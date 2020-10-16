@@ -1,0 +1,17 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: jenkins
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 50m
+  labels:
+    app: jenkins
+spec:
+  rules:
+  - host: "jenkins.kronkltd.net"
+    http:
+      paths:
+      - path: "/"
+        backend:
+          serviceName: "jenkins"
+          servicePort: http
