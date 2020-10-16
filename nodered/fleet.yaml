@@ -1,0 +1,7 @@
+namespace: nodered
+
+helm:
+  releaseName: node-red
+  chart: k8s-at-home
+  repo: https://k8s-at-home.com/charts/
+  version: 3.1.0
