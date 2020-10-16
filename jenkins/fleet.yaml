@@ -2,7 +2,7 @@ namespace: jenkins
 
 helm:
   releaseName: jenkins
-  chart: jenkins
+  chart: jenkins/jenkins
   repo: https://charts.jenkins.io
   version: 2.13.0
 kustomize:
