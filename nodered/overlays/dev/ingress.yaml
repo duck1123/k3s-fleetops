@@ -8,7 +8,7 @@ metadata:
     app: nodered
 spec:
   rules:
-  - host: "nodered.kronkltd.net"
+  - host: "nodered.dev.kronkltd.net"
     http:
       paths:
       - path: "/"
