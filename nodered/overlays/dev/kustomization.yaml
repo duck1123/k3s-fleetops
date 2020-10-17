@@ -1,3 +1,4 @@
 resources:
+- basic-auth-secret.yaml
 - ingress.yaml
 - redis-master-deployment.yaml

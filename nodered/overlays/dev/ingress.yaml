@@ -3,6 +3,9 @@ kind: Ingress
 metadata:
   name: node-red
   annotations:
+    ingress.kubernetes.io/auth-type: basic
+    ingress.kubernetes.io/auth-realm: traefik
+    ingress.kubernetes.io/auth-secret: basic-auth
     nginx.ingress.kubernetes.io/proxy-body-size: 50m
   labels:
     app: nodered
