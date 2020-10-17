@@ -1,5 +1,0 @@
-enableProjects: "true"
-ingress:
-  enabled: true
-  hosts:
-  - node-red.local
