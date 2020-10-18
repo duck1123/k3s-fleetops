@@ -1,11 +1,11 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: node-red
+  name: jenkins
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: 50m
   labels:
-    app: nodered
+    app: jenkins
 spec:
   rules:
   - host: "jenkins.dev.kronkltd.net"
