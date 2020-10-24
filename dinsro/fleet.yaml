@@ -1,8 +1,1 @@
 namespace: dinsro
-
-helm:
-  releaseName: dinsro
-  chart: dinsro
-  repo: https://github.com/duck1123/k3s-fleetops.git
-kustomize:
-  dir: ./overlays/dev
