@@ -1,3 +1,4 @@
+{{- if .Values.ingress.enabled }}
 {{- $name := include "dinsro.release" . -}}
 apiVersion: extensions/v1beta1
 kind: Ingress

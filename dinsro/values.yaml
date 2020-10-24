@@ -29,6 +29,12 @@ resources:
     memory: 256Mi
     cpu: 100m
 
+ingress:
+  enabled: true
+  hosts:
+  - name: dinsro.dev.kronkltd.net
+    path: /
+
 service:
   type: ClusterIP
   port: 3000
