@@ -4,14 +4,12 @@
   "metadata": {
     "name": "client-id",
     "namespace": "cattle-system",
-    "creationTimestamp": null
   },
   "spec": {
     "template": {
       "metadata": {
         "name": "client-id",
         "namespace": "cattle-system",
-        "creationTimestamp": null
       }
     },
     "encryptedData": {
