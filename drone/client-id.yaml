@@ -1,0 +1,21 @@
+{
+  "kind": "SealedSecret",
+  "apiVersion": "bitnami.com/v1alpha1",
+  "metadata": {
+    "name": "client-id",
+    "namespace": "cattle-system",
+    "creationTimestamp": null
+  },
+  "spec": {
+    "template": {
+      "metadata": {
+        "name": "client-id",
+        "namespace": "cattle-system",
+        "creationTimestamp": null
+      }
+    },
+    "encryptedData": {
+      "clientID": "AgAGehkze1qduE4Q2chkb42HZOK+RDU3qDp2OdZCZ8KbIc8S3EKcr5lpGMMNE8hrWTlUxBGZOQA9r8C+aq5amqVQH2w/smJwMrxDDWYSieSMmFuubAf5IM22lLmtLbexCJqOlJWEJcNnuymrDSEa+nQTQ1Q6kJPbaxMPBETnbyTgGfPJFAQX5F4cXFI6n/65Ywm/5Lw99iJt5j+QNAdtM1jVP1PjlTt9Ab3FpfoRh1mYoL/AkvJnPmcvxaEugKTR2+yRff8ldr0gnnou/hFIhMrlQAu53vSXKPzoUjbD/L0PAb4yPLmELnWIU7svB8eIXXnecT+/CTOIbCFCzT0korMtccdHshlREAeZ1anyeKmYcSqRzrNZJ2iaaLpzhGEMg3lhdYawcjQcy0V2aOcy8I4p2a08dGeHMUrkSnH7jiqwzYkJMQZNJj07xAlla3kWMjU/OmhoMn8vVqxUWU5mzPsq+flG5DK0zdxDVlaJHJOspRNtyzSty4ab4LZOOMMX4iE89B1UToyBHliyWiksVsVJWSRTHgq/eKJtpWtP/V2ZjGW9OaldwzxWNucrk4B7M4vN5gN7269s41rTbvmPcDi8rOKbUXYKIdYgm82dDiZLnIHZ3a/ARouo/9d7mRDRfJwxVjAwenrKGMmL17VCmWMwv0yhD5yPL1xP7EVXn6aZed9cPlnPsrQfObtpBHH51Rao9ryuSHnxwNYRiF4hCg565UeZcw=="
+    }
+  }
+}
