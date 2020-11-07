@@ -1,7 +1,7 @@
 image: "duck1123/dinsro"
 imageTag: "latest"
 
-imagePullPolicy: IfNotPresent
+imagePullPolicy: Always
 
 nodeSelector: {}
 
