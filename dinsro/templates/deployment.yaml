@@ -27,7 +27,7 @@ spec:
         - name: DATAHIKE_URL
           value: "datahike:file:///var/lib/dinsro/data"
         ports:
-        - name: dinsro
+        - name: http
           containerPort: 3000
         livenessProbe:
           httpGet:
