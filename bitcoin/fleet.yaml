@@ -1,0 +1,9 @@
+namespace: bitcoin
+
+helm:
+  releaseName: bitcoind
+  chart: fold
+  repo: https://charts.foldapp.com
+  version: 0.2.3
+# kustomize:
+#   dir: ./overlays/dev

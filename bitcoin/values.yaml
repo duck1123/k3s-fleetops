@@ -1,0 +1,21 @@
+configurationFile:
+  bitcoin.conf: |-
+    server=1
+    printtoconsole=1
+    rpcuser=rpcuser
+    rpcpassword=rpcpassword
+image:
+  pullPolicy: IfNotPresent
+  repository: arilot/docker-bitcoind
+  tag: 0.17.1
+persistence:
+  accessMode: ReadWriteOnce
+  enabled: true
+  size: 300Gi
+resources: {}
+service:
+  p2pPort: 8333
+  rpcPort: 8332
+  testnetP2pPort: 18333
+  testnetPort: 18332
+terminationGracePeriodSeconds: 30
