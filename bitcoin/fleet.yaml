@@ -5,6 +5,7 @@ helm:
   chart: bitcoind
   repo: https://charts.foldapp.com
   version: 0.2.3
+  force: true
   values:
     configurationFile:
       bitcoin.conf: |-
