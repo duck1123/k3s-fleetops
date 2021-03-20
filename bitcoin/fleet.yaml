@@ -2,7 +2,7 @@ namespace: bitcoin
 
 helm:
   releaseName: bitcoind
-  chart: fold
+  chart: bitcoind
   repo: https://charts.foldapp.com
   version: 0.2.3
 # kustomize:
