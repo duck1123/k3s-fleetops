@@ -11,7 +11,7 @@ helm:
       bitcoin.conf: |-
         server=1
         printtoconsole=1
-        regtest=1
+        testnet=1
         rpcuser=rpcuser
         rpcpassword=rpcpassword
     image:
