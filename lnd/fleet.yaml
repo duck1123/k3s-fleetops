@@ -1,0 +1,9 @@
+namespace: lnd
+
+helm:
+  releaseName: lnd
+  chart: lnd
+  repo: https://charts.foldapp.com
+  version: 0.3.5
+# kustomize:
+#   dir: ./overlays/dev
