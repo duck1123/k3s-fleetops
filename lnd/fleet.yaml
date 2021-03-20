@@ -12,7 +12,8 @@ helm:
       lnd.conf: |-
         bitcoin.active=1
         bitcoin.mainnet=0
-        bitcoin.testnet=1
+        bitcoin.testnet=0
+        bitcoin.regtest=1
         debuglevel=info
         bitcoin.node=neutrino
         neutrino.addpeer=faucet.lightning.community
@@ -34,7 +35,7 @@ helm:
       image:
         repository: thesisrobot/loop
         tag: v0.11.1-beta
-    network: testnet
+    network: regtest
     persistence:
       accessMode: ReadWriteOnce
       enabled: true
