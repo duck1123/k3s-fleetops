@@ -1,0 +1,17 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: nextcloud
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 50m
+  labels:
+    app: nextcloud
+spec:
+  rules:
+  - host: "nextcloud.dev.kronkltd.net"
+    http:
+      paths:
+      - path: "/"
+        backend:
+          serviceName: "nextcloud"
+          servicePort: http
