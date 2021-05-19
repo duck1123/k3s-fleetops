@@ -2,7 +2,7 @@ namespace: nextcloud
 
 helm:
   releaseName: nextcloud
-  chart: nextcloud/nextcloud
+  chart: nextcloud
   repo: https://nextcloud.github.io/helm/
   version: 2.6.4
 kustomize:
