@@ -1,2 +1,4 @@
 nextcloud:
   host: nextcloud.dev.kronkltd.net
+livenessProbe:
+  enabled: true
