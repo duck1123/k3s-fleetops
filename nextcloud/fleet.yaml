@@ -17,6 +17,8 @@ helm:
         password: changeme
         user: nextcloud
       enabled: true
+      rootUser:
+        password: rootpassword
       master:
         persistence:
           enabled: true
