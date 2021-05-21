@@ -1,0 +1,7 @@
+namespace: nextcloud
+
+helm:
+  releaseName: mysql
+  chart: mysql
+  repo: https://charts.bitnami.com/bitnami
+  version: 8.5.8
