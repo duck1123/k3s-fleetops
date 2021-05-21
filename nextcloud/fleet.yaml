@@ -5,5 +5,10 @@ helm:
   chart: nextcloud
   repo: https://nextcloud.github.io/helm/
   version: 2.6.4
+  values:
+    nextcloud:
+      host: nextcloud.dev.kronkltd.net
+    livenessProbe:
+      enabled: true
 kustomize:
   dir: ./overlays/dev
