@@ -5,3 +5,6 @@ helm:
   chart: mysql
   repo: https://charts.bitnami.com/bitnami
   version: 8.5.8
+  values:
+    auth:
+      rootPassword: "rootpassword"
