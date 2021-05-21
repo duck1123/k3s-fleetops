@@ -11,16 +11,16 @@ helm:
       password: change_me
     livenessProbe:
       enabled: true
-    mariadb:
-      db:
-        name: nextcloud
-        password: changeme
-        user: nextcloud
-      enabled: true
-      rootUser:
-        password: rootpassword
-      # master:
-      #   persistence:
-      #     enabled: true
+    # mariadb:
+    #   db:
+    #     name: nextcloud
+    #     password: changeme
+    #     user: nextcloud
+    #   enabled: true
+    #   rootUser:
+    #     password: rootpassword
+    #   # master:
+    #   #   persistence:
+    #   #     enabled: true
 kustomize:
   dir: ./overlays/dev
