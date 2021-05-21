@@ -19,8 +19,8 @@ helm:
       enabled: true
       rootUser:
         password: rootpassword
-      master:
-        persistence:
-          enabled: true
+      # master:
+      #   persistence:
+      #     enabled: true
 kustomize:
   dir: ./overlays/dev
