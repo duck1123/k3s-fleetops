@@ -19,6 +19,8 @@ helm:
       enabled: true
       replication:
         enabled: false
+      rootUser:
+        password: rootpassword
       auth:
         rootPassword: rootpassword
       # master:
