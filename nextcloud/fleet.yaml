@@ -12,11 +12,11 @@ helm:
       configs:
         custom.config.php: |-
           <?php
-            \$CONFIG = array (
-            'overwrite.cli.url' => "https://nextcloud.dev.kronkltd.net",
-            'overwritehost' => "nextcloud.dev.kronkltd.net",
-            'overwriteprotocol' => 'https',
-          );
+            $CONFIG = array (
+              'overwrite.cli.url' => "https://nextcloud.dev.kronkltd.net",
+              'overwritehost' => "nextcloud.dev.kronkltd.net",
+              'overwriteprotocol' => 'https',
+            );
 
     livenessProbe:
       enabled: true
