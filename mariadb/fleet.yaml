@@ -1,7 +1,7 @@
 helm:
   releaseName: mariadb
   chart: mariadb
-  repo: https://nextcloud.github.io/helm/
+  repo: https://charts.bitnami.com/bitnami
   version: 9.3.11
   values:
     auth:

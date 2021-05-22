@@ -1,5 +1,0 @@
-apiVersion: v2
-name: mariadb
-description: mariadb
-version: 9.3.11
-appVersion: 9.3.11
