@@ -21,7 +21,7 @@ helm:
     livenessProbe:
       enabled: true
     internalDatabase:
-      enabled: false
+      enabled: true
     mariadb:
       db:
         name: nextcloud
