@@ -27,7 +27,7 @@ helm:
         name: nextcloud
         password: changeme
         user: nextcloud
-      enabled: true
+      enabled: false
       replication:
         enabled: false
       rootUser:
