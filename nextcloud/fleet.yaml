@@ -9,8 +9,19 @@ helm:
     nextcloud:
       host: nextcloud.dev.kronkltd.net
       password: change_me
+      configs:
+        custom.config.php: |-
+          <?php
+            \$CONFIG = array (
+            'overwrite.cli.url' => "https://nextcloud.dev.kronkltd.net",
+            'overwritehost' => "nextcloud.dev.kronkltd.net",
+            'overwriteprotocol' => 'https',
+          );
+
     livenessProbe:
       enabled: true
+    internalDatabase:
+      enabled: false
     mariadb:
       db:
         name: nextcloud
@@ -23,8 +34,10 @@ helm:
         password: rootpassword
       auth:
         rootPassword: rootpassword
-      # master:
-      #   persistence:
-      #     enabled: true
+      master:
+        persistence:
+          enabled: true
+          accessMode: ReadWriteOnce
+          size: 8Gi
 kustomize:
   dir: ./overlays/dev
