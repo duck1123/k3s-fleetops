@@ -5,3 +5,20 @@ helm:
   chart: dinsro
   repo: https://chart.kronkltd.net/
   version: 0.1.0
+  values:
+    image:
+      pullPolicy: Always
+      tag: latest
+    devtools:
+      ingress:
+        enabled: false
+    workspaces:
+      ingress:
+        enabled: false
+    ingress:
+      hosts:
+      - host: demo.dinsro.com
+      tls:
+        hosts:
+        - demo.dinsro.com
+        secretName: dinsro-tls
