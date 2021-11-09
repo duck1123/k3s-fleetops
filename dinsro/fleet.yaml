@@ -23,10 +23,12 @@ helm:
         hosts:
           - host: workspaces.demo.dinsro.com
             paths:
-              - path: /
+              - path: "/"
     ingress:
       hosts:
         - host: demo.dinsro.com
+          paths:
+            - path: "/"
       tls:
         hosts:
         - demo.dinsro.com
