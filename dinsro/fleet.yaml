@@ -24,12 +24,12 @@ helm:
           - host: workspaces.demo.dinsro.com
             paths:
               - path: "/"
-    ingress:
-      hosts:
-        - host: demo.dinsro.com
-          paths:
-            - path: "/"
-      tls:
-        hosts:
-        - demo.dinsro.com
-        secretName: dinsro-tls
+    # ingress:
+    #   hosts:
+    #     - host: demo.dinsro.com
+    #       paths:
+    #         - path: "/"
+    #   tls:
+    #     hosts:
+    #     - demo.dinsro.com
+    #     secretName: dinsro-tls
