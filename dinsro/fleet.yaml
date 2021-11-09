@@ -12,6 +12,8 @@ helm:
     devtools:
       ingress:
         enabled: false
+    persistence:
+      enabled: false
     workspaces:
       ingress:
         enabled: false
