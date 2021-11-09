@@ -30,6 +30,6 @@ helm:
           paths:
             - path: "/"
       tls:
-        hosts:
-        - demo.dinsro.com
-        secretName: dinsro-tls
+        - hosts:
+          - demo.dinsro.com
+          secretName: dinsro-tls
