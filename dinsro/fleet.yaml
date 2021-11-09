@@ -2,10 +2,12 @@ namespace: dinsro
 defaultNamespace: dinsro
 helm:
   releaseName: dinsro
-  chart: "github.com/duck1123/helm/stable/dinsro"
-  version: "master"
-  repo: ""
-  # repo: https://chart.kronkltd.net
+  # chart: "github.com/duck1123/helm/stable/dinsro"
+  # version: "master"
+  # repo: ""
+  repo: http://chart.kronkltd.net
+  chart: dinsro
+  version: 0.1.0
   values:
     image:
       pullPolicy: Always
