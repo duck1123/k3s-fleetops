@@ -2,7 +2,7 @@ namespace: dinsro
 defaultNamespace: dinsro
 helm:
   releaseName: dinsro
-  chart: dinsro
+  # chart: dinsro
   repo: https://chart.kronkltd.net
   values:
     image:
