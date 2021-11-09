@@ -1,10 +1,9 @@
 namespace: dinsro
-
+defaultNamespace: dinsro
 helm:
   releaseName: dinsro
   chart: dinsro
-  repo: https://chart.kronkltd.net/
-  version: 0.1.0
+  repo: https://chart.kronkltd.net
   values:
     image:
       pullPolicy: Always
@@ -17,9 +16,13 @@ helm:
     workspaces:
       ingress:
         enabled: false
+        hosts:
+          - host: workspaces.demo.dinsro.com
+            paths:
+              - path: /
     ingress:
       hosts:
-      - host: demo.dinsro.com
+        - host: demo.dinsro.com
       tls:
         hosts:
         - demo.dinsro.com
