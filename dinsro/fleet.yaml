@@ -17,6 +17,7 @@ helm:
         enabled: false
     persistence:
       enabled: false
+      seed: true
     workspaces:
       ingress:
         enabled: false
