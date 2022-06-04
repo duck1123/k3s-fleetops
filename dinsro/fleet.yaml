@@ -36,18 +36,6 @@ helm:
           secretName: dinsro-tls
     dinsroConfig: |-
       {:dinsro.component.notebooks/config {:enabled true}
-       :roterski.fulcro.rad.database-adapters.xtdb/databases
-       {:main
-         {:xtdb.jdbc/connection-pool
-           {:dialect #:xtdb{:module "xtdb.jdbc.psql/->dialect"}
-            :db-spec {:dbname   "dinsro"
-                      :host     "db"
-                      :user     "postgres"
-                      :password "mysecretpassword"}}
-            :xtdb/tx-log         {:xtdb/module     "xtdb.jdbc/->tx-log"
-                                  :connection-pool :xtdb.jdbc/connection-pool}
-            :xtdb/document-store {:xtdb/module     "xtdb.jdbc/->document-store"
-                                  :connection-pool :xtdb.jdbc/connection-pool}}}
        :com.fulcrologic.rad.pathom/config
          {:trace?         false
           :log-requests?  false
