@@ -12,6 +12,8 @@ helm:
     image:
       pullPolicy: Always
       tag: latest
+    devcards:
+      enabled: false
     docs:
       enabled: true
       ingress:
@@ -31,6 +33,8 @@ helm:
     devtools:
       ingress:
         enabled: false
+    portal:
+      enabled: false
     persistence:
       enabled: false
       seed: true
