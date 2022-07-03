@@ -12,6 +12,22 @@ helm:
     image:
       pullPolicy: Always
       tag: latest
+    docs:
+      enabled: true
+      ingress:
+        enabled: true
+        hosts:
+        - host: docs.dinsro.com
+          paths:
+          - path: /
+    notebooks:
+      enabled: true
+      ingress:
+        enabled: true
+        hosts:
+        - host: notebooks.demo.dinsro.com
+          paths:
+          - path: /
     devtools:
       ingress:
         enabled: false
@@ -41,7 +57,7 @@ helm:
           :log-requests?  false
           :log-responses? false}
        :dinsro.components.config/secret-path "/mnt/certs/secret"
-       :dinsro.components.notebooks/config {:enabled false}
+       :dinsro.components.notebooks/config {:enabled true}
        :dinsro.components.seed/enabled true
        :taoensso.timbre/logging-config
          {:level :debug
