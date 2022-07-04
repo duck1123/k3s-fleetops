@@ -55,14 +55,14 @@ helm:
           - demo.dinsro.com
           secretName: dinsro-tls
     dinsroConfig: |-
-      {:dinsro.component.notebooks/config {:enabled true}
-       :com.fulcrologic.rad.pathom/config
+      {:com.fulcrologic.rad.pathom/config
          {:trace?         false
           :log-requests?  false
           :log-responses? false}
        :dinsro.components.config/secret-path "/mnt/certs/secret"
-       :dinsro.components.notebooks/config {:enabled true}
-       :dinsro.components.seed/enabled true
+       :dinsro.components.notebooks/config   {:enabled true}
+       :dinsro.components.seed/enabled       true
+       :dinsro.core/modules                  [ "dinsro.components.notebooks" ]
        :taoensso.timbre/logging-config
          {:level :debug
           :min-level
