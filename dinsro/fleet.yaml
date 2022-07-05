@@ -30,6 +30,10 @@ helm:
         - host: notebooks.demo.dinsro.com
           paths:
           - path: /
+        tls:
+        - hosts:
+          - notebooks.demo.dinsro.com
+          secretName: dinsro-notebooks-tls
     devtools:
       ingress:
         enabled: false
@@ -42,18 +46,18 @@ helm:
       ingress:
         enabled: false
         hosts:
-          - host: workspaces.demo.dinsro.com
-            paths:
-              - path: "/"
+        - host: workspaces.demo.dinsro.com
+          paths:
+          - path: "/"
     ingress:
       hosts:
-        - host: demo.dinsro.com
-          paths:
-            - path: "/"
+      - host: demo.dinsro.com
+        paths:
+        - path: "/"
       tls:
-        - hosts:
-          - demo.dinsro.com
-          secretName: dinsro-tls
+      - hosts:
+        - demo.dinsro.com
+        secretName: dinsro-tls
     dinsroConfig: |-
       {:com.fulcrologic.rad.pathom/config
          {:trace?         false
