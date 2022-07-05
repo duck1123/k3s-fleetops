@@ -58,6 +58,9 @@ helm:
           paths:
           - path: "/"
     ingress:
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+        ingress.kubernetes.io/ssl-redirect: true
       hosts:
       - host: demo.dinsro.com
         paths:
