@@ -24,10 +24,10 @@ helm:
         - host: docs.dinsro.com
           paths:
           - path: /
-      # tls:
-      # - hosts:
-      #   - docs.dinsro.com
-      #   secretName: dinsro-docs-tls
+      tls:
+      - hosts:
+        - docs.dinsro.com
+        secretName: dinsro-docs-tls
     notebooks:
       enabled: true
       ingress:
@@ -36,10 +36,10 @@ helm:
         - host: notebooks.demo.dinsro.com
           paths:
           - path: /
-        # tls:
-        # - hosts:
-        #   - notebooks.demo.dinsro.com
-        #   secretName: dinsro-notebooks-tls
+        tls:
+        - hosts:
+          - notebooks.demo.dinsro.com
+          secretName: dinsro-notebooks-tls
     devtools:
       ingress:
         enabled: false
