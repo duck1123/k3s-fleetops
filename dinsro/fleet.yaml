@@ -30,6 +30,8 @@ helm:
         secretName: dinsro-docs-tls
     notebooks:
       enabled: true
+      service:
+        port: 7777
       ingress:
         enabled: true
         hosts:
