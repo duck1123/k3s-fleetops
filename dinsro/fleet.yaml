@@ -38,10 +38,10 @@ helm:
         - host: notebooks.demo.dinsro.com
           paths:
           - path: /
-        tls:
-        - hosts:
-          - notebooks.demo.dinsro.com
-          secretName: dinsro-notebooks-tls
+        # tls:
+        # - hosts:
+        #   - notebooks.demo.dinsro.com
+        #   secretName: dinsro-notebooks-tls
     devtools:
       ingress:
         enabled: false
