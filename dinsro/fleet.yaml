@@ -60,10 +60,10 @@ helm:
       - host: demo.dinsro.com
         paths:
         - path: "/"
-      # tls:
-      # - hosts:
-      #   - demo.dinsro.com
-      #   secretName: dinsro-tls
+      tls:
+      - hosts:
+        - demo.dinsro.com
+        secretName: dinsro-tls
     dinsroConfig: |-
       {:com.fulcrologic.rad.pathom/config
          {:trace?         false
