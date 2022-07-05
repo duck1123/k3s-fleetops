@@ -7,11 +7,13 @@ helm:
   # repo: ""
   repo: http://chart.kronkltd.net
   chart: dinsro
-  version: 0.1.2
+  version: 0.1.3
   values:
     image:
       pullPolicy: Always
       tag: latest
+    database:
+      enabled: false
     devcards:
       enabled: false
     docs:
