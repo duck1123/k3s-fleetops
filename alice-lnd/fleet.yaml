@@ -35,4 +35,5 @@ helm:
     autoUnlock: false
     autoUnlockPassword: unlockpassword
     network: regtest
-    ingress: {host: lnd.alice.localhost}
+    ingress:
+      host: lnd.alice.demo.dinsro.com
