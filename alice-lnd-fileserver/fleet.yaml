@@ -1,0 +1,39 @@
+namespace: alice
+defaultNamespace: alice
+helm:
+  releaseName: lnd
+  repo: http://chart.kronkltd.net
+  chart: lnd
+  version: 0.3.9
+  values:
+    configurationFile:
+      lnd.conf: |-
+        [Bitcoin]
+        bitcoin.active=1
+        bitcoin.mainnet=0
+        bitcoin.testnet=0
+        bitcoin.regtest=1
+        bitcoin.node=bitcoind
+
+        [Bitcoind]
+        bitcoind.rpchost=bitcoin.alice:18443
+        bitcoind.rpcuser=rpcuser
+        bitcoind.rpcpass=rpcpassword
+        bitcoind.zmqpubrawblock=tcp://bitcoin.alice:28332
+        bitcoind.zmqpubrawtx=tcp://bitcoin.alice:28333
+
+        [Application Options]
+        debuglevel=info
+        restlisten=0.0.0.0:8080
+        rpclisten=0.0.0.0:10009
+        tlsextradomain=lnd.alice.svc.cluster.local
+        tlsextraip=0.0.0.0
+        alias=Node alice
+    loop: {enable: false}
+    pool: {enable: false}
+    persistence: {enabled: true}
+    autoUnlock: false
+    autoUnlockPassword: unlockpassword
+    network: regtest
+    ingress:
+      host: lnd.alice.demo.dinsro.com
