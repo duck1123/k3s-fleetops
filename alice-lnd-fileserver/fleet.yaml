@@ -3,7 +3,7 @@ defaultNamespace: alice
 helm:
   releaseName: fileserver
   repo: http://chart.kronkltd.net
-  chart: lnd
+  chart: fileserver
   version: 0.3.10
   values:
     image:
