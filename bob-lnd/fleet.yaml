@@ -4,7 +4,7 @@ helm:
   releaseName: lnd
   repo: http://chart.kronkltd.net
   chart: lnd
-  version: 0.3.8
+  version: 0.3.9
   values:
     configurationFile:
       lnd.conf: |-
