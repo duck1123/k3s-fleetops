@@ -10,7 +10,7 @@ helm:
       repository: duck1123/lnd-fileserver
       tag: latest
     persistence:
-      enabled: false
+      enabled: true
       existingClaim: lnd
       accessMode: ReadWriteOnce
       size: 5Gi
