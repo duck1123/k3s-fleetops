@@ -11,6 +11,7 @@ helm:
       tag: latest
     persistence:
       enabled: false
+      existingClaim: lnd
       accessMode: ReadWriteOnce
       size: 5Gi
     network: regtest
