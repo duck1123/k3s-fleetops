@@ -6,7 +6,15 @@ helm:
   chart: lnd
   version: 0.3.10
   values:
+    image:
+      repository: duck1123/lnd-fileserver
+      tag: latest
+    persistence:
+      enabled: false
+      accessMode: ReadWriteOnce
+      size: 5Gi
     network: regtest
+    resources: {}
     ingress:
       host: lnd.alice.demo.dinsro.com
       port: 80
