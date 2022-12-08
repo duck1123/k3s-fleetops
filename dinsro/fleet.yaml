@@ -76,7 +76,7 @@ helm:
           :log-responses? false}
        :dinsro.components.config/secret-path "/mnt/certs/secret"
        :dinsro.components.notebooks/config   {:enabled true}
-       :dinsro.components.seed/enabled       true
+       :dinsro.components.seed/enabled       false
        :dinsro.core/modules                  [ "dinsro.components.notebooks" ]
        :taoensso.timbre/logging-config
          {:level :debug
