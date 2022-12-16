@@ -4,6 +4,6 @@ helm:
   releaseName: node-red
   chart: node-red
   repo: https://k8s-at-home.com/charts/
-  version: 3.1.0
+  version: 10.3.2
 kustomize:
   dir: ./overlays/dev
