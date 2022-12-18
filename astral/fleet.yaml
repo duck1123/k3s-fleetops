@@ -1,0 +1,20 @@
+namespace: relay
+
+helm:
+  releaseName: me-untethr-nostr-relay
+  repo: http://chart.kronkltd.net
+  chart: astral
+  version: 0.1.0
+  values:
+    ingress:
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+        ingress.kubernetes.io/force-ssl-redirect: "true"
+      hosts:
+        - host: astral.detbtc.com
+          paths:
+            - path: "/"
+      tls:
+        - hosts:
+            - astral.detbtc.com
+          secretName: relay-tls
