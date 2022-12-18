@@ -1,4 +1,4 @@
-namespace: relay
+namespace: astral
 
 helm:
   releaseName: me-untethr-nostr-relay
