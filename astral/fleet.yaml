@@ -11,10 +11,10 @@ helm:
         cert-manager.io/cluster-issuer: letsencrypt-prod
         ingress.kubernetes.io/force-ssl-redirect: "true"
       hosts:
-        - host: astral.detbtc.com
+        - host: astral.kronkltd.net
           paths:
             - path: "/"
       tls:
         - hosts:
-            - astral.detbtc.com
+            - astral.kronkltd.net
           secretName: relay-tls
