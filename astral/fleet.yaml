@@ -1,7 +1,7 @@
 namespace: astral
 
 helm:
-  releaseName: me-untethr-nostr-relay
+  releaseName: astral
   repo: http://chart.kronkltd.net
   chart: astral
   version: 0.1.0
@@ -17,4 +17,4 @@ helm:
       tls:
         - hosts:
             - astral.kronkltd.net
-          secretName: relay-tls
+          secretName: astral-tls
