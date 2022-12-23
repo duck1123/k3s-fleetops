@@ -4,7 +4,7 @@ helm:
   releaseName: me-untethr-nostr-relay
   repo: http://chart.kronkltd.net
   chart: me-untethr-nostr-relay
-  version: 0.1.1
+  version: 0.1.2
   values:
     image:
       repository: duck1123/me.untethr.nostr-relay:0.2.1
