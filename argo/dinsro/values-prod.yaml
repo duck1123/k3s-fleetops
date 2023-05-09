@@ -2,6 +2,10 @@ devcards:
   enabled: false
   ingress:
     enabled: false
+  devtools:
+    enabled: false
+    ingress:
+      enabled: false
 
 devtools:
   enabled: false
