@@ -31,4 +31,4 @@ ingress:
       tls:
         - hosts:
             - dinsro.com
-        secretName: dinsro-com-tls
+          secretName: dinsro-com-tls
