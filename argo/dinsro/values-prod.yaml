@@ -28,7 +28,7 @@ ingress:
     - host: dinsro.com
       paths:
         - path: "/"
-      tls:
-        - hosts:
-            - dinsro.com
-          secretName: dinsro-com-tls
+  tls:
+    - hosts:
+        - dinsro.com
+      secretName: dinsro-com-tls
