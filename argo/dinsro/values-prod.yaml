@@ -36,3 +36,8 @@ ingress:
     - hosts:
         - dinsro.com
       secretName: dinsro-com-tls
+
+workspaces:
+  enabled: false
+  ingress:
+    enabled: false
