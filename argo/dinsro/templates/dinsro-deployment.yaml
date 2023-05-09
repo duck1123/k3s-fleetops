@@ -1,0 +1,115 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "dinsro.fullname" . }}
+  namespace: "{{ .Release.Namespace }}"
+  labels:
+    {{- include "dinsro.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "dinsro.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "dinsro.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "dinsro.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+      - name: {{ .Chart.Name }}
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 12 }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+        {{- if .Values.devtools.webtoolsUrl }}
+        - name: DEVTOOLS_URL
+          value: "https://{{ .Values.devtools.webtoolsUrl }}"
+        {{- else -}}
+        {{- with (first .Values.devtools.ingress.hosts) }}
+        - name: DEVTOOLS_URL
+          value: "https://{{ .host }}"
+        {{- end }}
+        {{- end }}
+        {{- if .Values.devtools.enabled }}
+        - name: WATCH_SOURCES
+          value: "true"
+        {{- end }}
+        - name: DINSRO_USE_NOTEBOOKS
+          value: {{ .Values.notebooks.enabled | quote }}
+        ports:
+        - name: http
+          containerPort: 3000
+          protocol: TCP
+        - name: nrepl
+          containerPort: 3333
+          protocol: TCP
+        {{- if .Values.devtools.enabled }}
+        - name: devtools
+          containerPort: 9630
+          protocol: TCP
+        - name: tests
+          containerPort: 3692
+          protocol: TCP
+        - name: workspaces
+          containerPort: 3693
+          protocol: TCP
+        {{- end }}
+        {{- if .Values.notebooks.enabled }}
+        - name: notebooks
+          containerPort: 7777
+          protocol: TCP
+        {{- end }}
+        - name: devcards
+          containerPort: 7778
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http
+          failureThreshold: 20
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http
+          failureThreshold: 20
+        resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+        volumeMounts:
+        - name: certs
+          mountPath: /mnt/certs
+        - name: config
+          mountPath: /etc/dinsro
+          # subPath: config.edn
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+      - name: certs
+        persistentVolumeClaim:
+          claimName: certs
+      - name: config
+        configMap:
+          name: config

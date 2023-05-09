@@ -1,0 +1,18 @@
+{{- if .Values.devcards.ingress.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: devcards
+  namespace: "{{ .Release.Namespace }}"
+  labels:
+    {{- include "dinsro.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.devcards.service.type }}
+  ports:
+  - port: {{ .Values.devcards.service.port }}
+    targetPort: devcards
+    protocol: TCP
+    name: devcards
+  selector:
+    {{- include "dinsro.selectorLabels" . | nindent 4 }}
+{{- end }}

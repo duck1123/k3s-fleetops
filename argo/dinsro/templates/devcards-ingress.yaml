@@ -1,0 +1,40 @@
+{{- if .Values.devcards.ingress.enabled -}}
+{{- $fullName := include "dinsro.fullname" . -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: devcards
+  namespace: "{{ .Release.Namespace }}"
+  labels:
+    {{- include "dinsro.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.devcards.ingress.tls }}
+  tls:
+  {{- range .Values.devcards.ingress.tls }}
+  - hosts:
+    {{- range .hosts }}
+     - {{ . | quote }}
+     {{- end }}
+    secretName: {{ .secretName }}
+  {{- end }}
+  {{- end }}
+  rules:
+  {{- range .Values.devcards.ingress.hosts }}
+  - host: {{ .host | quote }}
+    http:
+      paths:
+      {{- range .paths }}
+      - path: {{ .path }}
+        pathType: "ImplementationSpecific"
+        backend:
+          service:
+            name: {{ default "devcards" .service }}
+            port:
+              name: devcards
+      {{- end }}
+  {{- end }}
+{{- end }}

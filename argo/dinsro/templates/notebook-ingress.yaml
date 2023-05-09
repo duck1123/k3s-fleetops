@@ -1,0 +1,41 @@
+{{- if and .Values.notebooks.enabled .Values.notebooks.ingress.enabled -}}
+{{- $fullName := include "dinsro.fullname" . -}}
+{{- $svcPort := .Values.notebooks.service.port -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: notebooks
+  namespace: "{{ .Release.Namespace }}"
+  labels:
+    {{- include "dinsro.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.notebooks.ingress.tls }}
+  tls:
+    {{- range .Values.notebooks.ingress.tls }}
+    - hosts:
+      {{- range .hosts }}
+      - {{ . | quote }}
+      {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+  {{- range .Values.notebooks.ingress.hosts }}
+  - host: {{ .host | quote }}
+    http:
+      paths:
+      {{- range .paths }}
+      - path: {{ .path }}
+        pathType: "ImplementationSpecific"
+        backend:
+          service:
+            name: {{ $fullName }}-notebooks
+            port:
+              name: notebooks
+      {{- end }}
+  {{- end }}
+{{- end }}

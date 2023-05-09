@@ -1,0 +1,20 @@
+devcards:
+  enabled: false
+
+devtools:
+  enabled: false
+
+docs:
+  enabled: false
+
+nrepl:
+  enabled: false
+
+notebooks:
+  enabled: false
+
+persistence:
+  enabled: false
+
+ingress:
+  enabled: false

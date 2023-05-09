@@ -1,0 +1,255 @@
+# Default values for dinsro.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: duck1123/dinsro
+  pullPolicy: Always
+  # -- Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # -- Specifies whether a service account should be created
+  create: true
+  # -- Annotations to add to the service account
+  annotations: {}
+  # -- The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 3000
+
+devcards:
+  # -- deploy devcards
+  enabled: true
+  devtools:
+    # -- deploy devtools for devcards
+    enabled: true
+    service:
+      type: ClusterIP
+      # -- Port for devcards devtools ws
+      port: 9630
+    ingress:
+      # -- Enable ingress for devcards devtools
+      enabled: true
+      hosts:
+      - host: devtools.devcards.dinsro.localtest.me
+        paths:
+        - path: /
+      # tls:
+      # - hosts:
+      #   - devtools.devcards.dinsro.localtest.me
+      #   secretName: dinsro-devcards-devtools-tls
+  ingress:
+    enabled: true
+    hosts:
+    - host: cards.dinsro.localtest.me
+      paths:
+      - path: /
+    # tls:
+    # - hosts:
+    #   - cards.dinsro.localtest.me
+    #   secretName: cards-tls
+  service:
+    type: ClusterIP
+    port: 7778
+
+devtools:
+  # -- Deploy Devtools
+  enabled: false
+  service:
+    type: ClusterIP
+    port: 9630
+  ingress:
+    # -- Deploy Devtools ingress
+    enabled: true
+    hosts:
+    - host: devtools.dinsro.localtest.me
+      service: devtools
+      paths:
+      - path: /
+    # tls: []
+    # - hosts:
+    #   - devtools.dinsro.localtest.me
+    #   secretName: dinsro-devtools-tls
+
+docs:
+  # -- Deploy docs server
+  enabled: false
+  service:
+    type: ClusterIP
+    port: 3000
+  ingress:
+    enabled: true
+    hosts:
+    - host: docs.dinsro.localtest.me
+      paths:
+      - path: /
+    # tls:
+    # - hosts:
+    #   - docs.dinsro.localtest.me
+    #   secretName: docs-tls
+
+# -- base log level for dinsro
+logLevel: ":info"
+
+nrepl:
+  # -- enable nRepl connection
+  enabled: false
+
+workspaces:
+  # -- deploy workspaces
+  enabled: false
+  service:
+    type: ClusterIP
+    port: 3693
+  ingress:
+    # -- deploy workspaces ingress
+    enabled: true
+    hosts:
+    - host: workspaces.dinsro.localtest.me
+      paths:
+      - path: /
+    # tls:
+    # - hosts:
+    #   - workspaces.dinsro.localtest.me
+    #   secretName: dinsro-workspaces-tls
+
+notebooks:
+  # -- deploy notebooks
+  enabled: false
+  service:
+    type: ClusterIP
+    port: 3693
+  ingress:
+    # -- deploy notebooks ingress
+    enabled: true
+    hosts:
+    - host: notebooks.dinsro.localtest.me
+      paths:
+      - path: /
+    # tls:
+    # - hosts:
+    #   - notebooks.dinsro.localtest.me
+    #   secretName: dinsro-notebooks-tls
+
+persistence:
+  enabled: false
+  size: 1G
+  storageClass: 'local-path'
+  # existingClaim: ''
+  seed: false
+  certs:
+    enabled: true
+    storageClass: 'local-path'
+    size: 1G
+
+database:
+  # -- Deploy postgres backend
+  enabled: false
+  # -- postgres username
+  user: postgres
+  host: db
+  name: dinsro
+  # -- postgres password
+  password: mysecretpassword
+  service:
+    port: 5432
+    # nodePort: 1000
+  image:
+    repository: postgres
+    version: 12.1
+  persistence:
+    # existingClaim: -
+    size: 1G
+    storageClass: local-path
+  seed: false
+
+ingress:
+  enabled: true
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+  - host: dinsro.localtest.me
+    paths:
+    - path: "/"
+  # tls:
+  # - hosts:
+  #   - dinsro.localtest.me
+  #   secretName: dinsro-tls
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# dinsroConfig: |-
+#     {:dinsro.component.notebooks/config {:enabled true}
+#      :roterski.fulcro.rad.database-adapters.xtdb/databases
+#       {:main
+#         {:xtdb.jdbc/connection-pool
+#          {:dialect #:xtdb{:module "xtdb.jdbc.psql/->dialect"}
+#           :db-spec {:dbname   "dinsro"
+#                     :host     "db"
+#                     :user     "postgres"
+#                     :password "mysecretpassword"}}
+#          :xtdb/tx-log         {:xtdb/module     "xtdb.jdbc/->tx-log"
+#                                :connection-pool :xtdb.jdbc/connection-pool}
+#          :xtdb/document-store {:xtdb/module     "xtdb.jdbc/->document-store"
+#                                :connection-pool :xtdb.jdbc/connection-pool}}}
+#      :com.fulcrologic.rad.pathom/config
+#        {:trace?         false
+#         :log-requests?  false
+#         :log-responses? false}
+#      :dinsro.components.config/secret-path "/mnt/certs/secret"
+#      :taoensso.timbre/logging-config
+#      {:min-level
+#      [[#{"_rad.resolvers"
+#          "roterski.fulcro.rad.database-adapters.xtdb.generate-resolvers"} :fatal]
+#       [#{"dinsro.*"} :debug]
+#       [#{"*"} :info]]}
+#       }
+
+dinsroConfig: "-"
