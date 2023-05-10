@@ -21,7 +21,7 @@ docs:
     enabled: false
 
 image:
-  tag: "latest@sha256:383f6017026d5a2aa43f1eb1ad745f17cf942ca87b5674e51cf2de18ff52666a"
+  tag: "latest@sha256:b27094aa7fc0f6331d896055f09184c8065279c8bf8e5c98294328df92bf3804"
 
 nrepl:
   enabled: false
