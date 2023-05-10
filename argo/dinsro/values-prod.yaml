@@ -1,3 +1,6 @@
+database:
+  seed: true
+
 devcards:
   enabled: false
   ingress:
