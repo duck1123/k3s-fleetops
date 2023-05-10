@@ -1,0 +1,9 @@
+apiVersion: v2
+name: alice
+type: application
+version: 0.1.4
+dependencies:
+  - name: bitcoind
+    version: 0.2.3
+    repository: https://chart.kronkltd.net/
+appVersion: "0.1.0"
