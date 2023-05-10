@@ -1,50 +1,42 @@
-database:
-  seed: true
-
-devcards:
-  enabled: false
-  ingress:
+dinsro:
+  database:
+    seed: true
+  devcards:
     enabled: false
+    ingress:
+      enabled: false
+    devtools:
+      enabled: false
+      ingress:
+        enabled: false
   devtools:
     enabled: false
     ingress:
       enabled: false
-
-devtools:
-  enabled: false
-  ingress:
+  docs:
     enabled: false
-
-docs:
-  enabled: false
-  ingress:
+    ingress:
+      enabled: false
+  image:
+    tag: "latest@sha256:b27094aa7fc0f6331d896055f09184c8065279c8bf8e5c98294328df92bf3804"
+  nrepl:
     enabled: false
-
-image:
-  tag: "latest@sha256:b27094aa7fc0f6331d896055f09184c8065279c8bf8e5c98294328df92bf3804"
-
-nrepl:
-  enabled: false
-
-notebooks:
-  enabled: false
-
-persistence:
-  enabled: false
-  seed: true
-
-ingress:
-  enabled: true
-  hosts:
-    - host: dinsro.com
-      paths:
-        - path: "/"
-  tls:
-    - hosts:
-        - dinsro.com
-      secretName: dinsro-com-tls
-
-workspaces:
-  enabled: false
-  ingress:
+  notebooks:
     enabled: false
+  persistence:
+    enabled: false
+    seed: true
+  ingress:
+    enabled: true
+    hosts:
+      - host: dinsro.com
+        paths:
+          - path: "/"
+    tls:
+      - hosts:
+          - dinsro.com
+        secretName: dinsro-com-tls
+  workspaces:
+    enabled: false
+    ingress:
+      enabled: false
