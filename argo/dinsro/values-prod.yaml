@@ -28,6 +28,7 @@ notebooks:
 
 persistence:
   enabled: false
+  seed: true
 
 ingress:
   enabled: true
