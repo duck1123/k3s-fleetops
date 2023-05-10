@@ -9,7 +9,4 @@ dependencies:
   - name: alice
     version: "0.1.0"
     repository: "file://alice"
-  - name: bitcoind
-    version: 0.2.3
-    repository: https://chart.kronkltd.net/
 appVersion: "0.1.0"
