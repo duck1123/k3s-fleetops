@@ -1,5 +1,6 @@
 dinsro:
   database:
+    enabled: true
     seed: true
   devcards:
     enabled: false
@@ -24,7 +25,7 @@ dinsro:
   notebooks:
     enabled: false
   persistence:
-    enabled: false
+    enabled: true
     seed: true
   ingress:
     enabled: true
