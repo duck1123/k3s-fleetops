@@ -19,7 +19,7 @@ dinsro:
     ingress:
       enabled: false
   image:
-    tag: "latest@sha256:b27094aa7fc0f6331d896055f09184c8065279c8bf8e5c98294328df92bf3804"
+    tag: "latest@sha256:7895009208e69ef053ea8603db330a3002aedf105e037c3301a313f94fd65976"
   nrepl:
     enabled: false
   notebooks:
