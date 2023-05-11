@@ -6,7 +6,7 @@ dependencies:
   - name: dinsro
     version: 0.1.4
     repository: https://chart.kronkltd.net/
-  - name: alice
-    version: "0.1.0"
-    repository: "file://alice"
+  # - name: alice
+  #   version: "0.1.0"
+  #   repository: "file://alice"
 appVersion: "0.1.0"
