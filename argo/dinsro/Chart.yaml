@@ -4,7 +4,7 @@ type: application
 version: 0.1.4
 dependencies:
   - name: dinsro
-    version: 0.1.4
+    version: 0.1.5
     repository: https://chart.kronkltd.net/
   # - name: bitcoind
   #   version: 0.2.3
