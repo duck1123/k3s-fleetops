@@ -19,7 +19,7 @@ dinsro:
     ingress:
       enabled: false
   image:
-    tag: "4.0.3096"
+    tag: "4.0.3097"
   nrepl:
     enabled: false
   notebooks:
