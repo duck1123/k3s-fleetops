@@ -1,3 +1,5 @@
+.clj-kondo
+.lsp
 *.unsealed.json
 tls.crt
 tls.key
