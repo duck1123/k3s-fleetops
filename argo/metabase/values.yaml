@@ -1,7 +1,13 @@
 metabase:
   replicaCount: 1
+  monitoring:
+    enabled: true
   ingress:
     enabled: true
     hosts:
     - metabase.dev.kronkltd.net
+    tls:
+    - secretName: metabase-tls
+      hosts:
+      - metabase.dev.kronkltd.net
 
