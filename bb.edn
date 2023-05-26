@@ -1,0 +1,20 @@
+{:tasks
+ {:requires
+  ([babashka.fs :as fs]
+   [clojure.string :as str])
+
+  build
+  {:task
+   (let [dry-run? false
+         files    (into [] (filter (fn [f] (not (.endsWith f "bb.edn"))) (fs/glob "." "**/*.edn")))]
+     (doseq [file files]
+       (println (str "# File: " file "\n----"))
+       (let [absolute  (.toAbsolutePath file)
+             base-name (str/replace absolute  (re-pattern "\\..*$") "")
+             parts     [(str "cat " absolute)
+                        (str "jet -i edn -o yaml")
+                        (str "tee " base-name ".yaml")]
+             command   (str "sh -c \"" (str/join " | " parts) "\"")]
+         (if dry-run?
+           (println (str "[DRY-RUN] " command))
+           (shell command)))))}}}
