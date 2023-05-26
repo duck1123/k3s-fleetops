@@ -1,6 +1,7 @@
-replicaCount: 1
-ingress:
-  enabled: true
-  hosts:
-  - metabase.dev.kronkltd.net
+metabase:
+  replicaCount: 1
+  ingress:
+    enabled: true
+    hosts:
+    - metabase.dev.kronkltd.net
 
