@@ -1,0 +1,19 @@
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  annotations:
+    sealedsecrets.bitnami.com/cluster-wide: "true"
+  creationTimestamp: null
+  name: sealed-answer
+  namespace: argocd
+spec:
+  encryptedData:
+    theanswer: AgCV/6BmyysMbaq73lKwJG3wfVIlM0p2jcz+o/Rj9n2kU3WIstwe4BG0tIx0K/ikkwq03D//bnrsihlqPc+d6lep00zsK3wJXJCEwclqSUk4Pjqn8hmnPbBjIgYD1c4qg/GAngiMovRxB8J3JLdj902QY7WOEQ7K2Yn5UhrputmX7Yh5TNuKM5gwyFqethk/zhVCfrsbE8ko6/D8oXJvyYgUCybQbpYdlDuT6rNSL55+LKkqDaGPayW1PadN40lY6wyA7eHWPFOhEdN1TWKi1FzcDrRetSqOr8zFJw38xP8xg2cr7dywrn0DrV6EBriQuMrG/r8jd1aRBQbwQ9qIVcGWx4sPd8CsvphitnEyxtdSQqUvMoWhXg0cvLEyFisqHXQ1D7+PYs3hNqwUnasMMxCKH85qulXaxZko4Ufc7HiC7OmeESFHHL3x1fYlLJVWqvQvTVBjZaK0VEy8mGLJfaIjmkTIi5E4/qq7/NzTGQkHBnYIIRA/t76Kn94ZkGkIb3SJ3zWDPhAokpFN13xao17XBSLvLN1S3+d3fqGfL33QBgNEWrNFxkgS/w4MuVZq08IadLyVR+UqgD6RILkzwPTjfp8Tyw3+uttxS85fwfvfkl34On51vKKehU8hM/pOO7ryiLHxnw4odrcxmlmIgi13zp4To40zBkarGHxYGMQnCfexN46t+jS4ej/JFouXC0i7rg==
+  template:
+    metadata:
+      annotations:
+        sealedsecrets.bitnami.com/cluster-wide: "true"
+      creationTimestamp: null
+      name: sealed-answer
+      namespace: argocd
+
