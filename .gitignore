@@ -1,1 +1,3 @@
 *.unsealed.json
+tls.crt
+tls.key
