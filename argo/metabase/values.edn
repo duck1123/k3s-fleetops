@@ -1,9 +1,13 @@
 {:metabase
  {:replicaCount 1
-  :monitoring {:enabled true}
+  :monitoring   {:enabled true}
   :ingress
-  {:enabled true
+  {:annotations
+   {"cert-manager.io/cluster-issuer"                   "letsencrypt-prod"
+    "ingress.kubernetes.io/force-ssl-redirect"         "true"
+    "traefik.ingress.kubernetes.io/router.middlewares" "dinsro-redirect@kubernetescrd"}
+   :enabled true
    :hosts
    ["metabase.dev.kronkltd.net"]
-   :tls [{:secretName "metabase-tls"
-          :hosts ["metabase.dev.kronkltd.net"]}]}}}
+   :tls     [{:secretName "metabase-tls"
+              :hosts      ["metabase.dev.kronkltd.net"]}]}}}
