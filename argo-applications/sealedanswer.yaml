@@ -1,14 +1,18 @@
 apiVersion: bitnami.com/v1alpha1
 kind: SealedSecret
 metadata:
+  annotations:
+    sealedsecrets.bitnami.com/cluster-wide: "true"
   creationTimestamp: null
   name: sealed-answer
   namespace: dinsro
 spec:
   encryptedData:
-    theanswer: AgAgo11v9xF9mhvnq3y7Vu+Kmtjai1TU+Gs9O/Xk7MCiGhi4n/Li6BIvMjBV/4/1gy4aJGRTCgOyILhfouRve7ewabmA5O6EpakaIbA19EbfyZ5BDpHmIRCIckCHX0ekX+CUhVAsS8xgZDmvHYDuULJtQzJuYVxTQGCzF032HcuWnaJU8Ccyzco6RezWBDRt8+QOZZyFl89DRFkTrWO7lcoudDqflhQqIWc4x8JDqxdVkDs3y1rzH0qCL6FINLT2KL+fG4spNu5CTKbQSmKp9sznL/fHs6Y1LU2GYc+nqR8UV2lENEMUMLKifqIfzIdXfcaB7TlJiq/PrwFJZE9XTPJh8BT4ZRul4lTc24F+h6L2Y2/VHeeKEsT3V1XLYVe90ZIdh6KLuokIOiOaC2A1z4CztbWUMr8JElC93U4p9ffmYch+JXuTNG1XkIt510B0TTTGL9uZD/i/yGLIJDJyCgfKldw7CTEc0zfXgvO0kbaZznBR+S2g2fnftPhxkBCMHHRKenh5jnA7mCj0WOs98bEiArVqvorxjeltyTLi48RTg1zfCPili65xXJr66iNnzhD/KukSjWJ8jWgnGcxGzLa9Ndw6x7yTgpkzYXDz+TL74fnFro4EXUh5lUChf6Y+YQkqciInfehNR28QiYpBx0Qb5nOH40PcNY8kG2BdxyOi8zScq53A8DD53GxdngzhK6C+Vg==
+    theanswer: AgCAq/OWZmMdFSp96TiFOMinZPLR6462OdxQPERec7DdtpcjBDPQJqg8x45UVQH5pfP8HUA21EDD+NKRU8atF9+ofYoRM3IWoDkXW9NVy0Qu8H//TXwOLcWHEx2pbLMY1xxlchO+aSZy83Cyk2ExXA4s5aBAwL+Qhs/WcjBISaq4LvogPa2kzuuMaBCxza7CfwxEaY4j9oyPXEAQRClntcMAbWIvKHtb8jZC1yCc1mtHyLkBAOi7jFUuXAH7ADckBdOj9DwLNyCg63f5KlAxp+mDl74mGg7Xgp5q/8C4JwGVyADBcPrv6shIcCtHm1S31+GqrIHsvYOcJmtCHFqSg515l4Who07fLJx6K/ZpBQd7Fi7W5Zkyn9SrlvVGFZsIbPs/aOZ9KOUDjA+9YLBG+Ffoj8Rox3iFw42nlg/E8s9HS52sYvmVLm9ev5e4+n9IYzpAOaOcELb4JoPc9bWPVITOYNVEMq9YlPsqLbiHk2/vSHOwY0mIRJehGpDtXQsDCCcCdVj7LuMXrHJmUStzQeUHVEf66bojaskRYT84cxzKJ4kbU2L33JP9fv9w4aTDnnjoppyeB1HC4wQ2Cevy0wQVr2b4b5fKWOjHyFUpfyVND/E1LgTOTA8wg21GuQbXR5crB5qndGA9WIEMHq3HUJLmiGcrxGkRYnf2396b3X9QHCvMa/7zwt3xBqISoBIEBHUrdQ==
   template:
     metadata:
+      annotations:
+        sealedsecrets.bitnami.com/cluster-wide: "true"
       creationTimestamp: null
       name: sealed-answer
       namespace: dinsro
