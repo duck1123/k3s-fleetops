@@ -13,7 +13,7 @@ spec:
       releaseName: sealed-secrets
   destination:
     server: https://kubernetes.default.svc
-    namespace: kubeseal
+    namespace: kube-system
   syncPolicy:
     automated:
       prune: true
