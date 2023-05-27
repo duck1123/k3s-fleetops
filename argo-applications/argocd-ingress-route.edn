@@ -11,5 +11,5 @@
    {:kind     "Rule"
     :match    "Host(`argocd.dev.kronkltd.net`) && Headers(`Content-Type`, `application/grpc`)"
     :priority 11
-    :services [{:name "argocd-server" :port 80 :scheme "h2c"}]}
-   :tls {:certResolver "default"}]}}
+    :services [{:name "argocd-server" :port 80 :scheme "h2c"}]}]
+  :tls {:certResolver "default"}}}
