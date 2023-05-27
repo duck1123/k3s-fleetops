@@ -1,10 +1,17 @@
 {:database    {:enabled true :seed true}
  :devcards    {:enabled  true
-               :ingress  {:enabled true}
+               :ingress  {:enabled true
+                          :hosts   [{:host  "devcards.dinsro.com"
+                                     :paths [{:path "/"}]}]
+                          :tls     [{:hosts      ["devcards.dinsro.com"]
+                                     :secretName "dinsro-com-devcards-tls"}]}
                :devtools {:enabled true :ingress {:enabled false}}}
  :devtools    {:enabled false
                :ingress {:enabled false}}
- :docs        {:enabled false :ingress {:enbled false}}
+ :docs        {:enabled true
+               :ingress {:enbled true
+                         :hosts  [{:host "docs.dinsro.com" :paths [{:path "/"}]}]
+                         :tls    [{:hosts ["docs.dinsro.com"] :secretName "dinsro-com-docs-tls"}]}}
  :image       {:tag "4.0.3097"}
  :nrepl       {:enabled false}
  :notebooks   {:enabled false}
