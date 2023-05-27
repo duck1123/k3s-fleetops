@@ -2,6 +2,6 @@
  {:main
   {:enabled true
    :hosts   [{:host "homer.dev.kronkltd.net"
-              :http {:paths ["/"]}}]
+              :http {:paths [{:path "/"}]}}]
    :tls     [{:secretName "homer-tls"
               :hosts      ["homer.dev.kronkltd.net"]}]}}}

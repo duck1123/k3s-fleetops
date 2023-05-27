@@ -5,7 +5,7 @@ ingress:
     - host: homer.dev.kronkltd.net
       http:
         paths:
-        - /
+        - path: /
     tls:
     - secretName: homer-tls
       hosts:
