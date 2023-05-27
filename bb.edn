@@ -5,8 +5,9 @@
 
   build
   {:task
-   (let [dry-run? false
+   (let [dry-run? true
          files    (into [] (filter (fn [f] (not (.endsWith f "bb.edn"))) (fs/glob "." "**/*.edn")))]
+     (prn *file*)
      (doseq [file files]
        (println (str "# File: " file "\n----"))
        (let [absolute  (.toAbsolutePath file)

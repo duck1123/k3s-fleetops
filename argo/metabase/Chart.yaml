@@ -1,9 +1,0 @@
-apiVersion: v2
-name: metabase-bundle
-type: application
-version: 0.1.4
-dependencies:
-  - name: metabase
-    version: "2.7.0"
-    repository: https://pmint93.github.io/helm-charts
-appVersion: "0.1.0"

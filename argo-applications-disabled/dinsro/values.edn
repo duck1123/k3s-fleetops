@@ -1,0 +1,16 @@
+{:database    {:enabled true :seed true}
+ :devcards    {:enabled  true
+               :ingress  {:enabled true}
+               :devtools {:enabled true :ingress {:enabled false}}}
+ :devtools    {:enabled false
+               :ingress {:enabled false}}
+ :docs        {:enabled false :ingress {:enbled false}}
+ :image       {:tag "4.0.3097"}
+ :nrepl       {:enabled false}
+ :notebooks   {:enabled false}
+ :persistence {:enabled true :seed true}
+ :ingress     {:enabled true
+               :hosts   [{:host "dinsro.com" :paths [{:path "/"}]}]
+               :tls     [{:hosts      ["dinsro.com"]
+                          :secretName "dinsro-com-tls"}]}
+ :workspaces  {:enabled false :ingress {:enabled false}}}

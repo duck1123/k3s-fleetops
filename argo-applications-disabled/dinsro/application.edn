@@ -1,0 +1,12 @@
+{{:apiVersion "argoproj.io/v1alpha1"
+  :kind       "Application"
+  :metadata   {:name "dinsro-propd" :namespace "argocd"}
+  :spec
+  {:project     "default"
+   :source      {:chart          "dinsro"
+                 :repoURL        "https://chart.kronkltd.net/"
+                 :targetRevision "0.1.7"
+                 :helm           {:releaseName "dinsro-prod"}}
+   :destination {:server "https://kubernetes.default.svc" :namespace "dinsro-prod"}
+   :syncPolicy  {:automated   {:prune true :selfHeal true}
+                 :syncOptions ["CreateNamespace=true"]}}}}
