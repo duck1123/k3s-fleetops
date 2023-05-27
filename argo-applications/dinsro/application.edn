@@ -1,12 +1,16 @@
 {:apiVersion "argoproj.io/v1alpha1"
  :kind       "Application"
- :metadata   {:name "dinsro-propd" :namespace "argocd"}
+ :metadata   {:name "dinsro-prod" :namespace "argocd"}
  :spec
  {:project     "default"
-  :source      {:chart          "dinsro"
-                :repoURL        "https://chart.kronkltd.net/"
-                :targetRevision "0.1.7"
-                :helm           {:releaseName "dinsro-prod"}}
+  :sources      [{:chart          "dinsro"
+                  :repoURL        "https://chart.kronkltd.net/"
+                  :targetRevision "0.1.7"
+                  :helm           {:releaseName "dinsro-prod"
+                                   :valueFiles  ["$values/argo-applications/dinsro/values.yaml"]}}
+                 {:repoURL        "https://github.com/duck1123/k3s-fleetops"
+                  :targetRevision "master"
+                  :ref            "values"}]
   :destination {:server "https://kubernetes.default.svc" :namespace "dinsro-prod"}
   :syncPolicy  {:automated   {:prune true :selfHeal true}
                 :syncOptions ["CreateNamespace=true"]}}}
