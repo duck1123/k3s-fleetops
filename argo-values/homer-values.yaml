@@ -3,9 +3,8 @@ ingress:
     enabled: true
     hosts:
     - host: homer.dev.kronkltd.net
-      http:
-        paths:
-        - path: /
+      paths:
+      - path: /
     tls:
     - secretName: homer-tls
       hosts:
