@@ -9,4 +9,17 @@ ingress:
     - secretName: homer-tls
       hosts:
       - homer.dev.kronkltd.net
+  addons:
+    codeserver:
+      enabled: true
+      ingress:
+        enabled: true
+        hosts:
+        - host: codeserver.dev.kronkltd.net
+          paths:
+          - path: /
+        tls:
+        - secretName: codeserver-tls
+          hosts:
+          - codeserver.dev.kronkltd.net
 
