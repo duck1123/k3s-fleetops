@@ -12,5 +12,5 @@ ingress:
     - specter-alice.dinsro.com
 persistence:
   storageClassName: local-path
-nodeConfig: '{"protocol":"http","external_node":true,"password":"rpcpassword","name":"alice","autodetect":false,"port":18443,"host":"bitcoin.alice","alias":"bar","fullpath":"/data/.specter/nodes/alice.json","datadir":"","user":"rpcuser"}'
+nodeConfig: '{"protocol":"http","external_node":true,"password":"rpcpassword","name":"alice","autodetect":false,"port":18443,"host":"alice-bitcoin","alias":"bar","fullpath":"/data/.specter/nodes/alice.json","datadir":"","user":"rpcuser"}'
 
