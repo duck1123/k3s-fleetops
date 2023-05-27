@@ -1,0 +1,43 @@
+notebooks:
+  enabled: false
+ingress:
+  enabled: true
+  hosts:
+  - host: dinsro.com
+    paths:
+    - path: /
+  tls:
+  - hosts:
+    - dinsro.com
+    secretName: dinsro-com-tls
+devtools:
+  enabled: false
+  ingress:
+    enabled: false
+docs:
+  enabled: false
+  ingress:
+    enbled: false
+nrepl:
+  enabled: false
+database:
+  enabled: true
+  seed: true
+image:
+  tag: 4.0.3097
+persistence:
+  enabled: true
+  seed: true
+devcards:
+  enabled: true
+  ingress:
+    enabled: true
+  devtools:
+    enabled: true
+    ingress:
+      enabled: false
+workspaces:
+  enabled: false
+  ingress:
+    enabled: false
+
