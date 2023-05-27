@@ -1,0 +1,11 @@
+image:
+  tag: v1.10.3
+ingress:
+  hosts:
+  - host: specter-alice.dinsro.com
+  paths:
+  - path: /
+persistence:
+  storageClassName: local-path
+nodeConfig: '{"protocol":"http","external_node":true,"password":"rpcpassword","name":"alice","autodetect":false,"port":18443,"host":"bitcoin.alice","alias":"bar","fullpath":"/data/.specter/nodes/alice.json","datadir":"","user":"rpcuser"}'
+
