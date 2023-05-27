@@ -1,6 +1,7 @@
 {:ingress
  {:main
   {:enabled true
-   :hosts   [{:host "homer.dev.kronkltd.net"}]
+   :hosts   [{:host "homer.dev.kronkltd.net"
+              :http {:paths ["/"]}}]
    :tls     [{:secretName "homer-tls"
               :hosts      ["homer.dev.kronkltd.net"]}]}}}
