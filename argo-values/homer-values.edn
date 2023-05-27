@@ -1,1 +1,6 @@
-{}
+{:ingress
+ {:main
+  {:enabled true
+   :hosts   [{:host "homer.dev.kronkltd.net"}]
+   :tls     [{:secretName "homer-tls"
+              :hosts      ["homer.dev.kronkltd.net"]}]}}}
