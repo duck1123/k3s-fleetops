@@ -1,6 +1,6 @@
 {:apiVersion "argoproj.io/v1alpha1"
  :kind       "Application"
- :metadata   {:name "infra" :namespace "argocd"}
+ :metadata   {:name "001-infra" :namespace "argocd"}
  :spec
  {:destination {:namespace "argocd-server"
                 :server    "https://kubernetes.default.svc"}

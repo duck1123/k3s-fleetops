@@ -1,18 +1,18 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: master
+  name: 00-master
   namespace: argocd
 spec:
   destination:
-    namespace: argocd-server
+    namespace: argocd
     server: https://kubernetes.default.svc
   project: default
   source:
     directory:
       jsonnet: {}
       recurse: true
-    path: argo-applications
+    path: 00-master
     repoURL: https://github.com/duck1123/k3s-fleetops.git
     targetRevision: master
   syncPolicy:
