@@ -8,7 +8,9 @@
   :source      {:chart          "cert-manager"
                 :repoURL        "https://charts.jetstack.io"
                 :targetRevision "v1.12.0"
-                :helm           {:releaseName "cert-manager"}}
+                :helm           {:releaseName "cert-manager"
+                                 :parameters [{:name "installCRDs"
+                                               :value "true"}]}}
   :destination {:server "https://kubernetes.default.svc" :namespace "cert-manager"}
   :syncPolicy  {:automated   {:prune true :selfHeal true}
                 :syncOptions ["CreateNamespace=true"]}}}
