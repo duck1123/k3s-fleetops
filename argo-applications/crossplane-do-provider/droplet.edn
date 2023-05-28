@@ -1,0 +1,8 @@
+{:apiVersion "compute.do.crossplane.io/v1alpha1"
+ :kind       "Droplet"
+ :metadata   {:name        "test-droplet"
+              :annotations {"crossplane.io/external-name" "crossplane-droplet"}}
+ :spec       {:forProvider       {:region "nyc1"
+                                  :size   "s-1vcpu-1gb"
+                                  :image  "ubuntu-20-04-x64"}
+              :providerConfigRef {:name "do-provider"}}}
