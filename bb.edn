@@ -3,6 +3,9 @@
   ([babashka.fs :as fs]
    [clojure.string :as str])
 
+  apply-master-application
+  {:task (shell "kubectl apply -f manifests/00-master.yaml")}
+
   build
   {:task
    (let [dry-run? false
@@ -17,4 +20,12 @@
              command   (str "sh -c \"" (str/join " | " parts) "\"")]
          (if dry-run?
            (println (str "[DRY-RUN] " command))
-           (shell command)))))}}}
+           (shell command)))))}
+
+  forward-traefik-dashboard
+  {:task
+   (do
+     (let [get-name-command "kubectl get pods --selector \"app.kubernetes.io/name=traefik\" --output=name"
+           pod-name         (shell get-name-command)
+           command          (str "kubectl port-forward " pod-name " 9000:9000")]
+       (shell command)))}}}
