@@ -7,6 +7,6 @@
                 :repoURL        "https://charts.jetstack.io"
                 :targetRevision "v1.12.0"
                 :helm           {:releaseName "cert-manager"}}
-  :destination {:server "https://kubernetes.default.svc" :namespace "kube-system"}
+  :destination {:server "https://kubernetes.default.svc" :namespace "cert-manager"}
   :syncPolicy  {:automated   {:prune true :selfHeal true}
                 :syncOptions ["CreateNamespace=true"]}}}
