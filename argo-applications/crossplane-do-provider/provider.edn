@@ -1,4 +1,4 @@
 {:apiVersion "pkg.crossplane.io/v1"
  :kind       "Provider"
  :metadata   {:name "provider-do" :namespace "crossplane-system"}
- :spec       {:package "crossplane/provider-digitalocean:v0.1.0"}}
+ :spec       {:package "crossplane/provider-digitalocean:v0.2.0"}}
