@@ -9,4 +9,5 @@
                 :path           "infra"
                 :repoURL        "https://github.com/duck1123/k3s-fleetops.git"
                 :targetRevision "master"}
-  :syncPolicy  {:syncOptions ["CreateNamespace=true"]}}}
+  :syncPolicy  {:automated   {:prune true :selfHeal true}
+                :syncOptions ["CreateNamespace=true"]}}}
