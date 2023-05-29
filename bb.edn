@@ -52,7 +52,7 @@
 
   apply-sealed-key-label
   {:task
-   (let [dry-run?    true
+   (let [dry-run?    false
          namespace   "sealed-secrets"
          secret-name "imported-secret"
          command     (str "kubectl -n \"" namespace  "\" label secret \"" secret-name  "\" sealedsecrets.bitnami.com/sealed-secrets-key=active")]
