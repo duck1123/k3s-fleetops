@@ -22,10 +22,40 @@
            (println (str "[DRY-RUN] " command))
            (shell command)))))}
 
+  delete-secret-controller
+  {:task
+   (let [namespace "sealed-secrets"
+         command   (str "kubectl -n \"" namespace "\" delete pod -l name=sealed-secrets-controller")]
+     (shell command))}
+
   forward-traefik-dashboard
   {:task
    (do
      (let [get-name-command "kubectl get pods --selector \"app.kubernetes.io/name=traefik\" --output=name"
            pod-name         (shell get-name-command)
            command          (str "kubectl port-forward " pod-name " 9000:9000")]
+       (shell command)))}
+
+  ;; https://github.com/bitnami-labs/sealed-secrets/blob/main/docs/bring-your-own-certificates.md
+  install-sealed-key
+  {:task
+   (let [dry-run?    false
+         namespace   "sealed-secrets"
+         secret-name "imported-secret"
+         public-key  "tls.crt"
+         private-key "tls.key"
+         command     (str "kubectl -n \"" namespace  "\" create secret tls \"" secret-name
+                          "\" --cert=\"" public-key "\" --key=\"" private-key "\"")]
+     (if dry-run?
+       (println command)
+       (shell command)))}
+
+  apply-sealed-key-label
+  {:task
+   (let [dry-run?    true
+         namespace   "sealed-secrets"
+         secret-name "imported-secret"
+         command     (str "kubectl -n \"" namespace  "\" label secret \"" secret-name  "\" sealedsecrets.bitnami.com/sealed-secrets-key=active")]
+     (if dry-run?
+       (println command)
        (shell command)))}}}
