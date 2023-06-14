@@ -15,9 +15,9 @@ devtools:
   ingress:
     enabled: false
 docs:
-  enabled: true
+  enabled: false
   ingress:
-    enbled: true
+    enbled: false
     hosts:
     - host: docs.dinsro.com
       paths:
@@ -29,15 +29,15 @@ docs:
 nrepl:
   enabled: false
 database:
-  enabled: true
+  enabled: false
   seed: true
 image:
   tag: 4.0.3110
 persistence:
-  enabled: true
+  enabled: false
   seed: true
 devcards:
-  enabled: true
+  enabled: false
   ingress:
     enabled: true
     hosts:
@@ -49,7 +49,7 @@ devcards:
       - devcards.dinsro.com
       secretName: dinsro-com-devcards-tls
   devtools:
-    enabled: true
+    enabled: false
     ingress:
       enabled: false
 workspaces:
