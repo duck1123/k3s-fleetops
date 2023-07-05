@@ -12,7 +12,7 @@
                :ingress {:enbled false
                          :hosts  [{:host "docs.dinsro.com" :paths [{:path "/"}]}]
                          :tls    [{:hosts ["docs.dinsro.com"] :secretName "dinsro-com-docs-tls"}]}}
- :image       {:tag "4.0.3110"}
+ :image       {:tag "4.0.3128"}
  :nrepl       {:enabled false}
  :notebooks   {:enabled false}
  :persistence {:enabled false :seed true}
