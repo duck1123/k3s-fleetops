@@ -1,4 +1,5 @@
 .clj-kondo
+.envrc
 .lsp
 n.db
 *.unsealed.json

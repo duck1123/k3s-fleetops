@@ -7,7 +7,7 @@
                   :repoURL        "https://chart.kronkltd.net/"
                   :targetRevision "0.1.7"
                   :helm           {:releaseName "dinsro-prod"
-                                   :valueFiles  ["$values/argo-applications/dinsro/values.yaml"]}}
+                                   :valueFiles  ["$values/target/argo-applications/dinsro/values.yaml"]}}
                  {:repoURL        "https://github.com/duck1123/k3s-fleetops"
                   :targetRevision "master"
                   :ref            "values"}]

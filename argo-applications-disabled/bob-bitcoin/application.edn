@@ -1,14 +1,14 @@
 {:apiVersion "argoproj.io/v1alpha1"
  :kind       "Application"
- :metadata   {:name "alice-specter" :namespace "argocd"}
+ :metadata   {:name "bob-bitcoin" :namespace "argocd"}
  :spec
  {:project     "default"
   :sources
-  [{:chart          "specter-desktop"
+  [{:chart          "bitcoind"
     :repoURL        "https://chart.kronkltd.net/"
-    :targetRevision "0.1.0"
-    :helm           {:releaseName "alice-specter"
-                     :valueFiles  ["$values/target/argo-applications/alice-specter/values.yaml"]}}
+    :targetRevision "0.2.3"
+    :helm           {:releaseName "alice-bitcoin"
+                     :valueFiles  ["$values/target/argo-applications/bob-bitcoin/values.yaml"]}}
    {:repoURL        "https://github.com/duck1123/k3s-fleetops"
     :targetRevision "master"
     :ref            "values"}]
