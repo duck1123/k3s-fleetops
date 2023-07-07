@@ -1,6 +1,8 @@
 {:apiVersion "argoproj.io/v1alpha1"
  :kind       "Application"
- :metadata   {:name "001-infra" :namespace "argocd"}
+ :metadata   {:name        "001-infra"
+              :namespace   "argocd"
+              :annotations {"argocd.argoproj.io/sync-wave" "1"}}
  :spec
  {:destination {:namespace "argocd-server"
                 :server    "https://kubernetes.default.svc"}
