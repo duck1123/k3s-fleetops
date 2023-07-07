@@ -1,6 +1,8 @@
 {:apiVersion "traefik.containo.us/v1alpha1"
  :kind       "IngressRoute"
- :metadata   {:name "argocd-server" :namespace "argocd"}
+ :metadata   {:name        "argocd-server"
+              :namespace   "argocd"
+              :annotations {"argocd.argoproj.io/sync-wave" "4"}}
  :spec
  {:entryPoints ["websecure"]
   :routes
@@ -12,4 +14,4 @@
     :match    "Host(`argocd.dev.kronkltd.net`) && Headers(`Content-Type`, `application/grpc`)"
     :priority 11
     :services [{:name "argocd-server" :port 80 :scheme "h2c"}]}]
-  :tls {:certResolver "default"}}}
+  :tls         {:certResolver "default"}}}

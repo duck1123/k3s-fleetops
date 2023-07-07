@@ -2,7 +2,7 @@
  :kind       "Application"
  :metadata   {:name        "cert-manager"
               :namespace   "argocd"
-              :annotations {"argocd.argoproj.io/sync-wave" "1"}}
+              :annotations {"argocd.argoproj.io/sync-wave" "3"}}
  :spec
  {:project     "default"
   :source      {:chart          "cert-manager"
