@@ -1,10 +1,52 @@
+* Registry
+
+** Create
+
+#+begin_src shell
+  bbg k3d-create-registry
+#+end_src
+
+** Delete
+
+#+begin_src shell
+  k3d registry delete k3d-myregistry.localtest.me
+#+end_src
+
+* Create cluster
+
+See https://github.com/duck1123/dotfiles
+
+#+begin_src shell
+  bbg k3d-create
+#+end_src
+
 * Setup
 
 ** Argo CD
+
+*** Install
 
 https://argo-cd.readthedocs.io/en/stable/getting_started/
 
 #+begin_src shell
   kubectl create namespace argocd
   kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+#+end_src
+
+*** Get password
+
+#+begin_src shell
+  argocd admin initial-password -n argocd
+#+end_src
+
+*** Forward ports
+
+#+begin_src shell
+  kubectl port-forward svc/argocd-server -n argocd 8080:443
+#+end_src
+
+*** Apply master app
+
+#+begin_src shell
+  bb apply-master-application
 #+end_src
