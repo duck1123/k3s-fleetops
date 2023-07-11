@@ -1,6 +1,6 @@
 {:database    {:enabled true :seed true}
  :devcards    {:enabled  false
-               :ingress  {:enabled true
+               :ingress  {:enabled false
                           :hosts   [{:host  "devcards.dinsro.com"
                                      :paths [{:path "/"}]}]
                           :tls     [{:hosts      ["devcards.dinsro.com"]

@@ -39,7 +39,7 @@ persistence:
 devcards:
   enabled: false
   ingress:
-    enabled: true
+    enabled: false
     hosts:
     - host: devcards.dinsro.com
       paths:
