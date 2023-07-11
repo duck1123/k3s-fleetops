@@ -1,3 +1,9 @@
+* Secrets
+
+This assumes that you have placed the files tls.crt and tls.key at the root of the directory
+
+All secrets are encrypted with that key
+
 * Registry
 
 ** Create
