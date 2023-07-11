@@ -1,4 +1,4 @@
-{:database    {:enabled false :seed true}
+{:database    {:enabled true :seed true}
  :devcards    {:enabled  false
                :ingress  {:enabled true
                           :hosts   [{:host  "devcards.dinsro.com"
@@ -15,7 +15,7 @@
  :image       {:tag "4.0.3134"}
  :nrepl       {:enabled false}
  :notebooks   {:enabled false}
- :persistence {:enabled false :seed true}
+ :persistence {:enabled true :seed true}
  :ingress     {:enabled true
                :hosts   [{:host "dinsro.com" :paths [{:path "/"}]}]
                :tls     [{:hosts      ["dinsro.com"]
