@@ -15,9 +15,9 @@ devtools:
   ingress:
     enabled: false
 docs:
-  enabled: false
+  enabled: true
   ingress:
-    enbled: false
+    enbled: true
     hosts:
     - host: docs.dinsro.com
       paths:
