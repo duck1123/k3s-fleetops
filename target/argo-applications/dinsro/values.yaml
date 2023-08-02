@@ -32,7 +32,7 @@ database:
   enabled: true
   seed: true
 image:
-  tag: 4.0.3142
+  tag: 4.0.3148
 persistence:
   enabled: true
   seed: true

@@ -15,7 +15,7 @@
                                    :paths [{:path "/"}]}]
                          :tls    [{:hosts      ["docs.dinsro.com"]
                                    :secretName "dinsro-com-docs-tls"}]}}
- :image       {:tag "4.0.3142"}
+ :image       {:tag "4.0.3148"}
  :nrepl       {:enabled false}
  :notebooks   {:enabled false}
  :persistence {:enabled true :seed true}
