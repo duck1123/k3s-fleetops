@@ -7,8 +7,12 @@
                                      :secretName "dinsro-com-devcards-tls"}]}
                :devtools {:enabled false
                           :ingress {:enabled false}}}
- :devtools    {:enabled false
-               :ingress {:enabled false}}
+ :devtools    {:enabled true
+               :ingress {:enabled true
+                         :hosts   [{:host  "devtools.dinsro.com"
+                                    :paths [{:path "/"}]}]
+                         :tls     [{:hosts      ["devtools.dinsro.com"]
+                                    :secretName "dinsro-com-devtools-tls"}]}}
  :docs        {:enabled true
                :ingress {:enbled true
                          :hosts  [{:host  "docs.dinsro.com"

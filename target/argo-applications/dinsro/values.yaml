@@ -21,9 +21,17 @@ ingress:
     - dinsro.com
     secretName: dinsro-com-tls
 devtools:
-  enabled: false
+  enabled: true
   ingress:
-    enabled: false
+    enabled: true
+    hosts:
+    - host: devtools.dinsro.com
+      paths:
+      - path: /
+    tls:
+    - hosts:
+      - devtools.dinsro.com
+      secretName: dinsro-com-devtools-tls
 docs:
   enabled: true
   ingress:
