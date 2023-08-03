@@ -22,7 +22,7 @@
                          :hosts   [{:host  "notebooks.dinsro.com"
                                     :paths [{:path "/"}]}]
                          :tls     [{:hosts      ["notebooks.dinsro.com"]
-                                    :secretName "notebooks.dinsro.com"}]}}
+                                    :secretName "dinsro-com-notebooks-tls"}]}}
  :persistence {:enabled true :seed true}
  :ingress     {:enabled true
                :hosts   [{:host "dinsro.com" :paths [{:path "/"}]}]

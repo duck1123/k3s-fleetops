@@ -9,7 +9,7 @@ notebooks:
     tls:
     - hosts:
       - notebooks.dinsro.com
-      secretName: notebooks.dinsro.com
+      secretName: dinsro-com-notebooks-tls
 ingress:
   enabled: true
   hosts:
