@@ -1,5 +1,15 @@
 notebooks:
-  enabled: false
+  enabled: true
+  ingress:
+    enabled: true
+    hosts:
+    - host: notebooks.dinsro.com
+      paths:
+      - path: /
+    tls:
+    - hosts:
+      - notebooks.dinsro.com
+      secretName: notebooks.dinsro.com
 ingress:
   enabled: true
   hosts:

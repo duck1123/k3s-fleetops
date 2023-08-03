@@ -17,7 +17,12 @@
                                    :secretName "dinsro-com-docs-tls"}]}}
  :image       {:tag "4.0.3151"}
  :nrepl       {:enabled false}
- :notebooks   {:enabled false}
+ :notebooks   {:enabled true
+               :ingress {:enabled true
+                         :hosts   [{:host  "notebooks.dinsro.com"
+                                    :paths [{:path "/"}]}]
+                         :tls     [{:hosts      ["notebooks.dinsro.com"]
+                                    :secretName "notebooks.dinsro.com"}]}}
  :persistence {:enabled true :seed true}
  :ingress     {:enabled true
                :hosts   [{:host "dinsro.com" :paths [{:path "/"}]}]
