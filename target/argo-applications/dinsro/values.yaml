@@ -63,7 +63,15 @@ devcards:
     ingress:
       enabled: false
 workspaces:
-  enabled: false
+  enabled: true
   ingress:
-    enabled: false
+    enabled: true
+    hosts:
+    - host: workspaces.dinsro.com
+      paths:
+      - path: /
+    tls:
+    - hosts:
+      - workspaces.dinsro.com
+      secretName: dinsro-com-workspaces-tls
 

@@ -28,4 +28,9 @@
                :hosts   [{:host "dinsro.com" :paths [{:path "/"}]}]
                :tls     [{:hosts      ["dinsro.com"]
                           :secretName "dinsro-com-tls"}]}
- :workspaces  {:enabled false :ingress {:enabled false}}}
+ :workspaces  {:enabled true
+               :ingress {:enabled true
+                         :hosts   [{:host  "workspaces.dinsro.com"
+                                    :paths [{:path "/"}]}]
+                         :tls     [{:hosts      ["workspaces.dinsro.com"]
+                                    :secretName "dinsro-com-workspaces-tls"}]}}}
