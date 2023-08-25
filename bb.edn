@@ -77,6 +77,10 @@
          command   (str "kubectl -n \"" namespace "\" delete pod -l name=sealed-secrets-controller")]
      (shell command))}
 
+  forward-argocd
+  {:docs "Forward the argocd port"
+   :task (shell "kubectl port-forward svc/argocd-server -n argocd 8080:443")}
+
   forward-traefik-dashboard
   {:docs "Expose traefik dashboard"
    :task
