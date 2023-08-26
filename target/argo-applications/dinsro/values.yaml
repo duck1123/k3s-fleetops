@@ -50,7 +50,7 @@ database:
   enabled: true
   seed: true
 image:
-  tag: 4.0.3172
+  tag: 4.0.3176
 persistence:
   enabled: true
   seed: true
