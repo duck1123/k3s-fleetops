@@ -8,7 +8,7 @@ ingress:
     - name: airflow.dev.kronkltd.net
       tls:
         enabled: true
-        secret: airflow-tls
+        secretName: airflow-tls
 migrateDatabaseJob:
   useHelmHooks: false
   applyCustomEnv: false
