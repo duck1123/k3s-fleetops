@@ -1,6 +1,14 @@
 createUserJob:
   useHelmHooks: false
   applyCustomEnv: false
+ingress:
+  web:
+    enabled: true
+    hosts:
+    - name: airflow.dev.kronkltd.net
+      tls:
+        enabled: true
+        secret: airflow-tls
 migrateDatabaseJob:
   useHelmHooks: false
   applyCustomEnv: false
