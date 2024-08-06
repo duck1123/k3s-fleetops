@@ -3,7 +3,7 @@
  :metadata   {:name "st-dw-test" :namespace "argocd"}
  :spec
  {:project     "default"
-  :sources      [{:chart          "licenseware/mssql"
+  :sources      [{:chart          "mssql"
                   :repoURL        "https://licenseware.github.io/charts/"
                   :targetRevision "0.1.2"
                   :helm           {:releaseName "mssql"

@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   sources:
-  - chart: licenseware/mssql
+  - chart: mssql
     repoURL: https://licenseware.github.io/charts/
     targetRevision: 0.1.2
     helm:
