@@ -8,7 +8,7 @@ spec:
   sources:
   - chart: sqlpad
     repoURL: https://chart.kronkltd.net/
-    targetRevision: 0.2.3
+    targetRevision: 0.1.0
     helm:
       releaseName: sqlpad
       valueFiles:
