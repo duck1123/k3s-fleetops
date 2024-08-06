@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   sources:
-  - chart: airflow
+  - chart: mssql
     repoURL: oci://registry.gitlab.com/xrow-public/helm-mssql/charts/mssql
     targetRevision: 1.0.4
     helm:

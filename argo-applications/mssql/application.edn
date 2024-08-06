@@ -3,7 +3,7 @@
  :metadata   {:name "st-dw-test" :namespace "argocd"}
  :spec
  {:project     "default"
-  :sources      [{:chart          "airflow"
+  :sources      [{:chart          "mssql"
                   :repoURL        "oci://registry.gitlab.com/xrow-public/helm-mssql/charts/mssql"
                   :targetRevision "1.0.4"
                   :helm           {:releaseName "mssql"
