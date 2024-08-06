@@ -3,6 +3,8 @@ createUserJob:
   applyCustomEnv: false
 ingress:
   web:
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
     enabled: true
     hosts:
     - name: airflow.dev.kronkltd.net

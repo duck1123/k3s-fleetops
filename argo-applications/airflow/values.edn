@@ -4,7 +4,11 @@
 
  :ingress
  {:web
-  {:enabled true
+  {:annotations
+   {"cert-manager.io/cluster-issuer" "letsencrypt-prod"}
+
+   :enabled true
+
    :hosts
    [{:name "airflow.dev.kronkltd.net"
      :tls  {:enabled    true
