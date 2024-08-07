@@ -1,5 +1,3 @@
 acceptEula:
   value: y
-persistence:
-  enabled: false
 
