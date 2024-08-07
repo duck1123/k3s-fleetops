@@ -3,9 +3,9 @@
  :metadata   {:name "st-dw-test" :namespace "argocd"}
  :spec
  {:project     "default"
-  :sources      [{:chart          "mssql"
-                  :repoURL        "https://licenseware.github.io/charts/"
-                  :targetRevision "0.1.2"
+  :sources      [{:chart          "mssqlserver-2022"
+                  :repoURL        "https://simcubeltd.github.io/simcube-helm-charts/"
+                  :targetRevision "1.2.3"
                   :helm           {:releaseName "mssql"
                                    :valueFiles  ["$values/target/argo-applications/mssql/values.yaml"]}}
                  {:repoURL        "https://github.com/duck1123/k3s-fleetops"

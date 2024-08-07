@@ -6,9 +6,9 @@ metadata:
 spec:
   project: default
   sources:
-  - chart: mssql
-    repoURL: https://licenseware.github.io/charts/
-    targetRevision: 0.1.2
+  - chart: mssqlserver-2022
+    repoURL: https://simcubeltd.github.io/simcube-helm-charts/
+    targetRevision: 1.2.3
     helm:
       releaseName: mssql
       valueFiles:
