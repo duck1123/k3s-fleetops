@@ -1,2 +1,2 @@
 {:config {:saPassword "w3YcgxYbiGtPMWCYSo122m3PLK2pkRZ1"}
- :persistence {:enabled true}}
+ :persistence {:enabled false}}
