@@ -1,3 +1,4 @@
+externalURL: https://harbor.dev.kronkltd.net
 expose:
   ingress:
     annotations:

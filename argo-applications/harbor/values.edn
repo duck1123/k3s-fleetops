@@ -1,4 +1,5 @@
-{:expose
+{:externalURL "https://harbor.dev.kronkltd.net"
+ :expose
  {:ingress
   {:annotations
    {"cert-manager.io/cluster-issuer"           "letsencrypt-prod"
