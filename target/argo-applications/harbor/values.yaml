@@ -6,6 +6,7 @@ expose:
       ingress.kubernetes.io/force-ssl-redirect: 'true'
       ingress.kubernetes.io/proxy-body-size: '0'
       ingress.kubernetes.io/ssl-redirect: 'true'
+    className: traefik
     hosts:
       core: harbor.dev.kronkltd.net
   tls:
