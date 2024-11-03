@@ -1,6 +1,7 @@
 .clj-kondo
 .envrc
 .lsp
+.portal
 n.db
 *.unsealed.json
 tls.crt
