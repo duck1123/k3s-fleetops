@@ -3,6 +3,8 @@
   {:annotations
    {"cert-manager.io/cluster-issuer"                   "letsencrypt-prod"
     "ingress.kubernetes.io/force-ssl-redirect"         "true"
-    "traefik.ingress.kubernetes.io/router.middlewares" "dinsro-redirect@kubernetescrd"}
+    "ingress.kubernetes.io/proxy-body-size"            "0"
+    "ingress.kubernetes.io/ssl-redirect"               "true"
+    #_#_"traefik.ingress.kubernetes.io/router.middlewares" "dinsro-redirect@kubernetescrd"}
    :hosts
    {:core "harbor.dev.kronkltd.net"}}}}

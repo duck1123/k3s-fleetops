@@ -96,6 +96,36 @@ This registers the `00-master` Application with argocd.
 bb apply-master-application
 ```
 
+#### Create letsencrypt provider
+
+Create cluster issuer record.
+
+This will cause any ingress with the appropriate annotations to obtain a
+certificate from letsencrypt
+
+replace EMAIL with your email
+
+```sh {"excludeFromRunAll":"true","id":"01J9EFNB7XD34C8SG0HQSE3CRJ","name":"install-cluster-issuer"}
+# Set to an email that will receive certificate expiration notices.
+export EMAIL="duck@kronkltd.net"
+
+cat <<EOF | kubectl apply -f -
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: ${EMAIL}
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    solvers:
+    - http01:
+        ingress:
+          class: traefik
+EOF
+```
 ### Install Sealed Key
 
 Ensure that `001-infra` is properly healthy
