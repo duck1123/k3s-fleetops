@@ -8,4 +8,5 @@
     #_#_"traefik.ingress.kubernetes.io/router.middlewares" "dinsro-redirect@kubernetescrd"}
    :hosts
    {:core "harbor.dev.kronkltd.net"}}
-  :tls {:certSource "secret"}}}
+  :tls {:certSource "secret"
+        :secret     {:secretName "harbor-tls"}}}}

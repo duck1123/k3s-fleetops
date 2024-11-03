@@ -9,4 +9,6 @@ expose:
       core: harbor.dev.kronkltd.net
   tls:
     certSource: secret
+    secret:
+      secretName: harbor-tls
 
