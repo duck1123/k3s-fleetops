@@ -7,4 +7,6 @@ expose:
       ingress.kubernetes.io/ssl-redirect: 'true'
     hosts:
       core: harbor.dev.kronkltd.net
+  tls:
+    certSource: secret
 
