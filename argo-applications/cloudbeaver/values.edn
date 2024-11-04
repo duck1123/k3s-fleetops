@@ -1,0 +1,9 @@
+{:ingress
+ {:annotations {"cert-manager.io/cluster-issuer"           "letsencrypt-prod"
+                "ingress.kubernetes.io/force-ssl-redirect" "true"}
+  :enabled     true
+  :hosts       [{:host  "cloudbeaver.dev.kronkltd.net"
+                 :paths [{:path "/" :pathType "ImplementationSpecific"}]}]
+  :tls         [{:secretName "cloudbeaver-tls"
+                 :host       ["cloudbeaver.dev.kronkltd.net"]}]}
+ :persistence {:enabled true}}
