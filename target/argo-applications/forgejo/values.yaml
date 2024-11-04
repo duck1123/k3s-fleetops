@@ -1,0 +1,16 @@
+ingress:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    ingress.kubernetes.io/force-ssl-redirect: 'true'
+  enabled: true
+  className: traefik
+  hosts:
+  - host: git.dev.kronkltd.net
+    paths:
+    - path: /
+      pathType: ImplementationSpecific
+  tls:
+  - secretName: forgejo-tls
+    hosts:
+    - git.dev.kronkltd.net
+
