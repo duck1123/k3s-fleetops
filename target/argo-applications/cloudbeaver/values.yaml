@@ -15,5 +15,5 @@ ingress:
 persistence:
   enabled: false
 service:
-  port: 80
+  port: 8978
 
