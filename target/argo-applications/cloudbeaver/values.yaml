@@ -10,7 +10,7 @@ ingress:
       pathType: ImplementationSpecific
   tls:
   - secretName: cloudbeaver-tls
-    host:
+    hosts:
     - cloudbeaver.dev.kronkltd.net
 persistence:
   enabled: false
