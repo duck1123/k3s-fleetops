@@ -13,5 +13,5 @@ ingress:
     host:
     - cloudbeaver.dev.kronkltd.net
 persistence:
-  enabled: true
+  enabled: false
 
