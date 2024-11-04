@@ -6,4 +6,5 @@
                  :paths [{:path "/" :pathType "ImplementationSpecific"}]}]
   :tls         [{:secretName "cloudbeaver-tls"
                  :hosts      ["cloudbeaver.dev.kronkltd.net"]}]}
- :persistence {:enabled false}}
+ :persistence {:enabled false}
+ :service     {:port 80}}
