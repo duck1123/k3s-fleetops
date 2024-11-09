@@ -110,6 +110,35 @@
        (println command)
        (shell command)))}
 
+  k3d-create
+  {:description "Create a k3d cluster"
+   :task
+   (let [dry-run?         false
+         use-ingress      false
+         create-registry? false
+         use-registry?    false
+         api-port         6550
+         registry-name    "registry"
+         registry-host    "k3d-myregistry.localtest.me:12345"
+         server-count     1
+         cmd              (clojure.string/join
+                           " "
+                           ["k3d cluster create"
+                            "--api-port" api-port
+                            "-p \"80:80@loadbalancer\""
+                            "-p \"443:443@loadbalancer\""
+                            (when-not use-ingress "--k3s-arg \"--disable=traefik@server:0\"")
+                            "--servers" server-count
+                            "--volume kube-nfs-volume:/opt/local-path-provisioner"
+                            (when create-registry?
+                              (str "--registry-create " registry-name))
+                            (when use-registry?
+                              (str "--registry-use " registry-host))
+                            "--kubeconfig-update-default"])]
+     (if dry-run?
+       (println cmd)
+       (shell cmd)))}
+
   apply-sealed-key-label
   {:docs "Marked the sealed key as active"
    :task

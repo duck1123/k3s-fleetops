@@ -1,4 +1,6 @@
-{:externalURL "https://harbor.dev.kronkltd.net"
+{#_#_:existingSecretAdminPassword    "harbor-admin-password"
+ #_#_:existingSecretAdminPasswordKey "HARBOR_ADMIN_PASSWORD"
+ :externalURL                        "https://harbor.dev.kronkltd.net"
  :expose
  {:ingress
   {:annotations

@@ -126,6 +126,7 @@ spec:
           class: traefik
 EOF
 ```
+
 ### Install Sealed Key
 
 Ensure that `001-infra` is properly healthy

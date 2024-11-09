@@ -1,20 +1,14 @@
 { pkgs ? import <nixpkgs> {} }:
 pkgs.mkShell {
   buildInputs = with pkgs; [
+    argocd
     babashka
     clojure
-    # devspace
     docker
-    # earthly
-    # geckodriver
-    # helm
-    # helm-docs
-    # kubectl
-    # kustomize
-    # nodejs
-    # openjdk
-    # tilt
-    # yarn
-    # yq
+    jet
+    keepassxc
+    kubectl
+    kubernetes-helm
+    kubeseal
   ];
 }

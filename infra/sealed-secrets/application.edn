@@ -1,3 +1,4 @@
+;; https://artifacthub.io/packages/helm/bitnami-labs/sealed-secrets
 {:apiVersion "argoproj.io/v1alpha1"
  :kind       "Application"
  :metadata   {:name        "sealed-secrets"
@@ -7,7 +8,7 @@
  {:project     "default"
   :source      {:chart          "sealed-secrets"
                 :repoURL        "https://bitnami-labs.github.io/sealed-secrets"
-                :targetRevision "2.9.0"
+                :targetRevision "2.16.2"
                 :helm           {:releaseName "sealed-secrets"}}
   :destination {:server "https://kubernetes.default.svc" :namespace "sealed-secrets"}
   :syncPolicy  {:automated   {:prune true :selfHeal true}
