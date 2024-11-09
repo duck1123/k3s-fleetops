@@ -13,7 +13,7 @@
 
   :processors
   {:memory_limiter {:check_interval "1s"
-                    :limit_mib      "512"}
+                    :limit_mib      512}
    :batch          {}}
 
   :connectors
