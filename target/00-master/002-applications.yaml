@@ -13,7 +13,7 @@ spec:
   source:
     directory:
       jsonnet: {}
-      recurse: true
+      recurse: false
     path: target/argo-applications
     repoURL: https://github.com/duck1123/k3s-fleetops.git
     targetRevision: master
