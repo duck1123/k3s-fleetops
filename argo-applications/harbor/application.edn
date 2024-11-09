@@ -1,3 +1,4 @@
+;; https://artifacthub.io/packages/helm/harbor/harbor
 {:apiVersion "argoproj.io/v1alpha1"
  :kind       "Application"
  :metadata   {:name "harbor" :namespace "argocd"}

@@ -5,10 +5,12 @@ pkgs.mkShell {
     babashka
     clojure
     docker
+    gum
     jet
     keepassxc
     kubectl
     kubernetes-helm
     kubeseal
+    openssl
   ];
 }

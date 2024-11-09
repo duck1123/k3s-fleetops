@@ -70,6 +70,53 @@
   clean
   {:task (shell "rm -rf target")}
 
+  generate-key-file
+  {:task (shell "openssl rand -out keepass.keyx 256")}
+
+  get-harbor-password
+  {:task
+   (let [db-password (:out (shell {:out :string} "gum input --password --prompt 'Enter Keepass Password> '"))
+         db-path     (or
+                      (System/getenv "KEEPASS_DB_PATH")
+                      (throw (ex-info "KEEPASS_DB_PATH not set" {})))
+         cmd         (str "keepassxc-cli show -s -a Password "
+                          db-path " /Kubernetes/Harbor")]
+     (println "password: " db-password)
+     (let [harbor-password (:out (shell {:in db-password :out :string} cmd))]
+       (println "Harbor Password: " harbor-password)))}
+
+  create-harbor-password-secret
+  {:task
+   (let [harbor-ns       "harbor"
+         key-name        "HARBOR_ADMIN_PASSWORD"
+         key-path        "/Kubernetes/Harbor"
+         secret-name     "harbor-admin-password"
+         controller-name "sealed-secrets"
+         controller-ns   "sealed-secrets"
+         sealed-file     "harbor-admin-password-sealed-secret.json"
+         db-path         (or (System/getenv "KEEPASS_DB_PATH")
+                             (throw (ex-info "KEEPASS_DB_PATH not set" {})))
+         prompt-cmd      "gum input --password --prompt 'Enter Keepass Password> '"
+         db-password     (:out (shell {:out :string} prompt-cmd))
+         harbor-pass     (->> (str "keepassxc-cli show -s -a Password " db-path " " key-path)
+                              (shell {:in db-password :out :string})
+                              :out)
+         args            ["kubectl create secret generic"
+                          secret-name
+                          (str "--namespace " harbor-ns)
+                          "--dry-run=client"
+                          (str "--from-file=" key-name "=/dev/stdin")
+                          "-o json"]
+         secret-json     (:out (shell {:in harbor-pass :out :string} (str/join " " args)))
+         seal-args       ["kubeseal"
+                          (str "--namespace " harbor-ns)
+                          (str "--controller-name " controller-name)
+                          (str "--controller-namespace " controller-ns)
+                          "--secret-file /dev/stdin"
+                          (str "--sealed-secret-file " sealed-file)]
+         seal-cmd        (str/join " " seal-args)]
+     (shell {:in secret-json} seal-cmd))}
+
   delete-secret-controller
   {:docs "Delete the sealed secrets controller"
    :task
