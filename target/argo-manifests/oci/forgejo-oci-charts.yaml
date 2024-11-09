@@ -3,7 +3,7 @@ kind: Secret
 metadata:
   name: forgejo-oci-charts
   namespace: argocd
-  label:
+  labels:
     argocd.argoproj.io/secret-type: repository
 stringData:
   enableOCI: 'true'
