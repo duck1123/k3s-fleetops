@@ -15,7 +15,11 @@
 
   build
   {:docs "Convert all edn files to yaml"
-   :task (c/build)}
+   :task
+   (do
+     (shell "mkdir -p target/argo-applications")
+     (shell "touch target/argo-applications/.gitkeep")
+     (c/build))}
 
   clean
   {:task (shell "rm -rf target")}
