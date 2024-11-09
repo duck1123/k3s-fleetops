@@ -3,6 +3,6 @@
  :metadata   {:name      "forgejo-oci-charts"
               :namespace "argocd"
               :label     {"argocd.argoproj.io/secret-type" "repository"}}
- :stringData {:enableOCI true
+ :stringData {:enableOCI "true"
               :name      "forgejo-oci-charts"
               :url       "code.forgejo.org/forgejo-helm/forgejo"}}
