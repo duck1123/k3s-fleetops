@@ -79,7 +79,7 @@ config:
         insecure: true
   extensions:
     health_check: {}
-  services:
+  service:
     extensions:
     - health_check
     pipelines:
