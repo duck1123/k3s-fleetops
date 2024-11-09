@@ -147,7 +147,7 @@
         secret-name      "harbor-admin-password"
         controller-name  "sealed-secrets"
         controller-ns    "sealed-secrets"
-        sealed-file      "harbor-admin-password-sealed-secret.json"
+        sealed-file      "argo-applications/harbor/manifests/harbor-admin-password-sealed-secret.yaml"
         keepass-password (prompt-password)]
     (->> (read-password keepass-password key-path)
          (create-secret secret-name harbor-ns key-name)
