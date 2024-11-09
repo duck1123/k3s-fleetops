@@ -1,0 +1,8 @@
+{:apiVersion "v1"
+ :kind       "Secret"
+ :metadata   {:name      "forgejo-oci-charts"
+              :namespace "argocd"
+              :label     {"argocd.argoproj.io/secret-type" "repository"}}
+ :stringData {:enableOCI true
+              :name      "forgejo-oci-charts"
+              :url       "code.forgejo.org/forgejo-helm/forgejo"}}
