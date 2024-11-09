@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# Clean
+bb clean
+
+# Run the build command
+bb build
+
+# Add any changes in the target/ directory
+git add target/

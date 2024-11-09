@@ -6,6 +6,14 @@ runme:
 
 # Setup
 
+## Register Git hooks
+
+This ensures all generated yaml is up to date on commit
+
+```sh {"name":"setup-git-hooks"}
+bb apply-git-hooks
+```
+
 ## Secrets
 
 This assumes that you have placed the files tls.crt and tls.key at the root of the directory

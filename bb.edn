@@ -3,6 +3,10 @@
   ([babashka.fs :as fs]
    [clojure.string :as str])
 
+  apply-git-hooks
+  {:docs "Register git hooks"
+   :task (shell "git config core.hooksPath .githooks")}
+
   apply-master-application
   {:docs "Install 00-master argo application"
    :task (shell "kubectl apply -f target/manifests/00-master.yaml")}
