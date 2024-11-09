@@ -120,25 +120,48 @@
         str/trim-newline)))
 
 (defn create-secret
-  [secret-name target-ns key-name secret-data]
-  (let [args ["kubectl create secret generic"
-              secret-name
-              (str "--namespace " target-ns)
-              "--dry-run=client"
-              (str "--from-file=" key-name "=/dev/stdin")
-              "-o json"]]
-    (:out (shell {:in secret-data :out :string} (str/join " " args)))))
+  ([secret-name target-ns key-name secret-data]
+   (create-secret secret-name target-ns key-name secret-data []))
+  ([secret-name target-ns key-name secret-data extra-args]
+   (let [args (concat ["kubectl create secret generic"
+                       secret-name
+                       (str "--namespace " target-ns)
+                       "--dry-run=client"
+                       (str "--from-file=" key-name "=/dev/stdin")
+                       "-o json"]
+                      extra-args)
+         cmd (str/join " " args)]
+     #_(println cmd)
+     (:out (shell {:in secret-data :out :string} cmd)))))
 
 (defn seal-secret
-  [controller-ns controller-name harbor-ns sealed-file secret-json]
-  (let [seal-args ["kubeseal"
-                   (str "--namespace " harbor-ns)
-                   (str "--controller-name " controller-name)
-                   (str "--controller-namespace " controller-ns)
-                   "--secret-file /dev/stdin"
-                   (str "--sealed-secret-file " sealed-file)]
-        seal-cmd  (str/join " " seal-args)]
-    (shell {:in secret-json} seal-cmd)))
+  [controller-ns controller-name target-ns sealed-file secret-json]
+  (let [args ["kubeseal"
+              (str "--namespace " target-ns)
+              (str "--controller-name " controller-name)
+              (str "--controller-namespace " controller-ns)
+              "--secret-file /dev/stdin"
+              (str "--sealed-secret-file " sealed-file)]
+        cmd  (str/join " " args)]
+    #_(println cmd)
+    (shell {:in secret-json} cmd)))
+
+(defn create-forgejo-password-secret
+  []
+  (let [harbor-ns        "forgejo"
+        key-name         "password"
+        key-path         "/Kubernetes/Forgejo"
+        secret-name      "forgejo-admin-password"
+        controller-name  "sealed-secrets"
+        controller-ns    "sealed-secrets"
+        sealed-dir       "argo-manifests/forgejo/"
+        sealed-file      (str sealed-dir "forgejo-admin-password-sealed-secret.yaml")
+        keepass-password (prompt-password)
+        password         (read-password keepass-password key-path)
+        extra-args       ["--from-literal=username=admin"]
+        secret-data      (create-secret secret-name harbor-ns key-name password extra-args)]
+    (shell (str "mkdir -p " sealed-dir))
+    (seal-secret controller-ns controller-name harbor-ns sealed-file secret-data)))
 
 (defn create-harbor-password-secret
   []

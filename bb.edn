@@ -24,6 +24,9 @@
   clean
   {:task (shell "rm -rf target")}
 
+  create-forgejo-password-secret
+  {:task (c/create-forgejo-password-secret)}
+
   create-harbor-password-secret
   {:task (c/create-harbor-password-secret)}
 

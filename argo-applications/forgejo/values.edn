@@ -1,5 +1,6 @@
 ;; https://artifacthub.io/packages/helm/forgejo-helm/forgejo
-{:ingress
+{:gitea {:admin {:existingSecret "forgejo-admin-password"}}
+ :ingress
  {:annotations {"cert-manager.io/cluster-issuer"           "letsencrypt-prod"
                 "ingress.kubernetes.io/force-ssl-redirect" "true"}
   :enabled     true
