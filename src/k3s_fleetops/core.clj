@@ -1,5 +1,6 @@
 (ns k3s-fleetops.core
   (:require
+   [babashka.fs :as fs]
    [babashka.tasks :refer [shell]]
    [clojure.string :as str]))
 
@@ -44,3 +45,137 @@
          cmd   (str/join " " parts)]
      #_(println cmd)
      (shell cmd))))
+
+(defn build
+  []
+  (let [dry-run?        false
+        verbose?        false
+        cwd             (fs/cwd)
+        output-dir      "target"
+        output-path     (fs/path cwd output-dir)
+        relative-output (fs/relativize cwd output-path)
+        files           (->> (fs/glob "." "**/*.edn")
+                             (filter (fn [f] (not (.endsWith f "bb.edn"))))
+                             (into []))]
+    (let [command (str "mkdir -p " output-path)]
+      (if dry-run?
+        (println (str "[DRY-RUN] " command))
+        (shell command)))
+    (doseq [file files]
+      (when verbose?
+        (println (str "# File: " file "\n----")))
+      (let [file-path             (fs/absolutize (fs/path file))
+            input-parent          (fs/parent file)
+            absolute-input-parent (fs/absolutize input-parent)
+            relative-input-dir    (fs/relativize cwd absolute-input-parent)
+            absolute              (fs/relativize cwd file-path)
+            base-path             (fs/relativize absolute-input-parent file-path)
+            base-name             (fs/strip-ext base-path)
+            target-directory      (fs/path output-path relative-input-dir)
+            target-path           (fs/path target-directory (str base-name ".yaml"))]
+        (when-not (fs/exists? target-directory)
+          (if dry-run?
+            (println (str "[DRY-RUN] sh -c \"mkdir -p " target-directory "\""))
+            (fs/create-dirs target-directory)))
+        (let [target-path-string (fs/relativize cwd target-path)
+              parts              [(str "cat " absolute)
+                                  (str "jet -i edn -o yaml")
+                                  (str (if verbose? "tee " "dd of=") target-path-string)]
+              command            (str "sh -c \"" (str/join " | " parts) "\"")]
+          (if dry-run?
+            (println (str "[DRY-RUN] " command))
+            (shell command)))))
+    (let [yaml-files (->> (fs/glob "." "**/*.yaml")
+                          (filter (fn [f]
+                                    (not (or
+                                          (fs/starts-with? f relative-output)
+                                          (fs/starts-with? f "fleet")))))
+                          (into []))]
+      (doseq [file yaml-files]
+        (let [file-path             (fs/absolutize (fs/path file))
+              input-parent          (fs/parent file)
+              absolute-input-parent (fs/absolutize input-parent)
+              relative-input-dir    (fs/relativize cwd absolute-input-parent)
+              target-directory      (fs/path output-path relative-input-dir)]
+          (when-not (fs/exists? target-directory)
+            (if dry-run?
+              (println (str "[DRY-RUN] sh -c \"mkdir -p " target-directory "\""))
+              (fs/create-dirs target-directory)))
+          (if dry-run?
+            (println (str "copy" file-path " - " target-directory))
+            (fs/copy file-path target-directory {:replace-existing true})))))))
+
+(defn prompt-password
+  []
+  (let [prompt-cmd "gum input --password --prompt 'Enter Keepass Password> '"]
+    (:out (shell {:out :string} prompt-cmd))))
+
+(defn read-password
+  ([keepass-password key-path]
+   (read-password keepass-password key-path (env+ "KEEPASS_DB_PATH")))
+  ([keepass-password key-path db-path]
+   (->> (str "keepassxc-cli show -s -a Password " db-path " " key-path)
+        (shell {:in keepass-password :out :string})
+        :out)))
+
+(defn create-secret
+  [secret-name target-ns key-name secret-data]
+  (let [args ["kubectl create secret generic"
+              secret-name
+              (str "--namespace " target-ns)
+              "--dry-run=client"
+              (str "--from-file=" key-name "=/dev/stdin")
+              "-o json"]]
+    (:out (shell {:in secret-data :out :string} (str/join " " args)))))
+
+(defn seal-secret
+  [controller-ns controller-name harbor-ns sealed-file secret-json]
+  (let [seal-args ["kubeseal"
+                   (str "--namespace " harbor-ns)
+                   (str "--controller-name " controller-name)
+                   (str "--controller-namespace " controller-ns)
+                   "--secret-file /dev/stdin"
+                   (str "--sealed-secret-file " sealed-file)]
+        seal-cmd  (str/join " " seal-args)]
+    (shell {:in secret-json} seal-cmd)))
+
+(defn create-harbor-password-secret
+  []
+  (let [harbor-ns        "harbor"
+        key-name         "HARBOR_ADMIN_PASSWORD"
+        key-path         "/Kubernetes/Harbor"
+        secret-name      "harbor-admin-password"
+        controller-name  "sealed-secrets"
+        controller-ns    "sealed-secrets"
+        sealed-file      "harbor-admin-password-sealed-secret.json"
+        keepass-password (prompt-password)]
+    (->> (read-password keepass-password key-path)
+         (create-secret secret-name harbor-ns key-name)
+         (seal-secret controller-ns controller-name harbor-ns sealed-file))))
+
+(defn k3d-create
+  []
+  (let [dry-run?         false
+        use-ingress      false
+        create-registry? false
+        use-registry?    false
+        api-port         6550
+        registry-name    "registry"
+        registry-host    "k3d-myregistry.localtest.me:12345"
+        server-count     1
+        args             ["k3d cluster create"
+                          "--api-port" api-port
+                          "-p \"80:80@loadbalancer\""
+                          "-p \"443:443@loadbalancer\""
+                          (when-not use-ingress "--k3s-arg \"--disable=traefik@server:0\"")
+                          "--servers" server-count
+                          "--volume kube-nfs-volume:/opt/local-path-provisioner"
+                          (when create-registry?
+                            (str "--registry-create " registry-name))
+                          (when use-registry?
+                            (str "--registry-use " registry-host))
+                          "--kubeconfig-update-default"]
+        cmd              (str/join " " args)]
+    (if dry-run?
+      (println cmd)
+      (shell cmd))))

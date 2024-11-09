@@ -15,97 +15,13 @@
 
   build
   {:docs "Convert all edn files to yaml"
-   :task
-   (let [dry-run?        false
-         verbose?        false
-         cwd             (fs/cwd)
-         output-dir      "target"
-         output-path     (fs/path cwd output-dir)
-         relative-output (fs/relativize cwd output-path)
-         files           (->> (fs/glob "." "**/*.edn")
-                              (filter (fn [f] (not (.endsWith f "bb.edn"))))
-                              (into []))]
-     (let [command (str "mkdir -p " output-path)]
-       (if dry-run?
-         (println (str "[DRY-RUN] " command))
-         (shell command)))
-     (doseq [file files]
-       (when verbose?
-         (println (str "# File: " file "\n----")))
-       (let [file-path             (fs/absolutize (fs/path file))
-             input-parent          (fs/parent file)
-             absolute-input-parent (fs/absolutize input-parent)
-             relative-input-dir    (fs/relativize cwd absolute-input-parent)
-             absolute              (fs/relativize cwd file-path)
-             base-path             (fs/relativize absolute-input-parent file-path)
-             base-name             (fs/strip-ext base-path)
-             target-directory      (fs/path output-path relative-input-dir)
-             target-path           (fs/path target-directory (str base-name ".yaml"))]
-         (when-not (fs/exists? target-directory)
-           (if dry-run?
-             (println (str "[DRY-RUN] sh -c \"mkdir -p " target-directory "\""))
-             (fs/create-dirs target-directory)))
-         (let [target-path-string (fs/relativize cwd target-path)
-               parts              [(str "cat " absolute)
-                                   (str "jet -i edn -o yaml")
-                                   (str (if verbose? "tee " "dd of=") target-path-string)]
-               command            (str "sh -c \"" (str/join " | " parts) "\"")]
-           (if dry-run?
-             (println (str "[DRY-RUN] " command))
-             (shell command)))))
-     (let [yaml-files (->> (fs/glob "." "**/*.yaml")
-                           (filter (fn [f]
-                                     (not (or
-                                           (fs/starts-with? f relative-output)
-                                           (fs/starts-with? f "fleet")))))
-                           (into []))]
-       (doseq [file yaml-files]
-         (let [file-path             (fs/absolutize (fs/path file))
-               input-parent          (fs/parent file)
-               absolute-input-parent (fs/absolutize input-parent)
-               relative-input-dir    (fs/relativize cwd absolute-input-parent)
-               target-directory      (fs/path output-path relative-input-dir)]
-           (when-not (fs/exists? target-directory)
-             (if dry-run?
-               (println (str "[DRY-RUN] sh -c \"mkdir -p " target-directory "\""))
-               (fs/create-dirs target-directory)))
-           (if dry-run?
-             (println (str "copy" file-path " - " target-directory))
-             (fs/copy file-path target-directory {:replace-existing true}))))))}
+   :task (c/build)}
 
   clean
   {:task (shell "rm -rf target")}
 
   create-harbor-password-secret
-  {:task
-   (let [harbor-ns       "harbor"
-         key-name        "HARBOR_ADMIN_PASSWORD"
-         key-path        "/Kubernetes/Harbor"
-         secret-name     "harbor-admin-password"
-         controller-name "sealed-secrets"
-         controller-ns   "sealed-secrets"
-         sealed-file     "harbor-admin-password-sealed-secret.json"
-         db-path         (c/env+ "KEEPASS_DB_PATH")
-         prompt-cmd      "gum input --password --prompt 'Enter Keepass Password> '"
-         db-password     (:out (shell {:out :string} prompt-cmd))
-         harbor-pass     (->> (str "keepassxc-cli show -s -a Password " db-path " " key-path)
-                              (shell {:in db-password :out :string})
-                              :out)
-         args            ["kubectl create secret generic"
-                          secret-name
-                          (str "--namespace " harbor-ns)
-                          "--dry-run=client"
-                          (str "--from-file=" key-name "=/dev/stdin")
-                          "-o json"]
-         secret-json     (:out (shell {:in harbor-pass :out :string} (str/join " " args)))
-         seal-args       ["kubeseal"
-                          (str "--namespace " harbor-ns)
-                          (str "--controller-name " controller-name)
-                          (str "--controller-namespace " controller-ns)
-                          "--secret-file /dev/stdin"
-                          (str "--sealed-secret-file " sealed-file)]
-         seal-cmd        (str/join " " seal-args)]
-     (shell {:in secret-json} seal-cmd))}
+  {:task (c/create-harbor-password-secret)}
 
   delete-secret-controller
   {:docs "Delete the sealed secrets controller"
@@ -152,32 +68,7 @@
 
   k3d-create
   {:description "Create a k3d cluster"
-   :task
-   (let [dry-run?         false
-         use-ingress      false
-         create-registry? false
-         use-registry?    false
-         api-port         6550
-         registry-name    "registry"
-         registry-host    "k3d-myregistry.localtest.me:12345"
-         server-count     1
-         cmd              (clojure.string/join
-                           " "
-                           ["k3d cluster create"
-                            "--api-port" api-port
-                            "-p \"80:80@loadbalancer\""
-                            "-p \"443:443@loadbalancer\""
-                            (when-not use-ingress "--k3s-arg \"--disable=traefik@server:0\"")
-                            "--servers" server-count
-                            "--volume kube-nfs-volume:/opt/local-path-provisioner"
-                            (when create-registry?
-                              (str "--registry-create " registry-name))
-                            (when use-registry?
-                              (str "--registry-use " registry-host))
-                            "--kubeconfig-update-default"])]
-     (if dry-run?
-       (println cmd)
-       (shell cmd)))}
+   :task        (c/k3d-create)}
 
   apply-sealed-key-label
   {:docs "Marked the sealed key as active"
