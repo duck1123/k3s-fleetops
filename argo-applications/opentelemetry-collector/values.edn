@@ -1,6 +1,6 @@
 {:mode "deployment"
 
- :presets {:logsCollection {:enabled fasle}}
+ :presets {:logsCollection {:enabled false}}
 
  :image
  {:repository "otel/opentelemetry-collector-contrib"}

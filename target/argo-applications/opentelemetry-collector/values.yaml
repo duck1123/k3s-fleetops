@@ -1,7 +1,7 @@
 mode: deployment
 presets:
   logsCollection:
-    enabled: !!clojure.lang.Symbol {}
+    enabled: false
 image:
   repository: otel/opentelemetry-collector-contrib
 config:
