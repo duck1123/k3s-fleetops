@@ -1,3 +1,4 @@
+existingSecretAdminPassword: harbor-admin-password
 externalURL: https://harbor.dev.kronkltd.net
 expose:
   ingress:

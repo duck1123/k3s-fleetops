@@ -1,4 +1,4 @@
-{#_#_:existingSecretAdminPassword    "harbor-admin-password"
+{:existingSecretAdminPassword    "harbor-admin-password"
  #_#_:existingSecretAdminPasswordKey "HARBOR_ADMIN_PASSWORD"
  :externalURL                        "https://harbor.dev.kronkltd.net"
  :expose
