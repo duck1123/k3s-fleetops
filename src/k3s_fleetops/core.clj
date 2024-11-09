@@ -116,7 +116,8 @@
   ([keepass-password key-path db-path]
    (->> (str "keepassxc-cli show -s -a Password " db-path " " key-path)
         (shell {:in keepass-password :out :string})
-        :out)))
+        :out
+        str/trim-newline)))
 
 (defn create-secret
   [secret-name target-ns key-name secret-data]
