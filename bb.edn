@@ -1,7 +1,9 @@
-{:tasks
+{:paths ["src"]
+ :tasks
  {:requires
   ([babashka.fs :as fs]
-   [clojure.string :as str])
+   [clojure.string :as str]
+   [k3s-fleetops.core :as c])
 
   apply-git-hooks
   {:docs "Register git hooks"
@@ -74,21 +76,6 @@
   clean
   {:task (shell "rm -rf target")}
 
-  generate-key-file
-  {:task (shell "openssl rand -out keepass.keyx 256")}
-
-  get-harbor-password
-  {:task
-   (let [db-password (:out (shell {:out :string} "gum input --password --prompt 'Enter Keepass Password> '"))
-         db-path     (or
-                      (System/getenv "KEEPASS_DB_PATH")
-                      (throw (ex-info "KEEPASS_DB_PATH not set" {})))
-         cmd         (str "keepassxc-cli show -s -a Password "
-                          db-path " /Kubernetes/Harbor")]
-     (println "password: " db-password)
-     (let [harbor-password (:out (shell {:in db-password :out :string} cmd))]
-       (println "Harbor Password: " harbor-password)))}
-
   create-harbor-password-secret
   {:task
    (let [harbor-ns       "harbor"
@@ -98,8 +85,7 @@
          controller-name "sealed-secrets"
          controller-ns   "sealed-secrets"
          sealed-file     "harbor-admin-password-sealed-secret.json"
-         db-path         (or (System/getenv "KEEPASS_DB_PATH")
-                             (throw (ex-info "KEEPASS_DB_PATH not set" {})))
+         db-path         (c/env+ "KEEPASS_DB_PATH")
          prompt-cmd      "gum input --password --prompt 'Enter Keepass Password> '"
          db-password     (:out (shell {:out :string} prompt-cmd))
          harbor-pass     (->> (str "keepassxc-cli show -s -a Password " db-path " " key-path)
@@ -160,6 +146,9 @@
      (if dry-run?
        (println command)
        (shell command)))}
+
+  generate-key-file
+  {:task (shell "openssl rand -out keepass.keyx 256")}
 
   k3d-create
   {:description "Create a k3d cluster"
