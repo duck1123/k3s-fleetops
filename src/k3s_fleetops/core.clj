@@ -154,7 +154,7 @@
         secret-name      "forgejo-admin-password"
         controller-name  "sealed-secrets"
         controller-ns    "sealed-secrets"
-        sealed-dir       "argo-manifests/forgejo/"
+        sealed-dir       "argo-application-manifests/forgejo/"
         sealed-file      (str sealed-dir "forgejo-admin-password-sealed-secret.yaml")
         keepass-password (prompt-password)
         password         (read-password keepass-password key-path)
