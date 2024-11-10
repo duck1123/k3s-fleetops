@@ -30,6 +30,9 @@
   create-harbor-password-secret
   {:task (c/create-harbor-password-secret)}
 
+  create-keycloak-password-secret
+  {:task (c/create-keycloak-password-secret)}
+
   delete-secret-controller
   {:docs "Delete the sealed secrets controller"
    :task

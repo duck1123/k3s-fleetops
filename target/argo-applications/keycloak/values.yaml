@@ -1,0 +1,20 @@
+auth:
+  existingSecret: keycloak-admin-password
+  passwordSecretKey: password
+ingress:
+  enabled: true
+  ingressClassName: traefik
+  hostname: keycloak.dev.kronkltd.net
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    ingress.kubernetes.io/force-ssl-redirect: 'true'
+  tls: true
+adminIngress:
+  enabled: true
+  ingressClassName: traefik
+  hostname: keycloak-admin.dev.kronkltd.net
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    ingress.kubernetes.io/force-ssl-redirect: 'true'
+  tls: true
+

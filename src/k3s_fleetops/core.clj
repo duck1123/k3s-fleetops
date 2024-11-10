@@ -148,7 +148,7 @@
 
 (defn create-forgejo-password-secret
   []
-  (let [harbor-ns        "forgejo"
+  (let [target-ns        "forgejo"
         key-name         "password"
         key-path         "/Kubernetes/Forgejo"
         secret-name      "forgejo-admin-password"
@@ -159,23 +159,41 @@
         keepass-password (prompt-password)
         password         (read-password keepass-password key-path)
         extra-args       ["--from-literal=username=admin"]
-        secret-data      (create-secret secret-name harbor-ns key-name password extra-args)]
+        secret-data      (create-secret secret-name target-ns key-name password extra-args)]
     (shell (str "mkdir -p " sealed-dir))
-    (seal-secret controller-ns controller-name harbor-ns sealed-file secret-data)))
+    (seal-secret controller-ns controller-name target-ns sealed-file secret-data)))
 
 (defn create-harbor-password-secret
   []
-  (let [harbor-ns        "harbor"
+  (let [target-ns        "harbor"
         key-name         "HARBOR_ADMIN_PASSWORD"
         key-path         "/Kubernetes/Harbor"
         secret-name      "harbor-admin-password"
         controller-name  "sealed-secrets"
         controller-ns    "sealed-secrets"
-        sealed-file      "argo-manifests/harbor/harbor-admin-password-sealed-secret.yaml"
+        sealed-dir       "argo-application-manifests/harbor/"
+        sealed-file      (str sealed-dir "harbor-admin-password-sealed-secret.yaml")
         keepass-password (prompt-password)]
+    (shell (str "mkdir -p " sealed-dir))
     (->> (read-password keepass-password key-path)
-         (create-secret secret-name harbor-ns key-name)
-         (seal-secret controller-ns controller-name harbor-ns sealed-file))))
+         (create-secret secret-name target-ns key-name)
+         (seal-secret controller-ns controller-name target-ns sealed-file))))
+
+(defn create-keycloak-password-secret
+  []
+  (let [target-ns        "keycloak"
+        key-name         "KEYCLOAK_ADMIN_PASSWORD"
+        key-path         "/Kubernetes/Keycloak"
+        secret-name      "keycloak-admin-password"
+        controller-name  "sealed-secrets"
+        controller-ns    "sealed-secrets"
+        sealed-dir       "argo-application-manifests/keycloak/"
+        sealed-file      (str sealed-dir "keycloak-admin-password-sealed-secret.yaml")
+        keepass-password (prompt-password)]
+    (shell (str "mkdir -p " sealed-dir))
+    (->> (read-password keepass-password key-path)
+         (create-secret secret-name target-ns key-name)
+         (seal-secret controller-ns controller-name target-ns sealed-file))))
 
 (defn k3d-create
   []

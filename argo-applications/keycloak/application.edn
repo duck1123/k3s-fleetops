@@ -1,0 +1,20 @@
+{:apiVersion "argoproj.io/v1alpha1"
+ :kind       "Application"
+ :metadata   {:name "keycloak" :namespace "argocd"}
+ :spec
+ {:project     "default"
+  :sources     [{:chart          "keycloak"
+                 :repoURL        "registry-1.docker.io/bitnamicharts"
+                 :path           "keycloak"
+                 :targetRevision "24.1.0"
+                 :helm           {:releaseName "keycloak"
+                                  :valueFiles  ["$values/target/argo-applications/keycloak/values.yaml"]}}
+                {:repoURL        "https://github.com/duck1123/k3s-fleetops"
+                 :targetRevision "master"
+                 :ref            "values"}
+                {:directory      {:jsonnet {} :recurse true}
+                 :path           "target/argo-application-manifests/keycloak"
+                 :repoURL        "https://github.com/duck1123/k3s-fleetops.git"
+                 :targetRevision "master"}]
+  :destination {:server "https://kubernetes.default.svc" :namespace "keycloak"}
+  :syncPolicy  {:automated {:prune true :selfHeal true} :syncOptions ["CreateNamespace=true"]}}}
