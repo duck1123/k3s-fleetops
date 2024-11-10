@@ -1,6 +1,8 @@
 {:apiVersion "argoproj.io/v1alpha1"
  :kind       "Application"
- :metadata   {:name "cloudbeaver" :namespace "argocd"}
+ :metadata   {:name       "cloudbeaver"
+              :namespace  "argocd"
+              :finalizers ["resources-finalizer.argocd.argoproj.io"]}
  :spec       {:project     "default"
               :sources     [{:chart          "cloudbeaver"
                              :repoURL        "https://homeenterpriseinc.github.io/helm-charts/"
