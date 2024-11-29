@@ -8,6 +8,7 @@ ingress:
     paths:
     - path: /
       pathType: ImplementationSpecific
+  tls: []
 persistence:
   enabled: false
 

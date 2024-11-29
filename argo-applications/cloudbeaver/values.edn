@@ -7,7 +7,7 @@
                  "cloudbeaver.localhost"
                  #_"cloudbeaver.dev.kronkltd.net"
                  :paths [{:path "/" :pathType "ImplementationSpecific"}]}]
-  #_#_:tls         [{:secretName "cloudbeaver-tls"
-                 :hosts      ["cloudbeaver.dev.kronkltd.net"]}]}
+  :tls         [#_{:secretName "cloudbeaver-tls"
+                   :hosts      ["cloudbeaver.dev.kronkltd.net"]}]}
  :persistence {:enabled false}
  #_#_:service     {:port 8978}}
