@@ -1,6 +1,8 @@
 {:apiVersion "argoproj.io/v1alpha1"
  :kind       "Application"
- :metadata   {:name "sqlpad" :namespace "argocd"}
+ :metadata   {:name       "sqlpad"
+              :namespace  "argocd"
+              :finalizers ["resources-finalizer.argocd.argoproj.io"]}
  :spec
  {:project     "default"
   :sources
