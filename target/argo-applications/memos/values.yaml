@@ -1,0 +1,20 @@
+ingress:
+  main:
+    enabled: true
+    hosts:
+    - host: memos.dev.kronkltd.net
+      paths:
+      - path: /
+    tls:
+    - secretName: memos-tls
+      hosts:
+      - memos.dev.kronkltd.net
+persistence:
+  data:
+    enabled: true
+postgresql:
+  enabled: true
+  primary:
+    persistence:
+      enabled: true
+
