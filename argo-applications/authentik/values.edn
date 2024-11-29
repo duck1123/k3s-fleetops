@@ -6,12 +6,12 @@
  {:env
   [{:name "AUTHENTIK_SECRET_KEY"
     :valueFrom
-    {:secretRef
+    {:secretKeyRef
      {:name "authentik-secret-key"
       :key  "authentik-secret-key"}}}
    {:name "AUTHENTIK_POSTGRESQL__PASSWORD"
     :valueFrom
-    {:secretRef
+    {:secretKeyRef
      {:name "authentik-postgres-auth"
       :key  "password"}}}]}
 
