@@ -182,7 +182,7 @@
 (defn create-keycloak-password-secret
   []
   (let [target-ns        "keycloak"
-        key-name         "KEYCLOAK_ADMIN_PASSWORD"
+        key-name         "password"
         key-path         "/Kubernetes/Keycloak"
         secret-name      "keycloak-admin-password"
         controller-name  "sealed-secrets"
