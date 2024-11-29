@@ -27,7 +27,7 @@ spec:
     targetRevision: master
   destination:
     server: https://kubernetes.default.svc
-    namespace: keycloak
+    namespace: authentik
   syncPolicy:
     automated:
       prune: true
