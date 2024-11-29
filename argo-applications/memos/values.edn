@@ -7,10 +7,10 @@
               :hosts      ["memos.dev.kronkltd.net"]}]}}
 
  :persistence
- {:data {:enabled true}}
+ {:data {:enabled false}}
 
  :postgresql
  {:enabled true
   :primary
   {:persistence
-   {:enabled true}}}}
+   {:enabled false}}}}
