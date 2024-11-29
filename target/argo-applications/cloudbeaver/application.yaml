@@ -23,11 +23,10 @@ spec:
       - target:
           kind: Ingress
           name: cloudbeaver-ingress
-        patch:
-        - |-
+        patch: |-
           - op: add
-          path: /spec/template/spec/ingressClassName
-          value: traefik
+            path: /spec/template/spec/ingressClassName
+            value: traefik
   destination:
     server: https://kubernetes.default.svc
     namespace: cloudbeaver
