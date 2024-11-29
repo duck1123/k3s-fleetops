@@ -15,15 +15,6 @@ spec:
       releaseName: cloudbeaver
       valueFiles:
       - $values/target/argo-applications/cloudbeaver/values.yaml
-    kustomize:
-      patches:
-      - target:
-          kind: Ingress
-          name: cloudbeaver-ingress
-        patch: |-
-          - op: add
-            path: /spec/ingressClassName
-            value: traefik
   - repoURL: https://github.com/duck1123/k3s-fleetops
     targetRevision: master
     ref: values

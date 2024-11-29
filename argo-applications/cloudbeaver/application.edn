@@ -9,6 +9,7 @@
                              :targetRevision "0.6.0"
                              :helm           {:releaseName "cloudbeaver"
                                               :valueFiles  ["$values/target/argo-applications/cloudbeaver/values.yaml"]}
+                             #_#_
                              :kustomize
                              {:patches [{:target {:kind "Ingress" :name "cloudbeaver-ingress"}
                                          :patch  "- op: add\n  path: /spec/ingressClassName\n  value: traefik"}]}}
