@@ -2,6 +2,7 @@
   (:require
    [babashka.fs :as fs]
    [babashka.tasks :refer [shell]]
+   [clojure.edn :as edn]
    [clojure.string :as str]))
 
 (defn env
@@ -46,6 +47,7 @@
      #_(println cmd)
      (shell cmd))))
 
+#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn build
   []
   (let [dry-run?        false
@@ -110,91 +112,95 @@
   (let [prompt-cmd "gum input --password --prompt 'Enter Keepass Password> '"]
     (:out (shell {:out :string} prompt-cmd))))
 
+(defn choose
+  [options]
+  (let [cmd (str "gum choose " (str/join " " options))]
+    (:out (shell {:out :string} cmd))))
+
+(def sealed-secrets-controller {:name "sealed-secrets" :ns "sealed-secrets"})
+
 (defn read-password
   ([keepass-password key-path]
-   (read-password keepass-password key-path (env+ "KEEPASS_DB_PATH")))
-  ([keepass-password key-path db-path]
-   (->> (str "keepassxc-cli show -s -a Password " db-path " " key-path)
+   (let [field "Password"]
+     (read-password keepass-password key-path field)))
+  ([keepass-password key-path field]
+   (read-password keepass-password key-path field (env+ "KEEPASS_DB_PATH")))
+  ([keepass-password key-path field db-path]
+   (->> (str "keepassxc-cli show -s -a " field  " " db-path " " key-path)
         (shell {:in keepass-password :out :string})
         :out
         str/trim-newline)))
 
 (defn create-secret
-  ([secret-name target-ns key-name secret-data]
-   (create-secret secret-name target-ns key-name secret-data []))
-  ([secret-name target-ns key-name secret-data extra-args]
+  ([chosen-data secret-values]
+   (let [extra-args []]
+     (create-secret chosen-data secret-values extra-args)))
+  ([{target-ns :ns :keys [secret-name]} secret-values extra-args]
    (let [args (concat ["kubectl create secret generic"
                        secret-name
                        (str "--namespace " target-ns)
                        "--dry-run=client"
-                       (str "--from-file=" key-name "=/dev/stdin")
+                       "--from-env-file=/dev/stdin"
                        "-o json"]
                       extra-args)
          cmd (str/join " " args)]
-     #_(println cmd)
-     (:out (shell {:in secret-data :out :string} cmd)))))
+     #_(binding [*out* *err*] (println cmd))
+     (:out (shell {:in secret-values :out :string} cmd)))))
 
 (defn seal-secret
-  [controller-ns controller-name target-ns sealed-file secret-json]
-  (let [args ["kubeseal"
-              (str "--namespace " target-ns)
-              (str "--controller-name " controller-name)
-              (str "--controller-namespace " controller-ns)
-              "--secret-file /dev/stdin"
-              (str "--sealed-secret-file " sealed-file)]
-        cmd  (str/join " " args)]
-    #_(println cmd)
+  [{target-ns :ns :keys [secret-name]} secret-json]
+  (let [sealed-dir      (str "argo-application-manifests/" target-ns "/")
+        sealed-file     (str sealed-dir secret-name "-sealed-secret.yaml")
+        controller-name (:name sealed-secrets-controller)
+        controller-ns   (:ns sealed-secrets-controller)
+        args            ["kubeseal"
+                         (str "--namespace " target-ns)
+                         (str "--controller-name " controller-name)
+                         (str "--controller-namespace " controller-ns)
+                         "--secret-file /dev/stdin"
+                         (str "--sealed-secret-file " sealed-file)]
+        cmd             (str/join " " args)]
+    #_(binding [*out* *err*] (println cmd))
+    (fs/create-dirs sealed-dir)
     (shell {:in secret-json} cmd)))
 
-(defn create-forgejo-password-secret
+(defn get-secret-data
   []
-  (let [target-ns        "forgejo"
-        key-name         "password"
-        key-path         "/Kubernetes/Forgejo"
-        secret-name      "forgejo-admin-password"
-        controller-name  "sealed-secrets"
-        controller-ns    "sealed-secrets"
-        sealed-dir       "argo-application-manifests/forgejo/"
-        sealed-file      (str sealed-dir "forgejo-admin-password-sealed-secret.yaml")
-        keepass-password (prompt-password)
-        password         (read-password keepass-password key-path)
-        extra-args       ["--from-literal=username=admin"]
-        secret-data      (create-secret secret-name target-ns key-name password extra-args)]
-    (shell (str "mkdir -p " sealed-dir))
-    (seal-secret controller-ns controller-name target-ns sealed-file secret-data)))
+  (edn/read-string (slurp "secrets.edn")))
 
-(defn create-harbor-password-secret
-  []
-  (let [target-ns        "harbor"
-        key-name         "HARBOR_ADMIN_PASSWORD"
-        key-path         "/Kubernetes/Harbor"
-        secret-name      "harbor-admin-password"
-        controller-name  "sealed-secrets"
-        controller-ns    "sealed-secrets"
-        sealed-dir       "argo-application-manifests/harbor/"
-        sealed-file      (str sealed-dir "harbor-admin-password-sealed-secret.yaml")
-        keepass-password (prompt-password)]
-    (shell (str "mkdir -p " sealed-dir))
-    (->> (read-password keepass-password key-path)
-         (create-secret secret-name target-ns key-name)
-         (seal-secret controller-ns controller-name target-ns sealed-file))))
+(defn get-secret-values
+  [{:keys [fields]} keepass-password]
+  (->> (for [[k {:keys [literal path field]
+                 :or   {field "Password"}}] fields]
+         (let [data (cond
+                      (seq literal) literal
+                      (seq path)    (read-password keepass-password path field)
+                      :else         (throw (ex-info "Missing key" {})))]
+           (str k "=" data)))
+       (str/join "\n")))
 
-(defn create-keycloak-password-secret
-  []
-  (let [target-ns        "keycloak"
-        key-name         "password"
-        key-path         "/Kubernetes/Keycloak"
-        secret-name      "keycloak-admin-password"
-        controller-name  "sealed-secrets"
-        controller-ns    "sealed-secrets"
-        sealed-dir       "argo-application-manifests/keycloak/"
-        sealed-file      (str sealed-dir "keycloak-admin-password-sealed-secret.yaml")
-        keepass-password (prompt-password)]
-    (shell (str "mkdir -p " sealed-dir))
-    (->> (read-password keepass-password key-path)
-         (create-secret secret-name target-ns key-name)
-         (seal-secret controller-ns controller-name target-ns sealed-file))))
+#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
+(defn create-sealed-secret
+  ([]
+   (let [secret-data  (get-secret-data)
+         secret-names (->> secret-data keys (map name))
+         secret-key   (keyword (choose secret-names))
+         chosen-maps  (get secret-data secret-key)]
+     (create-sealed-secret secret-key chosen-maps)))
+  ([secret-key]
+   (let [secret-data (get-secret-data)
+         chosen-maps (get secret-data secret-key)]
+     (create-sealed-secret secret-key chosen-maps)))
+  ([secret-key chosen-maps]
+   (let [keepass-password (prompt-password)]
+     (create-sealed-secret secret-key chosen-maps keepass-password)))
+  ([_secret-key chosen-maps keepass-password]
+   (doseq [chosen-data chosen-maps]
+     (let [secret-values (get-secret-values chosen-data keepass-password)
+           secret-json   (create-secret chosen-data secret-values [])]
+       (seal-secret chosen-data secret-json)))))
 
+#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn k3d-create
   []
   (let [dry-run?         false

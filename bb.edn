@@ -25,13 +25,16 @@
   {:task (shell "rm -rf target")}
 
   create-forgejo-password-secret
-  {:task (c/create-forgejo-password-secret)}
+  {:task (c/create-sealed-secret :forgejo)}
 
   create-harbor-password-secret
-  {:task (c/create-harbor-password-secret)}
+  {:task (c/create-sealed-secret :harbor)}
 
   create-keycloak-password-secret
-  {:task (c/create-keycloak-password-secret)}
+  {:task (c/create-sealed-secret :keycloak)}
+
+  create-sealed-secret
+  {:task (c/create-sealed-secret)}
 
   delete-secret-controller
   {:docs "Delete the sealed secrets controller"
