@@ -8,4 +8,4 @@
   :tls         [{:secretName "cloudbeaver-tls"
                  :hosts      ["cloudbeaver.dev.kronkltd.net"]}]}
  :persistence {:enabled false}
- :service     {:port 8978}}
+ #_#_:service     {:port 8978}}

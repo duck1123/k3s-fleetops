@@ -1,3 +1,4 @@
+;; https://artifacthub.io/packages/helm/goauthentik/authentik
 {:authentik
  {:error_reporting
   {:enabled true}}

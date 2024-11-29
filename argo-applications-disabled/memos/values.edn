@@ -1,3 +1,4 @@
+;; https://artifacthub.io/packages/helm/gabe565/memos?modal=values
 {:ingress
  {:main
   {:enabled true

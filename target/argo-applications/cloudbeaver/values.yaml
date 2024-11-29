@@ -14,6 +14,4 @@ ingress:
     - cloudbeaver.dev.kronkltd.net
 persistence:
   enabled: false
-service:
-  port: 8978
 
