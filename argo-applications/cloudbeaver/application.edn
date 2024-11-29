@@ -14,7 +14,7 @@
                              :ref            "values"}
                             {:kustomize
                              {:patches [{:target {:kind "Ingress" :name "cloudbeaver-ingress"}
-                                         :patch  "- op: add\n  path: /spec/template/spec/ingressClassName\n  value: traefik"
+                                         :patch  "- op: add\n  path: /spec/ingressClassName\n  value: traefik"
                                          #_{:op "add" :value {:ingressClassName "traefik"}}}]}}]
               :destination {:server "https://kubernetes.default.svc" :namespace "cloudbeaver"}
               :syncPolicy  {:automated {:prune true :selfHeal true} :syncOptions ["CreateNamespace=true"]}}}
