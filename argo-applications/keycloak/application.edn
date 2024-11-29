@@ -1,6 +1,8 @@
 {:apiVersion "argoproj.io/v1alpha1"
  :kind       "Application"
- :metadata   {:name "keycloak" :namespace "argocd"}
+ :metadata   {:name       "keycloak"
+              :namespace  "argocd"
+              :finalizers ["resources-finalizer.argocd.argoproj.io"]}
  :spec
  {:project     "default"
   :sources     [{:chart          "keycloak"
