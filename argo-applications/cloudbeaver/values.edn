@@ -3,9 +3,11 @@
  {:annotations {"cert-manager.io/cluster-issuer"           "letsencrypt-prod"
                 "ingress.kubernetes.io/force-ssl-redirect" "true"}
   :enabled     true
-  :hosts       [{:host  "cloudbeaver.dev.kronkltd.net"
+  :hosts       [{:host
+                 "cloudbeaver.localhost"
+                 #_"cloudbeaver.dev.kronkltd.net"
                  :paths [{:path "/" :pathType "ImplementationSpecific"}]}]
-  :tls         [{:secretName "cloudbeaver-tls"
+  #_#_:tls         [{:secretName "cloudbeaver-tls"
                  :hosts      ["cloudbeaver.dev.kronkltd.net"]}]}
  :persistence {:enabled false}
  #_#_:service     {:port 8978}}

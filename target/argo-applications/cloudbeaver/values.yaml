@@ -4,14 +4,10 @@ ingress:
     ingress.kubernetes.io/force-ssl-redirect: 'true'
   enabled: true
   hosts:
-  - host: cloudbeaver.dev.kronkltd.net
+  - host: cloudbeaver.localhost
     paths:
     - path: /
       pathType: ImplementationSpecific
-  tls:
-  - secretName: cloudbeaver-tls
-    hosts:
-    - cloudbeaver.dev.kronkltd.net
 persistence:
   enabled: false
 
