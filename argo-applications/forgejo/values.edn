@@ -1,6 +1,7 @@
 ;; https://artifacthub.io/packages/helm/forgejo-helm/forgejo
 {:gitea
- {:additionalConfigFromEnvs
+ {#_#_
+  :additionalConfigFromEnvs
   [{:name "FORGEJO__DATABASE__PASSWD"
     :valuesFrom
     {:secretKeyRef
@@ -11,6 +12,7 @@
   :admin
   {:existingSecret "forgejo-admin-password"}
 
+  #_#_
   :config
   {:database
    {:DB_TYPE "postgres"
