@@ -2,7 +2,7 @@
 {:persistence {:enabled true}
  :tempo       {:retention "72h"}
  :tempoQuery
- {:enabled true
+ {:enabled false
   :ingress
   {:enabled true
    :annotations
