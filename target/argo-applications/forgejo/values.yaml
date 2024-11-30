@@ -1,6 +1,6 @@
 gitea:
   additionalConfigFromEnvs:
-  - name: FORGEJO__DATABASE__PASSWD
+  - name: GITEA__DATABASE__PASSWD
     valuesFrom:
       secretKeyRef:
         key: userPassword
