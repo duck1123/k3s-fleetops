@@ -6,6 +6,13 @@ server:
     extraEnv:
     - name: ARGO_EXECUTOR_PLUGINS
       value: 'true'
+    metricsConfig:
+      enabled: true
+    telemetryConfig:
+      enabled: true
+    workflowNamespaces:
+    - default
+    - argo-workflows
   ingress:
     enabled: true
     ingressClassName: traefik
@@ -20,4 +27,7 @@ server:
     - secretName: argo-workflows-tls
       hosts:
       - argo-workflows.dev.kronkltd.net
+  workflow:
+    serviceAccount:
+      create: false
 

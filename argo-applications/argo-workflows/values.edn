@@ -4,7 +4,10 @@
   :controller
   {:extraEnv
    [;; https://argo-workflows.readthedocs.io/en/latest/executor_plugins/
-    {:name "ARGO_EXECUTOR_PLUGINS" :value "true"}]}
+    {:name "ARGO_EXECUTOR_PLUGINS" :value "true"}]
+   :metricsConfig      {:enabled true}
+   :telemetryConfig    {:enabled true}
+   :workflowNamespaces ["default" "argo-workflows"]}
   :ingress
   {:enabled          true
    :ingressClassName "traefik"
@@ -14,4 +17,6 @@
                       "ingress.kubernetes.io/ssl-redirect"       "true"}
    :hosts            ["argo-workflows.dev.kronkltd.net"]
    :tls              [{:secretName "argo-workflows-tls"
-                       :hosts      ["argo-workflows.dev.kronkltd.net"]}]}}}
+                       :hosts      ["argo-workflows.dev.kronkltd.net"]}]}
+  :workflow
+  {:serviceAccount {:create false}}}}
