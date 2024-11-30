@@ -3,7 +3,7 @@ gitea:
   - name: FORGEJO__DATABASE__PASSWD
     valuesFrom:
       secretKeyRef:
-        key: adminPassword
+        key: userPassword
         name: postgresql-password
         namespace: postgresql
   admin:
