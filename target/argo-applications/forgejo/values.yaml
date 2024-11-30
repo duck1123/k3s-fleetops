@@ -1,20 +1,6 @@
 gitea:
-  additionalConfigFromEnvs:
-  - name: GITEA__DATABASE__PASSWD
-    valuesFrom:
-      secretKeyRef:
-        key: userPassword
-        name: postgresql-password
-        namespace: postgresql
   admin:
     existingSecret: forgejo-admin-password
-  config:
-    database:
-      DB_TYPE: postgres
-      HOST: postgresql.postgresql
-      USER: postgres
-      NAME: gitea
-      SCHEMA: gitea
   metrics:
     enabled: true
 ingress:
