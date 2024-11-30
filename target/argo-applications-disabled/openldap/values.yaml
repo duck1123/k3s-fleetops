@@ -1,9 +1,16 @@
 replicaCount: 1
+openldap:
+  hostname: ldap.dev.kronkltd.net
 tls:
   secret: openldap-tls
 env:
   LDAP_ORGANISATION: KRONK Ltd.
   LDAP_DOMAIN: ldap.dev.kronkltd.net
+ingress:
+  phpldapadmin:
+    certificate: phpldapadmin-tls
+    enabled: true
+    hostname: phpldapadmin.dev.kronkltd.net
 phpldapadmin:
   ingress:
     annotations:
