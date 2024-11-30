@@ -1,27 +1,27 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: postgreql
+  name: postgresql
   namespace: argocd
   finalizers:
   - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   sources:
-  - chart: postgreql
+  - chart: postgresql
     repoURL: registry-1.docker.io/bitnamicharts
-    path: postgreql
+    path: postgresql
     targetRevision: 16.2.3
     helm:
-      releaseName: postgreql
+      releaseName: postgresql
       valueFiles:
-      - $values/target/argo-applications/postgreql/values.yaml
+      - $values/target/argo-applications/postgresql/values.yaml
   - repoURL: https://github.com/duck1123/k3s-fleetops
     targetRevision: master
     ref: values
   destination:
     server: https://kubernetes.default.svc
-    namespace: postgreql
+    namespace: postgresql
   syncPolicy:
     automated:
       prune: true
