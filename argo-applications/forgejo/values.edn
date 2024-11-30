@@ -33,6 +33,9 @@
   :tls         [{:secretName "forgejo-tls"
                  :hosts      ["git.dev.kronkltd.net"]}]}
 
+ :postgresql
+ {:enabled true}
+
  :postgresql-ha
  {:enabled false}
 
