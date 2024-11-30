@@ -1,6 +1,6 @@
 ;; https://artifacthub.io/packages/helm/argo/argo-workflows
 {:server
- {:authMode "server"
+ {:authModes ["server" "client"]
   :ingress
   {:enabled          true
    :ingressClassName "traefik"

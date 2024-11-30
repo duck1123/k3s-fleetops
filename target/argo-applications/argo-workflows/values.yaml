@@ -1,5 +1,7 @@
 server:
-  authMode: server
+  authModes:
+  - server
+  - client
   ingress:
     enabled: true
     ingressClassName: traefik
