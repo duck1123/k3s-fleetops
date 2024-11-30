@@ -4,4 +4,6 @@ metadata:
   name: argocd-cm
   namespace: argocd
 data:
+  exec.enabled: "true"
+  ui.bannercontent: fnord
   kustomize.buildOptions: --enable-helm
