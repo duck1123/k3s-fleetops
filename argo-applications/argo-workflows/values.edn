@@ -1,0 +1,12 @@
+;; https://artifacthub.io/packages/helm/argo/argo-workflows
+{:server
+ {:ingress
+  {:enabled          true
+   :ingressClassName "traefik"
+   :annotations      {"cert-manager.io/cluster-issuer"           "letsencrypt-prod"
+                      "ingress.kubernetes.io/force-ssl-redirect" "true"
+                      "ingress.kubernetes.io/proxy-body-size"    "0"
+                      "ingress.kubernetes.io/ssl-redirect"       "true"}
+   :hosts            ["argo-workflows.dev.kronkltd.net"]
+   :tls              [{:secretName "argo-workflows-tls"
+                       :hosts      ["argo-workflows.dev.kronkltd.net"]}]}}}
