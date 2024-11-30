@@ -34,7 +34,7 @@
                  :hosts      ["git.dev.kronkltd.net"]}]}
 
  :postgresql
- {:enabled false}
+ {:enabled true}
 
  :postgresql-ha
  {:enabled false}
