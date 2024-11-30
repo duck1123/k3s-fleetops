@@ -1,6 +1,7 @@
 ;; https://artifacthub.io/packages/helm/argo/argo-workflows
 {:server
- {:ingress
+ {:authMode "server"
+  :ingress
   {:enabled          true
    :ingressClassName "traefik"
    :annotations      {"cert-manager.io/cluster-issuer"           "letsencrypt-prod"
