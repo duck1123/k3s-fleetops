@@ -1,6 +1,10 @@
 ;; https://artifacthub.io/packages/helm/argo/argo-workflows
 {:server
  {:authModes ["server" "client"]
+  :controller
+  {:extraEnv
+   [;; https://argo-workflows.readthedocs.io/en/latest/executor_plugins/
+    {:name "ARGO_EXECUTOR_PLUGINS" :value "true"}]}
   :ingress
   {:enabled          true
    :ingressClassName "traefik"

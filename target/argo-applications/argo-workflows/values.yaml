@@ -2,6 +2,10 @@ server:
   authModes:
   - server
   - client
+  controller:
+    extraEnv:
+    - name: ARGO_EXECUTOR_PLUGINS
+      value: 'true'
   ingress:
     enabled: true
     ingressClassName: traefik
