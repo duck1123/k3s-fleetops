@@ -1,0 +1,22 @@
+{:replicaCount 1
+ :tls
+ {:secret "openldap-tls"}
+ :env
+ {:LDAP_ORGANISATION "KRONK Ltd."
+  :LDAP_DOMAIN       "ldap.dev.kronkltd.net"}
+
+ :phpldapadmin
+ {:ingress
+  {:annotations {"cert-manager.io/cluster-issuer"           "letsencrypt-prod"
+                 "ingress.kubernetes.io/force-ssl-redirect" "true"
+                 "ingress.kubernetes.io/proxy-body-size"    "0"
+                 "ingress.kubernetes.io/ssl-redirect"       "true"}
+   :hosts       ["phpldapadmin.dev.kronkltd.net"]}}
+
+ :ltb-passwd
+ {:ingress
+  {:annotations {"cert-manager.io/cluster-issuer"           "letsencrypt-prod"
+                 "ingress.kubernetes.io/force-ssl-redirect" "true"
+                 "ingress.kubernetes.io/proxy-body-size"    "0"
+                 "ingress.kubernetes.io/ssl-redirect"       "true"}
+   :hosts       ["ltb.dev.kronkltd.net"]}}}
