@@ -4,10 +4,13 @@ metadata:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
     ingress.kubernetes.io/force-ssl-redirect: 'true'
+    ingress.kubernetes.io/proxy-body-size: '0'
+    ingress.kubernetes.io/ssl-redirect: 'true'
     kubernetes.io/ingress.class: traefik
   name: cloudbeaver-ingress
   namespace: cloudbeaver
 spec:
+  ingressClassName: traefik
   rules:
     - host: cloudbeaver.dev.kronkltd.net
       http:
@@ -19,3 +22,7 @@ spec:
                   name: http
             path: /
             pathType: ImplementationSpecific
+  tls:
+    - hosts:
+        - cloudbeaver.dev.kronkltd.net
+      secretName: cloudbeaver-tls
