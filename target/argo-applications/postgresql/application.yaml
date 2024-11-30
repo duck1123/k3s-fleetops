@@ -9,7 +9,7 @@ spec:
   project: default
   sources:
   - chart: postgreql
-    repoURL: https://charts.bitnami.com/bitnami
+    repoURL: registry-1.docker.io/bitnamicharts
     path: postgreql
     targetRevision: 16.2.3
     helm:
