@@ -1,6 +1,20 @@
 gitea:
+  additionalConfigFromEnvs:
+  - name: FORGEJO__DATABASE__PASSWD
+    valuesFrom:
+      secretKeyRef:
+        key: adminPassword
+        name: postgresql-password
+        namespace: postgresql
   admin:
     existingSecret: forgejo-admin-password
+  config:
+    database:
+      DB_TYPE: postgres
+      HOST: postgresql.postgresql
+      USER: postgres
+      NAME: gitea
+      SCHEMA: gitea
   metrics:
     enabled: true
 ingress:
@@ -19,7 +33,7 @@ ingress:
     hosts:
     - git.dev.kronkltd.net
 postgresql:
-  enabled: true
+  enabled: false
 postgresql-ha:
   enabled: false
 redis:
