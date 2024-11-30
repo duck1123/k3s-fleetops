@@ -171,11 +171,12 @@
 (defn get-secret-values
   [{:keys [fields]} keepass-password]
   (->> (for [[k {:keys [literal path field]
-                 :or   {field "Password"}}] fields]
+                 :or   {field "Password"}
+                 :as   data}] fields]
          (let [data (cond
                       (seq literal) literal
                       (seq path)    (read-password keepass-password path field)
-                      :else         (throw (ex-info "Missing key" {})))]
+                      :else         (throw (ex-info "Missing key" {:data data})))]
            (str k "=" data)))
        (str/join "\n")))
 
