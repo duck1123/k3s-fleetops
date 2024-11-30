@@ -1,5 +1,24 @@
 ;; https://artifacthub.io/packages/helm/forgejo-helm/forgejo
-{:gitea {:admin {:existingSecret "forgejo-admin-password"}}
+{:gitea
+ {:additionalConfigFromEnvs
+  [{:name "FORGEJO__DATABASE__PASSWD"
+    :valuesFrom
+    {:secretKeyRef
+     {:name "postgres-secret" :key "password"}}}]
+
+  :admin
+  {:existingSecret "forgejo-admin-password"}
+
+  :config
+  {:database
+   {:DB_TYPE "postgres"
+    :HOST    "postgresql.postgresql"
+    :USER    "postgres"
+    :NAME    "gitea"
+    :SCHEMA  "gitea"}}
+
+  :metrics {:enabled true}}
+
  :ingress
  {:annotations {"cert-manager.io/cluster-issuer"           "letsencrypt-prod"
                 "ingress.kubernetes.io/force-ssl-redirect" "true"}
@@ -8,4 +27,13 @@
   :hosts       [{:host  "git.dev.kronkltd.net"
                  :paths [{:path "/" :pathType "ImplementationSpecific"}]}]
   :tls         [{:secretName "forgejo-tls"
-                 :hosts      ["git.dev.kronkltd.net"]}]}}
+                 :hosts      ["git.dev.kronkltd.net"]}]}
+
+ :postgresql-ha
+ {:enabled false}
+
+ :redis
+ {:enabled false}
+
+ :redis-cluster
+ {:enabled false}}
