@@ -1,6 +1,6 @@
 ;; https://artifacthub.io/packages/helm/argo/argo-workflows
 {:server
- {:authModes ["server" "client"]
+ {:authModes [#_"server" "client"]
   :controller
   {:extraEnv
    [;; https://argo-workflows.readthedocs.io/en/latest/executor_plugins/
