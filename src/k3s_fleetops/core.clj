@@ -47,66 +47,73 @@
      #_(println cmd)
      (shell cmd))))
 
-#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
-(defn build
-  [& [opts]]
-  (println opts)
+(defn build-yaml
+  [opts]
   (let [dry-run?        (:dry-run opts)
-        verbose?        (:verbose opts)
         cwd             (fs/cwd)
         output-dir      "target"
         output-path     (fs/path cwd output-dir)
         relative-output (fs/relativize cwd output-path)
-        files           (->> (fs/glob "." "**/*.edn")
-                             (filter (fn [f] (not (.endsWith f "bb.edn"))))
-                             (into []))]
-    (let [command (str "mkdir -p " output-path)]
-      (if dry-run?
-        (println (str "[DRY-RUN] " command))
-        (shell command)))
-    (doseq [file files]
-      (when verbose?
-        (println (str "# File: " file "\n----")))
+        yaml-files (->> (fs/glob "." "**/*.yaml")
+                        (filter (fn [f]
+                                  (not (or
+                                        (fs/starts-with? f relative-output)
+                                        (fs/starts-with? f "fleet")))))
+                        (into []))]
+    (doseq [file yaml-files]
       (let [file-path             (fs/absolutize (fs/path file))
             input-parent          (fs/parent file)
             absolute-input-parent (fs/absolutize input-parent)
             relative-input-dir    (fs/relativize cwd absolute-input-parent)
-            absolute              (fs/relativize cwd file-path)
-            base-path             (fs/relativize absolute-input-parent file-path)
-            base-name             (fs/strip-ext base-path)
-            target-directory      (fs/path output-path relative-input-dir)
-            target-path           (fs/path target-directory (str base-name ".yaml"))]
+            target-directory      (fs/path output-path relative-input-dir)]
         (when-not (fs/exists? target-directory)
           (if dry-run?
             (println (str "[DRY-RUN] sh -c \"mkdir -p " target-directory "\""))
             (fs/create-dirs target-directory)))
-        (let [target-path-string (fs/relativize cwd target-path)
-              parts              [(str "cat " absolute)
-                                  (str "jet -i edn -o yaml")
-                                  (str (if verbose? "tee " "dd of=") target-path-string)]
-              command            (str "sh -c \"" (str/join " | " parts) "\"")]
-          (if dry-run?
-            (println (str "[DRY-RUN] " command))
-            (shell command)))))
-    (let [yaml-files (->> (fs/glob "." "**/*.yaml")
-                          (filter (fn [f]
-                                    (not (or
-                                          (fs/starts-with? f relative-output)
-                                          (fs/starts-with? f "fleet")))))
-                          (into []))]
-      (doseq [file yaml-files]
+        (if dry-run?
+          (println (str "copy" file-path " - " target-directory))
+          (fs/copy file-path target-directory {:replace-existing true}))))))
+
+#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
+(defn build
+  [& [opts]]
+  (println opts)
+  (let [dry-run?    (:dry-run opts)
+        verbose?    (:verbose opts)
+        cwd         (fs/cwd)
+        output-dir  "target"
+        output-path (fs/path cwd output-dir)]
+    (if dry-run?
+      (println (str "[DRY-RUN] create directories: " output-path))
+      (fs/create-dirs output-path))
+    (let [files (->> (fs/glob "." "**/*.edn")
+                     (filter (fn [f] (not (.endsWith f "bb.edn"))))
+                     (into []))]
+      (doseq [file files]
+        (when verbose?
+          (println (str "# File: " file "\n----")))
         (let [file-path             (fs/absolutize (fs/path file))
               input-parent          (fs/parent file)
               absolute-input-parent (fs/absolutize input-parent)
               relative-input-dir    (fs/relativize cwd absolute-input-parent)
-              target-directory      (fs/path output-path relative-input-dir)]
+              absolute              (fs/relativize cwd file-path)
+              base-path             (fs/relativize absolute-input-parent file-path)
+              base-name             (fs/strip-ext base-path)
+              target-directory      (fs/path output-path relative-input-dir)
+              target-path           (fs/path target-directory (str base-name ".yaml"))]
           (when-not (fs/exists? target-directory)
             (if dry-run?
-              (println (str "[DRY-RUN] sh -c \"mkdir -p " target-directory "\""))
+              (println (str "[DRY-RUN] create directories: " target-directory))
               (fs/create-dirs target-directory)))
-          (if dry-run?
-            (println (str "copy" file-path " - " target-directory))
-            (fs/copy file-path target-directory {:replace-existing true})))))))
+          (let [target-path-string (fs/relativize cwd target-path)
+                parts              [(str "cat " absolute)
+                                    (str "jet -i edn -o yaml")
+                                    (str (if verbose? "tee " "dd of=") target-path-string)]
+                command            (str "sh -c \"" (str/join " | " parts) "\"")]
+            (if dry-run?
+              (println (str "[DRY-RUN] " command))
+              (shell command))))))
+    (build-yaml opts)))
 
 (defn prompt-password
   []
