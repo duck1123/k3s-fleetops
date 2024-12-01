@@ -1,7 +1,7 @@
 (ns k3s-fleetops.core
   (:require
    [babashka.fs :as fs]
-   [babashka.tasks :refer [shell]]
+   [babashka.process :refer [process shell]]
    [clojure.edn :as edn]
    [clojure.string :as str]))
 
@@ -49,9 +49,10 @@
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn build
-  []
-  (let [dry-run?        false
-        verbose?        false
+  [& [opts]]
+  (println opts)
+  (let [dry-run?        (:dry-run opts)
+        verbose?        (:verbose opts)
         cwd             (fs/cwd)
         output-dir      "target"
         output-path     (fs/path cwd output-dir)
@@ -109,8 +110,11 @@
 
 (defn prompt-password
   []
-  (let [prompt-cmd "gum input --password --prompt 'Enter Keepass Password> '"]
-    (:out (shell {:out :string} prompt-cmd))))
+  (let [prompt-cmd "gum input --password --prompt 'Enter Keepass Password> '"
+        response   (shell {:out :string} prompt-cmd)]
+    (if (zero? (:exit response))
+      (:out response)
+      (throw (ex-info "Failed to prompt password" {})))))
 
 (defn choose
   [options]
@@ -126,10 +130,11 @@
   ([keepass-password key-path field]
    (read-password keepass-password key-path field (env+ "KEEPASS_DB_PATH")))
   ([keepass-password key-path field db-path]
-   (->> (str "keepassxc-cli show -s -a " field  " " db-path " " key-path)
-        (shell {:in keepass-password :out :string})
-        :out
-        str/trim-newline)))
+   (let [cmd      (str "keepassxc-cli show -s -a " field  " " db-path " " key-path)
+         response @(process {:in keepass-password :out :string} cmd)]
+     (if (zero? (:exit response))
+       (->> response :out str/trim-newline)
+       (throw (ex-info "Failed to read password" {:type :password-read-error}))))))
 
 (defn create-secret
   ([chosen-data secret-values]
@@ -201,10 +206,34 @@
            secret-json   (create-secret chosen-data secret-values [])]
        (seal-secret chosen-data secret-json)))))
 
+(defn create-sealed-secret-command
+  [{:keys [keepass-password secret-name]}]
+  (try
+    (let [secret-data      (get-secret-data)
+          secret-names     (->> secret-data keys (map name))
+          secret-name      (or secret-name (choose secret-names))
+          keepass-password (or keepass-password (prompt-password))
+          secret-key       (keyword secret-name)
+          chosen-maps      (get secret-data secret-key)]
+      (println {:secret-key secret-key :keepass-password keepass-password :chosen-maps chosen-maps})
+      (create-sealed-secret secret-key chosen-maps keepass-password))
+    (catch Exception ex
+      (binding [*out* *err*] (println (ex-message ex)))
+      #_(binding [*out* *err*] (println ex))
+      (System/exit 1))))
+
+(defn list-secrets-command
+  [_opts]
+  #_(println opts)
+  (let [secret-data      (get-secret-data)
+        secret-names     (->> secret-data keys (map name))]
+    (->> secret-names (str/join "\n") println)))
+
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn k3d-create
-  []
-  (let [dry-run?         false
+  [& [opts]]
+  (println opts)
+  (let [dry-run?         true
         use-ingress      false
         create-registry? false
         use-registry?    false
