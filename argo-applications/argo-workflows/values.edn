@@ -1,6 +1,7 @@
 ;; https://artifacthub.io/packages/helm/argo/argo-workflows
 {:server
  {:authModes [#_"server" "client"]
+
   :controller
   {:extraEnv
    [;; https://argo-workflows.readthedocs.io/en/latest/executor_plugins/
@@ -8,6 +9,7 @@
    :metricsConfig      {:enabled true}
    :telemetryConfig    {:enabled true}
    :workflowNamespaces ["default" "argo-workflows"]}
+
   :ingress
   {:enabled          true
    :ingressClassName "traefik"
@@ -18,5 +20,20 @@
    :hosts            ["argo-workflows.dev.kronkltd.net"]
    :tls              [{:secretName "argo-workflows-tls"
                        :hosts      ["argo-workflows.dev.kronkltd.net"]}]}
+
+  :persistence
+  {:archive true
+   :postgresql
+   {:host     "postgresql.postgresql"
+    :database "argo_workflows"
+    :userNameSecret
+    {:name      "postresql-password"
+     :namespace "postgresql"
+     :key       "adminUsername"}
+    :passwordSecret
+    {:name      "postgresql-password"
+     :namespace "postgresql"
+     :key       "adminPassword"}}}
+
   :workflow
-  {:serviceAccount {:create false}}}}
+  {:serviceAccount {:create true}}}}
