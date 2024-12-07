@@ -305,9 +305,10 @@
               "  local -a completions"
               (str "  __" app-name "_debug \"\\n========= starting completion logic ==========\"")
               (str "  __" app-name "_debug \"CURRENT: ${CURRENT}, words[*]: ${words[*]}\"")
-              ;; (str "  local matches=(`" app-name " tasks | sed -r 's/\\t/:/g'`)")
-              (str "  local matches=(`" app-name " tasks | cut -f1`)")
-              (str "  compadd -a matches")
+              (str "  local matches=(`" app-name " tasks | sed -r 's/\\t/:/g'`)")
+              #_(str "  local matches=(`" app-name " tasks | cut -f1`)")
+              #_(str "  compadd -a matches")
+              (str "_describe 'command' matches")
               "}"
               ""
               (str "compdef _" app-name " " app-name)]
