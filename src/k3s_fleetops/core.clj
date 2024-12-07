@@ -2,8 +2,17 @@
   (:require
    [babashka.fs :as fs]
    [babashka.process :refer [process shell]]
+   [cli-matic.core :as cli]
+   [cli-matic.utils-v2 :as U2]
    [clojure.edn :as edn]
    [clojure.string :as str]))
+
+(def dry-run
+  {:option  "dry-run"
+   :env     "DRY_RUN"
+   :as      "Dry Run?"
+   :type    :with-flag
+   :default false})
 
 (defn env
   ([key]
@@ -264,3 +273,131 @@
     (if dry-run?
       (println cmd)
       (shell cmd))))
+
+(declare completion-command)
+
+(defn find-command
+  [config subcommand-path]
+  (reduce
+   (fn [m cn]
+     (first (filter
+             (fn [co]
+               (= cn (:command co)))
+             (:subcommands m))))
+   config
+   (rest subcommand-path)))
+
+(defn complete
+  [args config-obj]
+  (let [config (U2/cfg-v2 config-obj)]
+    (println config)
+    (let [args (if (nil? args) [] args)]
+      (println "args" args)
+      (let [{:keys [parse-errors subcommand-path]
+             :as parsed} (cli/parse-command-line args config)
+            command-config (find-command config subcommand-path)]
+        (if (= parse-errors :ERR-NO-SUBCMD)
+          (println (str/join "\n" (map :command (:subcommands command-config))))
+          (if (= parse-errors :ERR-UNKNOWN-SUBCMD)
+            (do
+              (println "parsed" parsed)
+              (println "command-config" command-config)
+              (let [other-paths (drop-last subcommand-path)
+                    final-stub (last subcommand-path)]
+                (if (not= final-stub (last args))
+                  (do
+                    ;; This path doesn't match a command, but the non-matching command isn't the last token
+                    (println "not final token")
+                    []
+                    )
+                  (do
+                    (println "other-paths" other-paths)
+                    (let [prev-command (find-command config other-paths)]
+                      (println "prev-command" prev-command)
+                      (let [matched-commands (filter
+                                              (fn [command]
+                                                (str/starts-with? (:command command) final-stub))
+                                              (:subcommands prev-command))]
+                        (println "matched commands" (map :command matched-commands))))))))
+
+            (do
+              (println "parsed" parsed)
+              (println "command-config" command-config)
+              (println (str/join "\n" (map #(str "--" %) (map :option (:opts command-config))))))))))))
+
+(def CONFIGURATION
+  {:app
+   {:command     "kops"
+    :description "A tool for managing clusters"
+    :version     "0.0.1"}
+   :global-opts []
+   :commands
+   [{:command     "build" :short "b"
+     :description "Build the app"
+     :opts
+     [dry-run
+      {:option  "verbose"
+       :short   "v"
+       :type    :with-flag
+       :default false}]
+     :runs        build}
+    {:command     "cluster"
+     :short       "c"
+     :description "Manages clusters"
+     :subcommands
+     [{:command     "create"
+       :short       "c"
+       :description "Creates a cluster"
+       :opts
+       [dry-run
+        {:option  "ingress"
+         :env     "USE_INGRESS"
+         :type    :with-flag
+         :default false}
+        {:option  "api-port"
+         :env     "API_PORT"
+         :type    :int
+         :default 6550}
+        {:option  "registry"
+         :env     "USE_REGISTRY"
+         :type    :with-flag
+         :default true}
+        {:option  "registry-name"
+         :env     "REGISTRY_NAME"
+         :type    :string
+         :default "registry"}
+        {:option  "registry-host"
+         :env     "REGISTRY_HOST"
+         :short   "h"
+         :type    :string
+         :default "k3d-myregistry.localtest.me:12345"}
+        {:option  "create-registry"
+         :env     "REGISTRY_CREATE"
+         :type    :with-flag
+         :default false}]
+       :runs        k3d-create}]}
+    {:command     "completion"
+     :description "Completion script"}
+    {:command     "secrets"
+     :short       "s"
+     :description "Manages secrets"
+     :subcommands
+     [{:command     "create"
+       :short       "c"
+       :description "Seals a secret"
+       :opts
+       [{:option "keepass-password"
+         :short  "p"
+         :env    "KEEPASS_PASSWORD"
+         :type   :string
+         :as     "Keepass Password"}
+        {:option "secret-name"
+         :short  "n"
+         :as     "Secret Name"
+         :env    "SECRET_NAME"
+         :type   :string}]
+       :runs        create-sealed-secret-command}
+      {:command     "list"
+       :short       "l"
+       :description "Lists the configured secrets"
+       :runs        list-secrets-command}]}]})
