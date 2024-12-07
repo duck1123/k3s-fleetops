@@ -274,7 +274,55 @@
       (println cmd)
       (shell cmd))))
 
-(declare completion-command)
+(declare CONFIGURATION)
+
+(defn zsh-completion
+  []
+  (let [app-name "kops"
+        args [(str "#compdef " app-name)
+              (str "compdef _" app-name " " app-name)
+              ""
+              (str "# zsh completion for " app-name " -*- shell-script -*-")
+              ""
+              (str "__" app-name "_debug()")
+              "{"
+              "  local file=\"$BASH_COMP_DEBUG_FILE\""
+              "  if [[ -n ${file} ]]; then"
+              "    echo \" $* \" >> \" $ {file} \""
+              "  fi"
+              "}"
+              ""
+              (str "_" app-name "()")
+              "{"
+              "  local shellCompDirectiveError=1"
+              "  local shellCompDirectiveNoSpace=2"
+              "  local shellCompDirectiveNoFileComp=4"
+              "  local shellCompDirectiveFilterFileExt=8"
+              "  local shellCompDirectiveFilterDirs=16"
+              "  local shellCompDirectiveKeepOrder=32"
+              ""
+              "  local lastParam lastChar flagPrefix requestComp out directive comp lastComp noSpace keepOrder"
+              "  local -a completions"
+              (str "  __" app-name "_debug \"\\n========= starting completion logic ==========\"")
+              (str "  __" app-name "_debug \"CURRENT: ${CURRENT}, words[*]: ${words[*]}\"")
+              ;; (str "  local matches=(`" app-name " tasks | sed -r 's/\\t/:/g'`)")
+              (str "  local matches=(`" app-name " tasks | cut -f1`)")
+              (str "  compadd -a matches")
+              "}"
+              ""
+              (str "compdef _" app-name " " app-name)]
+        script (str/join "\n" args)]
+    (println script)))
+
+(defn completion-command
+  [& [args]]
+  ;; (println args)
+  ;; (prn CONFIGURATION)
+  (let [shell (first (:_arguments args))]
+    ;; (println "shell " shell)
+    (case shell
+      "zsh"    (zsh-completion)
+      :default (throw (ex-info "Unknown shell type" {:shell shell})))))
 
 (defn find-command
   [config subcommand-path]
@@ -308,8 +356,7 @@
                   (do
                     ;; This path doesn't match a command, but the non-matching command isn't the last token
                     (println "not final token")
-                    []
-                    )
+                    [])
                   (do
                     (println "other-paths" other-paths)
                     (let [prev-command (find-command config other-paths)]
@@ -319,11 +366,19 @@
                                                 (str/starts-with? (:command command) final-stub))
                                               (:subcommands prev-command))]
                         (println "matched commands" (map :command matched-commands))))))))
-
             (do
               (println "parsed" parsed)
               (println "command-config" command-config)
               (println (str/join "\n" (map #(str "--" %) (map :option (:opts command-config))))))))))))
+
+(defn display-tasks
+  [& [args]]
+  (println
+   (str/join "\n"
+             (map
+     (fn [command-obj]
+       (str (:command command-obj) "\t" (:description command-obj)))
+     (:commands CONFIGURATION)))))
 
 (def CONFIGURATION
   {:app
@@ -377,7 +432,8 @@
          :default false}]
        :runs        k3d-create}]}
     {:command     "completion"
-     :description "Completion script"}
+     :description "Completion script"
+     :runs        completion-command}
     {:command     "secrets"
      :short       "s"
      :description "Manages secrets"
@@ -400,4 +456,7 @@
       {:command     "list"
        :short       "l"
        :description "Lists the configured secrets"
-       :runs        list-secrets-command}]}]})
+       :runs        list-secrets-command}]}
+    {:command "tasks"
+     :descriptions "Display tasks"
+     :runs display-tasks}]})
