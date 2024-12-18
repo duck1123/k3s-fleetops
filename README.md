@@ -187,3 +187,13 @@ Delete registry for locally-built images
 ```sh {"excludeFromRunAll":"true","id":"01J9M6SR2R5G8JE646YKSHWZ9T","name":"delete-registry"}
 k3d registry delete k3d-myregistry.localtest.me
 ```
+
+# Inspect
+
+## Argo Workflows
+
+### Read token
+
+```sh {"name": "read-token"}
+echo "Bearer $(kubectl -n argo-workflows get secret duck.service-account-token -o=jsonpath='{.data.token}' | base64 --decode)"
+```
