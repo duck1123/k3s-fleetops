@@ -9,7 +9,7 @@
   :sources     [{:chart          "tempo"
                  :repoURL        "https://grafana.github.io/helm-charts"
                  :path           "tempo"
-                 :targetRevision "1.16.0"
+                 :targetRevision "1.15.0"
                  :helm           {:releaseName "tempo"
                                   :valueFiles  ["$values/target/argo-applications/tempo/values.yaml"]}}
                 {:repoURL        "https://github.com/duck1123/k3s-fleetops"
