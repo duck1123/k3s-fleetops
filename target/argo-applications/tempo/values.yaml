@@ -3,10 +3,10 @@ persistence:
 tempo:
   retention: 72h
 tempoQuery:
-  enabled: true
+  enabled: false
   tag: latest
   ingress:
-    enabled: true
+    enabled: false
     annotations:
       cert-manager.io/cluster-issuer: letsencrypt-prod
       ingress.kubernetes.io/force-ssl-redirect: 'true'
