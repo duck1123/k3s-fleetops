@@ -3,6 +3,7 @@
  :tempo       {:retention "72h"}
  :tempoQuery
  {:enabled true
+  :tag "latest"
   :ingress
   {:enabled true
    :annotations
