@@ -373,7 +373,7 @@
               (println (str/join "\n" (map #(str "--" %) (map :option (:opts command-config))))))))))))
 
 (defn display-tasks
-  [& [args]]
+  [& [_args]]
   (println
    (str/join "\n"
              (map
