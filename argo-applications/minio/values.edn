@@ -1,5 +1,5 @@
 {:apiIngress
- {:enabled          false
+ {:enabled          true
   :ingressClassName "traefik"
   :hostname         "minio-api.dev.kronkltd.net"
   :annotations      {"cert-manager.io/cluster-issuer"           "letsencrypt-prod"
