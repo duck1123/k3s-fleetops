@@ -1,5 +1,5 @@
 apiIngress:
-  enabled: true
+  enabled: false
   ingressClassName: traefik
   hostname: minio-api.dev.kronkltd.net
   annotations:
