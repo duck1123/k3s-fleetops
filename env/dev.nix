@@ -16,6 +16,7 @@
   imports = [
     ../applications/argo-events.nix
     # ../applications/argo-workflows.nix
+    ../applications/cloudbeaver.nix
     ../applications/demo.nix
     # ../applications/harbor.nix
     ../applications/minio.nix
