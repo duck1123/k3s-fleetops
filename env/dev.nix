@@ -17,5 +17,7 @@
     ../applications/argo-events.nix
     # ../applications/argo-workflows.nix
     ../applications/demo.nix
+    # ../applications/harbor.nix
+    ../applications/minio.nix
   ];
 }
