@@ -13,5 +13,9 @@
     };
   };
 
-  imports = [ ../applications/demo.nix ];
+  imports = [
+    ../applications/argo-events.nix
+    # ../applications/argo-workflows.nix
+    ../applications/demo.nix
+  ];
 }
