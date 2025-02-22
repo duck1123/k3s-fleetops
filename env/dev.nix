@@ -12,4 +12,6 @@
       rootPath = "./manifests/dev";
     };
   };
+
+  imports = [ ../applications/demo.nix ];
 }
