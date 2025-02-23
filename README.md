@@ -197,3 +197,15 @@ k3d registry delete k3d-myregistry.localtest.me
 ```sh {"name": "read-token"}
 echo "Bearer $(kubectl -n argo-workflows get secret duck.service-account-token -o=jsonpath='{.data.token}' | base64 --decode)"
 ```
+
+# Generate CRD
+
+```sh {"name": "generate-crds"}
+nix run .#generate
+```
+
+# Build charts
+
+```sh {"name": "build-charts"}
+nixidy build .#dev
+```

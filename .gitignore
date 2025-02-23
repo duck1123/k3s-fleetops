@@ -7,3 +7,4 @@ n.db
 *.unsealed.json
 tls.crt
 tls.key
+/result
