@@ -18,6 +18,9 @@
   {:docs "Convert all edn files to yaml"
    :task (exec 'k3s-fleetops.core/build {})}
 
+  build-charts
+  {:task (shell "nixidy build .#dev")}
+
   clean
   {:task (shell "rm -rf target")}
 
@@ -72,6 +75,9 @@
      (if dry-run?
        (println command)
        (shell command)))}
+
+  switch-charts
+  {:task (shell "nixidy switch .#dev")}
 
   generate-key-file
   {:task (shell "openssl rand -out keepass.keyx 256")}
