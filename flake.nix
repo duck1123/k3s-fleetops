@@ -15,6 +15,7 @@
     };
 
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    treefmt-nix.url = "github:numtide/treefmt-nix";
   };
 
   outputs = { flake-utils, nixhelm, nixidy, nixpkgs, self, ... }@inputs:
@@ -58,6 +59,12 @@
               };
               crds =
                 [ "helm/sealed-secrets/crds/bitnami.com_sealedsecrets.yaml" ];
+            };
+            sops = nixidy.packages.${system}.generators.fromCRD {
+              name = "sops";
+              src =
+                nixhelm.chartsDerivations.${system}.isindir.sops-secrets-operator;
+              crds = [ "crds/isindir.github.com_sopssecrets.yaml" ];
             };
             tailscale = nixidy.packages.${system}.generators.fromCRD {
               name = "tailscale";
