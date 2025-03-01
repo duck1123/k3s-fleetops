@@ -18,8 +18,8 @@
     airflow.enable = true;
 
     # TODO: I know we can do better than this
-    alice-bitcoin.enable = true;
-    alice-specter.enable = true;
+    # alice-bitcoin.enable = true;
+    # alice-specter.enable = true;
 
     argo-events.enable = true;
     argo-workflows.enable = false;
@@ -28,7 +28,7 @@
     demo.enable = true;
     forgejo.enable = false;
     harbor.enable = false;
-    homer.enable = true;
+    # homer.enable = true;
     minio.enable = true;
     mssql.enable = false;
     postgresql.enable = false;
