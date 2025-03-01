@@ -13,6 +13,7 @@
       values = {
         existingSecretAdminPassword = "harbor-admin-password";
         externalURL = "https://harbor.dev.kronkltd.net";
+        internalTLS.enabled = false;
         expose = {
           ingress = {
             annotations = {
@@ -26,6 +27,7 @@
           };
           tls = {
             certSource = "secret";
+            enabled = false;
             secret.secretName = "harbor-tls";
           };
         };
