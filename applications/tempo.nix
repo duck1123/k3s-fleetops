@@ -5,6 +5,8 @@ in {
     namespace = "tempo";
     createNamespace = true;
 
+    # metadata.finalizers = ["resources-finalizer.argocd.argoproj.io"];
+
     helm.releases.tempo = {
       chart = lib.helm.downloadHelmChart {
         repo = "https://grafana.github.io/helm-charts";
