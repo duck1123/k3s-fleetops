@@ -1,65 +1,42 @@
 { lib, ... }:
-let domain = "git.dev.kronkltd.net";
+let domain = "tempo.dev.kronkltd.net";
 in {
-  applications.forgejo = {
-    namespace = "forgejo";
+  applications.tempo = {
+    namespace = "tempo";
     createNamespace = true;
 
-    helm.releases.forgejo = {
+    helm.releases.tempo = {
       chart = lib.helm.downloadHelmChart {
-        repo = "https://code.forgejo.org/forgejo-helm";
-        chart = "forgejo";
-        version = "10.0.1";
-        chartHash = "sha256-tndmg6tUHYnyWbiWVvxSI9tNQwjYBzWwNa8OXRSxYAQ=";
+        repo = "https://grafana.github.io/helm-charts";
+        chart = "tempo";
+        version = "1.15.0";
+        chartHash = "sha256-hmshN4RoUb9GVoyEdPObzhMmsdLMnNMEdJXmhFzg8Lg=";
       };
 
       values = {
-        gitea = {
-          additionalConfigFromEnvs = [{
-            name = "FORGEJO__DATABASE__PASSWD";
-            valuesFrom.secretKeyRef = {
-              key = "adminPassword";
-              name = "postgresql-password";
-              namespace = "postgresql";
+        persistence.enabled = true;
+        tempo.retention = "72h";
+        tempoQuery = {
+          enabled = false;
+          tag = "latest";
+          ingress = {
+            enabled = true;
+            annotations = {
+              "cert-manager.io/cluster-issuer" = "letsencrypt-prod";
+              "ingress.kubernetes.io/force-ssl-redirect" = "true";
+              "ingress.kubernetes.io/proxy-body-size" = "0";
+              "ingress.kubernetes.io/ssl-redirect" = "true";
+              "traefik.ingress.kubernetes.io/router.entrypoints" = "websecure";
+              "traefik.ingress.kubernetes.io/router.middlewares" =
+                "authentik-middlewares-authenkik@kubernetescrd";
             };
-          }];
-
-          admin.existingSecret = "forgejo-admin-password";
-          config.database = {
-            DB_TYPE = "postgres";
-            HOST = "postgresql.postgresql:5432";
-            USER = "postgres";
-            NAME = "gitea";
-            SCHEMA = "public";
-          };
-
-          metrics.enabled = true;
-        };
-
-        ingress = {
-          annotations = {
-            "cert-manager.io/cluster-issuer" = "letsencrypt-prod";
-            "ingress.kubernetes.io/force-ssl-redirect" = "true";
-          };
-          enabled = true;
-          className = "traefik";
-          hosts = [{
-            host = domain;
-            paths = [{
-              path = "/";
-              pathType = "ImplementationSpecific";
-            }];
-          }];
-          tls = [{
-            secretName = "forgejo-tls";
             hosts = [ domain ];
-          }];
+            tls = [{
+              secretName = "tempo-tls";
+              hosts = [ domain ];
+            }];
+          };
         };
-
-        postgresql.enabled = false;
-        postgresql-ha.enabled = false;
-        redis.enabled = false;
-        redis-cluster.enabled = false;
       };
     };
   };
