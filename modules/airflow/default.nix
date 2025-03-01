@@ -56,8 +56,7 @@ in with lib; {
   };
 
   config = mkIf cfg.enable {
-    applications.airflow = let
-      chart = helm.downloadHelmChart { inherit chart chartHash repo version; };
+    applications.airflow = let chart = helm.downloadHelmChart chartConfig;
     in {
       inherit namespace;
       createNamespace = true;
