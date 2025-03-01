@@ -2,8 +2,7 @@
   nixidy = {
     target = {
       repository = "https://github.com/duck1123/k3s-fleetops.git";
-      branch = "main";
-      rootPath = "manifests/dev";
+      branch = "master";
     };
     defaults.syncPolicy = {
       autoSync = {
