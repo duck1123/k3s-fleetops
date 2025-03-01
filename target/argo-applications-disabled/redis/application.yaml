@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: redis
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  sources:
+  - chart: redis
+    repoURL: registry-1.docker.io/bitnamicharts
+    targetRevision: 20.3.0
+    helm:
+      releaseName: redis
+      valueFiles:
+      - $values/target/argo-applications/redis/values.yaml
+  - repoURL: https://github.com/duck1123/k3s-fleetops
+    targetRevision: master
+    ref: values
+  - directory:
+      jsonnet: {}
+      recurse: true
+    path: target/argo-application-manifests/redis
+    repoURL: https://github.com/duck1123/k3s-fleetops.git
+    targetRevision: master
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: redis
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+

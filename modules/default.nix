@@ -3,19 +3,19 @@
     ./adventureworks
     ./airflow
     ./alice-bitcoin
-    ./alice-specter
-    ./argo-events
-    ./argo-workflows
-    ./authentik
-    ./cloudbeaver
-    ./demo
-    ./forgejo
+    # ./alice-specter
+    # ./argo-events
+    # ./argo-workflows
+    # ./authentik
+    # ./cloudbeaver
+    # ./demo
+    # ./forgejo
     ./harbor
-    ./homer
+    # ./homer
     ./minio
     ./mssql
     ./postgresql
     ./sealed-secrets
-    ./tempo
+    # ./tempo
   ];
 }
