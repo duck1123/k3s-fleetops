@@ -1,12 +1,11 @@
-{ charts, config, lib, ... }:
+{ charts, config, lib, pkgs, ... }:
 let
   cfg = config.services.forgejo;
 
-  chartConfig = {
-    repo = "https://code.forgejo.org/forgejo-helm";
-    chart = "forgejo";
-    version = "10.0.1";
-    chartHash = "sha256-tndmg6tUHYnyWbiWVvxSI9tNQwjYBzWwNa8OXRSxYAQ=";
+  chart = lib.helmChart {
+    inherit pkgs;
+    chartTgz = ../../charts/forgejo-11.0.3.tgz;
+    chartName = "forgejo";
   };
 
   defaultNamespace = "forgejo";
@@ -80,8 +79,7 @@ in with lib; {
   };
 
   config = mkIf cfg.enable {
-    applications.authentik = let chart = helm.downloadHelmChart chartConfig;
-    in {
+    applications.forgejo = {
       inherit namespace;
       createNamespace = true;
       finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
