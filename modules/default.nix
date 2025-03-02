@@ -3,6 +3,7 @@
     ./adventureworks
     ./airflow
     ./alice-bitcoin
+    ./alice-lnd
     ./alice-specter
     ./argocd
     ./argo-events
