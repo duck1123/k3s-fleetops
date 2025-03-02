@@ -31,6 +31,10 @@
     harbor.enable = false;
     homer.enable = true;
     keycloak.enable = true;
+    lldap.enable = true;
+    memos.enable = true;
+    metabase.enable = true;
+    mindsdb.enable = true;
     minio.enable = true;
     mssql.enable = false;
     postgresql.enable = false;
