@@ -5,7 +5,7 @@
     ./alice-bitcoin
     ./alice-specter
     ./argo-events
-    # ./argo-workflows
+    ./argo-workflows
     # ./authentik
     # ./cloudbeaver
     # ./demo
