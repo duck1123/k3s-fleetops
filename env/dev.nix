@@ -19,6 +19,7 @@
 
     # TODO: I know we can do better than this
     alice-bitcoin.enable = false;
+    alice-lnd.enable = true;
     alice-specter.enable = false;
 
     argo-events.enable = true;
