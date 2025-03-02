@@ -57,29 +57,29 @@ in with lib; {
       };
     };
 
-    # Define config maps with config for nginx
-    configMaps = {
-      nginx-config.data."nginx.conf" = ''
-        user nginx nginx;
-        error_log /dev/stdout info;
-        pid /dev/null;
-        events {}
-        http {
-          access_log /dev/stdout;
-          server {
-            listen 80;
-            index index.html;
-            location / {
-              root /var/lib/html;
-            }
-          }
-        }
-      '';
+    # # Define config maps with config for nginx
+    # configMaps = {
+    #   nginx-config.data."nginx.conf" = ''
+    #     user nginx nginx;
+    #     error_log /dev/stdout info;
+    #     pid /dev/null;
+    #     events {}
+    #     http {
+    #       access_log /dev/stdout;
+    #       server {
+    #         listen 80;
+    #         index index.html;
+    #         location / {
+    #           root /var/lib/html;
+    #         }
+    #       }
+    #     }
+    #   '';
 
-      nginx-static.data."index.html" = ''
-        <html><body><h1>Hello from NGINX</h1></body></html>
-      '';
-    };
+    #   nginx-static.data."index.html" = ''
+    #     <html><body><h1>Hello from NGINX</h1></body></html>
+    #   '';
+    # };
 
     # Define service for nginx
     services.nginx.spec = {
