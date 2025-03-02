@@ -1,70 +1,70 @@
-{ charts, config, lib, pkgs, ... }:
+{ charts, config, lib, ... }:
 let
   cfg = config.services.forgejo;
 
-  chart = lib.helmChart {
-    inherit pkgs;
-    chartTgz = ../../charts/forgejo-11.0.3.tgz;
-    chartName = "forgejo";
+  chartConfig = {
+    repo = "https://code.forgejo.org/forgejo-helm";
+    chart = "forgejo";
+    version = "10.0.1";
+    chartHash = "sha256-tndmg6tUHYnyWbiWVvxSI9tNQwjYBzWwNa8OXRSxYAQ=";
   };
 
   defaultNamespace = "forgejo";
   domain = "git.dev.kronkltd.net";
 
-  # https://artifacthub.io/packages/helm/forgejo-helm/forgejo
   defaultValues = {
-    gitea = {
-      additionalConfigFromEnvs = [{
-        name = "FORGEJO__DATABASE__PASSWD";
-        valueFrom.secretKeyRef = {
-          key = "adminPassword";
-          name = "postgresql-password";
-        };
-      }];
-
-      admin.existingSecret = "forgejo-admin-password";
-
-      config.database = {
-        DB_TYPE = "postgres";
-        HOST = "postgresql.postgresql:5432";
-        USER = "postgres";
-        NAME = "gitea";
-        SCHEMA = "public";
-      };
-
-      metrics.enabled = true;
-    };
-
-    ingress = {
-      annotations = {
-        "cert-manager.io/cluster-issuer" = "letsencrypt-prod";
-        "ingress.kubernetes.io/force-ssl-redirect" = "true";
-      };
-      className = "traefik";
-      enabled = true;
-      hosts = [{
-        host = domain;
-        paths = [{
-          path = "/";
-          pathType = "ImplementationSpecific";
-        }];
-      }];
-      tls = [{
-        hosts = [ domain ];
-        secretName = "forgejo-tls";
-      }];
-    };
-
-    postgresql.enabled = false;
-    postgresql-ha.enabled = false;
-    redis.enabled = false;
-    redis-cluster.enabled = false;
+     gitea = {
+       additionalConfigFromEnvs = [{
+         name = "FORGEJO__DATABASE__PASSWD";
+         valueFrom.secretKeyRef = {
+           key = "adminPassword";
+           name = "postgresql-password";
+         };
+       }];
+ 
+       admin.existingSecret = "forgejo-admin-password";
+ 
+       config.database = {
+         DB_TYPE = "postgres";
+         HOST = "postgresql.postgresql:5432";
+         USER = "postgres";
+         NAME = "gitea";
+         SCHEMA = "public";
+       };
+ 
+       metrics.enabled = true;
+     };
+ 
+     ingress = {
+       annotations = {
+         "cert-manager.io/cluster-issuer" = "letsencrypt-prod";
+         "ingress.kubernetes.io/force-ssl-redirect" = "true";
+       };
+       className = "traefik";
+       enabled = true;
+       hosts = [{
+         host = domain;
+         paths = [{
+           path = "/";
+           pathType = "ImplementationSpecific";
+         }];
+       }];
+       tls = [{
+         hosts = [ domain ];
+         secretName = "forgejo-tls";
+       }];
+     };
+ 
+     postgresql.enabled = false;
+     postgresql-ha.enabled = false;
+     redis.enabled = false;
+     redis-cluster.enabled = false;
   };
 
   values = lib.attrsets.recursiveUpdate defaultValues cfg.values;
   namespace = cfg.namespace;
 in with lib; {
-  options.services.forgejo = {
+  options.services.authentik = {
     enable = mkEnableOption "Enable application";
     namespace = mkOption {
       description = mdDoc "The namespace to install into";
@@ -80,7 +80,8 @@ in with lib; {
   };
 
   config = mkIf cfg.enable {
-    applications.forgejo = {
+    applications.authentik = let chart = helm.downloadHelmChart chartConfig;
+    in {
       inherit namespace;
       createNamespace = true;
       finalizers = [ "resources-finalizer.argocd.argoproj.io" ];

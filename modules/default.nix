@@ -7,15 +7,15 @@
     ./argo-events
     ./argo-workflows
     ./authentik
-    # ./cloudbeaver
-    # ./demo
-    # ./forgejo
+    ./cloudbeaver
+    ./demo
+    ./forgejo
     ./harbor
-    # ./homer
+    ./homer
     ./minio
     ./mssql
     ./postgresql
     ./sealed-secrets
-    # ./tempo
+    ./tempo
   ];
 }
