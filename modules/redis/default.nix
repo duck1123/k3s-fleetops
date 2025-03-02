@@ -3,10 +3,10 @@ let
   cfg = config.services.redis;
 
   chartConfig = {
-    repo = "registry-1.docker.io/bitnamicharts";
+    repo = "https://charts.bitnami.com/bitnami";
     chart = "redis";
-    version = "23.3.0";
-    chartHash = "sha256-Svr5oinmHRzpsJhqjocs5KKfi0LdEgYPui76r3uEnhI=";
+    version = "20.10.0";
+    chartHash = "sha256-gK0+tInWSSrXUSnKbcYQzZqSjVptbZa7np1ZsqhaNDw=";
   };
 
   defaultNamespace = "redis";
