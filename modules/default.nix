@@ -6,7 +6,7 @@
     ./alice-specter
     ./argo-events
     ./argo-workflows
-    # ./authentik
+    ./authentik
     # ./cloudbeaver
     # ./demo
     # ./forgejo
