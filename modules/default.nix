@@ -8,6 +8,8 @@
     ./argo-events
     ./argo-workflows
     ./authentik
+    # ./bob-bitcoin
+    # ./bob-lnd
     ./cloudbeaver
     ./crossplane-do-provider
     ./demo
