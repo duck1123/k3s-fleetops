@@ -9,6 +9,8 @@
     ./argo-events
     ./argo-workflows
     ./authentik
+    # ./bob-bitcoin
+    # ./bob-lnd
     ./cert-manager
     ./cloudbeaver
     ./crossplane
