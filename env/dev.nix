@@ -15,11 +15,11 @@
 
   services = {
     adventureworks.enable = true;
-    # airflow.enable = true;
+    airflow.enable = false;
 
     # TODO: I know we can do better than this
     alice-bitcoin.enable = true;
-    # alice-specter.enable = true;
+    alice-specter.enable = true;
 
     argo-events.enable = true;
     argo-workflows.enable = false;

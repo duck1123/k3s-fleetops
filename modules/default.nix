@@ -3,7 +3,7 @@
     ./adventureworks
     ./airflow
     ./alice-bitcoin
-    # ./alice-specter
+    ./alice-specter
     # ./argo-events
     # ./argo-workflows
     # ./authentik
