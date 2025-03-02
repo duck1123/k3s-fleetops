@@ -9,11 +9,13 @@ let
     chartHash = "sha256-lzGWuSAzOR/n5iBhg25einXA255SwTm0BRB88lUdEoE=";
   };
 
-  defaultNamespace = "alice-specter";
-  domain = "specter-alice.dinsro.com";
+  userEnv = "alice";
+  defaultNamespace = "${userEnv}-specter";
+  domain = "specter-${userEnv}.dinsro.com";
+  imageVersion = "v1.10.3";
 
   defaultValues = {
-    image.tag = "v1.10.3";
+    image.tag = imageVersion;
     ingress = {
       enabled = true;
       hosts = [{
@@ -21,24 +23,24 @@ let
         paths = [{ path = "/"; }];
       }];
       tls = [{
-        secretName = "alice-specter-prod-tls";
+        secretName = "${userEnv}-specter-prod-tls";
         hosts = [ domain ];
       }];
     };
     persistence.storageClassName = "local-path";
-    # TODO: generate json
+
     nodeConfig = (builtins.toJSON {
-      protocol = "http";
+      alias = "bar";
+      autodetect = false;
+      datadir = "";
       external_node = true;
+      fullpath = "/data/.specter/nodes/${userEnv}.json";
+      host = "${userEnv}-bitcoin";
+      name = userEnv;
+      protocol = "http";
       # TODO: generate a better password
       password = "rpcpassword";
-      name = "alice";
-      autodetect = false;
       port = 18443;
-      host = "alice-bitcoin";
-      alias = "bar";
-      fullpath = "/data/.specter/nodes/alice.json";
-      datadir = "";
       user = "rpcuser";
     });
   };
