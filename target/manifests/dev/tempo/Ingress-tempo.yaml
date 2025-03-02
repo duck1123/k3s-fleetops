@@ -1,0 +1,34 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    ingress.kubernetes.io/force-ssl-redirect: "true"
+    ingress.kubernetes.io/proxy-body-size: "0"
+    ingress.kubernetes.io/ssl-redirect: "true"
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.middlewares: authentik-middlewares-authenkik@kubernetescrd
+  labels:
+    app.kubernetes.io/instance: tempo
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: tempo
+    app.kubernetes.io/version: 2.6.1
+    helm.sh/chart: tempo-1.15.0
+  name: tempo
+  namespace: tempo
+spec:
+  rules:
+    - host: tempo.dev.kronkltd.net
+      http:
+        paths:
+          - backend:
+              service:
+                name: tempo
+                port:
+                  number: 16686
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - tempo.dev.kronkltd.net
+      secretName: tempo-tls

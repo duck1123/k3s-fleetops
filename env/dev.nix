@@ -28,7 +28,7 @@
     demo.enable = true;
     forgejo.enable = false;
     harbor.enable = false;
-    # homer.enable = true;
+    homer.enable = true;
     minio.enable = true;
     mssql.enable = false;
     postgresql.enable = false;
