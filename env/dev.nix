@@ -15,7 +15,7 @@
 
   services = {
     adventureworks.enable = true;
-    airflow.enable = true;
+    # airflow.enable = true;
 
     # TODO: I know we can do better than this
     # alice-bitcoin.enable = true;
