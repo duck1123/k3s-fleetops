@@ -3,6 +3,7 @@
     ./adventureworks
     ./airflow
     ./alice-bitcoin
+    ./alice-lnd
     ./alice-specter
     ./argo-events
     ./argo-workflows
@@ -12,10 +13,13 @@
     ./forgejo
     ./harbor
     ./homer
+    ./keycloak
     ./minio
     ./mssql
     ./postgresql
+    ./redis
     ./sealed-secrets
+    ./sqlpad
     ./tempo
   ];
 }
