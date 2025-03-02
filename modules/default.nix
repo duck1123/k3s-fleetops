@@ -2,6 +2,7 @@
   imports = [
     ./adventureworks
     ./argo-events
+    ./argo-workflows
     ./forgejo
     ./minio
     ./mssql
