@@ -36,7 +36,7 @@ in with lib; {
       inherit namespace;
       createNamespace = true;
       helm.releases.argo-events = { inherit chart values; };
-      syncPolicy.finalSyncOpts = ["CreateNamespace=true"];
+      syncPolicy.finalSyncOpts = [ "CreateNamespace=true" ];
     };
   };
 }
