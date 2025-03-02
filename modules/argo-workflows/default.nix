@@ -97,5 +97,7 @@ in with lib; {
       createNamespace = true;
       helm.releases.argo-workflows = { inherit chart values; };
     };
+
+
   };
 }
