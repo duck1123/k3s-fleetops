@@ -4,7 +4,7 @@
     ./airflow
     ./alice-bitcoin
     ./alice-specter
-    # ./argo-events
+    ./argo-events
     # ./argo-workflows
     # ./authentik
     # ./cloudbeaver
