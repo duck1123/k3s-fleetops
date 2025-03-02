@@ -27,19 +27,20 @@ let
     };
     persistence.storageClassName = "local-path";
     # TODO: generate json
-    nodeConfig = ''
-      {"protocol":"http",
-       "external_node":true,
-       "password":"rpcpassword",
-       "name":"alice",
-       "autodetect":false,
-       "port":18443,
-       "host":"alice-bitcoin",
-       "alias":"bar",
-       "fullpath":"/data/.specter/nodes/alice.json",
-       "datadir":"",
-       "user":"rpcuser"}
-    '';
+    nodeConfig = (builtins.toJSON {
+      protocol = "http";
+      external_node = true;
+      # TODO: generate a better password
+      password = "rpcpassword";
+      name = "alice";
+      autodetect = false;
+      port = 18443;
+      host = "alice-bitcoin";
+      alias = "bar";
+      fullpath = "/data/.specter/nodes/alice.json";
+      datadir = "";
+      user = "rpcuser";
+    });
   };
 
   values = lib.attrsets.recursiveUpdate defaultValues cfg.values;
