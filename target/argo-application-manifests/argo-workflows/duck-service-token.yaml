@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/service-account-token
+metadata:
+  name: duck.service-account-token
+  annotations:
+    kubernetes.io/service-account.name: duck
+
