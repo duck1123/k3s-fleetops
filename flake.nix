@@ -20,9 +20,7 @@
 
   outputs = { flake-utils, nixhelm, nixidy, nixpkgs, self, ... }@inputs:
     (flake-utils.lib.eachDefaultSystem (system:
-      let
-        pkgs = import nixpkgs { inherit system; };
-        helmChart = import ./helmChart.nix;
+      let pkgs = import nixpkgs { inherit system; };
       in {
         lib = { inherit helmChart; };
 
