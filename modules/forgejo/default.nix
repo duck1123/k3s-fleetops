@@ -64,7 +64,7 @@ let
   values = lib.attrsets.recursiveUpdate defaultValues cfg.values;
   namespace = cfg.namespace;
 in with lib; {
-  options.services.authentik = {
+  options.services.forgejo = {
     enable = mkEnableOption "Enable application";
     namespace = mkOption {
       description = mdDoc "The namespace to install into";
