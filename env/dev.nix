@@ -18,7 +18,7 @@
     # airflow.enable = true;
 
     # TODO: I know we can do better than this
-    # alice-bitcoin.enable = true;
+    alice-bitcoin.enable = true;
     # alice-specter.enable = true;
 
     argo-events.enable = true;
