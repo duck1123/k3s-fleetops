@@ -1,4 +1,0 @@
-{:ingress {:enabled true
-           :hosts   [{:host  "mindsdb.dev.kronkltd.net"
-                      :paths [{:path "/" :pathType "ImplementationSpecific"}]}]
-           :tls     [{:secretName "mindsdb-tls" :hosts ["mindsdb.dev.kronkltd.net"]}]}}
