@@ -3,10 +3,10 @@ let
   cfg = config.services.lldap;
 
   chartConfig = {
-    repo = "https://charts.rock8s.com";
+    repo = "https://djjudas21.github.io/charts/";
     chart = "lldap";
-    version = "4.1.1";
-    chartHash = "sha256-B1pmsE4zsl8saUnBBzljmJY6Lq6vrVuIeTMStpy3pPc=";
+    version = "0.4.2";
+    chartHash = "sha256-YwInTAIEIpWS/Sd4Kb4ABsH2rYGg/zcpTQGoJW8wbSQ=";
   };
 
   defaultNamespace = "lldap";
@@ -14,7 +14,9 @@ let
 
   clusterIssuer = "letsencrypt-prod";
 
+  # https://artifacthub.io/packages/helm/djjudas21/lldap?modal=values
   defaultValues = {
+    lldap.baseDN = "dc=kronkltd,dc=net";
   };
 
   values = lib.attrsets.recursiveUpdate defaultValues cfg.values;

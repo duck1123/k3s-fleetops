@@ -1,2 +1,0 @@
-;; https://artifacthub.io/packages/helm/djjudas21/lldap?modal=values
-{:lldap {:baseDN "dc=kronkltd,dc=net"}}
