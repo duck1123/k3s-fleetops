@@ -6,7 +6,7 @@ let
     repo = "https://chart.kronkltd.net/";
     chart = "sqlpad";
     version = "0.1.0";
-    chartHash = "sha256-Svr5oinmHRzpsJhqjocs5KKfi0LdEgYPui76r3uEnhI=";
+    chartHash = "sha256-NVGvY+hjeL80Aa7T/AJzqWusHhLA3SKnpzOjJo6g40A=";
   };
 
   defaultNamespace = "sqlpad";
