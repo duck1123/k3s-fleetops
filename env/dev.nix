@@ -26,6 +26,7 @@
     argo-workflows.enable = true;
     authentik.enable = true;
     cloudbeaver.enable = true;
+    crossplane-do-provider.enable = true;
     demo.enable = true;
     forgejo.enable = false;
     harbor.enable = false;
@@ -37,8 +38,12 @@
     mindsdb.enable = true;
     minio.enable = true;
     mssql.enable = false;
+    openldap.enable = true;
+    opentelemetry-collector.enable = true;
     postgresql.enable = false;
     redis.enable = true;
+    sqlpad.enable = true;
     tempo.enable = true;
+    traefik.enable = true;
   };
 }
