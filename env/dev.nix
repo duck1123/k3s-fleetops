@@ -26,7 +26,7 @@
     argo-workflows.enable = true;
     authentik.enable = true;
     cloudbeaver.enable = true;
-    crossplane-do-provider.enable = true;
+    crossplane-do-provider.enable = false;
     demo.enable = true;
     forgejo.enable = false;
     harbor.enable = false;
