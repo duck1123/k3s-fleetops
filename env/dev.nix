@@ -18,5 +18,6 @@
     argo-events.enable = true;
     forgejo.enable = true;
     minio.enable = true;
+    postgresql.enable = true;
   };
 }

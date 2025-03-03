@@ -4,6 +4,7 @@
     ./argo-events
     ./forgejo
     ./minio
+    ./postgresql
     ./sealed-secrets
   ];
 }
