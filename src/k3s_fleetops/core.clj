@@ -87,6 +87,8 @@
 (defn build
   [& [opts]]
   (println opts)
+  (shell "mkdir -p target/argo-applications")
+  (shell "touch target/argo-applications/.gitkeep")
   (let [dry-run?    (:dry-run opts)
         verbose?    (:verbose opts)
         cwd         (fs/cwd)

@@ -16,11 +16,7 @@
 
   build
   {:docs "Convert all edn files to yaml"
-   :task
-   (do
-     (shell "mkdir -p target/argo-applications")
-     (shell "touch target/argo-applications/.gitkeep")
-     (c/build))}
+   :task (exec 'k3s-fleetops.core/build {})}
 
   clean
   {:task (shell "rm -rf target")}
