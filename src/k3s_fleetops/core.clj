@@ -68,7 +68,8 @@
                                   (not (or
                                         (fs/starts-with? f relative-output)
                                         (fs/starts-with? f "fleet")
-                                        (fs/starts-with? f "mainfests")))))
+                                        (fs/starts-with? f "manifests")
+                                        (fs/starts-with? f "target")))))
                         (into []))]
     (doseq [file yaml-files]
       (let [file-path             (fs/absolutize (fs/path file))
@@ -81,7 +82,7 @@
             (println (str "[DRY-RUN] sh -c \"mkdir -p " target-directory "\""))
             (fs/create-dirs target-directory)))
         (if dry-run?
-          (println (str "copy" file-path " - " target-directory))
+          (println (str "copy " file-path " - " target-directory))
           (fs/copy file-path target-directory {:replace-existing true}))))))
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
