@@ -2,5 +2,6 @@
   imports = [
     ./adventureworks
     ./argo-events
+    ./minio
   ];
 }

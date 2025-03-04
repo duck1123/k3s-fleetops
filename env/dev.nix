@@ -16,5 +16,6 @@
   services = {
     adventureworks.enable = true;
     argo-events.enable = true;
+    minio.enable = true;
   };
 }
