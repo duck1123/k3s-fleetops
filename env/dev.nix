@@ -1,4 +1,4 @@
-{ lib, ... }: {
+{ nixidy, lib, ... }: {
   nixidy = {
     defaults.syncPolicy.autoSync = {
       enabled = true;
@@ -7,9 +7,11 @@
     };
 
     target = {
-      repository = "https://github.com/duck1123/k3s-fleetops.git";
       branch = "master";
+      repository = "https://github.com/duck1123/k3s-fleetops.git";
       rootPath = "./manifests/dev";
     };
   };
+
+  services = { adventureworks.enable = true; };
 }

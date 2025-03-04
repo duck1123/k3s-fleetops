@@ -3,23 +3,30 @@
 
   inputs = {
     flake-utils.url = "github:numtide/flake-utils";
+
+    nixhelm = {
+      url = "github:farcaller/nixhelm";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     nixidy = {
       url = "github:arnarg/nixidy";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
   };
 
-  outputs = { flake-utils, nixidy, nixpkgs, self, }:
+  outputs = { flake-utils, nixhelm, nixidy, nixpkgs, self, ... }@inputs:
     (flake-utils.lib.eachDefaultSystem (system:
       let pkgs = import nixpkgs { inherit system; };
       in {
         nixidyEnvs = nixidy.lib.mkEnvs {
           inherit pkgs;
+          charts = nixhelm.chartsDerivations.${system};
           envs.dev.modules = [ ./env/dev.nix ];
+          modules = [ ./modules ];
         };
-
 
         packages = {
           generators.cilium = nixidy.packages.${system}.generators.fromCRD {
@@ -46,7 +53,9 @@
 
                  echo "generate cilium"
                  mkdir -p target/modules/cilium
-                 cat ${self.packages.${system}.generators.cilium} > target/modules/cilium/generated.nix
+                 cat ${
+                   self.packages.${system}.generators.cilium
+                 } > target/modules/cilium/generated.nix
             '').outPath;
           };
         };
