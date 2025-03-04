@@ -3,5 +3,6 @@
     ./adventureworks
     ./argo-events
     ./minio
+    ./sealed-secrets
   ];
 }

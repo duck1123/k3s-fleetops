@@ -29,18 +29,31 @@
         };
 
         packages = {
-          generators.cilium = nixidy.packages.${system}.generators.fromCRD {
-            name = "cilium";
-            src = pkgs.fetchFromGitHub {
-              owner = "cilium";
-              repo = "cilium";
-              rev = "v1.15.6";
-              hash = "sha256-oC6pjtiS8HvqzzRQsE+2bm6JP7Y3cbupXxCKSvP6/kU=";
+          generators = {
+            cilium = nixidy.packages.${system}.generators.fromCRD {
+              name = "cilium";
+              src = pkgs.fetchFromGitHub {
+                owner = "cilium";
+                repo = "cilium";
+                rev = "v1.15.6";
+                hash = "sha256-oC6pjtiS8HvqzzRQsE+2bm6JP7Y3cbupXxCKSvP6/kU=";
+              };
+              crds = [
+                "pkg/k8s/apis/cilium.io/client/crds/v2/ciliumnetworkpolicies.yaml"
+                "pkg/k8s/apis/cilium.io/client/crds/v2/ciliumclusterwidenetworkpolicies.yaml"
+              ];
             };
-            crds = [
-              "pkg/k8s/apis/cilium.io/client/crds/v2/ciliumnetworkpolicies.yaml"
-              "pkg/k8s/apis/cilium.io/client/crds/v2/ciliumclusterwidenetworkpolicies.yaml"
-            ];
+            sealedSecrets = nixidy.packages.${system}.generators.fromCRD {
+              name = "sealed-secrets";
+              src = pkgs.fetchFromGitHub {
+                owner = "bitnami-labs";
+                repo = "sealed-secrets";
+                rev = "v0.28.0";
+                hash = "sha256-YyiYryNLSY8XnrA+3AWeQR2p55YNHFfp/sWCevATdZ0=";
+              };
+              crds =
+                [ "helm/sealed-secrets/crds/bitnami.com_sealedsecrets.yaml" ];
+            };
           };
           nixidy = nixidy.packages.${system}.default;
         };
@@ -51,11 +64,17 @@
             program = (pkgs.writeShellScript "generate-modules" ''
               set -eo pipefail
 
-                 echo "generate cilium"
-                 mkdir -p target/modules/cilium
-                 cat ${
-                   self.packages.${system}.generators.cilium
-                 } > target/modules/cilium/generated.nix
+              echo "generate cilium"
+              mkdir -p target/modules/cilium
+              cat ${
+                self.packages.${system}.generators.cilium
+              } > target/modules/cilium/generated.nix
+
+              echo "generate sealed-secrets"
+              mkdir -p modules/sealed-secrets
+              cat ${
+                self.packages.${system}.generators.sealedSecrets
+              } > modules/sealed-secrets/generated.nix
             '').outPath;
           };
         };
