@@ -67,7 +67,8 @@
                         (filter (fn [f]
                                   (not (or
                                         (fs/starts-with? f relative-output)
-                                        (fs/starts-with? f "fleet")))))
+                                        (fs/starts-with? f "fleet")
+                                        (fs/starts-with? f "mainfests")))))
                         (into []))]
     (doseq [file yaml-files]
       (let [file-path             (fs/absolutize (fs/path file))

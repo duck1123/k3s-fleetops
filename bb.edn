@@ -12,7 +12,7 @@
 
   apply-master-application
   {:docs "Install 00-master argo application"
-   :task (shell "kubectl apply -f target/manifests/00-master.yaml")}
+   :task (shell "kubectl apply -f target/infra-manifests/00-master.yaml")}
 
   build
   {:docs "Convert all edn files to yaml"
