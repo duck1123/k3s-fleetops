@@ -1,3 +1,6 @@
 { inputs, ... }: {
-  imports = [./adventureworks];
+  imports = [
+    ./adventureworks
+    ./argo-events
+  ];
 }

@@ -13,5 +13,8 @@
     };
   };
 
-  services = { adventureworks.enable = true; };
+  services = {
+    adventureworks.enable = true;
+    argo-events.enable = true;
+  };
 }
