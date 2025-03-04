@@ -38,7 +38,7 @@ let
       ingressClassName = "traefik";
       hostname = domain;
       annotations = {
-        "cert-manager.io/cluster-issuer" =  "letsencrypt-prod";
+        "cert-manager.io/cluster-issuer" = "letsencrypt-prod";
         "ingress.kubernetes.io/force-ssl-redirect" = "true";
         "ingress.kubernetes.io/proxy-body-size" = "0";
         "ingress.kubernetes.io/ssl-redirect" = "true";
