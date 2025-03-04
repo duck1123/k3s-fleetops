@@ -35,6 +35,7 @@ in with lib; {
     applications.adventureworks = {
       createNamespace = false;
       helm.releases.adventureworks = { inherit chart namespace values; };
+      syncPolicy.finalSyncOpts = ["CreateNamespace=true"];
     };
   };
 }
