@@ -1,6 +1,6 @@
 {:apiVersion "argoproj.io/v1alpha1"
  :kind       "Application"
- :metadata   {:name        "003-manifests"
+ :metadata   {:name        "004-nix-manifests"
               :namespace   "argocd"
               :annotations {"argocd.argoproj.io/sync-wave" "3"}}
  :spec
