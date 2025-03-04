@@ -10,7 +10,7 @@
     };
 
     nixidy = {
-      url = "github:arnarg/nixidy";
+      url = "github:duck1123/nixidy?ref=feature/chmod";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

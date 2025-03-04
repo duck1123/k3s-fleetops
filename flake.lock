@@ -219,15 +219,16 @@
         ]
       },
       "locked": {
-        "lastModified": 1738622699,
-        "narHash": "sha256-Zp4oxj9/yUqC7BeELR0eqYzE1EJhLIhWf3JDbh0DcC4=",
-        "owner": "arnarg",
+        "lastModified": 1741054514,
+        "narHash": "sha256-wqZE84YZ48AM38Nw1UjZE32cN6cZtcBABLY/0Y4zDRM=",
+        "owner": "duck1123",
         "repo": "nixidy",
-        "rev": "9334fa5cfc972acdc624b1f15277ab5d60801f5f",
+        "rev": "72e0688623c02fe21c96e05645eecff6df4cf36d",
         "type": "github"
       },
       "original": {
-        "owner": "arnarg",
+        "owner": "duck1123",
+        "ref": "feature/chmod",
         "repo": "nixidy",
         "type": "github"
       }
