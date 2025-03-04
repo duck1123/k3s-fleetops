@@ -33,9 +33,8 @@ in with lib; {
 
   config = mkIf cfg.enable {
     applications.adventureworks = {
-      inherit namespace;
-      createNamespace = true;
-      helm.releases.adventureworks = { inherit chart values; };
+      createNamespace = false;
+      helm.releases.adventureworks = { inherit chart namespace values; };
     };
   };
 }
