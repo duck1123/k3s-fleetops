@@ -35,6 +35,7 @@ in {
     applications.mssql = {
       inherit namespace;
       createNamespace = true;
+      finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
       helm.releases.mssql = { inherit chart values; };
     };
   };
