@@ -63,26 +63,21 @@
           nixidy = nixidy.packages.${system}.default;
         };
 
-        apps = {
-          generate = {
+        apps.generate = let generators = self.packages.${system}.generators;
+          in {
             type = "app";
             program = (pkgs.writeShellScript "generate-modules" ''
               set -eo pipefail
 
               echo "generate cilium"
               mkdir -p target/modules/cilium
-              cat ${
-                self.packages.${system}.generators.cilium
-              } > target/modules/cilium/generated.nix
+              cat ${generators.cilium} > target/modules/cilium/generated.nix
 
               echo "generate sealed-secrets"
               mkdir -p modules/sealed-secrets
-              cat ${
-                self.packages.${system}.generators.sealedSecrets
-              } > modules/sealed-secrets/generated.nix
+              cat ${generators.sealedSecrets} > modules/sealed-secrets/generated.nix
             '').outPath;
           };
-        };
 
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; [
