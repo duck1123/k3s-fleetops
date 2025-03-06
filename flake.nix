@@ -19,12 +19,17 @@
 
   outputs = { flake-utils, nixhelm, nixidy, nixpkgs, self, ... }@inputs:
     (flake-utils.lib.eachDefaultSystem (system:
-      let pkgs = import nixpkgs { inherit system; };
+      let
+        pkgs = import nixpkgs { inherit system; };
+        helmChart = import ./helmChart.nix;
       in {
+        lib = { inherit helmChart; };
+
         nixidyEnvs = nixidy.lib.mkEnvs {
           inherit pkgs;
           charts = nixhelm.chartsDerivations.${system};
           envs.dev.modules = [ ./env/dev.nix ];
+          libOverlay = final: prev: { inherit helmChart; };
           modules = [ ./modules ];
         };
 
