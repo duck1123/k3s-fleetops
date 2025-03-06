@@ -3,8 +3,12 @@
 # Clean
 bb clean
 
+# Build charts
+bb switch-charts
+
 # Run the build command
 bb build
 
 # Add any changes in the target/ directory
+git add manifests/
 git add target/
