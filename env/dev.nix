@@ -14,11 +14,11 @@
   };
 
   services = {
-    adventureworks.enable = true;
+    adventureworks.enable = false;
     argo-events.enable = true;
     forgejo.enable = false;
     minio.enable = true;
-    mssql.enable = true;
-    postgresql.enable = true;
+    mssql.enable = false;
+    postgresql.enable = false;
   };
 }
