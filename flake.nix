@@ -84,7 +84,22 @@
           };
         };
 
-        devShells.default =
-          pkgs.mkShell { buildInputs = [ nixidy.packages.${system}.default ]; };
+        devShells.default = pkgs.mkShell {
+          buildInputs = with pkgs; [
+            nixidy.packages.${system}.default
+            argo
+            argocd
+            babashka
+            clojure
+            docker
+            gum
+            jet
+            keepassxc
+            kubectl
+            kubernetes-helm
+            kubeseal
+            openssl
+          ];
+        };
       }));
 }
