@@ -41,7 +41,7 @@ let
         "ingress.kubernetes.io/force-ssl-redirect" = "true";
       };
       className = "traefik";
-      enabled = false;
+      enabled = true;
       hosts = [{
         host = domain;
         paths = [{
