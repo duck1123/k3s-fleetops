@@ -69,6 +69,7 @@ in with lib; {
     applications.minio = {
       inherit namespace;
       createNamespace = true;
+      finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
       helm.releases.minio = { inherit chart values; };
 
       resources = {

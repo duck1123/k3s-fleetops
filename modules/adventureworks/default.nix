@@ -34,6 +34,7 @@ in with lib; {
   config = mkIf cfg.enable {
     applications.adventureworks = {
       createNamespace = false;
+      finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
       helm.releases.adventureworks = { inherit chart namespace values; };
       syncPolicy.finalSyncOpts = ["CreateNamespace=true"];
     };

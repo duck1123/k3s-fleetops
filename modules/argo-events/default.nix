@@ -35,6 +35,7 @@ in with lib; {
     applications.argo-events = {
       inherit namespace;
       createNamespace = true;
+      finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
       helm.releases.argo-events = { inherit chart values; };
       syncPolicy.finalSyncOpts = [ "CreateNamespace=true" ];
     };

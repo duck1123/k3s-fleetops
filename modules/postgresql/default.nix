@@ -44,6 +44,7 @@ in with lib; {
     applications.postgresql = {
       inherit namespace;
       createNamespace = true;
+      finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
       helm.releases.postgresql = { inherit chart values; };
       syncPolicy.finalSyncOpts = [ "CreateNamespace=true" ];
 

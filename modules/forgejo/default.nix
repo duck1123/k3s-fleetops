@@ -83,6 +83,7 @@ in with lib; {
     applications.forgejo = {
       inherit namespace;
       createNamespace = true;
+      finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
       helm.releases.forgejo = { inherit chart values; };
 
       resources.sealedSecrets = {
