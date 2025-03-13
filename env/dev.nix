@@ -25,5 +25,6 @@
     minio.enable = true;
     mssql.enable = false;
     postgresql.enable = false;
+    redis.enable = true;
   };
 }

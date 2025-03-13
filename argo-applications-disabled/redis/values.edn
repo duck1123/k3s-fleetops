@@ -1,4 +1,0 @@
-;; https://artifacthub.io/packages/helm/bitnami/redis
-{:auth    {:existingSecret            "redis-password"
-           :existingSecretPasswordKey "password"}
- :replica {:replicaCount 1}}

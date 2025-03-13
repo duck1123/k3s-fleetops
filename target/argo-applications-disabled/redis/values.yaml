@@ -1,6 +1,0 @@
-auth:
-  existingSecret: redis-password
-  existingSecretPasswordKey: password
-replica:
-  replicaCount: 1
-

@@ -11,6 +11,7 @@
     ./minio
     ./mssql
     ./postgresql
+    ./redis
     ./sealed-secrets
   ];
 }
