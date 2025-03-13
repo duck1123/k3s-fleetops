@@ -3,6 +3,7 @@
     ./adventureworks
     ./argo-events
     ./argo-workflows
+    ./cloudbeaver
     ./forgejo
     ./minio
     ./mssql

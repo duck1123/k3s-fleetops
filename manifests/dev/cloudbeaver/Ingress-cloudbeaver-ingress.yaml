@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    ingress.kubernetes.io/force-ssl-redirect: "true"
+    kubernetes.io/ingress.class: nginx
+  labels:
+    app-name: cloudbeaver
+    component: db-server
+    created-by: chynten
+    helm.sh/chart: cloudbeaver-0.6
+    hostNetwork: "false"
+    internal-service: "true"
+    managed-by: chynten
+    version: 22.0.4
+  name: cloudbeaver-ingress
+  namespace: cloudbeaver
+spec:
+  rules:
+    - host: cloudbeaver.dev.kronkltd.net
+      http:
+        paths:
+          - backend:
+              service:
+                name: cloudbeaver-svc
+                port:
+                  number: 8978
+            path: /
+            pathType: ImplementationSpecific

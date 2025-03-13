@@ -16,7 +16,8 @@
   services = {
     adventureworks.enable = true;
     argo-events.enable = true;
-    argo-workflows.enable = true;
+    argo-workflows.enable = false;
+    cloudbeaver.enable = true;
     forgejo.enable = false;
     minio.enable = true;
     mssql.enable = false;
