@@ -43,6 +43,9 @@
          command   (str "kubectl -n \"" namespace "\" delete pod -l name=sealed-secrets-controller")]
      (shell command))}
 
+  format
+  {:task (shell "sh -c \"nixfmt **/*.nix\"")}
+
   forward-argocd
   {:docs "Forward the argocd port"
    :task (shell "kubectl port-forward svc/argocd-server -n argocd 8080:443")}
