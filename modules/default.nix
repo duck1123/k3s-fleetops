@@ -5,6 +5,7 @@
     ./argo-workflows
     ./cloudbeaver
     ./forgejo
+    ./lldap
     ./metabase
     ./minio
     ./mssql

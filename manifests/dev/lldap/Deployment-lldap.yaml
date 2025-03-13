@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/instance: lldap
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: lldap
+    app.kubernetes.io/version: v0.6.1
+    helm.sh/chart: lldap-0.4.2
+  name: lldap
+  namespace: lldap
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: lldap
+      app.kubernetes.io/name: lldap
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: lldap
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: lldap
+        app.kubernetes.io/version: v0.6.1
+        helm.sh/chart: lldap-0.4.2
+    spec:
+      containers:
+        - env:
+            - name: uid
+              value: "1000"
+            - name: gid
+              value: "1000"
+            - name: TZ
+              value: Etc/UTC
+            - name: LLDAP_LDAP_PORT
+              value: "3890"
+            - name: LLDAP_HTTP_PORT
+              value: "17170"
+            - name: LLDAP_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  key: jwtSecret
+                  name: lldap-credentials
+            - name: LLDAP_LDAP_USER_PASS
+              valueFrom:
+                secretKeyRef:
+                  key: ldapUserPass
+                  name: lldap-credentials
+            - name: LLDAP_DATABASE_URL
+              value: sqlite:///data/users.db?mode=rwc
+            - name: LLDAP_LDAP_BASE_DN
+              value: dc=kronkltd,dc=net
+            - name: LLDAP_LDAP_USER_DN
+              value: admin
+            - name: LLDAP_VERBOSE
+              value: "false"
+            - name: LLDAP_KEY_SEED
+              value: REPLACE_WITH_RANDOM
+            - name: LLDAP_LDAPS_OPTIONS__ENABLED
+              value: "false"
+            - name: LLDAP_LDAPS_OPTIONS__CERT_FILE
+              value: /data/cert.pem
+            - name: LLDAP_LDAPS_OPTIONS__KEY_FILE
+              value: /data/key.pem
+          image: lldap/lldap:v0.6.1
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          name: lldap
+          ports:
+            - containerPort: 17170
+              name: http
+              protocol: TCP
+            - containerPort: 3890
+              name: ldap
+              protocol: TCP
+            - containerPort: 6360
+              name: ldaps
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources: {}
+          securityContext: {}
+      securityContext: {}
+      serviceAccountName: lldap

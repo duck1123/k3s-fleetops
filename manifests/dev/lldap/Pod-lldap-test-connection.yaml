@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    helm.sh/hook: test
+  labels:
+    app.kubernetes.io/instance: lldap
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: lldap
+    app.kubernetes.io/version: v0.6.1
+    helm.sh/chart: lldap-0.4.2
+  name: lldap-test-connection
+  namespace: lldap
+spec:
+  containers:
+    - args:
+        - 'lldap:'
+      command:
+        - wget
+      image: busybox
+      name: wget
+  restartPolicy: Never
