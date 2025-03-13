@@ -5,6 +5,7 @@
     ./argo-workflows
     ./cloudbeaver
     ./forgejo
+    ./homer
     ./lldap
     ./metabase
     ./minio

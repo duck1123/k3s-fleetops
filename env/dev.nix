@@ -19,6 +19,7 @@
     argo-workflows.enable = false;
     cloudbeaver.enable = true;
     forgejo.enable = false;
+    homer.enable = true;
     lldap.enable = true;
     metabase.enable = false;
     minio.enable = true;
