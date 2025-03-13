@@ -5,8 +5,8 @@ metadata:
     app.kubernetes.io/instance: homer
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: homer
-    app.kubernetes.io/version: v23.05.1
-    helm.sh/chart: homer-0.7.0
+    app.kubernetes.io/version: v25.02.1
+    helm.sh/chart: homer-0.13.0
   name: homer
   namespace: homer
 spec:
@@ -26,7 +26,7 @@ spec:
     spec:
       automountServiceAccountToken: true
       containers:
-        - image: ghcr.io/bastienwirtz/homer:v23.05.1
+        - image: ghcr.io/bastienwirtz/homer:v25.02.1
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3

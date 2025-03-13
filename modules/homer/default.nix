@@ -2,11 +2,12 @@
 let
   cfg = config.services.homer;
 
+  # https://artifacthub.io/packages/helm/gabe565/homer
   chart = lib.helm.downloadHelmChart {
     repo = "https://charts.gabe565.com";
     chart = "homer";
-    version = "0.7.0";
-    chartHash = "sha256-Svr5oinmHRzpsJhqjocs5KKfi0LdEgYPui76r3uEnhI=";
+    version = "0.13.0";
+    chartHash = "sha256-z6o5LHUYqm7Jd5gsIs+J3Z48Frbj8F1ZnEZw4mHIeQA=";
   };
 
   defaultNamespace = "homer";
