@@ -19,7 +19,7 @@ let
         "cert-manager.io/cluster-issuer" = "letsencrypt-prod";
         "ingress.kubernetes.io/force-ssl-redirect" = "true";
       };
-      enabled = true;
+      enabled = false;
       hosts = [{
         host = domain;
         paths = [{
@@ -56,6 +56,35 @@ in with lib; {
       createNamespace = true;
       finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
       helm.releases.cloudbeaver = { inherit chart values; };
+
+      resources.ingresses.cloudbeaver-ingress = {
+        metadata.annotations = {
+          "cert-manager.io/cluster-issuer" = "letsencrypt-prod";
+          "ingress.kubernetes.io/force-ssl-redirect" = "true";
+          "ingress.kubernetes.io/proxy-body-size" = "0";
+          "ingress.kubernetes.io/ssl-redirect" = "true";
+          "kubernetes.io/ingress.class" = "traefik";
+        };
+        spec = {
+          ingressClassName = "traefik";
+          rules = [{
+            host = domain;
+            http.paths = [{
+              backend.service = {
+                name = "cloudbeaver-svc";
+                port.name = "http";
+              };
+              path = "/";
+              pathType = "ImplementationSpecific";
+            }];
+          }];
+          tls = [{
+            hosts = [ domain ];
+            secretName = "cloudbeaver-tls";
+          }];
+        };
+      };
+
       syncPolicy.finalSyncOpts = [ "CreateNamespace=true" ];
     };
   };
