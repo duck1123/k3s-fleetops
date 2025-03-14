@@ -11,6 +11,7 @@
     ./homer
     ./keycloak
     ./lldap
+    ./memos
     ./metabase
     ./minio
     ./mssql

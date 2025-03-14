@@ -28,6 +28,7 @@
     homer.enable = true;
     keycloak.enable = true;
     lldap.enable = true;
+    memos.enable = true;
     metabase.enable = false;
     minio.enable = true;
     mssql.enable = false;
