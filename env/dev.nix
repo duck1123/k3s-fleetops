@@ -39,6 +39,7 @@
     postgresql.enable = false;
     redis.enable = false;
     sqlpad.enable = true;
+    tempo.enable = true;
     traefik.enable = true;
   };
 }

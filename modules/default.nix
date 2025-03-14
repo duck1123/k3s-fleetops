@@ -23,6 +23,7 @@
     ./redis
     ./sealed-secrets
     ./sqlpad
+    ./tempo
     ./traefik
   ];
 }
