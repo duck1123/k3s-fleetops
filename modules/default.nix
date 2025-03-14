@@ -2,6 +2,7 @@
   imports = [
     ./adventureworks
     ./alice-bitcoin
+    ./alice-specter
     ./argo-events
     ./argo-workflows
     ./authentik
