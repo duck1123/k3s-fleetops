@@ -27,7 +27,10 @@
     authentik.enable = false;
     cert-manager.enable = true;
     cloudbeaver.enable = true;
-    crossplane.enable = true;
+    crossplane = {
+      enable = true;
+      providers.digital-ocean.enable = true;
+    };
     demo.enable = false;
     dinsro.enable = false;
     forgejo.enable = false;

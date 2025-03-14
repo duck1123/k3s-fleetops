@@ -1,4 +1,4 @@
-{ lib, config, charts, nixidy, ... }:
+{ config, lib, ... }:
 let
   cfg = config.services.crossplane;
 
@@ -11,15 +11,16 @@ let
 
   defaultNamespace = "crossplane";
 
-  defaultValues = {
-    image.pullPolicy = "Always";
-  };
+  defaultValues = { image.pullPolicy = "Always"; };
 
   values = lib.attrsets.recursiveUpdate defaultValues cfg.values;
   namespace = cfg.namespace;
 in with lib; {
+  imports = [ ./providers ];
+
   options.services.crossplane = {
     enable = mkEnableOption "Enable application";
+
     namespace = mkOption {
       description = mdDoc "The namespace to install into";
       type = types.str;
@@ -34,6 +35,7 @@ in with lib; {
   };
 
   config = mkIf cfg.enable {
+
     nixidy.resourceImports = [ ./generated.nix ];
 
     applications.crossplane = {
