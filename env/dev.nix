@@ -32,13 +32,13 @@
     lldap.enable = false;
     memos.enable = false;
     metabase.enable = false;
-    mindsdb.enable = true;
+    mindsdb.enable = false;
     minio.enable = true;
     mssql.enable = false;
     opentelemetry-collector.enable = false;
     postgresql.enable = false;
     redis.enable = false;
-    sqlpad.enable = true;
+    sqlpad.enable = false;
     tempo.enable = true;
     traefik.enable = true;
   };
