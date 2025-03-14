@@ -18,11 +18,11 @@
 
     # TODO: I know we can do better than this
     alice-bitcoin.enable = false;
-    alice-specter.enable = true;
+    alice-specter.enable = false;
 
     argo-events.enable = true;
     argo-workflows.enable = false;
-    authentik.enable = true;
+    authentik.enable = false;
     cloudbeaver.enable = true;
     dinsro.enable = false;
     forgejo.enable = false;
@@ -30,11 +30,11 @@
     homer.enable = false;
     keycloak.enable = false;
     lldap.enable = false;
-    memos.enable = true;
+    memos.enable = false;
     metabase.enable = false;
     minio.enable = true;
     mssql.enable = false;
-    opentelemetry-collector.enable = true;
+    opentelemetry-collector.enable = false;
     postgresql.enable = false;
     redis.enable = false;
     traefik.enable = true;

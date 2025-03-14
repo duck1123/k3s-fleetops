@@ -1,7 +1,0 @@
-apiVersion: v1
-data:
-  wallet-config.edn: '{}'
-kind: ConfigMap
-metadata:
-  name: config
-  namespace: alice-specter
