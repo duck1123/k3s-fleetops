@@ -14,10 +14,10 @@
   };
 
   services = {
-    adventureworks.enable = true;
+    adventureworks.enable = false;
 
     # TODO: I know we can do better than this
-    alice-bitcoin.enable = true;
+    alice-bitcoin.enable = false;
 
     argo-events.enable = true;
     argo-workflows.enable = false;
@@ -25,14 +25,14 @@
     cloudbeaver.enable = true;
     forgejo.enable = false;
     harbor.enable = false;
-    homer.enable = true;
-    keycloak.enable = true;
-    lldap.enable = true;
+    homer.enable = false;
+    keycloak.enable = false;
+    lldap.enable = false;
     memos.enable = true;
     metabase.enable = false;
     minio.enable = true;
     mssql.enable = false;
     postgresql.enable = false;
-    redis.enable = true;
+    redis.enable = false;
   };
 }
