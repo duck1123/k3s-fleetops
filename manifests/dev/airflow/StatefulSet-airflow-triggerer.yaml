@@ -1,0 +1,216 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    chart: airflow-1.15.0
+    component: triggerer
+    heritage: Helm
+    release: airflow
+    tier: airflow
+  name: airflow-triggerer
+  namespace: airflow
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: triggerer
+      release: airflow
+      tier: airflow
+  serviceName: airflow-triggerer
+  template:
+    metadata:
+      annotations:
+        checksum/airflow-config: 5c8ce6e0f438a9dd88d88b76bfa9675503406667f64ee232c12ea7a629b11888
+        checksum/extra-configmaps: e862ea47e13e634cf17d476323784fa27dac20015550c230953b526182f5cac8
+        checksum/extra-secrets: e9582fdd622296c976cbc10a5ba7d6702c28a24fe80795ea5b84ba443a56c827
+        checksum/metadata-secret: 1527346545415bf13f4c9ad69470086eb90d854f2b83594d78ec1badb5e13eb0
+        checksum/pgbouncer-config-secret: 1dae2adc757473469686d37449d076b0c82404f61413b58ae68b3c5e99527688
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+      labels:
+        component: triggerer
+        release: airflow
+        tier: airflow
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    component: triggerer
+                topologyKey: kubernetes.io/hostname
+              weight: 100
+      containers:
+        - args:
+            - bash
+            - -c
+            - exec airflow triggerer
+          env:
+            - name: AIRFLOW__CORE__FERNET_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: fernet-key
+                  name: airflow-fernet-key
+            - name: AIRFLOW_HOME
+              value: /opt/airflow
+            - name: AIRFLOW__CORE__SQL_ALCHEMY_CONN
+              valueFrom:
+                secretKeyRef:
+                  key: connection
+                  name: airflow-metadata
+            - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+              valueFrom:
+                secretKeyRef:
+                  key: connection
+                  name: airflow-metadata
+            - name: AIRFLOW_CONN_AIRFLOW_DB
+              valueFrom:
+                secretKeyRef:
+                  key: connection
+                  name: airflow-metadata
+            - name: AIRFLOW__WEBSERVER__SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: webserver-secret-key
+                  name: airflow-webserver-secret-key
+            - name: AIRFLOW__CELERY__BROKER_URL
+              valueFrom:
+                secretKeyRef:
+                  key: connection
+                  name: airflow-broker-url
+          envFrom: []
+          image: apache/airflow:2.9.3
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - |
+                  CONNECTION_CHECK_MAX_COUNT=0 AIRFLOW__LOGGING__LOGGING_LEVEL=ERROR exec /entrypoint \
+                  airflow jobs check --job-type TriggererJob --local
+            failureThreshold: 5
+            initialDelaySeconds: 10
+            periodSeconds: 60
+            timeoutSeconds: 20
+          name: triggerer
+          ports:
+            - containerPort: 8794
+              name: triggerer-logs
+          resources: {}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - mountPath: /opt/airflow/logs
+              name: logs
+            - mountPath: /opt/airflow/airflow.cfg
+              name: config
+              readOnly: true
+              subPath: airflow.cfg
+            - mountPath: /opt/airflow/config/airflow_local_settings.py
+              name: config
+              readOnly: true
+              subPath: airflow_local_settings.py
+        - args:
+            - bash
+            - /clean-logs
+          env:
+            - name: AIRFLOW__LOG_RETENTION_DAYS
+              value: "15"
+            - name: AIRFLOW_HOME
+              value: /opt/airflow
+          image: apache/airflow:2.9.3
+          imagePullPolicy: IfNotPresent
+          name: triggerer-log-groomer
+          resources: {}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - mountPath: /opt/airflow/logs
+              name: logs
+      initContainers:
+        - args:
+            - airflow
+            - db
+            - check-migrations
+            - --migration-wait-timeout=60
+          env:
+            - name: AIRFLOW__CORE__FERNET_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: fernet-key
+                  name: airflow-fernet-key
+            - name: AIRFLOW_HOME
+              value: /opt/airflow
+            - name: AIRFLOW__CORE__SQL_ALCHEMY_CONN
+              valueFrom:
+                secretKeyRef:
+                  key: connection
+                  name: airflow-metadata
+            - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+              valueFrom:
+                secretKeyRef:
+                  key: connection
+                  name: airflow-metadata
+            - name: AIRFLOW_CONN_AIRFLOW_DB
+              valueFrom:
+                secretKeyRef:
+                  key: connection
+                  name: airflow-metadata
+            - name: AIRFLOW__WEBSERVER__SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: webserver-secret-key
+                  name: airflow-webserver-secret-key
+            - name: AIRFLOW__CELERY__BROKER_URL
+              valueFrom:
+                secretKeyRef:
+                  key: connection
+                  name: airflow-broker-url
+          envFrom: []
+          image: apache/airflow:2.9.3
+          imagePullPolicy: IfNotPresent
+          name: wait-for-airflow-migrations
+          resources: {}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - mountPath: /opt/airflow/airflow.cfg
+              name: config
+              readOnly: true
+              subPath: airflow.cfg
+            - mountPath: /opt/airflow/config/airflow_local_settings.py
+              name: config
+              readOnly: true
+              subPath: airflow_local_settings.py
+      nodeSelector: {}
+      restartPolicy: Always
+      securityContext:
+        fsGroup: 0
+        runAsUser: 50000
+      serviceAccountName: airflow-triggerer
+      terminationGracePeriodSeconds: 60
+      tolerations: []
+      topologySpreadConstraints: []
+      volumes:
+        - configMap:
+            name: airflow-config
+          name: config
+  volumeClaimTemplates:
+    - metadata:
+        name: logs
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 100Gi

@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    chart: airflow-1.15.0
+    component: statsd
+    heritage: Helm
+    release: airflow
+    tier: airflow
+  name: airflow-statsd
+  namespace: airflow
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: statsd
+      release: airflow
+      tier: airflow
+  template:
+    metadata:
+      labels:
+        component: statsd
+        release: airflow
+        tier: airflow
+    spec:
+      affinity: {}
+      containers:
+        - args:
+            - --statsd.mapping-config=/etc/statsd-exporter/mappings.yml
+          image: quay.io/prometheus/statsd-exporter:v0.26.1
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            httpGet:
+              path: /metrics
+              port: 9102
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+          name: statsd
+          ports:
+            - containerPort: 9125
+              name: statsd-ingest
+              protocol: UDP
+            - containerPort: 9102
+              name: statsd-scrape
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: 9102
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+          resources: {}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - mountPath: /etc/statsd-exporter/mappings.yml
+              name: config
+              subPath: mappings.yml
+      nodeSelector: {}
+      restartPolicy: Always
+      securityContext:
+        runAsUser: 65534
+      serviceAccountName: airflow-statsd
+      tolerations: []
+      topologySpreadConstraints: []
+      volumes:
+        - configMap:
+            name: airflow-statsd
+          name: config

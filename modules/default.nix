@@ -1,6 +1,7 @@
 { inputs, ... }: {
   imports = [
     ./adventureworks
+    ./airflow
     ./alice-bitcoin
     ./alice-specter
     ./argo-events
