@@ -19,5 +19,6 @@
     ./postgresql
     ./redis
     ./sealed-secrets
+    ./traefik
   ];
 }
