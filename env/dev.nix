@@ -17,6 +17,7 @@
     adventureworks.enable = true;
     argo-events.enable = true;
     argo-workflows.enable = false;
+    authentik.enable = true;
     cloudbeaver.enable = true;
     forgejo.enable = false;
     homer.enable = true;

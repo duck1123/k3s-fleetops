@@ -3,6 +3,7 @@
     ./adventureworks
     ./argo-events
     ./argo-workflows
+    ./authentik
     ./cloudbeaver
     ./forgejo
     ./homer
