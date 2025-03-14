@@ -17,7 +17,7 @@ let
   defaultValues = {
     auth = {
       adminUser = "admin";
-      existingSecret = "keycload-admin-password";
+      existingSecret = "keycloak-admin-password";
       passwordSecretKey = "password";
     };
 
