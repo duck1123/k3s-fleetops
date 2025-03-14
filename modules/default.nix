@@ -7,6 +7,7 @@
     ./argo-workflows
     ./authentik
     ./cloudbeaver
+    ./dinsro
     ./forgejo
     ./harbor
     ./homer

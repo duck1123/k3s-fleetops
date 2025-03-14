@@ -24,6 +24,7 @@
     argo-workflows.enable = false;
     authentik.enable = true;
     cloudbeaver.enable = true;
+    dinsro.enable = false;
     forgejo.enable = false;
     harbor.enable = false;
     homer.enable = false;
