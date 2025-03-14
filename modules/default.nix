@@ -8,6 +8,7 @@
     ./argo-workflows
     ./authentik
     ./cloudbeaver
+    ./crossplane-do-provider
     ./demo
     ./dinsro
     ./forgejo
