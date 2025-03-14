@@ -32,6 +32,7 @@
     lldap.enable = false;
     memos.enable = false;
     metabase.enable = false;
+    mindsdb.enable = true;
     minio.enable = true;
     mssql.enable = false;
     opentelemetry-collector.enable = false;

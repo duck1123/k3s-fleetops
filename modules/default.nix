@@ -15,6 +15,7 @@
     ./lldap
     ./memos
     ./metabase
+    ./mindsdb
     ./minio
     ./mssql
     ./opentelemetry-collector
