@@ -15,6 +15,7 @@
     ./metabase
     ./minio
     ./mssql
+    ./opentelemetry-collector
     ./postgresql
     ./redis
     ./sealed-secrets

@@ -32,6 +32,7 @@
     metabase.enable = false;
     minio.enable = true;
     mssql.enable = false;
+    opentelemetry-collector.enable = true;
     postgresql.enable = false;
     redis.enable = false;
   };
