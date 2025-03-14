@@ -25,7 +25,7 @@
     argo-workflows.enable = false;
     authentik.enable = false;
     cloudbeaver.enable = true;
-    demo.enable = true;
+    demo.enable = false;
     dinsro.enable = false;
     forgejo.enable = false;
     harbor.enable = false;
@@ -42,7 +42,7 @@
     postgresql.enable = false;
     redis.enable = false;
     sqlpad.enable = false;
-    tempo.enable = true;
+    tempo.enable = false;
     traefik.enable = true;
   };
 }
