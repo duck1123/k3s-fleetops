@@ -1,6 +1,7 @@
 { inputs, ... }: {
   imports = [
     ./adventureworks
+    ./alice-bitcoin
     ./argo-events
     ./argo-workflows
     ./authentik

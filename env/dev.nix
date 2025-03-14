@@ -15,6 +15,10 @@
 
   services = {
     adventureworks.enable = true;
+
+    # TODO: I know we can do better than this
+    alice-bitcoin.enable = true;
+
     argo-events.enable = true;
     argo-workflows.enable = false;
     authentik.enable = true;

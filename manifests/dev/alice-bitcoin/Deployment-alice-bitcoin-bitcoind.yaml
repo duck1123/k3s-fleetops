@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: bitcoind
+    chart: bitcoind-0.2.3
+    heritage: Helm
+    release: alice-bitcoin
+  name: alice-bitcoin-bitcoind
+  namespace: alice-bitcoin
+spec:
+  selector:
+    matchLabels:
+      app: bitcoind
+      release: alice-bitcoin
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: bitcoind
+        release: alice-bitcoin
+    spec:
+      containers:
+        - image: ruimarinho/bitcoin-core:22
+          imagePullPolicy: IfNotPresent
+          name: alice-bitcoin-bitcoind
+          ports:
+            - containerPort: 8332
+              name: rpc
+            - containerPort: 8333
+              name: p2p
+            - containerPort: 18332
+              name: testnet
+            - containerPort: 18333
+              name: testnetp2pport
+            - containerPort: 18443
+              name: regtest
+            - containerPort: 18444
+              name: regtestp2pport
+            - containerPort: 28332
+              name: zmq-raw-block
+            - containerPort: 28333
+              name: zmq-raw-tx
+            - containerPort: 28334
+              name: zmq-hash-block
+          resources: {}
+          volumeMounts:
+            - mountPath: /home/bitcoin/.bitcoin
+              name: data
+            - mountPath: /home/bitcoin/.bitcoin/bitcoin.conf
+              name: config
+              subPath: bitcoin.conf
+      initContainers:
+        - command:
+            - sh
+            - -c
+            - cp /configmap/bitcoin.conf /bitcoin/.bitcoin/bitcoin.conf
+          image: busybox
+          name: copy-bitcoind-config
+          volumeMounts:
+            - mountPath: /configmap
+              name: configmap
+            - mountPath: /bitcoin/.bitcoin/
+              name: config
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - emptyDir: {}
+          name: config
+        - configMap:
+            name: alice-bitcoin-bitcoind
+          name: configmap
+        - name: data
+          persistentVolumeClaim:
+            claimName: alice-bitcoin-bitcoind

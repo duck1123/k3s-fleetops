@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    helm.sh/resource-policy: keep
+  labels:
+    app: bitcoind
+    chart: bitcoind-0.2.3
+    heritage: Helm
+    release: alice-bitcoin
+  name: alice-bitcoin-bitcoind
+  namespace: alice-bitcoin
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 300Gi
