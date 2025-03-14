@@ -22,6 +22,7 @@
     ./postgresql
     ./redis
     ./sealed-secrets
+    ./sqlpad
     ./traefik
   ];
 }

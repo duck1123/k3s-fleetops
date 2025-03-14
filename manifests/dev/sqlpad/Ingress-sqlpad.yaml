@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  labels:
+    app.kubernetes.io/instance: sqlpad
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: sqlpad
+    app.kubernetes.io/version: "6.7"
+    helm.sh/chart: sqlpad-0.1.0
+  name: sqlpad
+  namespace: sqlpad
+spec:
+  rules:
+    - host: sqlpad.localhost
+      http:
+        paths:
+          - backend:
+              service:
+                name: sqlpad
+                port:
+                  number: 3000
+            path: /
+            pathType: ImplementationSpecific

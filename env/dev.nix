@@ -38,6 +38,7 @@
     opentelemetry-collector.enable = false;
     postgresql.enable = false;
     redis.enable = false;
+    sqlpad.enable = true;
     traefik.enable = true;
   };
 }

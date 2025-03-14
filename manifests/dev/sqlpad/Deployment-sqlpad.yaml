@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/instance: sqlpad
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: sqlpad
+    app.kubernetes.io/version: "6.7"
+    helm.sh/chart: sqlpad-0.1.0
+  name: sqlpad
+  namespace: sqlpad
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: sqlpad
+      app.kubernetes.io/name: sqlpad
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: sqlpad
+        app.kubernetes.io/name: sqlpad
+    spec:
+      containers:
+        - env:
+            - name: SQLPAD_PORT
+              value: "3000"
+            - name: SQLPAD_AUTH_DISABLED
+              value: "true"
+            - name: SQLPAD_ALLOW_CONNECTION_ACCESS_TO_EVERYONE
+              value: "true"
+            - name: SQLPAD_SEED_DATA_PATH
+              value: /mnt/seed-data
+          image: sqlpad/sqlpad:6.7
+          name: sqlpad
+          ports:
+            - containerPort: 3000
+              name: http
+          volumeMounts:
+            - mountPath: /mnt/seed-data2
+              name: seed-data
+      volumes:
+        - name: seed-data
+          persistentVolumeClaim:
+            claimName: seed-data
