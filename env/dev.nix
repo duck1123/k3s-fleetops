@@ -20,6 +20,7 @@
     authentik.enable = true;
     cloudbeaver.enable = true;
     forgejo.enable = false;
+    harbor.enable = false;
     homer.enable = true;
     keycloak.enable = true;
     lldap.enable = true;

@@ -6,6 +6,7 @@
     ./authentik
     ./cloudbeaver
     ./forgejo
+    ./harbor
     ./homer
     ./keycloak
     ./lldap
