@@ -20,6 +20,7 @@
     ./mindsdb
     ./minio
     ./mssql
+    ./openldap
     ./opentelemetry-collector
     ./postgresql
     ./redis

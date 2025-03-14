@@ -1,0 +1,64 @@
+apiVersion: integration.rock8s.com/v1beta1
+kind: Socket
+metadata:
+  labels:
+    app.kubernetes.io/instance: openldap
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: openldap
+    helm.sh/chart: openldap-4.1.1
+  name: ldap
+spec:
+  config:
+    adminDN: cn=admin,dc=example,dc=org
+    hostname: openldap-release.openldap.svc.cluster.local
+    port: "636"
+    protocol: ldaps
+    rootDN: dc=example,dc=org
+  configTemplate:
+    adminPassword: '{% .vars.BASE64_ENCODED_LDAP_ADMIN_PASSWORD | default "" | b64dec %}'
+    caCrt: '{% .vars.BASE64_ENCODED_CA_CRT | default "" | b64dec %}'
+    tlsCrt: '{% .vars.BASE64_ENCODED_TLS_CRT | default "" | b64dec %}'
+  epoch: "1741956866"
+  interface:
+    config:
+      plug: {}
+      socket:
+        adminDN:
+          required: true
+        adminPassword:
+          required: true
+        caCrt: {}
+        hostname:
+          required: true
+        port:
+          required: true
+        protocol:
+          required: true
+        rootDN:
+          required: true
+        tlsCrt: {}
+  vars:
+    - fieldref:
+        fieldPath: data.LDAP_ADMIN_PASSWORD
+      name: BASE64_ENCODED_LDAP_ADMIN_PASSWORD
+      objref:
+        apiVersion: v1
+        kind: Secret
+        name: openldap
+        namespace: openldap
+    - fieldref:
+        fieldPath: data.tls\.crt
+      name: BASE64_ENCODED_TLS_CRT
+      objref:
+        apiVersion: v1
+        kind: Secret
+        name: openldap-cert
+        namespace: openldap
+    - fieldref:
+        fieldPath: data.ca\.crt
+      name: BASE64_ENCODED_CA_CRT
+      objref:
+        apiVersion: v1
+        kind: Secret
+        name: openldap-cert
+        namespace: openldap

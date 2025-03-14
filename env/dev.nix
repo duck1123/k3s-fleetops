@@ -37,6 +37,7 @@
     mindsdb.enable = false;
     minio.enable = true;
     mssql.enable = false;
+    openldap.enable = true;
     opentelemetry-collector.enable = false;
     postgresql.enable = false;
     redis.enable = false;
