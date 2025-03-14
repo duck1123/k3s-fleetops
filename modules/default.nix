@@ -7,6 +7,7 @@
     ./cloudbeaver
     ./forgejo
     ./homer
+    ./keycloak
     ./lldap
     ./metabase
     ./minio
