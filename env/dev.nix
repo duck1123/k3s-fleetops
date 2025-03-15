@@ -24,6 +24,7 @@
     argo-events.enable = true;
     argo-workflows.enable = false;
     authentik.enable = false;
+    cert-manager.enable = true;
     cloudbeaver.enable = true;
     demo.enable = false;
     dinsro.enable = false;

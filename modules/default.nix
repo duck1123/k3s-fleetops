@@ -7,6 +7,7 @@
     ./argo-events
     ./argo-workflows
     ./authentik
+    ./cert-manager
     ./cloudbeaver
     ./demo
     ./dinsro
