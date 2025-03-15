@@ -10,6 +10,7 @@
     ./authentik
     ./cert-manager
     ./cloudbeaver
+    ./crossplane
     ./demo
     ./dinsro
     ./forgejo
