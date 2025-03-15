@@ -70,8 +70,8 @@
               set -eo pipefail
 
               echo "generate cilium"
-              mkdir -p target/modules/cilium
-              cat ${generators.cilium} > target/modules/cilium/generated.nix
+              mkdir -p modules/cilium
+              cat ${generators.cilium} > modules/cilium/generated.nix
 
               echo "generate sealed-secrets"
               mkdir -p modules/sealed-secrets
