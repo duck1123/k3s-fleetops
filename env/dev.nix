@@ -29,7 +29,7 @@
     cloudbeaver.enable = true;
     crossplane = {
       enable = true;
-      providers.digital-ocean.enable = true;
+      providers.digital-ocean.enable = false;
     };
     demo.enable = false;
     dinsro.enable = false;
