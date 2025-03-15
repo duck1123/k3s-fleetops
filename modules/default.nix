@@ -4,6 +4,7 @@
     ./airflow
     ./alice-bitcoin
     ./alice-specter
+    ./argocd
     ./argo-events
     ./argo-workflows
     ./authentik
