@@ -21,6 +21,9 @@
   build-charts
   {:task (shell "nixidy build .#dev")}
 
+  ci
+  {:depends [clean generate switch-charts build]}
+
   clean
   {:task (shell "rm -rf target")}
 
@@ -58,6 +61,9 @@
            pod-name         (shell get-name-command)
            command          (str "kubectl port-forward " pod-name " 9000:9000")]
        (shell command)))}
+
+  generate
+  {:task (shell "nix run '.#generate'")}
 
   ;; https://github.com/bitnami-labs/sealed-secrets/blob/main/docs/bring-your-own-certificates.md
   install-sealed-key
