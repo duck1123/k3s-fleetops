@@ -21,6 +21,15 @@ let
       }];
 
       persistence.archive.enabled = true;
+
+      # These are applied to the ingress?
+      service.annotations = {
+        "cert-manager.io/cluster-issuer" = "letsencrypt-prod";
+        "ingress.kubernetes.io/force-ssl-redirect" = "true";
+        "ingress.kubernetes.io/proxy-body-size" = "0";
+        "ingress.kubernetes.io/ssl-redirect" = "true";
+      };
+
       telemetry.enabled = true;
       # workflowNamespaces = [ "default" "argo-workflows" ];
     };
@@ -29,6 +38,7 @@ let
       enabled = true;
       hostname = domain;
       ingressClassName = "traefik";
+      # These have no effect
       annotations = {
         "cert-manager.io/cluster-issuer" = "letsencrypt-prod";
         "ingress.kubernetes.io/force-ssl-redirect" = "true";
