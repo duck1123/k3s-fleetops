@@ -41,6 +41,7 @@
     opentelemetry-collector.enable = false;
     postgresql.enable = false;
     redis.enable = false;
+    sealed-secrets.enable = true;
     sqlpad.enable = false;
     tempo.enable = false;
     traefik.enable = true;
