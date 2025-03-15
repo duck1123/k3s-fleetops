@@ -76,29 +76,69 @@
               crds =
                 [ "helm/sealed-secrets/crds/bitnami.com_sealedsecrets.yaml" ];
             };
+            sops = nixidy.packages.${system}.generators.fromCRD {
+              name = "sops";
+              src =
+                nixhelm.chartsDerivations.${system}.isindir.sops-secrets-operator;
+              crds = [ "crds/isindir.github.com_sopssecrets.yaml" ];
+            };
+            tailscale = nixidy.packages.${system}.generators.fromCRD {
+              name = "tailscale";
+              src = pkgs.fetchFromGitHub {
+                owner = "tailscale";
+                repo = "tailscale";
+                rev = "v1.72.1";
+                hash = "sha256-b1o3UHotVs5/+cpMx9q8bvt6BSM2QamLDUNyBNfb58A=";
+              };
+              crds = [
+                "cmd/k8s-operator/deploy/crds/tailscale.com_proxyclasses.yaml"
+              ];
+            };
+            traefik = nixidy.packages.${system}.generators.fromCRD {
+              name = "traefik";
+              src = nixhelm.chartsDerivations.${system}.traefik.traefik;
+              crds = [
+                "crds/traefik.io_ingressroutes.yaml"
+                "crds/traefik.io_ingressroutetcps.yaml"
+                "crds/traefik.io_ingressrouteudps.yaml"
+                "crds/traefik.io_traefikservices.yaml"
+              ];
+            };
           };
           nixidy = nixidy.packages.${system}.default;
         };
 
         apps.generate = let generators = self.packages.${system}.generators;
-          in {
-            type = "app";
-            program = (pkgs.writeShellScript "generate-modules" ''
-              set -eo pipefail
+        in {
+          type = "app";
+          program = (pkgs.writeShellScript "generate-modules" ''
+            set -eo pipefail
 
-              echo "generate cert-manager"
-              mkdir -p modules/cert-manager
-              cat ${generators.cert-manager} > modules/cert-manager/generated.nix
+            echo "generate cert-manager"
+            mkdir -p modules/cert-manager
+            cat ${generators.cert-manager} > modules/cert-manager/generated.nix
 
-              echo "generate cilium"
-              mkdir -p modules/cilium
-              cat ${generators.cilium} > modules/cilium/generated.nix
+            echo "generate cilium"
+            mkdir -p modules/cilium
+            cat ${generators.cilium} > modules/cilium/generated.nix
 
-              echo "generate sealed-secrets"
-              mkdir -p modules/sealed-secrets
-              cat ${generators.sealedSecrets} > modules/sealed-secrets/generated.nix
-            '').outPath;
-          };
+            echo "generate sealed-secrets"
+            mkdir -p modules/sealed-secrets
+            cat ${generators.sealedSecrets} > modules/sealed-secrets/generated.nix
+
+            echo "generate sops"
+            mkdir -p modules/sops
+            cat ${generators.sops} > modules/sops/generated.nix
+
+            echo "generate tailscale"
+            mkdir -p modules/tailscale
+            cat ${generators.tailscale} > modules/tailscale/generated.nix
+
+            echo "generate traefik"
+            mkdir -p modules/traefik
+            cat ${generators.traefik} > modules/traefik/generated.nix
+          '').outPath;
+        };
 
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; [
