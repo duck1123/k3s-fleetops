@@ -2,8 +2,6 @@
 let
   cfg = config.services.argocd;
   defaultNamespace = "argocd";
-  defaultValues = { };
-  values = lib.attrsets.recursiveUpdate defaultValues cfg.values;
   namespace = cfg.namespace;
 in with lib; {
   options.services.argocd = {
@@ -13,12 +11,6 @@ in with lib; {
       type = types.str;
       default = defaultNamespace;
     };
-
-    values = mkOption {
-      description = "All the values";
-      type = types.attrsOf types.anything;
-      default = { };
-    };
   };
 
   config = mkIf cfg.enable {
@@ -26,13 +18,35 @@ in with lib; {
       inherit namespace;
       createNamespace = true;
       finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
-      resources.configMaps.argocd-cm.data = {
-        "exec.enabled" = "true";
-        "exec.shells" = "bash,sh";
-        "kustomize.buildOptions" = "--enable-helm";
-        "ui.bannercontent" = "Ignore This Notice!";
-        "ui.bannerurl" = "https://duck1123.com/";
-        "url" = "https://argocd.dev.kronkltd.net";
+      resources = {
+        configMaps.argocd-cm.data = {
+          "exec.enabled" = "true";
+          "exec.shells" = "bash,sh";
+          "kustomize.buildOptions" = "--enable-helm";
+          "ui.bannercontent" = "Ignore This Notice!";
+          "ui.bannerurl" = "https://duck1123.com/";
+          "url" = "https://argocd.dev.kronkltd.net";
+        };
+        secrets = {
+          bitnamicharts = {
+            metadata.labels."argocd.argoproj.io/secret-type" = "repository";
+            stringData = {
+              enableOCI = "true";
+              name= "bitnamicharts";
+              type = "helm";
+              url = "registry-1.docker.io/bitnamicharts";
+            };
+          };
+          forgejo-helm-oci = {
+            metadata.labels."argocd.argoproj.io/secret-type" = "repository";
+            stringData = {
+              enableOCI = "true";
+              name= "forgejo-helm";
+              type = "helm";
+              url = "registry-1.docker.io/bitnamicharts";
+            };
+          };
+        };
       };
       syncPolicy.finalSyncOpts = [ "CreateNamespace=true" ];
     };
