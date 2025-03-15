@@ -1,0 +1,124 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/component: server
+    app.kubernetes.io/instance: argo-workflows
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: argo-workflows
+    app.kubernetes.io/part-of: argo-workflows
+    app.kubernetes.io/version: 3.6.5
+    helm.sh/chart: argo-workflows-11.1.10
+  name: argo-workflows-server
+  namespace: argo-workflows
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: server
+      app.kubernetes.io/instance: argo-workflows
+      app.kubernetes.io/name: argo-workflows
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        checksum/config: e382293f26ea618c86b97b2f1dc6640912ef7d1fa63ff4a28fdc320d1f71c5e1
+      labels:
+        app.kubernetes.io/component: server
+        app.kubernetes.io/instance: argo-workflows
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: argo-workflows
+        app.kubernetes.io/part-of: argo-workflows
+        app.kubernetes.io/version: 3.6.5
+        helm.sh/chart: argo-workflows-11.1.10
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/component: server
+                    app.kubernetes.io/instance: argo-workflows
+                    app.kubernetes.io/name: argo-workflows
+                topologyKey: kubernetes.io/hostname
+              weight: 1
+      automountServiceAccountToken: true
+      containers:
+        - args:
+            - server
+            - --configmap=argo-workflows-controller
+            - --secure=false
+            - --auth-mode
+            - client
+            - --port
+            - "2746"
+          env:
+            - name: IN_CLUSTER
+              value: "true"
+            - name: ARGO_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace
+            - name: BASE_HREF
+              value: /
+          image: docker.io/bitnami/argo-workflow-cli:3.6.5-debian-12-r0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 10
+            periodSeconds: 20
+            successThreshold: 1
+            tcpSocket:
+              port: 2746
+            timeoutSeconds: 1
+          name: argo-server
+          ports:
+            - containerPort: 2746
+              name: web
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 2746
+            initialDelaySeconds: 10
+            periodSeconds: 20
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 150m
+              ephemeral-storage: 2Gi
+              memory: 192Mi
+            requests:
+              cpu: 100m
+              ephemeral-storage: 50Mi
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+            runAsGroup: 1001
+            runAsNonRoot: true
+            runAsUser: 1001
+            seLinuxOptions: {}
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+            - mountPath: /tmp
+              name: empty-dir
+              subPath: tmp-dir
+      securityContext:
+        fsGroup: 1001
+        fsGroupChangePolicy: Always
+        supplementalGroups: []
+        sysctls: []
+      serviceAccountName: argo-workflows-server
+      volumes:
+        - emptyDir: {}
+          name: empty-dir

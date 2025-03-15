@@ -23,7 +23,7 @@
     alice-specter.enable = false;
     argocd.enable = true;
     argo-events.enable = true;
-    argo-workflows.enable = false;
+    argo-workflows.enable = true;
     authentik.enable = false;
     cert-manager.enable = true;
     cloudbeaver.enable = true;

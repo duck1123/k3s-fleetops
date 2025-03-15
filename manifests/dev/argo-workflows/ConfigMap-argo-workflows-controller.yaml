@@ -1,0 +1,78 @@
+apiVersion: v1
+data:
+  config: |2
+    ## How many workflows can be running at the same time
+    ##
+    parallelism:
+    ## Maximun number of workflows running in a namespace
+    ##
+    namespaceParallelism:
+    executor:
+      resources:
+        limits:
+          cpu: 150m
+          ephemeral-storage: 2Gi
+          memory: 192Mi
+        requests:
+          cpu: 100m
+          ephemeral-storage: 50Mi
+          memory: 128Mi
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+          - ALL
+        privileged: false
+        readOnlyRootFilesystem: true
+        runAsGroup: 1001
+        runAsNonRoot: true
+        runAsUser: 1001
+        seLinuxOptions: {}
+        seccompProfile:
+          type: RuntimeDefault
+    ## Uncomment to enable Artofact repository with the provided configuration
+    ## artifactRepository:
+    ##  archiveLogs: false
+    ##  configuration: {}
+    ##
+    telemetryConfig:
+      enabled: true
+      path: /telemetry
+    persistence:
+      connectionPool:
+        maxIdleConns: 100
+        maxOpenConns: 0
+      nodeStatusOffLoad: false
+      archive: true
+      postgresql:
+        host: argo-workflows-postgresql
+        port: 5432
+        database: bn_argo_workflows
+        tableName: argo_workflows
+        ## the database secrets must be in the same namespace of the controller
+        ##
+        userNameSecret:
+          name: argo-workflows-controller-database
+          key: username
+        passwordSecret:
+          name: argo-workflows-postgresql
+          key: postgres-password
+    ## Uncomment to set workflowRestrictions
+    ## Ref: https://argoproj.github.io/argo-workflows/workflow-restrictions/
+    ## workflowRestrictions: {}
+    ## Uncomment to set links
+    ## Ref: https://argoproj.github.io/argo-workflows/links/
+    ## links: {}
+    ##
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: argo-workflows
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: argo-workflows
+    app.kubernetes.io/part-of: argo-workflows
+    app.kubernetes.io/version: 3.6.5
+    helm.sh/chart: argo-workflows-11.1.10
+  name: argo-workflows-controller
+  namespace: argo-workflows
