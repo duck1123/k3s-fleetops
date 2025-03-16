@@ -33,8 +33,8 @@ in with lib; {
         #   };
         # };
 
-        providers.provider-do.spec.package =
-          "crossplane/provider-digitalocean:v0.2.0";
+        providers.provider-upjet-digitalocean.spec.package =
+          "crossplane-contrib/provider-upjet-digitalocean:v0.3.0";
 
         # providerConfigs.do-provider.spec.credentials = {
         #   source = "secret";
@@ -55,7 +55,7 @@ in with lib; {
             template.metadata = {
               annotations."sealedsecrets.bitnami.com/cluster-wide" = "true";
               creationTimestamp = null;
-              name = "provider-do-secret2";
+              name = "provider-do-secret";
               namespace = "crossplane-system";
             };
           };
