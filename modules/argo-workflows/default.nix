@@ -72,6 +72,12 @@ in with lib; {
       inherit namespace;
       finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
       helm.releases.argo-workflows = { inherit chart values; };
+
+      resources.secrets."duck.service-account-token" = {
+        metadata.annotations."kubernetes.io/service-account.name" = "duck";
+        type = "kubernetes.io/service-account-token";
+      };
+
       syncPolicy.finalSyncOpts = [ "CreateNamespace=true" ];
     };
   };
