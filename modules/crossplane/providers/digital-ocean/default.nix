@@ -36,7 +36,7 @@ in with lib; {
         providers.provider-upjet-digitalocean = {
           metadata = { inherit namespace; };
           spec.package =
-            "crossplane-contrib/provider-upjet-digitalocean:v0.3.0";
+            "crossplane-contrib/provider-upjet-digitalocean:v0.2.1";
         };
 
         # providerConfigs.do-provider.spec.credentials = {
