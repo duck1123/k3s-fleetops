@@ -16,7 +16,7 @@ metadata:
 spec:
   ingressClassName: traefik
   rules:
-    - host: spark.powerspecnix.bearded-snake.ts.net
+    - host: spark.dev.kronkltd.net
       http:
         paths:
           - backend:

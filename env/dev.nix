@@ -1,4 +1,6 @@
-{ nixidy, lib, ... }: {
+{ nixidy, lib, ... }:
+let base-domain = "dev.kronkltd.net";
+in {
   nixidy = {
     defaults.syncPolicy.autoSync = {
       enabled = true;
@@ -48,7 +50,12 @@
     postgresql.enable = false;
     redis.enable = false;
     sealed-secrets.enable = true;
-    spark.enable = true;
+
+    spark = {
+      enable = true;
+      domain = "spark.${base-domain}";
+    };
+
     sqlpad.enable = false;
     tempo.enable = false;
     traefik.enable = true;

@@ -9,7 +9,7 @@ let
   };
 
   defaultNamespace = "spark";
-  domain = "spark.powerspecnix.bearded-snake.ts.net";
+  domain = cfg.domain;
   clusterIssuer = "letsencrypt-prod";
 
   defaultValues = {
@@ -30,6 +30,13 @@ let
 in with lib; {
   options.services.spark = {
     enable = mkEnableOption "Enable application";
+
+    domain = mkOption {
+      description = mdDoc "The ingress domain";
+      type = types.str;
+      default = "spark.localhost";
+    };
+
     namespace = mkOption {
       description = mdDoc "The namespace to install into";
       type = types.str;
