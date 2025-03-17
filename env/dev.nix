@@ -53,7 +53,7 @@ in {
 
     spark = {
       enable = true;
-      domain = "spark.${base-domain}";
+      # domain = "spark.${base-domain}";
     };
 
     sqlpad.enable = false;

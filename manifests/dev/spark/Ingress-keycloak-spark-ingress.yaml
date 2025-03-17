@@ -16,7 +16,7 @@ metadata:
 spec:
   ingressClassName: traefik
   rules:
-    - host: spark.dev.kronkltd.net
+    - host: spark.localhost
       http:
         paths:
           - backend:
