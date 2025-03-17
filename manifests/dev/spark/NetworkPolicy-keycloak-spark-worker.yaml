@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/component: worker
+    app.kubernetes.io/instance: keycloak
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: spark
+    app.kubernetes.io/version: 3.5.5
+    helm.sh/chart: spark-9.3.5
+  name: keycloak-spark-worker
+  namespace: spark
+spec:
+  egress:
+    - {}
+  ingress:
+    - ports:
+        - {}
+        - port: 8080
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: worker
+      app.kubernetes.io/instance: keycloak
+      app.kubernetes.io/name: spark
+  policyTypes:
+    - Ingress
+    - Egress

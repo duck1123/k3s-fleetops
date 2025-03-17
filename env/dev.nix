@@ -48,6 +48,7 @@
     postgresql.enable = false;
     redis.enable = false;
     sealed-secrets.enable = true;
+    spark.enable = true;
     sqlpad.enable = false;
     tempo.enable = false;
     traefik.enable = true;

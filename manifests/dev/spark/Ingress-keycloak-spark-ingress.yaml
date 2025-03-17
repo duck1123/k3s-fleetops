@@ -1,0 +1,32 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    ingress.kubernetes.io/force-ssl-redirect: "true"
+  labels:
+    app.kubernetes.io/component: ingress
+    app.kubernetes.io/instance: keycloak
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: spark
+    app.kubernetes.io/version: 3.5.5
+    helm.sh/chart: spark-9.3.5
+  name: keycloak-spark-ingress
+  namespace: spark
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: spark.dev.kronkltd.net
+      http:
+        paths:
+          - backend:
+              service:
+                name: keycloak-spark-master-svc
+                port:
+                  name: http
+            path: /
+            pathType: ImplementationSpecific
+  tls:
+    - hosts:
+        - spark.dev.kronkltd.net
+      secretName: spark.dev.kronkltd.net-tls

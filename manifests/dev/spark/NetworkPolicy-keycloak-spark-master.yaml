@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/component: master
+    app.kubernetes.io/instance: keycloak
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: spark
+    app.kubernetes.io/version: 3.5.5
+    helm.sh/chart: spark-9.3.5
+  name: keycloak-spark-master
+  namespace: spark
+spec:
+  egress:
+    - {}
+  ingress:
+    - ports:
+        - port: 7077
+        - port: 80
+        - port: 7077
+        - port: 8080
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: master
+      app.kubernetes.io/instance: keycloak
+      app.kubernetes.io/name: spark
+  policyTypes:
+    - Ingress
+    - Egress

@@ -29,6 +29,7 @@
     ./postgresql
     ./redis
     ./sealed-secrets
+    ./spark
     ./sqlpad
     ./tempo
     ./traefik
