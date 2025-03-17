@@ -9,7 +9,7 @@ let
   };
 
   defaultNamespace = "spark";
-  domain = "spark.dev.kronkltd.net";
+  domain = "spark.powerspecnix.bearded-snake.ts.net";
   clusterIssuer = "letsencrypt-prod";
 
   defaultValues = {
@@ -21,7 +21,7 @@ let
         "cert-manager.io/cluster-issuer" = clusterIssuer;
         "ingress.kubernetes.io/force-ssl-redirect" = "true";
       };
-      tls = true;
+      tls = false;
     };
   };
 
