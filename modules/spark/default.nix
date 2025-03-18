@@ -55,7 +55,7 @@ in with lib; {
       inherit namespace;
       createNamespace = true;
       finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
-      helm.releases.keycloak = { inherit chart values; };
+      helm.releases.spark = { inherit chart values; };
       syncPolicy.finalSyncOpts = [ "CreateNamespace=true" ];
     };
   };

@@ -2,28 +2,27 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   labels:
-    app.kubernetes.io/component: worker
-    app.kubernetes.io/instance: keycloak
+    app.kubernetes.io/component: master
+    app.kubernetes.io/instance: spark
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: spark
     app.kubernetes.io/version: 3.5.5
     helm.sh/chart: spark-9.3.5
-  name: keycloak-spark-worker
+  name: spark-master
   namespace: spark
 spec:
-  podManagementPolicy: OrderedReady
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/component: worker
-      app.kubernetes.io/instance: keycloak
+      app.kubernetes.io/component: master
+      app.kubernetes.io/instance: spark
       app.kubernetes.io/name: spark
-  serviceName: keycloak-spark-headless
+  serviceName: spark-headless
   template:
     metadata:
       labels:
-        app.kubernetes.io/component: worker
-        app.kubernetes.io/instance: keycloak
+        app.kubernetes.io/component: master
+        app.kubernetes.io/instance: spark
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: spark
         app.kubernetes.io/version: 3.5.5
@@ -35,27 +34,24 @@ spec:
             - podAffinityTerm:
                 labelSelector:
                   matchLabels:
-                    app.kubernetes.io/component: worker
-                    app.kubernetes.io/instance: keycloak
+                    app.kubernetes.io/component: master
+                    app.kubernetes.io/instance: spark
                     app.kubernetes.io/name: spark
                 topologyKey: kubernetes.io/hostname
               weight: 1
       automountServiceAccountToken: false
       containers:
         - env:
-            - name: SPARK_MODE
-              value: worker
             - name: BITNAMI_DEBUG
               value: "false"
+            - name: SPARK_MODE
+              value: master
             - name: SPARK_DAEMON_MEMORY
               value: ""
-            - name: SPARK_WORKER_WEBUI_PORT
+            - name: SPARK_MASTER_PORT
+              value: "7077"
+            - name: SPARK_MASTER_WEBUI_PORT
               value: "8080"
-            - name: SPARK_DAEMON_JAVA_OPTS
-              value: ""
-            - name: SPARK_MASTER_URL
-              value: spark://keycloak-spark-master-svc:7077
-            - name: SPARK_WORKER_OPTS
           image: docker.io/bitnami/spark:3.5.5-debian-12-r0
           imagePullPolicy: IfNotPresent
           livenessProbe:
@@ -66,11 +62,13 @@ spec:
             tcpSocket:
               port: 8080
             timeoutSeconds: 5
-          name: spark-worker
+          name: spark-master
           ports:
             - containerPort: 8080
               name: http
               protocol: TCP
+            - containerPort: 7077
+              name: cluster
           readinessProbe:
             failureThreshold: 6
             httpGet:
@@ -102,15 +100,6 @@ spec:
             seLinuxOptions: {}
             seccompProfile:
               type: RuntimeDefault
-          startupProbe:
-            failureThreshold: 6
-            httpGet:
-              path: /
-              port: 8080
-            initialDelaySeconds: 30
-            periodSeconds: 10
-            successThreshold: 1
-            timeoutSeconds: 5
           volumeMounts:
             - mountPath: /tmp
               name: empty-dir
@@ -130,10 +119,9 @@ spec:
       securityContext:
         fsGroup: 1001
         fsGroupChangePolicy: Always
-        seLinuxOptions: {}
         supplementalGroups: []
         sysctls: []
-      serviceAccountName: keycloak-spark
+      serviceAccountName: spark
       volumes:
         - emptyDir: {}
           name: empty-dir

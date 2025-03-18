@@ -3,12 +3,12 @@ kind: Service
 metadata:
   labels:
     app.kubernetes.io/component: master
-    app.kubernetes.io/instance: keycloak
+    app.kubernetes.io/instance: spark
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: spark
     app.kubernetes.io/version: 3.5.5
     helm.sh/chart: spark-9.3.5
-  name: keycloak-spark-master-svc
+  name: spark-master-svc
   namespace: spark
 spec:
   ports:
@@ -21,7 +21,7 @@ spec:
       targetPort: http
   selector:
     app.kubernetes.io/component: master
-    app.kubernetes.io/instance: keycloak
+    app.kubernetes.io/instance: spark
     app.kubernetes.io/name: spark
   sessionAffinity: None
   type: ClusterIP
