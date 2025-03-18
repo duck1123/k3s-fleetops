@@ -29,6 +29,7 @@
         pkgs = import nixpkgs { inherit system; };
         encryptString =
           import ./encryptString.nix { inherit ageRecipients pkgs; };
+        createSecret = import ./lib/createSecret.nix;
         helmChart = import ./helmChart.nix;
         sharedConfig = { inherit inputs system pkgs; };
         fromYAML = import ./fromYAML.nix;
@@ -44,7 +45,8 @@
         else
           throw "Missing decrypted secret: ${decryptedPath}";
         lib = {
-          inherit ageRecipients encryptString fromYAML helmChart toYAML;
+          inherit ageRecipients createSecret encryptString fromYAML helmChart
+            toYAML;
           sopsConfig = ./.sops.yaml;
         };
         dev = import ./env/dev.nix { inherit lib nixidy secrets; };

@@ -24,7 +24,8 @@ in {
       enable = true;
       domain = "jupyterhub.${base-domain}";
       ssl = true;
-      inherit (secrets.jupyterhub) cookieSecret cryptkeeperKeys password proxyToken;
+      inherit (secrets.jupyterhub)
+        cookieSecret cryptkeeperKeys password proxyToken;
     };
 
     minio = {
@@ -39,6 +40,12 @@ in {
     sealed-secrets.enable = true;
     sops.enable = true;
     spark.enable = true;
+
+    tailscale = {
+      enable = true;
+      oauth = { inherit (secrets.tailscale) clientId clientSecret; };
+    };
+
     traefik.enable = true;
   };
 }

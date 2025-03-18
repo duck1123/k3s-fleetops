@@ -36,6 +36,7 @@
     ./sops
     ./spark
     ./sqlpad
+    ./tailscale
     ./tempo
     ./traefik
   ];

@@ -116,4 +116,16 @@
     secret-name = "sops-age-key";
     fields = { "age.key" = { path = "/Kubernetes/Age-key"; }; };
   }];
+
+  tailscale = [{
+    ns = "tailscale";
+    secret-name = "tailscale-oauth";
+    fields = [{
+      "clientId" = {
+        path = "/Kubernetes/Tailscale-oauth";
+        field = "Username";
+      };
+      "clientSecret" = { path = "/Kubernetes/Tailscale-oauth"; };
+    }];
+  }];
 }
