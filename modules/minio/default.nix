@@ -44,7 +44,7 @@ let
         "ingress.kubernetes.io/proxy-body-size" = "0";
         "ingress.kubernetes.io/ssl-redirect" = "true";
       };
-      tls = true;
+      tls = cfg.tls.enable;
     };
   };
 
@@ -70,6 +70,10 @@ in with lib; {
       description = mdDoc "The ingress domain";
       type = types.str;
       default = defaultDomain;
+    };
+
+    tls = {
+      enable = mkEnableOption "Enable application";
     };
 
     values = mkOption {

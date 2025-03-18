@@ -50,6 +50,7 @@ in {
       # domain = "minio.dev.kronkltd.net";
       domain = "minio.localtest.me";
       enable = true;
+      tls.enable = false;
     };
 
     mssql.enable = false;

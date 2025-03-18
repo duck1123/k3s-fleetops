@@ -27,7 +27,3 @@ spec:
                   name: minio-console
             path: /
             pathType: ImplementationSpecific
-  tls:
-    - hosts:
-        - minio.localtest.me
-      secretName: minio.localtest.me-tls
