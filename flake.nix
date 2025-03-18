@@ -17,7 +17,7 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
   };
 
-  outputs = { flake-utils, nixhelm, nixidy, nixpkgs, self, ... }@inputs:
+  outputs = { flake-utils, nixhelm, nixidy, nixpkgs, self, ... }:
     (flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs { inherit system; };

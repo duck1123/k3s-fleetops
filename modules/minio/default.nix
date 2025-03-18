@@ -9,8 +9,9 @@ let
     chartHash = "sha256-zP40G0NweolTpH/Fnq9nOe486n39MqJBqQ45GwJEc1I=";
   };
 
+  defaultApiDomain = "minio-api.localhost";
+  defaultDomain = "minio.localhost";
   defaultNamespace = "minio";
-  domain = "minio.dev.kronkltd.net";
 
   clusterIssuer = "letsencrypt-prod";
 
@@ -18,7 +19,7 @@ let
     apiIngress = {
       enabled = true;
       ingressClassName = "traefik";
-      hostname = "minio-api.dev.kronkltd.net";
+      hostname = cfg.api-domain;
       annotations = {
         "cert-manager.io/cluster-issuer" = clusterIssuer;
         "ingress.kubernetes.io/force-ssl-redirect" = "true";
@@ -36,7 +37,7 @@ let
     ingress = {
       enabled = true;
       ingressClassName = "traefik";
-      hostname = domain;
+      hostname = cfg.domain;
       annotations = {
         "cert-manager.io/cluster-issuer" = "letsencrypt-prod";
         "ingress.kubernetes.io/force-ssl-redirect" = "true";
@@ -51,11 +52,24 @@ let
   namespace = cfg.namespace;
 in with lib; {
   options.services.minio = {
+    api-domain = mkOption {
+      description = mdDoc "The ingress domain for the API";
+      type = types.str;
+      default = defaultApiDomain;
+    };
+
     enable = mkEnableOption "Enable application";
+
     namespace = mkOption {
       description = mdDoc "The namespace to install into";
       type = types.str;
       default = defaultNamespace;
+    };
+
+    domain = mkOption {
+      description = mdDoc "The ingress domain";
+      type = types.str;
+      default = defaultDomain;
     };
 
     values = mkOption {

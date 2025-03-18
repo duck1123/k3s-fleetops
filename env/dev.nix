@@ -43,7 +43,15 @@ in {
     memos.enable = false;
     metabase.enable = false;
     mindsdb.enable = false;
-    minio.enable = true;
+
+    minio = {
+      # api-domain = "minio-api.dev.kronkltd.net";
+      api-domain = "minio-api.localtest.me";
+      # domain = "minio.dev.kronkltd.net";
+      domain = "minio.localtest.me";
+      enable = true;
+    };
+
     mssql.enable = false;
     openldap.enable = false;
     opentelemetry-collector.enable = false;
