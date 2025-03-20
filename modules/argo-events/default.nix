@@ -2,11 +2,12 @@
 let
   cfg = config.services.argo-events;
 
+  # https://artifacthub.io/packages/helm/argo/argo-events
   chart = lib.helm.downloadHelmChart {
     repo = "https://argoproj.github.io/argo-helm";
     chart = "argo-events";
-    version = "2.4.9";
-    chartHash = "sha256-tndmg6tUHYnyWbiWVvxSI9tNQwjYBzWwNa8OXRSxYAQ=";
+    version = "2.4.14";
+    chartHash = "sha256-gLZOCMLYd9lSQfOQKqgYVscsDcsOTc1v25FvY0P95W4=";
   };
 
   defaultNamespace = "argo-events";
