@@ -10,7 +10,8 @@ let
   };
 
   defaultNamespace = "jupyterhub";
-  domain = "jupyterhub.localhost";
+  # domain = "jupyterhub.localhost";
+  domain = "jupyterhub.dev.kronkltd.net";
   tls-secret-name = "jupyterhub-tls";
   clusterIssuer = "letsencrypt-prod";
 
