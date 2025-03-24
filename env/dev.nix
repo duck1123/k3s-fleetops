@@ -31,7 +31,7 @@ in {
     authentik.enable = false;
     cert-manager.enable = true;
 
-    cloudbeaver.enable = false;
+    cloudbeaver.enable = true;
 
     crossplane = {
       enable = false;
@@ -64,7 +64,7 @@ in {
     mssql.enable = false;
     openldap.enable = false;
     opentelemetry-collector.enable = false;
-    postgresql.enable = false;
+    postgresql.enable = true;
     redis.enable = false;
     sealed-secrets.enable = true;
 
