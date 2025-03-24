@@ -25,17 +25,17 @@ in {
     alice-specter.enable = false;
 
     argocd.enable = true;
-    argo-events.enable = true;
-    argo-workflows.enable = true;
+    argo-events.enable = false;
+    argo-workflows.enable = false;
 
     authentik.enable = false;
     cert-manager.enable = true;
 
-    cloudbeaver.enable = true;
+    cloudbeaver.enable = false;
 
     crossplane = {
-      enable = true;
-      providers.digital-ocean.enable = true;
+      enable = false;
+      providers.digital-ocean.enable = false;
     };
 
     demo.enable = false;
@@ -44,7 +44,7 @@ in {
     harbor.enable = false;
     homer.enable = false;
 
-    jupyterhub.enable = true;
+    jupyterhub.enable = false;
 
     keycloak.enable = false;
     lldap.enable = false;
@@ -69,7 +69,7 @@ in {
     sealed-secrets.enable = true;
 
     spark = {
-      enable = true;
+      enable = false;
       # domain = "spark.${base-domain}";
     };
 
