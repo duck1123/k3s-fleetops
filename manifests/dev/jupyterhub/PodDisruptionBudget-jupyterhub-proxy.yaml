@@ -1,0 +1,19 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  labels:
+    app.kubernetes.io/component: proxy
+    app.kubernetes.io/instance: jupyterhub
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: jupyterhub
+    app.kubernetes.io/version: 4.6.3
+    helm.sh/chart: jupyterhub-8.1.5
+  name: jupyterhub-proxy
+  namespace: jupyterhub
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: proxy
+      app.kubernetes.io/instance: jupyterhub
+      app.kubernetes.io/name: jupyterhub
