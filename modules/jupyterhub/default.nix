@@ -12,24 +12,19 @@ let
   defaultNamespace = "jupyterhub";
   domain = "jupyterhub.localhost";
   tls-secret-name = "jupyterhub-tls";
+  clusterIssuer = "letsencrypt-prod";
 
   defaultValues = {
-    # ingress.main = {
-    #   enabled = true;
-    #   hosts = [{
-    #     host = domain;
-    #     paths = [{ path = "/"; }];
-    #   }];
-    #   tls = [{
-    #     secretName = tls-secret-name;
-    #     hosts = [ domain ];
-    #   }];
-    # };
-    # persistence.data.enabled = false;
-    # postgresql = {
-    #   enabled = true;
-    #   primary.persistence.enabled = false;
-    # };
+    proxy.ingress = {
+      enabled = true;
+      ingressClassName = "traefik";
+      hostname = domain;
+      annotations = {
+        "cert-manager.io/cluster-issuer" = clusterIssuer;
+        "ingress.kubernetes.io/force-ssl-redirect" = "true";
+      };
+      tls = true;
+    };
   };
 
   values = lib.attrsets.recursiveUpdate defaultValues cfg.values;

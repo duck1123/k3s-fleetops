@@ -23,7 +23,7 @@ spec:
     metadata:
       annotations:
         checksum/hub-config: b266f3a95c56e2ad28d0f258380788b1e21dc857e8ddb4a07fc85eea152a6c42
-        checksum/hub-secret: 1370961bb229f06c1eceae07452f652d99751c85b7aa17a6e8e3d3ca4ccf7d3a
+        checksum/hub-secret: 9e166e7e6bae79b35fce39cfb2f9f49f4c80d4df86abb37733b7230627820d53
       labels:
         app.kubernetes.io/component: hub
         app.kubernetes.io/instance: jupyterhub

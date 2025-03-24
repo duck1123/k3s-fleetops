@@ -23,16 +23,21 @@ in {
     alice-bitcoin.enable = false;
     alice-lnd.enable = false;
     alice-specter.enable = false;
+
     argocd.enable = true;
     argo-events.enable = true;
     argo-workflows.enable = true;
+
     authentik.enable = false;
     cert-manager.enable = true;
+
     cloudbeaver.enable = true;
+
     crossplane = {
       enable = true;
       providers.digital-ocean.enable = true;
     };
+
     demo.enable = false;
     dinsro.enable = false;
     forgejo.enable = false;
@@ -48,9 +53,9 @@ in {
     mindsdb.enable = false;
 
     minio = {
-      # api-domain = "minio-api.dev.kronkltd.net";
+      # api-domain = "minio-api.${base-domain}";
       api-domain = "minio-api.localtest.me";
-      # domain = "minio.dev.kronkltd.net";
+      # domain = "minio.${base-domain}";
       domain = "minio.localtest.me";
       enable = true;
       tls.enable = false;
