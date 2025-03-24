@@ -48,6 +48,9 @@ in {
 
     keycloak.enable = false;
     lldap.enable = false;
+
+    longhorn.enable = true;
+
     memos.enable = false;
     metabase.enable = false;
     mindsdb.enable = false;

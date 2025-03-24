@@ -20,6 +20,7 @@
     ./keycloak
     ./jupyterhub
     ./lldap
+    ./longhorn
     ./memos
     ./metabase
     ./mindsdb
