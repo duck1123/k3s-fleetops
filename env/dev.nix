@@ -53,10 +53,10 @@ in {
     mindsdb.enable = false;
 
     minio = {
-      # api-domain = "minio-api.${base-domain}";
-      api-domain = "minio-api.localtest.me";
-      # domain = "minio.${base-domain}";
-      domain = "minio.localtest.me";
+      api-domain = "minio-api.${base-domain}";
+      # api-domain = "minio-api.localtest.me";
+      domain = "minio.${base-domain}";
+      # domain = "minio.localtest.me";
       enable = true;
       tls.enable = false;
     };

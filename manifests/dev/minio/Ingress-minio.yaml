@@ -17,7 +17,7 @@ metadata:
 spec:
   ingressClassName: traefik
   rules:
-    - host: minio.localtest.me
+    - host: minio.dev.kronkltd.net
       http:
         paths:
           - backend:
