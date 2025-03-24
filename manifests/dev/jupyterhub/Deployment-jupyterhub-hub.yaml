@@ -23,7 +23,7 @@ spec:
     metadata:
       annotations:
         checksum/hub-config: b266f3a95c56e2ad28d0f258380788b1e21dc857e8ddb4a07fc85eea152a6c42
-        checksum/hub-secret: c66a0d2e7d781dd0d180ee81160eabf28ef2f69b24fca140d4d941cd9a7561a1
+        checksum/hub-secret: 4d9dfc0d3b1c4c62803ce1ff7c8835d8480b79b1a08ae732e368f86a84097a85
       labels:
         app.kubernetes.io/component: hub
         app.kubernetes.io/instance: jupyterhub
@@ -76,7 +76,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   key: password
-                  name: jupyterhub-postgresql
+                  name: postgresql-credentials
           image: docker.io/bitnami/jupyterhub:4.1.6-debian-12-r15
           imagePullPolicy: IfNotPresent
           livenessProbe:
@@ -181,7 +181,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   key: password
-                  name: jupyterhub-postgresql
+                  name: postgresql-credentials
             - name: POSTGRESQL_CLIENT_POSTGRES_USER
               value: bn_jupyterhub
           image: docker.io/bitnami/postgresql:17.4.0-debian-12-r10

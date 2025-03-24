@@ -48,11 +48,11 @@ in {
 
     keycloak.enable = false;
 
-    kyverno.enable = true;
+    kyverno.enable = false;
 
     lldap.enable = false;
 
-    longhorn.enable = true;
+    longhorn.enable = false;
 
     memos.enable = false;
     metabase.enable = false;

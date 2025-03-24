@@ -57,12 +57,12 @@ spec:
               valueFrom:
                 secretKeyRef:
                   key: password
-                  name: jupyterhub-postgresql
+                  name: postgresql-credentials
             - name: POSTGRES_POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
                   key: postgres-password
-                  name: jupyterhub-postgresql
+                  name: postgresql-credentials
             - name: POSTGRES_DATABASE
               value: bitnami_jupyterhub
             - name: POSTGRESQL_ENABLE_LDAP

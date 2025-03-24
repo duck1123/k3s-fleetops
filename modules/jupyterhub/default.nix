@@ -18,14 +18,9 @@ let
   defaultValues = {
     hub = {
       adminUser = "admin";
-      configuration = builtins.toJSON {
-        hub.config.JupyterHub = {
-          admin_access = true;
-          authenticator_class = "nativeauthenticator.NativeAuthenticator";
-          Authenticator.admin_users = ["admin"];
-        };
-      };
     };
+
+    postgresql.auth.existingSecret = "postgresql-credentials";
 
     proxy.ingress = {
       enabled = true;

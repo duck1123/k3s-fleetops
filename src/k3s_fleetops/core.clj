@@ -190,6 +190,7 @@
     (shell {:in secret-json} cmd)))
 
 (defn get-secret-data
+  "Read the secrets config"
   []
   (edn/read-string (slurp "secrets.edn")))
 
@@ -235,7 +236,7 @@
           keepass-password (or keepass-password (prompt-password))
           secret-key       (keyword secret-name)
           chosen-maps      (get secret-data secret-key)]
-      (println {:secret-key secret-key :keepass-password keepass-password :chosen-maps chosen-maps})
+      #_(println {:secret-key secret-key :keepass-password keepass-password :chosen-maps chosen-maps})
       (create-sealed-secret secret-key chosen-maps keepass-password))
     (catch Exception ex
       (binding [*out* *err*] (println (ex-message ex)))
