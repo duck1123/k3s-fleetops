@@ -1,4 +1,4 @@
-{ charts, config, lib, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 let
   cfg = config.services.keycloak;
 
@@ -26,7 +26,7 @@ let
       ingressClassName = "traefik";
       hostname = domain;
       annotations = {
-        "cert-manager.io/cluster-issuer" = "letsencrypt-prod";
+        "cert-manager.io/cluster-issuer" = clusterIssuer;
         "ingress.kubernetes.io/force-ssl-redirect" = "true";
       };
       tls = true;

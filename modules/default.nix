@@ -18,6 +18,7 @@
     ./harbor
     ./homer
     ./keycloak
+    ./jupyterhub
     ./lldap
     ./memos
     ./metabase

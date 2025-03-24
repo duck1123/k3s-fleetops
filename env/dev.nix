@@ -38,6 +38,9 @@ in {
     forgejo.enable = false;
     harbor.enable = false;
     homer.enable = false;
+
+    jupyterhub.enable = true;
+
     keycloak.enable = false;
     lldap.enable = false;
     memos.enable = false;

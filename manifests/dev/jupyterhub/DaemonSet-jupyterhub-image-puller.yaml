@@ -1,0 +1,140 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    app.kubernetes.io/component: image-puller
+    app.kubernetes.io/instance: jupyterhub
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: jupyterhub
+    app.kubernetes.io/version: 4.1.6
+    helm.sh/chart: jupyterhub-8.1.5
+  name: jupyterhub-image-puller
+  namespace: jupyterhub
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: image-puller
+      app.kubernetes.io/instance: jupyterhub
+      app.kubernetes.io/name: jupyterhub
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: image-puller
+        app.kubernetes.io/instance: jupyterhub
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: jupyterhub
+        app.kubernetes.io/version: 4.1.6
+        helm.sh/chart: jupyterhub-8.1.5
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/component: image-puller
+                    app.kubernetes.io/instance: jupyterhub
+                    app.kubernetes.io/name: jupyterhub
+                topologyKey: kubernetes.io/hostname
+              weight: 1
+      containers:
+        - command:
+            - /bin/sh
+            - -c
+            - sleep infinity
+          image: docker.io/bitnami/os-shell:12-debian-12-r40
+          imagePullPolicy: IfNotPresent
+          name: pause
+          resources:
+            limits:
+              cpu: 150m
+              ephemeral-storage: 2Gi
+              memory: 192Mi
+            requests:
+              cpu: 100m
+              ephemeral-storage: 50Mi
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+            runAsGroup: 1001
+            runAsNonRoot: true
+            runAsUser: 1001
+            seLinuxOptions: {}
+            seccompProfile:
+              type: RuntimeDefault
+      initContainers:
+        - command:
+            - /bin/sh
+            - -c
+            - echo "Pulling complete"
+          image: docker.io/bitnami/jupyter-base-notebook:4.1.6-debian-12-r27
+          imagePullPolicy: IfNotPresent
+          name: pull-0
+          resources:
+            limits:
+              cpu: 150m
+              ephemeral-storage: 2Gi
+              memory: 192Mi
+            requests:
+              cpu: 100m
+              ephemeral-storage: 50Mi
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+            runAsGroup: 1001
+            runAsNonRoot: true
+            runAsUser: 1001
+            seLinuxOptions: {}
+            seccompProfile:
+              type: RuntimeDefault
+        - command:
+            - /bin/sh
+            - -c
+            - echo "Pulling complete"
+          image: docker.io/bitnami/os-shell:12-debian-12-r40
+          imagePullPolicy: IfNotPresent
+          name: pull-1
+          resources:
+            limits:
+              cpu: 150m
+              ephemeral-storage: 2Gi
+              memory: 192Mi
+            requests:
+              cpu: 100m
+              ephemeral-storage: 50Mi
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+            runAsGroup: 1001
+            runAsNonRoot: true
+            runAsUser: 1001
+            seLinuxOptions: {}
+            seccompProfile:
+              type: RuntimeDefault
+      securityContext:
+        fsGroup: 1001
+        fsGroupChangePolicy: Always
+        supplementalGroups: []
+        sysctls: []
+      serviceAccountName: jupyterhub-image-puller
+      volumes:
+        - emptyDir: {}
+          name: empty-dir
+  updateStrategy:
+    rollingUpdate: {}
+    type: RollingUpdate
