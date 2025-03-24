@@ -25,6 +25,8 @@ let
       enabled = true;
       host = "longhorn.localhost";
     };
+
+    preUpgradeChecker.jobEnabled = false;
   };
 
   values = lib.attrsets.recursiveUpdate defaultValues cfg.values;
