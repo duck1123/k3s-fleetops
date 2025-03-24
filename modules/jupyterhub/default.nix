@@ -16,6 +16,10 @@ let
   clusterIssuer = "letsencrypt-prod";
 
   defaultValues = {
+    hub = {
+      adminUser = "admin";
+    };
+
     proxy.ingress = {
       enabled = true;
       ingressClassName = "traefik";

@@ -1,0 +1,133 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/component: proxy
+    app.kubernetes.io/instance: jupyterhub
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: jupyterhub
+    app.kubernetes.io/version: 4.6.3
+    helm.sh/chart: jupyterhub-8.1.5
+  name: jupyterhub-proxy
+  namespace: jupyterhub
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: proxy
+      app.kubernetes.io/instance: jupyterhub
+      app.kubernetes.io/name: jupyterhub
+  strategy:
+    rollingUpdate: {}
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        checksum/hub-secret: ee625c949c31d4afb19f5717b73d98339d2ecc0d7b996b2741fddfa8165d3450
+      labels:
+        app.kubernetes.io/component: proxy
+        app.kubernetes.io/instance: jupyterhub
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: jupyterhub
+        app.kubernetes.io/version: 4.6.3
+        helm.sh/chart: jupyterhub-8.1.5
+        hub.jupyter.org/network-access-hub: "true"
+        hub.jupyter.org/network-access-singleuser: "true"
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/component: proxy
+                    app.kubernetes.io/instance: jupyterhub
+                    app.kubernetes.io/name: jupyterhub
+                topologyKey: kubernetes.io/hostname
+              weight: 1
+      automountServiceAccountToken: false
+      containers:
+        - args:
+            - configurable-http-proxy
+            - '--ip=::'
+            - '--api-ip=::'
+            - --api-port=8001
+            - --default-target=http://jupyterhub-hub:8081
+            - --error-target=http://jupyterhub-hub:8081/hub/error
+            - --port=8000
+          env:
+            - name: CONFIGPROXY_AUTH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  key: proxy-token
+                  name: jupyterhub-hub
+          image: docker.io/bitnami/configurable-http-proxy:4.6.3-debian-12-r5
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 30
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            tcpSocket:
+              port: http
+            timeoutSeconds: 3
+          name: proxy
+          ports:
+            - containerPort: 8000
+              name: http
+              protocol: TCP
+            - containerPort: 8001
+              name: api
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 30
+            httpGet:
+              path: /_chp_healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 3
+          resources:
+            limits:
+              cpu: 150m
+              ephemeral-storage: 2Gi
+              memory: 192Mi
+            requests:
+              cpu: 100m
+              ephemeral-storage: 50Mi
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+            runAsGroup: 1001
+            runAsNonRoot: true
+            runAsUser: 1001
+            seLinuxOptions: {}
+            seccompProfile:
+              type: RuntimeDefault
+          startupProbe:
+            failureThreshold: 30
+            httpGet:
+              path: /_chp_healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 3
+          volumeMounts:
+            - mountPath: /tmp
+              name: empty-dir
+              subPath: tmp-dir
+      securityContext:
+        fsGroup: 1001
+        fsGroupChangePolicy: Always
+        supplementalGroups: []
+        sysctls: []
+      serviceAccountName: jupyterhub-proxy
+      volumes:
+        - emptyDir: {}
+          name: empty-dir
