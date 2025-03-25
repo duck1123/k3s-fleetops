@@ -47,6 +47,9 @@ in {
     jupyterhub.enable = true;
 
     keycloak.enable = false;
+
+    kyverno.enable = true;
+
     lldap.enable = false;
 
     longhorn.enable = true;

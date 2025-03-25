@@ -1,4 +1,4 @@
-{ charts, config, lib, ... }:
+{ config, lib, ... }:
 let
   cfg = config.services.tempo;
 
