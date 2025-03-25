@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/component: image-puller
+    app.kubernetes.io/instance: jupyterhub
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: jupyterhub
+    app.kubernetes.io/version: 4.1.6
+    helm.sh/chart: jupyterhub-8.1.5
+  name: jupyterhub-image-puller
+  namespace: jupyterhub
+spec:
+  egress:
+    - {}
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: image-puller
+      app.kubernetes.io/instance: jupyterhub
+      app.kubernetes.io/name: jupyterhub
+  policyTypes:
+    - Ingress
+    - Egress

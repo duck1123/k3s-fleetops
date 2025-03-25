@@ -1,0 +1,32 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    ingress.kubernetes.io/force-ssl-redirect: "true"
+  labels:
+    app.kubernetes.io/component: proxy
+    app.kubernetes.io/instance: jupyterhub
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: jupyterhub
+    app.kubernetes.io/version: 4.6.3
+    helm.sh/chart: jupyterhub-8.1.5
+  name: jupyterhub
+  namespace: jupyterhub
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: jupyterhub.dev.kronkltd.net
+      http:
+        paths:
+          - backend:
+              service:
+                name: jupyterhub-proxy-public
+                port:
+                  name: http
+            path: /
+            pathType: ImplementationSpecific
+  tls:
+    - hosts:
+        - jupyterhub.dev.kronkltd.net
+      secretName: jupyterhub.dev.kronkltd.net-tls
