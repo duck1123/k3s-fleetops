@@ -16,7 +16,7 @@ let
   domain = "jupyterhub.dev.kronkltd.net";
   tls-secret-name = "jupyterhub-tls";
   clusterIssuer = "letsencrypt-prod";
-  postgresql-secret = "postgresql-credentials";
+  postgresql-secret = "jupyterhub-postgresql";
 
   defaultValues = {
     hub.adminUser = "admin";
