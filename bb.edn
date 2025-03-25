@@ -7,54 +7,62 @@
    [k3s-fleetops.core :as c])
 
   apply-git-hooks
-  {:docs "Register git hooks"
+  {:doc  "Register git hooks"
    :task (shell "git config core.hooksPath .githooks")}
 
   apply-master-application
-  {:docs "Install 00-master argo application"
+  {:doc  "Install 00-master argo application"
    :task (shell "kubectl apply -f target/infra-manifests/00-master.yaml")}
 
   build
-  {:docs "Convert all edn files to yaml"
+  {:doc  "Convert all edn files to yaml"
    :task (exec 'k3s-fleetops.core/build {})}
 
   build-charts
-  {:task (shell "nixidy build .#dev")}
+  {:doc  "Build nixidy charts"
+   :task (shell "nixidy build .#dev")}
 
   ci
-  {:depends [clean generate switch-charts build]}
+  {:doc     "Run all build steps"
+   :depends [clean generate switch-charts build]}
 
   clean
-  {:task (shell "rm -rf target")}
+  {:doc  "Clean generated files"
+   :task (shell "rm -rf target")}
 
   create-forgejo-password-secret
-  {:task (c/create-sealed-secret :forgejo)}
+  {:doc  "Create secret for forgejo"
+   :task (c/create-sealed-secret :forgejo)}
 
   create-harbor-password-secret
-  {:task (c/create-sealed-secret :harbor)}
+  {:doc  "Create secret for Harbor"
+   :task (c/create-sealed-secret :harbor)}
 
   create-keycloak-password-secret
-  {:task (c/create-sealed-secret :keycloak)}
+  {:doc  "Create secret for Keycloak"
+   :task (c/create-sealed-secret :keycloak)}
 
   create-sealed-secret
-  {:task (c/create-sealed-secret)}
+  {:doc  "Create sealed secrets"
+   :task (c/create-sealed-secret)}
 
   delete-secret-controller
-  {:docs "Delete the sealed secrets controller"
+  {:doc "Delete the sealed secrets controller"
    :task
    (let [namespace "sealed-secrets"
          command   (str "kubectl -n \"" namespace "\" delete pod -l name=sealed-secrets-controller")]
      (shell command))}
 
   format
-  {:task (shell "sh -c \"nixfmt **/*.nix\"")}
+  {:doc  "format code"
+   :task (shell "sh -c \"nixfmt **/*.nix\"")}
 
   forward-argocd
-  {:docs "Forward the argocd port"
+  {:doc  "Forward the argocd port"
    :task (shell "kubectl port-forward svc/argocd-server -n argocd 8080:443")}
 
   forward-traefik-dashboard
-  {:docs "Expose traefik dashboard"
+  {:doc "Expose traefik dashboard"
    :task
    (do
      (let [get-name-command "kubectl get pods --selector \"app.kubernetes.io/name=traefik\" --output=name"
@@ -63,11 +71,12 @@
        (shell command)))}
 
   generate
-  {:task (shell "nix run '.#generate'")}
+  {:doc  "Run CRD generators"
+   :task (shell "nix run '.#generate'")}
 
   ;; https://github.com/bitnami-labs/sealed-secrets/blob/main/docs/bring-your-own-certificates.md
   install-sealed-key
-  {:docs "Upload sealed secrets key"
+  {:doc "Upload sealed secrets key"
    :task
    (let [dry-run?    false
          namespace   "sealed-secrets"
@@ -86,17 +95,19 @@
        (shell command)))}
 
   switch-charts
-  {:task (shell "nixidy switch .#dev")}
+  {:doc  "Switch nixidy charts"
+   :task (shell "nixidy switch .#dev")}
 
   generate-key-file
-  {:task (shell "openssl rand -out keepass.keyx 256")}
+  {:doc  "Generate random keyfile"
+   :task (shell "openssl rand -out keepass.keyx 256")}
 
   k3d-create
-  {:description "Create a k3d cluster"
-   :task        (c/k3d-create)}
+  {:doc  "Create a k3d cluster"
+   :task (c/k3d-create)}
 
   apply-sealed-key-label
-  {:docs "Marked the sealed key as active"
+  {:doc "Marked the sealed key as active"
    :task
    (let [dry-run?    false
          namespace   "sealed-secrets"
