@@ -44,7 +44,7 @@ in {
     harbor.enable = false;
     homer.enable = false;
 
-    jupyterhub.enable = true;
+    jupyterhub.enable = false;
 
     keycloak.enable = false;
 
