@@ -232,10 +232,10 @@
   (try
     (let [secret-data      (get-secret-data)
           secret-names     (->> secret-data keys (map name))
-          secret-name      (or secret-name (choose secret-names))
+          secret-name      (or secret-name (str/trim (choose secret-names)))
           keepass-password (or keepass-password (prompt-password))
           secret-key       (keyword secret-name)
-          chosen-maps      (get secret-data secret-key)]
+          chosen-maps      (get secret-data secret-key [])]
       #_(println {:secret-key secret-key :keepass-password keepass-password :chosen-maps chosen-maps})
       (create-sealed-secret secret-key chosen-maps keepass-password))
     (catch Exception ex
