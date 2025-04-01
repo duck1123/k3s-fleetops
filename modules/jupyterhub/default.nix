@@ -11,10 +11,6 @@ let
     chartName = "jupyterhub";
   };
 
-  defaultNamespace = "jupyterhub";
-  # domain = "jupyterhub.localhost";
-  domain = "jupyterhub.dev.kronkltd.net";
-  tls-secret-name = "jupyterhub-tls";
   clusterIssuer = "letsencrypt-prod";
   postgresql-secret = "jupyterhub-postgresql";
 
@@ -26,7 +22,7 @@ let
     proxy.ingress = {
       enabled = true;
       ingressClassName = "traefik";
-      hostname = domain;
+      hostname = cfg.domain;
       annotations = {
         "cert-manager.io/cluster-issuer" = clusterIssuer;
         "ingress.kubernetes.io/force-ssl-redirect" = "true";
@@ -38,12 +34,19 @@ let
   values = lib.attrsets.recursiveUpdate defaultValues cfg.values;
   namespace = cfg.namespace;
 in with lib; {
-  options.services."${app-name}" = {
+  options.services.${app-name} = {
+    domain = mkOption {
+      description = mdDoc "The ingress domain";
+      type = types.str;
+      default = "jupyterhub.localhost";
+    };
+
     enable = mkEnableOption "Enable application";
+
     namespace = mkOption {
       description = mdDoc "The namespace to install into";
       type = types.str;
-      default = defaultNamespace;
+      default = app-name;
     };
 
     values = mkOption {
@@ -54,13 +57,13 @@ in with lib; {
   };
 
   config = mkIf cfg.enable {
-    applications."${app-name}" = {
+    applications.${app-name} = {
       inherit namespace;
       createNamespace = true;
       finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
-      helm.releases."${app-name}" = { inherit chart values; };
+      helm.releases.${app-name} = { inherit chart values; };
 
-      resources.sealedSecrets."${postgresql-secret}".spec = {
+      resources.sealedSecrets.${postgresql-secret}.spec = {
         encryptedData = {
           password =
             "AgBfQAPO54bG0mdsU0SKtep4teQqOHb8AO1RwMIqYB7AtBU/850zbq68GGQaxqVZ1gS3pyK2ZGTzQ2f101Q2WBIZK5N7G2H0475E3+6ehRZFSolBZaR0SFzsZ6sbIupQ/DfAbtGWJdt0bQjnqK+RmopNvShe8vDpdK28AKypB65HC4b2ou76s7CuTSm3oYocrMYwN/zPY6MdzNjh8dp8R/ybUsDSRm4HE4N4jb6MPFsNb2Vy0dQgH39dgxrTgAioe/xj/QNdfHUYynZkrPcdRd9g8TU1Lcbw4jpUXQu6gWGt3Qiyw0ihzX5QoJsi7sgek/76w0sIxT6BKXgqHi8T2UtyklPWVP7bxsl8LlDUP2pdjplE5INf6FcBSXA3pUoORTsGBuZC3lRTjmi9VnhuTFRSu5ftUQ+NuOEk5oKVOOVGMuf0wkO08KIh1JnNWFkDb5W0qn32z+ePVC53YCFVcJPuNBbZLAKm/3XnUKin6M9453SXlDxPH0xwQOvY3OO8OMpZi2oQDD7UkwSe+RsD/zclULa8gqZ9vebrm0QGVjeFMB81TVNUoloJBaAHgzjdQ35IfDhYWbg9Fqk6CPlkP30xVZjY4W40AQDk9/wewVhJQ0781AyvEHnv7qVV7Px9H5f+WJdN5U2inyPZJwkKTkCOA7sq2lOz/arSTRsLRWv0PRG7c90SayoZtGeET98GmFfy0B66n+/jPpMdGJZdcan3oEbSog==";

@@ -44,7 +44,10 @@ in {
     harbor.enable = false;
     homer.enable = false;
 
-    jupyterhub.enable = true;
+    jupyterhub = {
+      enable = true;
+      domain = "jupyterhub.dev.kronkltd.net";
+    };
 
     keycloak.enable = false;
 
