@@ -2,9 +2,10 @@
 # without having to repeat yourself.
 # Also see https://github.com/Mic92/dotfiles/blob/master/nixos/.sops.yaml
 # for a more complex example.
-keys: []
+keys:
+  - &primary age1vs7ywtgycey4lc4aeq9npznlsj2xfcq3c725h5dk3rzkn4ay6vjsmmpedc
 creation_rules:
-  - path_regex: '.*-secret.sops.yaml'
-    encrypted_regex: ^(data|stringData)$
+  - path_regex: secrets/secrets.yaml$
     key_groups:
-      - age: []
+      - age:
+        - *primary

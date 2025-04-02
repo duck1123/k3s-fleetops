@@ -32,6 +32,7 @@
     ./postgresql
     ./redis
     ./sealed-secrets
+    ./sops
     ./spark
     ./sqlpad
     ./tempo

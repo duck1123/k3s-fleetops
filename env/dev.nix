@@ -77,6 +77,8 @@ in {
     redis.enable = false;
     sealed-secrets.enable = true;
 
+    sops.enable = true;
+
     spark = {
       enable = false;
       # domain = "spark.${base-domain}";

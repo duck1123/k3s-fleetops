@@ -15,6 +15,8 @@
     };
 
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+
+    sops-nix.url = "github:Mic92/sops-nix";
   };
 
   outputs = { flake-utils, nixhelm, nixidy, nixpkgs, self, ... }:
