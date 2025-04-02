@@ -64,9 +64,6 @@
           modules = [ ./modules ];
         };
 
-        packages = {
-          inherit (generators.packages) generators;
-          nixidy = nixidy.packages.${system}.default;
-        };
+        packages.nixidy = nixidy.packages.${system}.default;
       }));
 }

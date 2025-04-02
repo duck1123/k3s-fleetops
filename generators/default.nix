@@ -11,12 +11,7 @@ let
     value = import (./. + "/${file}") sharedConfig;
   }) generatorFiles);
 in {
-  # inherit generators;
-
-  packages.generators = generators;
-
-  apps.generate = let generators = self.packages.${system}.generators;
-  in {
+  apps.generate = {
     type = "app";
     program = (pkgs.writeShellScript "generate-modules" ''
       set -eo pipefail
