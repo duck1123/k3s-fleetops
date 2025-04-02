@@ -174,6 +174,7 @@
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; [
             nixidy.packages.${system}.default
+            age
             argo
             argocd
             babashka
@@ -186,6 +187,9 @@
             kubernetes-helm
             kubeseal
             openssl
+            sops
+            ssh-to-age
+            ssh-to-pgp
           ];
         };
       }));
