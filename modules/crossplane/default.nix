@@ -1,6 +1,7 @@
 { config, lib, ... }:
 let
-  cfg = config.services.crossplane;
+  app-name = "crossplane";
+  cfg = config.services.${app-name};
 
   chart = lib.helm.downloadHelmChart {
     repo = "https://charts.crossplane.io/master/";
@@ -9,22 +10,19 @@ let
     chartHash = "sha256-mzXUVxHhDgJ9bPH+4Msr8lzlQ74PkK/tw+n9n0xYvYA=";
   };
 
-  defaultNamespace = "crossplane";
-
   defaultValues = { image.pullPolicy = "Always"; };
 
   values = lib.attrsets.recursiveUpdate defaultValues cfg.values;
-  namespace = cfg.namespace;
 in with lib; {
   imports = [ ./providers ];
 
-  options.services.crossplane = {
+  options.services.${app-name} = {
     enable = mkEnableOption "Enable application";
 
     namespace = mkOption {
       description = mdDoc "The namespace to install into";
       type = types.str;
-      default = defaultNamespace;
+      default = app-name;
     };
 
     values = mkOption {
@@ -35,15 +33,14 @@ in with lib; {
   };
 
   config = mkIf cfg.enable {
-
-    nixidy.resourceImports = [ ./generated.nix ];
-
-    applications.crossplane = {
-      inherit namespace;
+    applications.${app-name} = {
+      inherit (cfg) namespace;
       createNamespace = true;
       finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
-      helm.releases.crossplane = { inherit chart values; };
+      helm.releases.${app-name} = { inherit chart values; };
       syncPolicy.finalSyncOpts = [ "CreateNamespace=true" ];
     };
+
+    nixidy.resourceImports = [ ./generated.nix ];
   };
 }
