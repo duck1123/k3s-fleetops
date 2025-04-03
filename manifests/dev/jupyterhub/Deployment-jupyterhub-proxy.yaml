@@ -22,7 +22,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/hub-secret: c69413dcb81a1b8ee7a4984e83873a7c4faf8ca95eaca6663ce739554fd6ddf7
+        checksum/hub-secret: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
       labels:
         app.kubernetes.io/component: proxy
         app.kubernetes.io/instance: jupyterhub

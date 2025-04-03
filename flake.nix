@@ -23,16 +23,16 @@
     (flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs { inherit system; };
+        sopsConfig = ./.sops.yaml;
+        encryptString = import ./encryptString.nix { inherit pkgs sopsConfig; };
         helmChart = import ./helmChart.nix;
-        sharedConfig = { inherit inputs system pkgs;};
+        sharedConfig = { inherit inputs system pkgs; };
         generators = import ./generators sharedConfig;
       in {
-        lib = { inherit helmChart; };
+        lib = { inherit encryptString helmChart; };
         imports = [ generators ];
 
-        apps = {
-          inherit (generators.apps) generate;
-        };
+        apps = { inherit (generators.apps) generate; };
 
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; [
@@ -60,7 +60,10 @@
           inherit pkgs;
           charts = nixhelm.chartsDerivations.${system};
           envs.dev.modules = [ ./env/dev.nix ];
-          libOverlay = final: prev: { inherit helmChart; };
+          libOverlay = final: prev: {
+            inherit encryptString helmChart;
+            sopsConfig = ./.sops.yaml;
+          };
           modules = [ ./modules ];
         };
 
