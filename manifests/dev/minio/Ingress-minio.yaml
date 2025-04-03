@@ -27,3 +27,7 @@ spec:
                   name: minio-console
             path: /
             pathType: ImplementationSpecific
+  tls:
+    - hosts:
+        - minio.dev.kronkltd.net
+      secretName: minio.dev.kronkltd.net-tls

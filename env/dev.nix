@@ -67,7 +67,7 @@ in {
       domain = "minio.${base-domain}";
       # domain = "minio.localtest.me";
       enable = true;
-      tls.enable = false;
+      tls.enable = true;
     };
 
     mssql.enable = false;
