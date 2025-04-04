@@ -3,7 +3,7 @@ let
   app-name = "sops";
   cfg = config.services.${app-name};
 
-  # https://artifacthub.io/packages/helm/bitnami/redis
+  # https://artifacthub.io/packages/helm/sops-secrets-operator/sops-secrets-operator
   chart = lib.helm.downloadHelmChart {
     repo = "https://isindir.github.io/sops-secrets-operator/";
     chart = "sops-secrets-operator";
@@ -13,7 +13,17 @@ let
 
   defaultNamespace = app-name;
 
-  defaultValues = { };
+  defaultValues = {
+    extraEnv = [{
+      name = "SOPS_AGE_KEY_FILE";
+      value = "/etc/sops-age-key-file/key";
+    }];
+    secretsAsFiles = [{
+      mountPath = "/etc/sops-age-key-file";
+      name = "sops-age-key-file";
+      secretName = "sops-age-key-file";
+    }];
+  };
 
   values = lib.attrsets.recursiveUpdate defaultValues cfg.values;
 in with lib; {
