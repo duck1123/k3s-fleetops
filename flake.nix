@@ -53,6 +53,7 @@
             sops
             ssh-to-age
             ssh-to-pgp
+            yq
           ];
         };
 
