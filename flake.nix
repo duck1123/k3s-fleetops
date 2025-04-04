@@ -22,9 +22,11 @@
   outputs = { flake-utils, nixhelm, nixidy, nixpkgs, ... }@inputs:
     (flake-utils.lib.eachDefaultSystem (system:
       let
+        ageRecipients =
+          "age1n372e8dgautnjhecllf7uvvldw9g6vyx3kggj0kyduz5jr2upvysue242c";
         pkgs = import nixpkgs { inherit system; };
-        sopsConfig = ./.sops.yaml;
-        encryptString = import ./encryptString.nix { inherit pkgs sopsConfig; };
+        encryptString =
+          import ./encryptString.nix { inherit ageRecipients pkgs; };
         helmChart = import ./helmChart.nix;
         sharedConfig = { inherit inputs system pkgs; };
         generators = import ./generators sharedConfig;

@@ -1,6 +1,5 @@
 { config, lib, pkgs, ... }:
 let
-  inherit (lib) sopsConfig;
   app-name = "jupyterhub";
 
   cfg = config.services."${app-name}";
@@ -17,28 +16,38 @@ let
 
   hub-secret = "jupyterhub-hub";
   hub-config = import ./config.nix { inherit (cfg) password; };
-  hub-yaml =
-    ((pkgs.formats.yaml { }).generate "config.yaml" hub-config).drvAttrs.value;
+  yaml-formatter = pkgs.formats.yaml { };
+  hub-yaml = (yaml-formatter.generate "config.yaml" hub-config).drvAttrs.value;
 
-  encrypted-cookie-secrets = lib.encryptString {
-    secretName = "cookie-secrets";
-    value = cfg.cookie-secrets;
+  hub-secret-config = {
+    apiVersion = "isindir.github.com/v1alpha3";
+    kind = "SopsSecret";
+    metadata = {
+      name = hub-secret;
+      inherit (cfg) namespace;
+    };
+    spec = {
+      secretTemplates = [{
+        name = hub-secret;
+        stringData = {
+          "hub.config.CryptKeeper.keys" = cfg.cryptkeeper-keys;
+          "hub.config.JupyterHub.cookie_secret" = cfg.cookie-secret;
+          "proxy-token" = cfg.proxy-token;
+          "values.yaml" = hub-yaml;
+        };
+      }];
+    };
   };
 
-  encrypted-cryptkeeper-keys = lib.encryptString {
-    secretName = "cryptkeeper-keys";
-    value = cfg.cryptkeeper-keys;
+  hub-secret-config-yaml =
+    (yaml-formatter.generate "values.yaml" hub-secret-config).drvAttrs.value;
+
+  encrypted-secret-config = lib.encryptString {
+    secretName = hub-secret;
+    value = hub-secret-config-yaml;
   };
 
-  encrypted-proxy-token = lib.encryptString {
-    secretName = "proxy-token";
-    value = cfg.proxy-token;
-  };
-
-  encryptedYaml = lib.encryptString {
-    secretName = "hub-values";
-    value = hub-yaml;
-  };
+  encrypted-secret-config-object = builtins.fromJSON encrypted-secret-config;
 
   defaultValues = {
     hub = {
@@ -61,10 +70,9 @@ let
   };
 
   values = lib.attrsets.recursiveUpdate defaultValues cfg.values;
-  namespace = cfg.namespace;
 in with lib; {
   options.services.${app-name} = {
-    cookie-secrets = mkOption {
+    cookie-secret = mkOption {
       description = mdDoc "The cookie secret";
       type = types.str;
       default = "CHANGEME";
@@ -111,7 +119,7 @@ in with lib; {
 
   config = mkIf cfg.enable {
     applications.${app-name} = {
-      inherit namespace;
+      inherit (cfg) namespace;
       createNamespace = true;
       finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
       helm.releases.${app-name} = { inherit chart values; };
@@ -128,20 +136,14 @@ in with lib; {
           };
 
           template.metadata = {
-            inherit namespace;
+            inherit (cfg) namespace;
             name = postgresql-secret;
           };
         };
 
-        sopsSecrets.${hub-secret}.spec.secretTemplates = [{
-          name = hub-secret;
-          stringData = {
-            "hub.config.CryptKeeper.keys" = encrypted-cryptkeeper-keys;
-            "hub.config.JupyterHub.cookie_secret" = encrypted-cookie-secrets;
-            "proxy-token" = encrypted-proxy-token;
-            "values.yaml" = encryptedYaml;
-          };
-        }];
+        sopsSecrets.${hub-secret} = {
+          inherit (encrypted-secret-config-object) sops spec;
+        };
       };
 
       syncPolicy.finalSyncOpts = [ "CreateNamespace=true" ];

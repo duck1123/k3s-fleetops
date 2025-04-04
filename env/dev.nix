@@ -46,7 +46,7 @@ in {
 
     jupyterhub = {
       enable = true;
-      cookie-secrets = "6b8150585353762fdaeb7960d87a7b9eb065b912e12a39f4581cbfa405e368f2";
+      cookie-secret = "6b8150585353762fdaeb7960d87a7b9eb065b912e12a39f4581cbfa405e368f2";
       cryptkeeper-keys = "OTBjM2NjMzFmMmQyYzIzZmU5OWY1NTQ5MDJiYmYyMDY3MGY0NGI0Zjc0MzE0OGZkODFkNmFiMzk0MTdkY2IzZA";
       domain = "jupyterhub.dev.kronkltd.net";
       password = "v2ryCkHmGG";
