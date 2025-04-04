@@ -110,4 +110,10 @@
     secret-name = "redis-password";
     fields = { "password" = { path = "/Kubernetes/redis"; }; };
   }];
+
+  sops = [{
+    ns = "sops";
+    secret-name = "sops-age-key";
+    fields = { "age.key" = { path = "/Kubernetes/Age-key"; }; };
+  }];
 }
