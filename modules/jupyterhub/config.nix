@@ -77,9 +77,9 @@
     };
 
     cmd = "jupyterhub-singleuser";
-    defaultUrl = [ ];
+    defaultUrl = null;
     events = true;
-    extraAnnotations = [ ];
+    extraAnnotations = null;
 
     extraLabels = {
       "app.kubernetes.io/component" = "singleuser";
@@ -99,10 +99,10 @@
     };
 
     networkTools.image = {
-      digest = [ ];
+      digest = null;
       name = "docker.io/bitnami/os-shell";
       pullPolicy = "IfNotPresent";
-      pullSecrets = [ ];
+      pullSecrets = null;
       tag = "12-debian-12-r40";
     };
 
