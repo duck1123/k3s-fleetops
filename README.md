@@ -11,11 +11,25 @@ my cluster
 
 ## List Tasks
 
+List all the available babashka tasks
+
 ```sh {"id":"01J9DFJCFCN3TYYMJHEZJVZZCJ","name":"list-tasks"}
 bb tasks
 ```
 
+## Create Key
+
+Create a private key for securing secrets
+
+```sh {"name": "create-age-key"}
+age-keygen -o ~/.config/sops/age/keys.txt
+```
+
+This will fail if the file has already been created
+
 ## Build
+
+Compile all edn templates to yaml
 
 ```sh {"category":"Building","excludeFromRunAll":"true","id":"01J9DFM8AX7SNGCJJK6XCCV3G3","interactive":"false","name":"build-code"}
 bb build
@@ -37,17 +51,21 @@ All secrets are encrypted with that key
 
 ## Registry
 
+Create a k3d registry for storing localally-built dev images
+
 ```sh {"id":"01J9HAPD89ZH24ER7CP99BVFM4","name":"create-registry"}
 bbg k3d-create-registry
 ```
 
 ## Cluster
 
-See https://github.com/duck1123/dotfiles
+Create a k3d cluster
 
 ```sh {"id":"01J9HAPD89ZH24ER7CPE4916TR","name":"create-cluster"}
 bbg k3d-create
 ```
+
+See https://github.com/duck1123/dotfiles
 
 ### Check Pod Status
 
@@ -65,17 +83,23 @@ https://argo-cd.readthedocs.io/en/stable/getting_started/
 
 #### Add Repo
 
+Register Argo Helm Repo
+
 ```sh {"id":"01JBT0MF6SEC8NMMCZW17AYQEC"}
 helm repo add argo https://argoproj.github.io/argo-helm
 ```
 
 #### Create Namespace
 
+Create namespace for argocd
+
 ```sh {"id":"01JBT0MF6SEC8NMMCZW3PFPEJD","name":"create-argo-namespace"}
 kubectl create namespace argocd
 ```
 
 ### Install Helm Chart
+
+Load ArgoCD helm chart
 
 ```sh {"id":"01JBT0MF6SEC8NMMCZW5Y95TD9","name":"install-argocd"}
 export DOMAIN="argocd.dev.kronkltd.net"
@@ -99,11 +123,15 @@ EOF
 
 ### Get password
 
+Fetch the default argocd password
+
 ```sh {"id":"01J9HAPD89ZH24ER7CPMKQ1FJW","name":"get-initial-password"}
 argocd admin initial-password -n argocd
 ```
 
 ### Forward ports
+
+Forward argocd interface ports
 
 ```sh {"background":"true","id":"01J9HAPD89ZH24ER7CPRARMG51","interactive":"false","name":"forward-argocd-ports"}
 kubectl port-forward svc/argocd-server -n argocd 8080:443
@@ -113,7 +141,7 @@ https://localhost:8080/
 
 ### Apply master app
 
-This registers the `00-master` Application with argocd.
+Registers the `00-master` Application with argocd.
 
 ```sh {"id":"01J9HAPD89ZH24ER7CPSBSYNH3","name":"apply-master-application"}
 bb apply-master-application
@@ -158,13 +186,15 @@ Ensure that `tls.crt` and `tls.key` have been installed to the root of the direc
 
 #### Upload sealed key to server
 
-Creates a secret from the keypair
+Create a secret from the keypair
 
 ```sh {"id":"01J9HAPD89ZH24ER7CPX4JV20M","name":"install-sealed-key"}
 bb install-sealed-key
 ```
 
 #### Mark key as active
+
+Flag sealed secret key as active
 
 ```sh {"id":"01J9HAPD89ZH24ER7CPY71BQTB","name":"apply-sealed-key-label"}
 bb apply-sealed-key-label
@@ -194,17 +224,23 @@ k3d registry delete k3d-myregistry.localtest.me
 
 ### Read token
 
+Read argo workflow token from secret
+
 ```sh {"name": "read-token"}
 echo "Bearer $(kubectl -n argo-workflows get secret duck.service-account-token -o=jsonpath='{.data.token}' | base64 --decode)"
 ```
 
 # Generate CRD
 
+Generate nixidy schemas from CRDs
+
 ```sh {"name": "generate-crds"}
 nix run .#generate
 ```
 
 # Build charts
+
+Compile Nixidy config to YAML manifests
 
 ```sh {"name": "build-charts"}
 nixidy build .#dev
