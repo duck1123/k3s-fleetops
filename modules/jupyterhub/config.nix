@@ -15,7 +15,7 @@
   };
 
   hub = {
-    activeServerLimit = [ ];
+    activeServerLimit = null;
     allowNamedServers = false;
     concurrentSpawnLimit = 64;
 
