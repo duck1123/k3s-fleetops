@@ -27,7 +27,7 @@
     };
 
     consecutiveFailureLimit = 5;
-    cookieSecret = [ ];
+    cookieSecret = null;
 
     db = {
       type = "postgres";
@@ -35,18 +35,18 @@
         "postgresql://bn_jupyterhub@jupyterhub-postgresql:5432/bitnami_jupyterhub";
     };
 
-    namedServerLimitPerUser = [ ];
-    redirectToServer = [ ];
+    namedServerLimitPerUser = null;
+    redirectToServer = null;
     services = { };
-    shutdownOnLogout = [ ];
+    shutdownOnLogout = null;
   };
 
   image = {
     name = "docker.io/bitnami/jupyter-base-notebook";
     tag = "4.1.6-debian-12-r27";
-    digest = [ ];
+    digest = null;
     pullPolicy = "IfNotPresent";
-    pullSecrets = [ ];
+    pullSecrets = null;
   };
 
   Release = {
