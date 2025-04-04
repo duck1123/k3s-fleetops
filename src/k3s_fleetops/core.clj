@@ -174,7 +174,7 @@
 
 (defn seal-secret
   [{target-ns :ns :keys [secret-name]} secret-json]
-  (let [sealed-dir      (str "argo-application-manifests/" target-ns "/")
+  (let [sealed-dir      "argo-manifests/"
         sealed-file     (str sealed-dir secret-name "-sealed-secret.yaml")
         controller-name (:name sealed-secrets-controller)
         controller-ns   (:ns sealed-secrets-controller)
