@@ -15,7 +15,7 @@
   };
 
   hub = {
-    activeServerLimit = null;
+    activeServerLimit = "";
     allowNamedServers = false;
     concurrentSpawnLimit = 64;
 
@@ -27,7 +27,7 @@
     };
 
     consecutiveFailureLimit = 5;
-    cookieSecret = null;
+    cookieSecret = "";
 
     db = {
       type = "postgres";
@@ -35,18 +35,18 @@
         "postgresql://bn_jupyterhub@jupyterhub-postgresql:5432/bitnami_jupyterhub";
     };
 
-    namedServerLimitPerUser = null;
-    redirectToServer = null;
+    namedServerLimitPerUser = "";
+    redirectToServer = "";
     services = { };
-    shutdownOnLogout = null;
+    shutdownOnLogout = "";
   };
 
   image = {
     name = "docker.io/bitnami/jupyter-base-notebook";
     tag = "4.1.6-debian-12-r27";
-    digest = null;
+    digest = "";
     pullPolicy = "IfNotPresent";
-    pullSecrets = null;
+    pullSecrets = "";
   };
 
   Release = {
@@ -77,9 +77,9 @@
     };
 
     cmd = "jupyterhub-singleuser";
-    defaultUrl = null;
+    defaultUrl = "";
     events = true;
-    extraAnnotations = null;
+    extraAnnotations = "";
 
     extraLabels = {
       "app.kubernetes.io/component" = "singleuser";
@@ -99,10 +99,10 @@
     };
 
     networkTools.image = {
-      digest = null;
+      digest = "";
       name = "docker.io/bitnami/os-shell";
       pullPolicy = "IfNotPresent";
-      pullSecrets = null;
+      pullSecrets = "";
       tag = "12-debian-12-r40";
     };
 
