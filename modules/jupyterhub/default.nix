@@ -60,7 +60,7 @@ let
   defaultValues = {
     hub = {
       adminUser = "admin";
-      existingSecret = hub-secret;
+      # existingSecret = hub-secret;
     };
 
     postgresql.auth.existingSecret = postgresql-secret;
