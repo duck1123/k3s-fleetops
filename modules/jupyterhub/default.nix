@@ -17,7 +17,15 @@ let
   hub-secret = "jupyterhub-hub2";
   hub-config = import ./config.nix { inherit (cfg) password; };
   yaml-formatter = pkgs.formats.yaml { };
-  hub-yaml = (yaml-formatter.generate "config.yaml" hub-config).drvAttrs.value;
+  hub-json = (yaml-formatter.generate "config.yaml" hub-config).drvAttrs.value;
+  hub-json-file = builtins.toFile "input.json" hub-json;
+  hub-json-drv = pkgs.runCommand "convert-values-yaml" {
+    nativeBuildInputs = with pkgs; [ jq yq ];
+  } ''
+    cat ${hub-json-file} | yq -y . > $out
+  '';
+
+  hub-yaml = builtins.readFile hub-json-drv;
 
   hub-secret-config = {
     apiVersion = "isindir.github.com/v1alpha3";
