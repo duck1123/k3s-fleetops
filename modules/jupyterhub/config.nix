@@ -41,14 +41,6 @@
     shutdownOnLogout = null;
   };
 
-  image = {
-    name = "docker.io/bitnami/jupyter-base-notebook";
-    tag = "4.1.6-debian-12-r27";
-    digest = null;
-    pullPolicy = "IfNotPresent";
-    pullSecrets = null;
-  };
-
   Release = {
     Name = "jupyterhub";
     Namespace = "jupyterhub";
@@ -92,6 +84,14 @@
     };
 
     fsGid = 1001;
+
+    image = {
+      name = "docker.io/bitnami/jupyter-base-notebook";
+      tag = "4.1.6-debian-12-r27";
+      digest = null;
+      pullPolicy = "IfNotPresent";
+      pullSecrets = null;
+    };
 
     memory = {
       limit = "768M";
