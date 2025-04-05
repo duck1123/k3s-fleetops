@@ -14,7 +14,7 @@ let
   clusterIssuer = "letsencrypt-prod";
   postgresql-secret = "jupyterhub-postgresql";
 
-  hub-secret = "jupyterhub-hub";
+  hub-secret = "jupyterhub-hub2";
   hub-config = import ./config.nix { inherit (cfg) password; };
   yaml-formatter = pkgs.formats.yaml { };
   hub-yaml = (yaml-formatter.generate "config.yaml" hub-config).drvAttrs.value;
@@ -52,7 +52,7 @@ let
   defaultValues = {
     hub = {
       adminUser = "admin";
-      existingSecret = hub-secret;
+      # existingSecret = hub-secret;
     };
 
     postgresql.auth.existingSecret = postgresql-secret;
