@@ -60,8 +60,8 @@
     cloudMetadata.blockWithIptables = false;
 
     cpu = {
-      limit = "0.75";
-      guarantee = "0.5";
+      limit = 0.75;
+      guarantee = 0.5;
     };
 
     containerSecurityContext = {
