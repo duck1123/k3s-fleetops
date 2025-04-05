@@ -22,16 +22,23 @@
   outputs = { flake-utils, nixhelm, nixidy, nixpkgs, ... }@inputs:
     (flake-utils.lib.eachDefaultSystem (system:
       let
+        # naughty config
         ageRecipients =
           "age1n372e8dgautnjhecllf7uvvldw9g6vyx3kggj0kyduz5jr2upvysue242c";
+
         pkgs = import nixpkgs { inherit system; };
         encryptString =
           import ./encryptString.nix { inherit ageRecipients pkgs; };
         helmChart = import ./helmChart.nix;
         sharedConfig = { inherit inputs system pkgs; };
+        toYAML = import ./toYAML.nix;
         generators = import ./generators sharedConfig;
+        lib = {
+          inherit encryptString helmChart toYAML;
+          sopsConfig = ./.sops.yaml;
+        };
       in {
-        lib = { inherit encryptString helmChart; };
+        inherit lib;
         imports = [ generators ];
 
         apps = { inherit (generators.apps) generate; };
@@ -63,10 +70,7 @@
           inherit pkgs;
           charts = nixhelm.chartsDerivations.${system};
           envs.dev.modules = [ ./env/dev.nix ];
-          libOverlay = final: prev: {
-            inherit encryptString helmChart;
-            sopsConfig = ./.sops.yaml;
-          };
+          libOverlay = final: prev: lib;
           modules = [ ./modules ];
         };
 

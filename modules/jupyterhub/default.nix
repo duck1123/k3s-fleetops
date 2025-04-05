@@ -12,20 +12,14 @@ let
   };
 
   clusterIssuer = "letsencrypt-prod";
-  postgresql-secret = "jupyterhub-postgresql";
 
   hub-secret = "jupyterhub-hub2";
-  hub-config = import ./config.nix { inherit (cfg) password; };
-  yaml-formatter = pkgs.formats.yaml { };
-  hub-json = (yaml-formatter.generate "config.yaml" hub-config).drvAttrs.value;
-  hub-json-file = builtins.toFile "input.json" hub-json;
-  hub-json-drv = pkgs.runCommand "convert-values-yaml" {
-    nativeBuildInputs = with pkgs; [ jq yq ];
-  } ''
-    cat ${hub-json-file} | yq -y . > $out
-  '';
+  postgresql-secret = "jupyterhub-postgresql";
 
-  hub-yaml = builtins.readFile hub-json-drv;
+  hub-values = lib.toYAML {
+    inherit pkgs;
+    value = import ./config.nix { inherit (cfg) password; };
+  };
 
   hub-secret-config = {
     apiVersion = "isindir.github.com/v1alpha3";
@@ -41,14 +35,16 @@ let
           "hub.config.CryptKeeper.keys" = cfg.cryptkeeper-keys;
           "hub.config.JupyterHub.cookie_secret" = cfg.cookie-secret;
           "proxy-token" = cfg.proxy-token;
-          "values.yaml" = hub-yaml;
+          "values.yaml" = hub-values;
         };
       }];
     };
   };
 
-  hub-secret-config-yaml =
-    (yaml-formatter.generate "values.yaml" hub-secret-config).drvAttrs.value;
+  hub-secret-config-yaml = lib.toYAML {
+    inherit pkgs;
+    value = hub-secret-config;
+  };
 
   encrypted-secret-config = lib.encryptString {
     secretName = hub-secret;
