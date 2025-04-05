@@ -206,7 +206,23 @@
            (str k "=" data)))
        (str/join "\n")))
 
-#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
+(defn create-secret-file
+  [secret-key chosen-maps keepass-password]
+  (doseq [chosen-data chosen-maps]
+    (prn chosen-data)
+    (let [{:keys [secret-name]} chosen-data
+          secret-values (get-secret-values chosen-data keepass-password)]
+      (println "\n\n")
+      (spit (str secret-name ".json") (create-secret chosen-data secret-values))
+      (let [args ["cat"
+                  (str secret-name ".json")
+                  "|"
+                  "yq -y ."
+                  ">"
+                  (str secret-name ".yaml")]
+            cmd (str/join " " args)]
+        (shell (str "sh -c \"" cmd "\""))))))
+
 (defn create-sealed-secret
   ([]
    (let [secret-data  (get-secret-data)
@@ -236,11 +252,31 @@
           keepass-password (or keepass-password (str/trim (prompt-password)))
           secret-key       (keyword secret-name)
           chosen-maps      (get secret-data secret-key [])]
-      (binding [*out* *err*]
-        (println {:secret-key       secret-key
-                  :keepass-password keepass-password
-                  :chosen-maps      chosen-maps}))
+      #_(binding [*out* *err*]
+          (println {:secret-key           secret-key
+                    #_#_:keepass-password keepass-password
+                    :chosen-maps          chosen-maps}))
       (create-sealed-secret secret-key chosen-maps keepass-password))
+    (catch Exception ex
+      (binding [*out* *err*] (println (ex-message ex)))
+      #_(binding [*out* *err*] (println ex))
+      (System/exit 1))))
+
+#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
+(defn create-secret-command
+  [{:keys [keepass-password secret-name]}]
+  (try
+    (let [secret-data      (get-secret-data)
+          secret-names     (->> secret-data keys (map name))
+          secret-name      (or secret-name (str/trim (choose secret-names)))
+          keepass-password (or keepass-password (str/trim (prompt-password)))
+          secret-key       (keyword secret-name)
+          chosen-maps      (get secret-data secret-key [])]
+      #_(binding [*out* *err*]
+          (println {:secret-key           secret-key
+                    #_#_:keepass-password keepass-password
+                    :chosen-maps          chosen-maps}))
+      (create-secret-file secret-key chosen-maps keepass-password))
     (catch Exception ex
       (binding [*out* *err*] (println (ex-message ex)))
       #_(binding [*out* *err*] (println ex))
@@ -253,7 +289,6 @@
         secret-names     (->> secret-data keys (map name))]
     (->> secret-names (str/join "\n") println)))
 
-#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn k3d-create
   [& [opts]]
   (println opts)
@@ -316,7 +351,7 @@
               (str "  local matches=(`" app-name " tasks | sed -r 's/\\t/:/g'`)")
               #_(str "  local matches=(`" app-name " tasks | cut -f1`)")
               #_(str "  compadd -a matches")
-              (str "_describe 'command' matches")
+              "_describe 'command' matches"
               "}"
               ""
               (str "compdef _" app-name " " app-name)]
@@ -325,10 +360,7 @@
 
 (defn completion-command
   [& [args]]
-  ;; (println args)
-  ;; (prn CONFIGURATION)
   (let [shell (first (:_arguments args))]
-    ;; (println "shell " shell)
     (case shell
       "zsh"    (zsh-completion)
       :default (throw (ex-info "Unknown shell type" {:shell shell})))))

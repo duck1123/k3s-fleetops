@@ -46,6 +46,10 @@
   {:doc  "Create sealed secrets"
    :task (exec 'k3s-fleetops.core/create-sealed-secret-command {})}
 
+  create-secret
+  {:doc  "Create secrets"
+   :task (exec 'k3s-fleetops.core/create-secret-command {})}
+
   delete-secret-controller
   {:doc "Delete the sealed secrets controller"
    :task
