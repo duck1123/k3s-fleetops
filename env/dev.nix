@@ -84,7 +84,7 @@ in {
     sops.enable = true;
 
     spark = {
-      enable = false;
+      enable = true;
       # domain = "spark.${base-domain}";
     };
 
