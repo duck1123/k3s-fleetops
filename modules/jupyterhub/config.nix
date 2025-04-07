@@ -89,7 +89,7 @@
       name = "harbor.dev.kronkltd.net/vallenit/vallenit/jupyter";
       tag = "latest";
       digest = null;
-      pullPolicy = "IfNotPresent";
+      pullPolicy = "Always";
       pullSecrets = null;
     };
 
