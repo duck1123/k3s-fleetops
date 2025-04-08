@@ -51,10 +51,10 @@ in {
       ssl = false;
 
       # FIXME: very naughty config
-      cookie-secret = "6b8150585353762fdaeb7960d87a7b9eb065b912e12a39f4581cbfa405e368f2";
-      cryptkeeper-keys = "OTBjM2NjMzFmMmQyYzIzZmU5OWY1NTQ5MDJiYmYyMDY3MGY0NGI0Zjc0MzE0OGZkODFkNmFiMzk0MTdkY2IzZA";
+      cookieSecret = "6b8150585353762fdaeb7960d87a7b9eb065b912e12a39f4581cbfa405e368f2";
+      cryptkeeperKeys = "OTBjM2NjMzFmMmQyYzIzZmU5OWY1NTQ5MDJiYmYyMDY3MGY0NGI0Zjc0MzE0OGZkODFkNmFiMzk0MTdkY2IzZA";
       password = "v2ryCkHmGG";
-      proxy-token = "izFoas2HBfSYhG0wFXUY2S0IaRXJ32vK";
+      proxyToken = "izFoas2HBfSYhG0wFXUY2S0IaRXJ32vK";
     };
 
     keycloak.enable = false;

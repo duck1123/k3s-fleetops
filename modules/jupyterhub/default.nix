@@ -32,9 +32,9 @@ let
       secretTemplates = [{
         name = hub-secret;
         stringData = {
-          "hub.config.CryptKeeper.keys" = cfg.cryptkeeper-keys;
-          "hub.config.JupyterHub.cookie_secret" = cfg.cookie-secret;
-          "proxy-token" = cfg.proxy-token;
+          "hub.config.CryptKeeper.keys" = cfg.cryptkeeperKeys;
+          "hub.config.JupyterHub.cookie_secret" = cfg.cookieSecret;
+          "proxy-token" = cfg.proxyToken;
           "values.yaml" = hub-values;
         };
       }];
@@ -74,13 +74,13 @@ let
   } cfg.values;
 in with lib; {
   options.services.${app-name} = {
-    cookie-secret = mkOption {
+    cookieSecret = mkOption {
       description = mdDoc "The cookie secret";
       type = types.str;
       default = "CHANGEME";
     };
 
-    cryptkeeper-keys = mkOption {
+    cryptkeeperKeys = mkOption {
       description = mdDoc "The cryptkeeper keys";
       type = types.str;
       default = "CHANGEME";
@@ -106,7 +106,7 @@ in with lib; {
       default = "CHANGEME";
     };
 
-    proxy-token = mkOption {
+    proxyToken = mkOption {
       description = mdDoc "The proxy token";
       type = types.str;
       default = "CHANGEME";
