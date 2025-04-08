@@ -53,7 +53,7 @@ let
 
   encrypted-secret-config-object = builtins.fromJSON encrypted-secret-config;
 
-  defaultValues = {
+  values = lib.attrsets.recursiveUpdate {
     hub = {
       adminUser = "admin";
       existingSecret = hub-secret;
@@ -71,9 +71,7 @@ let
       };
       tls = cfg.ssl;
     };
-  };
-
-  values = lib.attrsets.recursiveUpdate defaultValues cfg.values;
+  } cfg.values;
 in with lib; {
   options.services.${app-name} = {
     cookie-secret = mkOption {
