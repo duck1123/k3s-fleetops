@@ -46,7 +46,7 @@ in {
 
     jupyterhub = {
       enable = true;
-      domain = "jupyterhub.dev.kronkltd.net";
+      domain = "jupyterhub.localhost";
 
       # FIXME: very naughty config
       cookie-secret = "6b8150585353762fdaeb7960d87a7b9eb065b912e12a39f4581cbfa405e368f2";
