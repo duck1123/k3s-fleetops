@@ -34,7 +34,7 @@
         toYAML = import ./toYAML.nix;
         generators = import ./generators sharedConfig;
         lib = {
-          inherit encryptString helmChart toYAML;
+          inherit ageRecipients encryptString helmChart toYAML;
           sopsConfig = ./.sops.yaml;
         };
       in {
