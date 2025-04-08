@@ -1,3 +1,15 @@
+export ARGO_BASE_HREF=
+export ARGO_HTTP1=true
+export ARGO_NAMESPACE=argo-workflows
+export ARGO_SECURE=true
+export ARGO_SERVER="argo-workflows.example.com:443"
+export ARGO_TOKEN=""
+
 export KEEPASS_DB_PATH=~/keepass/passwords.kdbx
 
-use_nix
+export MINIO_ACCESS_KEY=xxxxxxxxxxxxxxxxxxxx
+export MINIO_SECRET_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+export SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
+
+use flake
