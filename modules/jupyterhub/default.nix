@@ -69,7 +69,7 @@ let
         "cert-manager.io/cluster-issuer" = clusterIssuer;
         "ingress.kubernetes.io/force-ssl-redirect" = "true";
       };
-      tls = true;
+      tls = cfg.ssl;
     };
   };
 
@@ -113,6 +113,8 @@ in with lib; {
       type = types.str;
       default = "CHANGEME";
     };
+
+    ssl = mkEnableOption "Should SSL be used?";
 
     values = mkOption {
       description = "All the values";

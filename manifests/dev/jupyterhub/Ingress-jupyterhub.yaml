@@ -26,7 +26,3 @@ spec:
                   name: http
             path: /
             pathType: ImplementationSpecific
-  tls:
-    - hosts:
-        - jupyterhub.localhost
-      secretName: jupyterhub.localhost-tls
