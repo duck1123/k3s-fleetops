@@ -9,4 +9,3 @@ tls.crt
 tls.key
 /result
 /secrets/secrets.yaml
-/secrets/secrets2.yaml
