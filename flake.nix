@@ -31,12 +31,23 @@
           import ./encryptString.nix { inherit ageRecipients pkgs; };
         helmChart = import ./helmChart.nix;
         sharedConfig = { inherit inputs system pkgs; };
+        fromYAML = import ./fromYAML.nix;
         toYAML = import ./toYAML.nix;
         generators = import ./generators sharedConfig;
+        decryptedPath = builtins.getEnv "DECRYPTED_SECRET_FILE";
+        hasDecrypted = builtins.pathExists decryptedPath;
+        secrets = if hasDecrypted then
+          fromYAML {
+            inherit pkgs;
+            value = builtins.readFile decryptedPath;
+          }
+        else
+          throw "Missing decrypted secret: ${decryptedPath}";
         lib = {
-          inherit ageRecipients encryptString helmChart toYAML;
+          inherit ageRecipients encryptString fromYAML helmChart toYAML;
           sopsConfig = ./.sops.yaml;
         };
+        dev = import ./env/dev.nix { inherit lib nixidy secrets; };
       in {
         inherit lib;
         imports = [ generators ];
@@ -69,7 +80,7 @@
         nixidyEnvs = nixidy.lib.mkEnvs {
           inherit pkgs;
           charts = nixhelm.chartsDerivations.${system};
-          envs.dev.modules = [ ./env/dev.nix ];
+          envs.dev.modules = [ dev ];
           libOverlay = final: prev: lib;
           modules = [ ./modules ];
         };

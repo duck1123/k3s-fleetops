@@ -5,6 +5,8 @@ export ARGO_SECURE=true
 export ARGO_SERVER="argo-workflows.example.com:443"
 export ARGO_TOKEN=""
 
+export DECRYPTED_SECRET_FILE=$(pwd)/secrets/secrets.yaml
+
 export KEEPASS_DB_PATH=~/keepass/passwords.kdbx
 
 export MINIO_ACCESS_KEY=xxxxxxxxxxxxxxxxxxxx

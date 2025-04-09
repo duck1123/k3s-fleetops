@@ -100,7 +100,18 @@
 
   switch-charts
   {:doc  "Switch nixidy charts"
-   :task (shell "nixidy switch .#dev")}
+   :task (let [env            "dev"
+               args           ["nix"
+                               "build"
+                               (str ".#nixidyEnvs.x86_64-linux." env ".activationPackage")
+                               "--impure"
+                               "--no-link"
+                               "--print-out-paths"]
+               cmd            (str/join " " args)
+               drv-path       (str/trim (:out (shell {:out :string} cmd)))
+               activation-cmd (str drv-path "/activate")]
+           #_(binding [*out* *err*] (println "path: " activation-cmd))
+           (shell activation-cmd))}
 
   generate-key-file
   {:doc  "Generate random keyfile"
