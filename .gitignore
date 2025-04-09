@@ -1,4 +1,5 @@
 .clj-kondo
+/.decrypted
 .direnv
 .envrc
 .lsp
@@ -9,3 +10,4 @@ tls.crt
 tls.key
 /result
 /secrets/secrets.yaml
+/target/secrets/secrets.yaml
