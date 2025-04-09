@@ -28,17 +28,15 @@ let
       name = hub-secret;
       inherit (cfg) namespace;
     };
-    spec = {
-      secretTemplates = [{
-        name = hub-secret;
-        stringData = {
-          "hub.config.CryptKeeper.keys" = cfg.cryptkeeperKeys;
-          "hub.config.JupyterHub.cookie_secret" = cfg.cookieSecret;
-          "proxy-token" = cfg.proxyToken;
-          "values.yaml" = hub-values;
-        };
-      }];
-    };
+    spec.secretTemplates = [{
+      name = hub-secret;
+      stringData = {
+        "hub.config.CryptKeeper.keys" = cfg.cryptkeeperKeys;
+        "hub.config.JupyterHub.cookie_secret" = cfg.cookieSecret;
+        "proxy-token" = cfg.proxyToken;
+        "values.yaml" = hub-values;
+      };
+    }];
   };
 
   hub-secret-config-yaml = lib.toYAML {
