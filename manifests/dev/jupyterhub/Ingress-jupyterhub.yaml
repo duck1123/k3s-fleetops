@@ -16,7 +16,7 @@ metadata:
 spec:
   ingressClassName: traefik
   rules:
-    - host: jupyterhub.localhost
+    - host: jupyterhub.dev.kronkltd.net
       http:
         paths:
           - backend:
@@ -26,3 +26,7 @@ spec:
                   name: http
             path: /
             pathType: ImplementationSpecific
+  tls:
+    - hosts:
+        - jupyterhub.dev.kronkltd.net
+      secretName: jupyterhub.dev.kronkltd.net-tls

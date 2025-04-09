@@ -46,9 +46,9 @@ in {
 
     jupyterhub = {
       enable = true;
-      # domain = "jupyterhub.${base-domain}";
-      domain = "jupyterhub.localhost";
-      ssl = false;
+      domain = "jupyterhub.${base-domain}";
+      # domain = "jupyterhub.localhost";
+      ssl = true;
       inherit (secrets.jupyterhub) cookieSecret cryptkeeperKeys password proxyToken;
     };
 
