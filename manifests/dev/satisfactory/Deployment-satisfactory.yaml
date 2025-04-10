@@ -27,6 +27,8 @@ spec:
     spec:
       containers:
         - env:
+            - name: DEBUG
+              value: "true"
             - name: STEAM_BETA
               value: "true"
           envFrom:
