@@ -158,7 +158,10 @@ in {
       password = secrets.redis.password;
     };
 
-    satisfactory.enable = false;
+    satisfactory = {
+      enable = true;
+    };
+
     sealed-secrets.enable = true;
 
     # ../modules/sops/default.nix
