@@ -31,6 +31,7 @@
     ./opentelemetry-collector
     ./postgresql
     ./redis
+    ./satisfactory
     ./sealed-secrets
     ./sops
     ./spark

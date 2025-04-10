@@ -35,6 +35,7 @@ in {
     };
 
     postgresql.enable = true;
+    satisfactory.enable = true;
     sealed-secrets.enable = true;
     sops.enable = true;
     spark.enable = true;
