@@ -13,12 +13,7 @@ let
   };
 
   values = lib.attrsets.recursiveUpdate {
-    env = [
-      {
-        name = "DEBUG";
-        value = "true";
-      }
-      {
+    env = [{
       name = "STEAM_BETA";
       value = "true";
     }];
