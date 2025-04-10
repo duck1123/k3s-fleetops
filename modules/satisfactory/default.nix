@@ -12,7 +12,13 @@ let
     chartHash = "sha256-3LMR39pvNgS5Nyn3YQPZEVGY0XPse2UZw474H3OhsV4=";
   };
 
-  values = lib.attrsets.recursiveUpdate { satisfactoryOpts = { }; } cfg.values;
+  values = lib.attrsets.recursiveUpdate {
+    env = [{
+      name = "STEAM_BETA";
+      value = "true";
+    }];
+    satisfactoryOpts = { };
+  } cfg.values;
 in with lib; {
   options.services.${app-name} = {
     enable = mkEnableOption "Enable application";

@@ -26,7 +26,10 @@ spec:
         app.kubernetes.io/name: satisfactory
     spec:
       containers:
-        - envFrom:
+        - env:
+            - name: STEAM_BETA
+              value: "true"
+          envFrom:
             - configMapRef:
                 name: satisfactory-env
           image: wolveix/satisfactory-server:v1.9.5
