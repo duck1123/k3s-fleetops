@@ -10,6 +10,7 @@ let
     chartHash = "sha256-8b9h+ZAls2FHU6fy4mKn+yR4o/p2BYtSWbaBv5BXjvE=";
   };
 
+  # https://github.com/tailscale/tailscale/blob/main/cmd/k8s-operator/deploy/chart/values.yaml
   values = lib.attrsets.recursiveUpdate { } cfg.values;
 in with lib; {
   options.services.${app-name} = {
@@ -52,7 +53,10 @@ in with lib; {
         inherit lib pkgs;
         inherit (cfg) namespace;
         secretName = "operator-oauth";
-        values = { inherit (cfg.oauth) clientId clientSecret; };
+        values = with cfg.oauth; {
+          client_id = clientId;
+          client_secret = clientSecret;
+        };
       };
 
       syncPolicy.finalSyncOpts = [ "CreateNamespace=true" ];
