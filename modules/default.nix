@@ -29,6 +29,7 @@
     ./mssql
     ./openldap
     ./opentelemetry-collector
+    ./pi-hole
     ./postgresql
     ./redis
     ./satisfactory

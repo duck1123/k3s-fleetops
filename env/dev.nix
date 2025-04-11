@@ -35,6 +35,7 @@ in {
       tls.enable = true;
     };
 
+    pihole.enable = true;
     postgresql.enable = true;
     satisfactory.enable = false;
     sealed-secrets.enable = true;

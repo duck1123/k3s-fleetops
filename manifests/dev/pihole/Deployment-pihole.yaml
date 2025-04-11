@@ -1,0 +1,129 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/component: pihole
+    app.kubernetes.io/instance: pihole
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: pihole
+    helm.sh/chart: pihole-0.2.0
+  name: pihole
+  namespace: pihole
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: pihole
+      app.kubernetes.io/instance: pihole
+      app.kubernetes.io/name: pihole
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: pihole
+        app.kubernetes.io/instance: pihole
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: pihole
+        helm.sh/chart: pihole-0.2.0
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/component: pihole
+                    app.kubernetes.io/instance: pihole
+                    app.kubernetes.io/name: pihole
+                namespaces:
+                  - pihole
+                topologyKey: kubernetes.io/hostname
+              weight: 1
+      containers:
+        - env:
+            - name: TZ
+              value: America/Los_Angeles
+            - name: WEBPASSWORD_FILE
+              valueFrom:
+                secretKeyRef:
+                  key: webpassword
+                  name: pihole-webui-password
+            - name: PIHOLE_DNS_
+              value: 8.8.8.8;8.8.4.4
+            - name: DNSSEC
+              value: "false"
+            - name: DNS_BOGUS_PRIV
+              value: "true"
+            - name: DNS_FQDN_REQUIRED
+              value: "true"
+            - name: REV_SERVER
+              value: "false"
+            - name: VIRTUAL_HOST
+              value: ""
+            - name: IPv6
+              value: "true"
+            - name: TEMPERATUREUNIT
+              value: f
+            - name: WEBUIBOXEDLAYOUT
+              value: boxed
+            - name: QUERY_LOGGING
+              value: "true"
+            - name: WEBTHEME
+              value: default-auto
+            - name: WEB_PORT
+              value: ""
+            - name: WEB_BIND_ADDR
+              value: ""
+            - name: CUSTOM_CACHE_SIZE
+              value: "10000"
+            - name: FTL_CMD
+              value: no-daemon
+            - name: ADMIN_EMAIL
+              value: ""
+          image: docker.io/pihole/pihole:2023.05.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 10
+            httpGet:
+              path: /admin.index.php
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          name: pihole
+          ports:
+            - containerPort: 53
+              name: dns
+              protocol: TCP
+            - containerPort: 53
+              name: dns-udp
+              protocol: UDP
+            - containerPort: 80
+              name: http
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /admin.index.php
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          resources:
+            limits:
+              cpu: 250m
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 256Mi
+          volumeMounts:
+            - mountPath: /etc/pihole
+              name: pihole
+      serviceAccountName: pihole
+      volumes:
+        - name: pihole
+          persistentVolumeClaim:
+            claimName: pihole
