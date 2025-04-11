@@ -43,7 +43,7 @@ in {
 
     tailscale = {
       enable = true;
-      oauth = { inherit (secrets.tailscale) clientId clientSecret; };
+      oauth = { inherit (secrets.tailscale) authKey clientId clientSecret; };
     };
 
     traefik.enable = true;

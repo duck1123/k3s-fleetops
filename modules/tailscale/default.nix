@@ -23,6 +23,12 @@ in with lib; {
     };
 
     oauth = {
+      # https://tailscale.com/kb/1185/kubernetes
+      authKey = mkOption {
+        description = mdDoc "The Tailscale auth key";
+        type = types.str;
+        default = "";
+      };
       clientId = mkOption {
         description = mdDoc "The client id";
         type = types.str;
@@ -49,13 +55,24 @@ in with lib; {
       finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
       helm.releases.${app-name} = { inherit chart values; };
 
-      resources.sopsSecrets.operator-oauth = lib.createSecret {
-        inherit lib pkgs;
-        inherit (cfg) namespace;
-        secretName = "operator-oauth";
-        values = with cfg.oauth; {
-          client_id = clientId;
-          client_secret = clientSecret;
+      resources.sopsSecrets = {
+        tailscale-auth = lib.createSecret {
+          inherit lib pkgs;
+          inherit (cfg) namespace;
+          secretName = "tailscale-auth";
+          values = with cfg.oauth; {
+            TS_AUTHKEY = authKey;
+          };
+        };
+
+        operator-oauth = lib.createSecret {
+          inherit lib pkgs;
+          inherit (cfg) namespace;
+          secretName = "operator-oauth";
+          values = with cfg.oauth; {
+            client_id = clientId;
+            client_secret = clientSecret;
+          };
         };
       };
 
