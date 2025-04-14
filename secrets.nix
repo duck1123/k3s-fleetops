@@ -78,6 +78,7 @@
     secret-name = "minio-password";
     fields = {
       "password" = { path = "/Kubernetes/minio"; };
+      "root-password" = { path = "/Kubernetes/minio"; };
       "user" = {
         path = "/Kubernetes/minio";
         field = "Username";
