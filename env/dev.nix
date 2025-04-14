@@ -18,10 +18,10 @@ in {
   services = {
     argocd.enable = true;
     cert-manager.enable = true;
-    cloudbeaver.enable = true;
+    cloudbeaver.enable = false;
 
     jupyterhub = {
-      enable = true;
+      enable = false;
       domain = "jupyterhub.${base-domain}";
       ssl = true;
       inherit (secrets.jupyterhub)
@@ -33,19 +33,19 @@ in {
     minio = {
       api-domain = "minio-api.${base-domain}";
       domain = "minio.${base-domain}";
-      enable = true;
+      enable = false;
       tls.enable = true;
     };
 
     pihole.enable = false;
-    postgresql.enable = true;
+    postgresql.enable = false;
     satisfactory.enable = false;
     sealed-secrets.enable = true;
     sops.enable = true;
-    spark.enable = true;
+    spark.enable = false;
 
     tailscale = {
-      enable = true;
+      enable = false;
       oauth = { inherit (secrets.tailscale) authKey clientId clientSecret; };
     };
 
