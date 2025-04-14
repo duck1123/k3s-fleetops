@@ -21,7 +21,7 @@ in {
     cloudbeaver.enable = false;
 
     jupyterhub = {
-      enable = false;
+      enable = true;
       domain = "jupyterhub.${base-domain}";
       ssl = true;
       inherit (secrets.jupyterhub)
@@ -31,14 +31,14 @@ in {
     longhorn.enable = true;
 
     minio = {
-      api-domain = "minio-api.${base-domain}";
+      api-domain = "api.minio.${base-domain}";
       domain = "minio.${base-domain}";
-      enable = false;
+      enable = true;
       tls.enable = true;
     };
 
     pihole.enable = false;
-    postgresql.enable = false;
+    postgresql.enable = true;
     satisfactory.enable = false;
     sealed-secrets.enable = true;
     sops.enable = true;
