@@ -1,7 +1,9 @@
-{ charts, config, lib, ... }:
+{ config, lib, ... }:
 let
+  app-name = "longhorn";
   cfg = config.services.longhorn;
 
+  # https://artifacthub.io/packages/helm/longhorn/longhorn
   chart = lib.helm.downloadHelmChart {
     repo = "https://charts.longhorn.io";
     chart = "longhorn";
@@ -10,9 +12,12 @@ let
   };
 
   defaultNamespace = "longhorn-system";
-  domain = "longhorn.dev.kronkltd.net";
 
-  defaultValues = {
+  values = lib.attrsets.recursiveUpdate {
+    defaultSettings = {
+      defaultReolicaCount = 1;
+    };
+
     persistence = {
       defaultClassReplicaCount = 1;
     };
@@ -27,12 +32,10 @@ let
     };
 
     preUpgradeChecker.jobEnabled = false;
-  };
-
-  values = lib.attrsets.recursiveUpdate defaultValues cfg.values;
+  } cfg.values;
   namespace = cfg.namespace;
 in with lib; {
-  options.services.longhorn = {
+  options.services.${app-name} = {
     enable = mkEnableOption "Enable application";
     namespace = mkOption {
       description = mdDoc "The namespace to install into";
@@ -48,8 +51,8 @@ in with lib; {
   };
 
   config = mkIf cfg.enable {
-    applications.longhorn = {
-      inherit namespace;
+    applications.${app-name} = {
+      inherit (cfg) namespace;
       createNamespace = true;
       finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
       helm.releases.longhorn = { inherit chart values; };
