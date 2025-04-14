@@ -1,6 +1,7 @@
 { config, lib, ... }:
 let
-  cfg = config.services.cert-manager;
+  app-name = "cert-manager";
+  cfg = config.services.${app-name};
 
   chart = lib.helm.downloadHelmChart {
     repo = "https://charts.jetstack.io";
@@ -9,19 +10,14 @@ let
     chartHash = "sha256-CUKd2R911uTfr461MrVcefnfOgzOr96wk+guoIBHH0c=";
   };
 
-  defaultNamespace = "cert-manager";
-
-  defaultValues = { };
-
-  values = lib.attrsets.recursiveUpdate defaultValues cfg.values;
-  namespace = cfg.namespace;
+  values = lib.attrsets.recursiveUpdate { crds.enabled = true; } cfg.values;
 in with lib; {
-  options.services.cert-manager = {
+  options.services.${app-name} = {
     enable = mkEnableOption "Enable application";
     namespace = mkOption {
       description = mdDoc "The namespace to install into";
       type = types.str;
-      default = defaultNamespace;
+      default = app-name;
     };
 
     values = mkOption {
@@ -34,11 +30,11 @@ in with lib; {
   config = mkIf cfg.enable {
     nixidy.resourceImports = [ ./generated.nix ];
 
-    applications.cert-manager = {
-      inherit namespace;
+    applications.${app-name} = {
+      inherit (cfg) namespace;
       createNamespace = true;
       finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
-      helm.releases.cert-manager = { inherit chart values; };
+      helm.releases.${app-name} = { inherit chart values; };
       syncPolicy.finalSyncOpts = [ "CreateNamespace=true" ];
     };
   };
