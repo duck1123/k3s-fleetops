@@ -5,15 +5,13 @@ metadata:
     app.kubernetes.io/instance: traefik-traefik
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: traefik
-    helm.sh/chart: traefik-23.0.1
+    helm.sh/chart: traefik-35.0.0
   name: traefik-traefik
 rules:
   - apiGroups:
-      - extensions
-      - networking.k8s.io
+      - ""
     resources:
-      - ingressclasses
-      - ingresses
+      - nodes
     verbs:
       - get
       - list
@@ -22,8 +20,31 @@ rules:
       - ""
     resources:
       - services
-      - endpoints
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - discovery.k8s.io
+    resources:
+      - endpointslices
+    verbs:
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
       - secrets
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - extensions
+      - networking.k8s.io
+    resources:
+      - ingressclasses
+      - ingresses
     verbs:
       - get
       - list
@@ -37,17 +58,17 @@ rules:
       - update
   - apiGroups:
       - traefik.io
-      - traefik.containo.us
     resources:
       - ingressroutes
       - ingressroutetcps
       - ingressrouteudps
       - middlewares
       - middlewaretcps
+      - serverstransports
+      - serverstransporttcps
       - tlsoptions
       - tlsstores
       - traefikservices
-      - serverstransports
     verbs:
       - get
       - list

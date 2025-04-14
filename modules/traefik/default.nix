@@ -1,27 +1,25 @@
-{ charts, config, lib, ... }:
+{ config, lib, ... }:
 let
+  app-name = "traefik";
   cfg = config.services.traefik;
 
   chart = lib.helm.downloadHelmChart {
     repo = "https://traefik.github.io/charts";
     chart = "traefik";
-    version = "23.0.1";
-    chartHash = "sha256-V6krhjJAI6/HFriKg48mPbd3Khe275BmrUJ80My+m9U=";
+    version = "35.0.0";
+    chartHash = "sha256-fY34pxXS/Uyvpcl0TmV6dIlrItLMKlNK1FEPmjsWr4M=";
   };
 
-  defaultNamespace = "traefik";
-
-  defaultValues = { };
-
-  values = lib.attrsets.recursiveUpdate defaultValues cfg.values;
-  namespace = cfg.namespace;
+  values = lib.attrsets.recursiveUpdate {
+    # providers.kubernetesGateway.statusAddress.hostname = "localhost";
+  } cfg.values;
 in with lib; {
-  options.services.traefik = {
+  options.services.${app-name} = {
     enable = mkEnableOption "Enable application";
     namespace = mkOption {
       description = mdDoc "The namespace to install into";
       type = types.str;
-      default = defaultNamespace;
+      default = app-name;
     };
 
     values = mkOption {
@@ -32,11 +30,11 @@ in with lib; {
   };
 
   config = mkIf cfg.enable {
-    applications.traefik = {
-      inherit namespace;
+    applications.${app-name} = {
+      inherit (cfg) namespace;
       createNamespace = true;
       finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
-      helm.releases.traefik = { inherit chart values; };
+      helm.releases.${app-name} = { inherit chart values; };
       syncPolicy.finalSyncOpts = [ "CreateNamespace=true" ];
     };
   };
