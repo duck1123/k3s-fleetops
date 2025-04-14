@@ -28,6 +28,8 @@ in {
         cookieSecret cryptkeeperKeys password proxyToken;
     };
 
+    longhorn.enable = true;
+
     minio = {
       api-domain = "minio-api.${base-domain}";
       domain = "minio.${base-domain}";
