@@ -55,7 +55,7 @@ in {
     spark.enable = false;
 
     tailscale = {
-      enable = false;
+      enable = true;
       oauth = { inherit (secrets.tailscale) authKey clientId clientSecret; };
     };
 
