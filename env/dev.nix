@@ -1,5 +1,7 @@
-{ nixidy, lib, secrets, ... }:
-let base-domain = "dev.kronkltd.net";
+{ secrets, ... }:
+let
+  base-domain = "dev.kronkltd.net";
+  tail-domain = "bearded-snake.ts.net";
 in {
   nixidy = {
     defaults.syncPolicy.autoSync = {
@@ -20,13 +22,13 @@ in {
     cert-manager.enable = true;
 
     cloudbeaver = {
-      domain = "cloudbeaver.${base-domain}";
+      domain = "cloudbeaver.${tail-domain}";
       enable = false;
     };
 
     jupyterhub = {
       enable = true;
-      domain = "jupyterhub.${base-domain}";
+      domain = "jupyterhub.${tail-domain}";
       ssl = true;
       inherit (secrets.jupyterhub)
         cookieSecret cryptkeeperKeys password proxyToken;
@@ -34,15 +36,13 @@ in {
 
     # ../modules/longhorn/default.nix
     longhorn = {
-      # domain = "longhorn.${base-domain}";
-      # domain = "longhorn.localtest.me";
-      domain = "longhorn.bearded-snake.ts.net";
+      domain = "longhorn.${tail-domain}";
       enable = true;
     };
 
     minio = {
-      api-domain = "api.minio.${base-domain}";
-      domain = "minio.${base-domain}";
+      api-domain = "api.minio.${tail-domain}";
+      domain = "minio.${tail-domain}";
       enable = true;
       tls.enable = true;
     };
