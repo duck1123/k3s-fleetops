@@ -63,10 +63,10 @@ let
       enabled = true;
       ingressClassName = "traefik";
       hostname = cfg.domain;
-      annotations = {
-        "cert-manager.io/cluster-issuer" = clusterIssuer;
-        "ingress.kubernetes.io/force-ssl-redirect" = "true";
-      };
+      # annotations = {
+      #   "cert-manager.io/cluster-issuer" = clusterIssuer;
+      #   "ingress.kubernetes.io/force-ssl-redirect" = "true";
+      # };
       tls = cfg.ssl;
     };
   } cfg.values;
