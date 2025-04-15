@@ -21,7 +21,7 @@ bb tasks
 
 Create a private key for securing secrets
 
-```sh {"name": "create-age-key"}
+```sh {"name":"create-age-key"}
 age-keygen -o ~/.config/sops/age/keys.txt
 ```
 
@@ -31,7 +31,7 @@ This will fail if the file has already been created
 
 Compile all edn templates to yaml
 
-```sh {"category":"Building","excludeFromRunAll":"true","id":"01J9DFM8AX7SNGCJJK6XCCV3G3","interactive":"false","name":"build-code"}
+```sh {"name":"build-code","excludeFromRunAll":"true","id":"01J9DFM8AX7SNGCJJK6XCCV3G3","interactive":"false",}
 bb build
 ```
 
@@ -45,15 +45,21 @@ bb apply-git-hooks
 
 ## Secrets
 
-This assumes that you have placed the files tls.crt and tls.key at the root of the directory
+This assumes that you have placed the files tls.crt and tls.key at the root of
+the directory
 
 All secrets are encrypted with that key
+
+Secrets are ultimately stored in a Keepass database. The `create-sealed-secrets`
+command will read the `secrets.edn` file which describes the mappings between
+entries in that keepass database and
+secret to be encrypted.
 
 ## Registry
 
 Create a k3d registry for storing localally-built dev images
 
-```sh {"id":"01J9HAPD89ZH24ER7CP99BVFM4","name":"create-registry"}
+```sh {"name":"create-registry","id":"01J9HAPD89ZH24ER7CP99BVFM4"}
 bbg k3d-create-registry
 ```
 
@@ -61,7 +67,7 @@ bbg k3d-create-registry
 
 Create a k3d cluster
 
-```sh {"id":"01J9HAPD89ZH24ER7CPE4916TR","name":"create-cluster"}
+```sh {"name":"create-cluster","id":"01J9HAPD89ZH24ER7CPE4916TR"}
 bbg k3d-create
 ```
 
@@ -71,7 +77,7 @@ See https://github.com/duck1123/dotfiles
 
 Wait until all pods are running or completed
 
-```sh {"id":"01J9EFNB7W63FD7K94XHHQB0Z9","name":"get-pods"}
+```sh {"name":"get-pods","id":"01J9EFNB7W63FD7K94XHHQB0Z9"}
 kubectl get pods -A
 ```
 
@@ -85,7 +91,7 @@ https://argo-cd.readthedocs.io/en/stable/getting_started/
 
 Register Argo Helm Repo
 
-```sh {"id":"01JBT0MF6SEC8NMMCZW17AYQEC"}
+```sh {"name":"add-argo-helm","id":"01JBT0MF6SEC8NMMCZW17AYQEC"}
 helm repo add argo https://argoproj.github.io/argo-helm
 ```
 
@@ -93,7 +99,7 @@ helm repo add argo https://argoproj.github.io/argo-helm
 
 Create namespace for argocd
 
-```sh {"id":"01JBT0MF6SEC8NMMCZW3PFPEJD","name":"create-argo-namespace"}
+```sh {"name":"create-argo-namespace","id":"01JBT0MF6SEC8NMMCZW3PFPEJD"}
 kubectl create namespace argocd
 ```
 
