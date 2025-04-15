@@ -20,11 +20,11 @@ let
       enabled = true;
       host = cfg.domain;
       ingressClassName = "tailscale";
-      tls = false;
-      annotations = {
-        "cert-manager.io/cluster-issuer" = clusterIssuer;
-        "ingress.kubernetes.io/force-ssl-redirect" = "true";
-      };
+      tls = true;
+      # annotations = {
+      #   "cert-manager.io/cluster-issuer" = clusterIssuer;
+      #   "ingress.kubernetes.io/force-ssl-redirect" = "true";
+      # };
     };
 
     longhornUI.replicas = 1;
