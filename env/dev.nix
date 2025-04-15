@@ -18,7 +18,11 @@ in {
   services = {
     argocd.enable = true;
     cert-manager.enable = true;
-    cloudbeaver.enable = false;
+
+    cloudbeaver = {
+      domain = "cloudbeaver.${base-domain}";
+      enable = false;
+    };
 
     jupyterhub = {
       enable = true;

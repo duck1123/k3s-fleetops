@@ -1,16 +1,15 @@
-{ charts, config, lib, ... }:
+{ config, lib, ... }:
 let
-  cfg = config.services.cloudbeaver;
+  app-name = "cloudbeaver";
+  cfg = config.services.${app-name};
 
+  # https://artifacthub.io/packages/helm/homeenterpriseinc/cloudbeaver
   chart = lib.helm.downloadHelmChart {
     repo = "https://homeenterpriseinc.github.io/helm-charts/";
     chart = "cloudbeaver";
     version = "0.6.0";
     chartHash = "sha256-+UuoshmHyNzVlWqpKP+DlWtgALnerkLdhx1ldQSorLk=";
   };
-
-  defaultNamespace = "cloudbeaver";
-  domain = "cloudbeaver.dev.kronkltd.net";
 
   defaultValues = {
     image.tag = "24.2.5";
@@ -21,7 +20,7 @@ let
       };
       enabled = false;
       hosts = [{
-        host = domain;
+        host = cfg.domain;
         paths = [{
           path = "/";
           pathType = "ImplementationSpecific";
@@ -36,11 +35,23 @@ let
   namespace = cfg.namespace;
 in with lib; {
   options.services.cloudbeaver = {
+    clusterIssuer = mkOption {
+      description = mdDoc "The cluster issuer for certificates";
+      type = types.str;
+      default = "letsencrypt-prod";
+    };
+
+    domain = mkOption {
+      description = mdDoc "The ingress hostname";
+      type = types.str;
+      default = "${app-name}.localhost";
+    };
+
     enable = mkEnableOption "Enable application";
     namespace = mkOption {
       description = mdDoc "The namespace to install into";
       type = types.str;
-      default = defaultNamespace;
+      default = app-name;
     };
 
     values = mkOption {
@@ -51,15 +62,15 @@ in with lib; {
   };
 
   config = mkIf cfg.enable {
-    applications.cloudbeaver = {
+    applications.${app-name} = {
       inherit namespace;
       createNamespace = true;
       finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
-      helm.releases.cloudbeaver = { inherit chart values; };
+      helm.releases.${app-name} = { inherit chart values; };
 
       resources.ingresses.cloudbeaver-ingress = {
         metadata.annotations = {
-          "cert-manager.io/cluster-issuer" = "letsencrypt-prod";
+          "cert-manager.io/cluster-issuer" = cfg.clusterIssuer;
           "ingress.kubernetes.io/force-ssl-redirect" = "true";
           "ingress.kubernetes.io/proxy-body-size" = "0";
           "ingress.kubernetes.io/ssl-redirect" = "true";
