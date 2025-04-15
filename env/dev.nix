@@ -33,7 +33,8 @@ in {
     };
 
     longhorn = {
-      domain = "longhorn.${base-domain}";
+      # domain = "longhorn.${base-domain}";
+      domain = "longhorn.localtest.me";
       enable = true;
     };
 
