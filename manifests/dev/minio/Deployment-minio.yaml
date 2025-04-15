@@ -5,8 +5,8 @@ metadata:
     app.kubernetes.io/instance: minio
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: minio
-    app.kubernetes.io/version: 2024.11.7
-    helm.sh/chart: minio-14.8.5
+    app.kubernetes.io/version: 2025.4.8
+    helm.sh/chart: minio-16.0.7
   name: minio
   namespace: minio
 spec:
@@ -22,8 +22,8 @@ spec:
         app.kubernetes.io/instance: minio
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: minio
-        app.kubernetes.io/version: 2024.11.7
-        helm.sh/chart: minio-14.8.5
+        app.kubernetes.io/version: 2025.4.8
+        helm.sh/chart: minio-16.0.7
     spec:
       affinity:
         podAntiAffinity:
@@ -46,16 +46,10 @@ spec:
               value: "no"
             - name: MINIO_API_PORT_NUMBER
               value: "9000"
-            - name: MINIO_ROOT_USER
-              valueFrom:
-                secretKeyRef:
-                  key: user
-                  name: minio-password
-            - name: MINIO_ROOT_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: root-password
-                  name: minio-password
+            - name: MINIO_ROOT_USER_FILE
+              value: /opt/bitnami/minio/secrets/user
+            - name: MINIO_ROOT_PASSWORD_FILE
+              value: /opt/bitnami/minio/secrets/root-password
             - name: MINIO_BROWSER
               value: "on"
             - name: MINIO_PROMETHEUS_AUTH_TYPE
@@ -64,7 +58,7 @@ spec:
               value: "9001"
             - name: MINIO_DATA_DIR
               value: /bitnami/minio/data
-          image: docker.io/bitnami/minio:2024.11.7-debian-12-r0
+          image: docker.io/bitnami/minio:2025.4.8-debian-12-r2
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
@@ -124,6 +118,8 @@ spec:
             - mountPath: /.mc
               name: empty-dir
               subPath: app-mc-dir
+            - mountPath: /opt/bitnami/minio/secrets/
+              name: minio-credentials
             - mountPath: /bitnami/minio/data
               name: data
       securityContext:
@@ -135,6 +131,9 @@ spec:
       volumes:
         - emptyDir: {}
           name: empty-dir
+        - name: minio-credentials
+          secret:
+            secretName: minio-password
         - name: data
           persistentVolumeClaim:
             claimName: minio

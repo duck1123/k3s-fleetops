@@ -1,24 +1,27 @@
 { charts, config, lib, ... }:
 let
-  cfg = config.services.minio;
+  app-name = "minio";
+  cfg = config.services.${app-name};
 
+  # https://artifacthub.io/packages/helm/bitnami/minio
   chart = lib.helm.downloadHelmChart {
     repo = "https://charts.bitnami.com/bitnami";
     chart = "minio";
-    version = "14.8.5";
-    chartHash = "sha256-zP40G0NweolTpH/Fnq9nOe486n39MqJBqQ45GwJEc1I=";
+    version = "16.0.7";
+    chartHash = "sha256-+srPCRCyltF2gKM8ourGqSBjgbt+05bYJBoB6zuXPaU=";
   };
 
-  defaultApiDomain = "minio-api.localhost";
+  defaultApiDomain = "api.minio.localhost";
   defaultDomain = "minio.localhost";
-  defaultNamespace = "minio";
 
-  clusterIssuer = "letsencrypt-prod";
+  # clusterIssuer = "letsencrypt-prod";
+  clusterIssuer = "tailscale";
+  ingressClassName = "tailscale";
 
   defaultValues = {
     apiIngress = {
+      inherit ingressClassName;
       enabled = true;
-      ingressClassName = "traefik";
       hostname = cfg.api-domain;
       annotations = {
         "cert-manager.io/cluster-issuer" = clusterIssuer;
@@ -35,11 +38,11 @@ let
     };
 
     ingress = {
+      inherit ingressClassName;
       enabled = true;
-      ingressClassName = "traefik";
       hostname = cfg.domain;
       annotations = {
-        "cert-manager.io/cluster-issuer" = "letsencrypt-prod";
+        "cert-manager.io/cluster-issuer" = clusterIssuer;
         "ingress.kubernetes.io/force-ssl-redirect" = "true";
         "ingress.kubernetes.io/proxy-body-size" = "0";
         "ingress.kubernetes.io/ssl-redirect" = "true";
@@ -63,7 +66,7 @@ in with lib; {
     namespace = mkOption {
       description = mdDoc "The namespace to install into";
       type = types.str;
-      default = defaultNamespace;
+      default = app-name;
     };
 
     domain = mkOption {
@@ -85,7 +88,7 @@ in with lib; {
 
   config = mkIf cfg.enable {
     applications.minio = {
-      inherit namespace;
+      inherit (cfg) namespace;
       createNamespace = true;
       finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
       helm.releases.minio = { inherit chart values; };
