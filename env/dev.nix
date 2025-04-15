@@ -32,7 +32,10 @@ in {
         cookieSecret cryptkeeperKeys password proxyToken;
     };
 
-    longhorn.enable = true;
+    longhorn = {
+      domain = "longhorn.${base-domain}";
+      enable = true;
+    };
 
     minio = {
       api-domain = "api.minio.${base-domain}";

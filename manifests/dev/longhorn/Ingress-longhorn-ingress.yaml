@@ -12,7 +12,7 @@ metadata:
   namespace: longhorn-system
 spec:
   rules:
-    - host: longhorn.localhost
+    - host: longhorn.dev.kronkltd.net
       http:
         paths:
           - backend:
