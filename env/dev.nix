@@ -32,9 +32,11 @@ in {
         cookieSecret cryptkeeperKeys password proxyToken;
     };
 
+    # ../modules/longhorn/default.nix
     longhorn = {
       # domain = "longhorn.${base-domain}";
-      domain = "longhorn.localtest.me";
+      # domain = "longhorn.localtest.me";
+      domain = "longhorn.bearded-snake.ts.net";
       enable = true;
     };
 

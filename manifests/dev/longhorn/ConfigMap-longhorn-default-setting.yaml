@@ -1,6 +1,7 @@
 apiVersion: v1
 data:
   default-setting.yaml: |-
+    default-replica-count: 1
     priority-class: longhorn-critical
     disable-revision-counter: true
 kind: ConfigMap

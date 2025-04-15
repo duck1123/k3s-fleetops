@@ -11,12 +11,20 @@ let
     chartHash = "sha256-tRepKwXa0GS4/vsQQrs5DQ/HMzhsoXeiUsXh6+sSMhw=";
   };
 
+  clusterIssuer = "letsencrypt-prod";
+
   values = lib.attrsets.recursiveUpdate {
-    defaultSettings.defaultReolicaCount = 1;
+    defaultSettings.defaultReplicaCount = 1;
 
     ingress = {
       enabled = true;
       host = cfg.domain;
+      ingressClassName = "tailscale";
+      tls = false;
+      annotations = {
+        "cert-manager.io/cluster-issuer" = clusterIssuer;
+        "ingress.kubernetes.io/force-ssl-redirect" = "true";
+      };
     };
 
     longhornUI.replicas = 1;
