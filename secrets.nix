@@ -3,19 +3,15 @@
     {
       ns = "authentik";
       secret-name = "authentik-secret-key";
-      fields = {
-        "authentik-secret-key" = { path = "/Kubernetes/Authentik"; };
-      };
+      fields."authentik-secret-key".path = "/Kubernetes/Authentik";
     }
     {
       ns = "authentik";
       secret-name = "authentik-postgres-auth";
       fields = {
-        "postgres-password" = { path = "/Kubernetes/Postgres-admin"; };
-        "password" = { path = "/Kubernetes/Postgres-user"; };
-        "replicationPasswordKey" = {
-          path = "/Kubernetes/Postgres-replication";
-        };
+        "postgres-password".path = "/Kubernetes/Postgres-admin";
+        "password".path = "/Kubernetes/Postgres-user";
+        "replicationPasswordKey".path = "/Kubernetes/Postgres-replication";
       };
     }
   ];
@@ -25,22 +21,21 @@
       ns = "forgejo";
       secret-name = "forgejo-admin-password";
       fields = {
-        "password" = { path = "/Kubernetes/Forgejo"; };
+        "password".path = "/Kubernetes/Forgejo";
         "username" = {
           path = "/Kubernetes/Forgejo";
           field = "Username";
         };
       };
-
     }
     {
       ns = "forgejo";
       secret-name = "postgresql-password";
       fields = {
-        "adminPassword" = { path = "/Kubernetes/Postgres-admin"; };
-        "adminUsername" = { literal = "postgres"; };
-        "replicationPassword" = { path = "/Kubernetes/Postgres-replication"; };
-        "userPassword" = { path = "/Kubernetes/Postgres-user"; };
+        "adminPassword".path = "/Kubernetes/Postgres-admin";
+        "adminUsername".literal = "postgres";
+        "replicationPassword".path = "/Kubernetes/Postgres-replication";
+        "userPassword".path = "/Kubernetes/Postgres-user";
       };
     }
   ];
@@ -49,7 +44,7 @@
     ns = "harbor";
     secret-name = "harbor-admin-password";
     fields = {
-      "HARBOR_ADMIN_PASSWORD" = { path = "/Kubernetes/Harbor"; };
+      "HARBOR_ADMIN_PASSWORD".path = "/Kubernetes/Harbor";
       "HARBOR_ADMIN_USERNAME" = {
         path = "/Kubernetes/Harbor";
         field = "Username";
@@ -61,24 +56,24 @@
     ns = "jupyterhub";
     secret-name = "jupyterhub-postgresql";
     fields = {
-      "username" = { literal = "postgres"; };
-      "password" = { path = "/Kubernetes/Postgres-admin"; };
-      "postgres-password" = { path = "/Kubernetes/Postgres-admin"; };
+      "username".literal = "postgres";
+      "password".path = "/Kubernetes/Postgres-admin";
+      "postgres-password".path = "/Kubernetes/Postgres-admin";
     };
   }];
 
   keycloak = [{
     ns = "keycloak";
     secret-name = "keycloak-admin-password";
-    fields = { "password" = { path = "/Kubernetes/Keycloak"; }; };
+    fields."password".path = "/Kubernetes/Keycloak";
   }];
 
   minio = [{
     ns = "minio";
     secret-name = "minio-password";
     fields = {
-      "password" = { path = "/Kubernetes/minio"; };
-      "root-password" = { path = "/Kubernetes/minio"; };
+      "password".path = "/Kubernetes/minio";
+      "root-password".path = "/Kubernetes/minio";
       "user" = {
         path = "/Kubernetes/minio";
         field = "Username";
@@ -90,8 +85,8 @@
     ns = "openldap";
     secret-name = "openldap-passwords";
     fields = {
-      "LDAP_ADMIN_PASSWORD" = { path = "/Kubernetes/openldap-admin"; };
-      "LDAP_CONFIG_PASSWORD" = { path = "/Kubernetes/openldap-config"; };
+      "LDAP_ADMIN_PASSWORD".path = "/Kubernetes/openldap-admin";
+      "LDAP_CONFIG_PASSWORD".path = "/Kubernetes/openldap-config";
     };
   }];
 
@@ -99,23 +94,23 @@
     ns = "postgresql";
     secret-name = "postgresql-password";
     fields = {
-      "adminPassword" = { path = "/Kubernetes/Postgres-admin"; };
-      "adminUsername" = { literal = "postgres"; };
-      "replicationPassword" = { path = "/Kubernetes/Postgres-replication"; };
-      "userPassword" = { path = "/Kubernetes/Postgres-user"; };
+      "adminPassword".path = "/Kubernetes/Postgres-admin";
+      "adminUsername".literal = "postgres";
+      "replicationPassword".path = "/Kubernetes/Postgres-replication";
+      "userPassword".path = "/Kubernetes/Postgres-user";
     };
   }];
 
   redis = [{
     ns = "redis";
     secret-name = "redis-password";
-    fields = { "password" = { path = "/Kubernetes/redis"; }; };
+    fields."password".path = "/Kubernetes/redis";
   }];
 
   sops = [{
     ns = "sops";
     secret-name = "sops-age-key";
-    fields = { "age.key" = { path = "/Kubernetes/Age-key"; }; };
+    fields."age.key".path = "/Kubernetes/Age-key";
   }];
 
   tailscale = [{
@@ -126,7 +121,7 @@
         path = "/Kubernetes/Tailscale-oauth";
         field = "Username";
       };
-      "clientSecret" = { path = "/Kubernetes/Tailscale-oauth"; };
+      "clientSecret".path = "/Kubernetes/Tailscale-oauth";
     }];
   }];
 }
