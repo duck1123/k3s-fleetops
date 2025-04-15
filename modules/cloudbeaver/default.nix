@@ -70,16 +70,17 @@ in with lib; {
 
       resources.ingresses.cloudbeaver-ingress = {
         metadata.annotations = {
-          "cert-manager.io/cluster-issuer" = cfg.clusterIssuer;
-          "ingress.kubernetes.io/force-ssl-redirect" = "true";
-          "ingress.kubernetes.io/proxy-body-size" = "0";
-          "ingress.kubernetes.io/ssl-redirect" = "true";
-          "kubernetes.io/ingress.class" = "traefik";
+          # "cert-manager.io/cluster-issuer" = cfg.clusterIssuer;
+          # "ingress.kubernetes.io/force-ssl-redirect" = "true";
+          # "ingress.kubernetes.io/proxy-body-size" = "0";
+          # "ingress.kubernetes.io/ssl-redirect" = "true";
+          # "kubernetes.io/ingress.class" = "traefik";
         };
         spec = {
-          ingressClassName = "traefik";
+          # ingressClassName = "traefik";
+          ingressClassName = "tailscale";
           rules = [{
-            host = domain;
+            host = cfg.domain;
             http.paths = [{
               backend.service = {
                 name = "cloudbeaver-svc";
@@ -90,7 +91,7 @@ in with lib; {
             }];
           }];
           tls = [{
-            hosts = [ domain ];
+            hosts = [ cfg.domain ];
             secretName = "cloudbeaver-tls";
           }];
         };

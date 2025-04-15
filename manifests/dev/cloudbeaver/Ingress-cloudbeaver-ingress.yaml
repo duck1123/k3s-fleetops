@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations: {}
+  name: cloudbeaver-ingress
+  namespace: cloudbeaver
+spec:
+  ingressClassName: tailscale
+  rules:
+    - host: cloudbeaver.bearded-snake.ts.net
+      http:
+        paths:
+          - backend:
+              service:
+                name: cloudbeaver-svc
+                port:
+                  name: http
+            path: /
+            pathType: ImplementationSpecific
+  tls:
+    - hosts:
+        - cloudbeaver.bearded-snake.ts.net
+      secretName: cloudbeaver-tls

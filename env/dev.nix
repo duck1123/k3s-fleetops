@@ -23,7 +23,7 @@ in {
 
     cloudbeaver = {
       domain = "cloudbeaver.${tail-domain}";
-      enable = false;
+      enable = true;
     };
 
     jupyterhub = {
