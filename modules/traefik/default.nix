@@ -18,6 +18,7 @@ let
       "--entryPoints.web.proxyProtocol.insecure=true"
       "--entryPoints.web.transport.respondingTimeouts.readTimeout=600s"
       "--entryPoints.web.transport.respondingTimeouts.writeTimeout=600s"
+      "--entryPoints.web.transport.respondingTimeouts.idleTimeout=600s"
     ];
   } cfg.values;
 in with lib; {
