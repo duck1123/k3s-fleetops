@@ -4,12 +4,13 @@
  :expose
  {:ingress
   {:annotations
-   {"cert-manager.io/cluster-issuer"              "letsencrypt-prod"
-    "ingress.kubernetes.io/force-ssl-redirect"    "true"
-    "ingress.kubernetes.io/proxy-body-size"       "0"
-    "ingress.kubernetes.io/ssl-redirect"          "true"
-    "nginx.ingress.kubernetes.io/ssl-redirect"    "true"
-    "nginx.ingress.kubernetes.io/proxy-body-size" "0"}
+   {"cert-manager.io/cluster-issuer"                   "letsencrypt-prod"
+    "ingress.kubernetes.io/force-ssl-redirect"         "true"
+    "ingress.kubernetes.io/proxy-body-size"            "0"
+    "ingress.kubernetes.io/ssl-redirect"               "true"
+    "nginx.ingress.kubernetes.io/ssl-redirect"         "true"
+    "nginx.ingress.kubernetes.io/proxy-body-size"      "0"
+    "traefik.ingress.kubernetes.io/router.middlewares" "traefik-allow-large-upload@kubernetescrd"}
    :className "traefik"
    :hosts
    {:core "harbor.dev.kronkltd.net"}}
