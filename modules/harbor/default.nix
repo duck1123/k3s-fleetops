@@ -1,6 +1,7 @@
 { config, lib, ... }:
 let
-  cfg = config.services.harbor;
+  app-name = "harbor-nix";
+  cfg = config.services.${app-name};
 
   chart = lib.helm.downloadHelmChart {
     repo = "https://helm.goharbor.io";
@@ -14,7 +15,7 @@ let
 
   clusterIssuer = "letsencrypt-prod";
 
-  defaultValues = {
+  values = lib.attrsets.recursiveUpdate {
     existingSecretAdminPassword = "harbor-admin-password";
     externalURL = "https://${domain}";
     internalTLS.enabled = false;
@@ -35,12 +36,9 @@ let
         secret.secretName = "harbor-tls";
       };
     };
-  };
-
-  values = lib.attrsets.recursiveUpdate defaultValues cfg.values;
-  namespace = cfg.namespace;
+  } cfg.values;
 in with lib; {
-  options.services.harbor = {
+  options.services.${app-name} = {
     enable = mkEnableOption "Enable application";
     namespace = mkOption {
       description = mdDoc "The namespace to install into";
@@ -56,11 +54,19 @@ in with lib; {
   };
 
   config = mkIf cfg.enable {
-    applications.harbor = {
-      inherit namespace;
+    applications.${app-name} = {
+      inherit (cfg) namespace;
       createNamespace = true;
       finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
-      helm.releases.harbor = { inherit chart values; };
+      # helm.releases.${app-name} = { inherit chart values; };
+
+      resources.middlewares.allow-large-upload.spec.buffering = {
+        maxRequestBodyBytes = 10737418240;
+        maxResponseBodyBytes = 0;
+        memRequestBodyBytes = 10485760;
+        memResponseBodyBytes = 10485760;
+      };
+
       syncPolicy.finalSyncOpts = [ "CreateNamespace=true" ];
     };
   };

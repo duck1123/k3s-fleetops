@@ -9,7 +9,7 @@ expose:
       ingress.kubernetes.io/ssl-redirect: 'true'
       nginx.ingress.kubernetes.io/ssl-redirect: 'true'
       nginx.ingress.kubernetes.io/proxy-body-size: '0'
-      traefik.ingress.kubernetes.io/router.middlewares: traefik-allow-large-upload@kubernetescrd
+      traefik.ingress.kubernetes.io/router.middlewares: allow-large-upload@kubernetescrd
     className: traefik
     hosts:
       core: harbor.dev.kronkltd.net

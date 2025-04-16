@@ -42,14 +42,6 @@ in with lib; {
       createNamespace = true;
       finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
       helm.releases.${app-name} = { inherit chart values; };
-
-      resources."traefik.io".v1alpha1.Middleware.allow-large-upload.spec.buffering = {
-        maxRequestBodyBytes = 10737418240;
-        maxResponseBodyBytes = 0;
-        memRequestBodyBytes = 10485760;
-        memResponseBodyBytes = 10485760;
-      };
-
       syncPolicy.finalSyncOpts = [ "CreateNamespace=true" ];
     };
 

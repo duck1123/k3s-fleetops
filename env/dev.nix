@@ -26,6 +26,8 @@ in {
       enable = true;
     };
 
+    harbor-nix.enable = true;
+
     jupyterhub = {
       enable = true;
       domain = "jupyterhub.${tail-domain}";
