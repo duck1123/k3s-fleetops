@@ -1,0 +1,11 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: harbor-registry-cert
+  namespace: harbor
+spec:
+  commonName: registry.dev.kronkltd.net
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt-prod
+  secretName: harbor-registry-tls
