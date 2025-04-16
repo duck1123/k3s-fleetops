@@ -11,7 +11,9 @@ let
     chartName = "jupyterhub";
   };
 
-  clusterIssuer = "letsencrypt-prod";
+  # clusterIssuer = "letsencrypt-prod";
+  clusterIssuer = "tailscale";
+  ingressClassName = "tailscale";
 
   hub-secret = "jupyterhub-hub2";
   postgresql-secret = "jupyterhub-postgresql";
@@ -60,13 +62,13 @@ let
     postgresql.auth.existingSecret = postgresql-secret;
 
     proxy.ingress = {
+      inherit ingressClassName;
       enabled = true;
-      ingressClassName = "traefik";
       hostname = cfg.domain;
-      # annotations = {
-      #   "cert-manager.io/cluster-issuer" = clusterIssuer;
-      #   "ingress.kubernetes.io/force-ssl-redirect" = "true";
-      # };
+      annotations = {
+        "cert-manager.io/cluster-issuer" = clusterIssuer;
+        "ingress.kubernetes.io/force-ssl-redirect" = "true";
+      };
       tls = cfg.ssl;
     };
   } cfg.values;

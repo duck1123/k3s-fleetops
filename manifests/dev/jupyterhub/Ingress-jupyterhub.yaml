@@ -1,6 +1,9 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: tailscale
+    ingress.kubernetes.io/force-ssl-redirect: "true"
   labels:
     app.kubernetes.io/component: proxy
     app.kubernetes.io/instance: jupyterhub
@@ -11,7 +14,7 @@ metadata:
   name: jupyterhub
   namespace: jupyterhub
 spec:
-  ingressClassName: traefik
+  ingressClassName: tailscale
   rules:
     - host: jupyterhub.bearded-snake.ts.net
       http:
@@ -23,3 +26,7 @@ spec:
                   name: http
             path: /
             pathType: ImplementationSpecific
+  tls:
+    - hosts:
+        - jupyterhub.bearded-snake.ts.net
+      secretName: jupyterhub.bearded-snake.ts.net-tls
