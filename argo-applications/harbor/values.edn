@@ -1,13 +1,15 @@
 ;; https://artifacthub.io/packages/helm/harbor/harbor
-{:existingSecretAdminPassword    "harbor-admin-password"
- :externalURL                        "https://harbor.dev.kronkltd.net"
+{:existingSecretAdminPassword "harbor-admin-password"
+ :externalURL                 "https://harbor.dev.kronkltd.net"
  :expose
  {:ingress
   {:annotations
-   {"cert-manager.io/cluster-issuer"           "letsencrypt-prod"
-    "ingress.kubernetes.io/force-ssl-redirect" "true"
-    "ingress.kubernetes.io/proxy-body-size"    "0"
-    "ingress.kubernetes.io/ssl-redirect"       "true"}
+   {"cert-manager.io/cluster-issuer"              "letsencrypt-prod"
+    "ingress.kubernetes.io/force-ssl-redirect"    "true"
+    "ingress.kubernetes.io/proxy-body-size"       "0"
+    "ingress.kubernetes.io/ssl-redirect"          "true"
+    "nginx.ingress.kubernetes.io/ssl-redirect"    "true"
+    "nginx.ingress.kubernetes.io/proxy-body-size" "0"}
    :className "traefik"
    :hosts
    {:core "harbor.dev.kronkltd.net"}}
