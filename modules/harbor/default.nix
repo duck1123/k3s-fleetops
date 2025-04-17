@@ -87,7 +87,7 @@ in with lib; {
                 path = "/";
                 pathType = "Prefix";
                 backend.service = {
-                  name = "harbor-harbor-registry";
+                  name = "harbor-registry";
                   port.number = 5000;
                 };
               }];
