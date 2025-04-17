@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.middlewares: harbor-harbor-allow-large-upload@kubernetescrd
+  name: harbor-registry-direct
+  namespace: harbor
+spec:
+  rules:
+    - host: registry.dev.kronkltd.net
+      http:
+        paths:
+          - backend:
+              service:
+                name: harbor-harbor-registry
+                port:
+                  number: 5000
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - registry.dev.kronkltd.net
+      secretName: harbor-registry-tls

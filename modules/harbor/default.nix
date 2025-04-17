@@ -66,27 +66,33 @@ in with lib; {
       # helm.releases.${app-name} = { inherit chart values; };
 
       resources = {
-        certificates.harbor-registry-cert.spec = {
-          secretName = "harbor-registry-tls";
-          issuerRef = {
-            kind = "ClusterIssuer";
-            name = clusterIssuer;
+        ingresses.harbor-registry-direct = {
+          metadata = {
+            annotations = {
+              "cert-manager.io/cluster-issuer" = "letsencrypt-prod";
+              "traefik.ingress.kubernetes.io/router.entrypoints" = "websecure";
+              "traefik.ingress.kubernetes.io/router.middlewares" =
+                "harbor-harbor-allow-large-upload@kubernetescrd";
+            };
           };
-          commonName = registry-domain;
-        };
 
-        ingressRoutes.harbor-registry-direct.spec = {
-          entryPoints = [ "websecure" ];
-          routes = [{
-            match = "Host(`${registry-domain}`)";
-            kind = "Rule";
-            services = [{
-              name = "harbor-harbor-registry";
-              port = 5000;
+          spec = {
+            tls = [{
+              hosts = [ registry-domain ];
+              secretName = "harbor-registry-tls";
             }];
-            middlewares = [{ name = "harbor-allow-large-upload"; }];
-          }];
-          tls.secretName = "harbor-registry-tls";
+            rules = [{
+              host = registry-domain;
+              http.paths = [{
+                path = "/";
+                pathType = "Prefix";
+                backend.service = {
+                  name = "harbor-harbor-registry";
+                  port.number = 5000;
+                };
+              }];
+            }];
+          };
         };
 
         middlewares.allow-large-upload.spec.buffering = {
