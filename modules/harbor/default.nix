@@ -88,8 +88,8 @@ in with lib; {
                 # pathType = "Prefix";
                 pathType = "ImplementationSpecific";
                 backend.service = {
-                  name = "harbor-registry";
-                  port.number = 5000;
+                  name = "harbor-core";
+                  port.number = 80;
                 };
               }];
             }];

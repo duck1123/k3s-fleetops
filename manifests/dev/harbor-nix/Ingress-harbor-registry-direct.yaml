@@ -14,9 +14,9 @@ spec:
         paths:
           - backend:
               service:
-                name: harbor-registry
+                name: harbor-core
                 port:
-                  number: 5000
+                  number: 80
             path: /
             pathType: ImplementationSpecific
   tls:
