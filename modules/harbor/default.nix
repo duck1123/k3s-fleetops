@@ -85,7 +85,8 @@ in with lib; {
               host = registry-domain;
               http.paths = [{
                 path = "/";
-                pathType = "Prefix";
+                # pathType = "Prefix";
+                pathType = "ImplementationSpecific";
                 backend.service = {
                   name = "harbor-registry";
                   port.number = 5000;
