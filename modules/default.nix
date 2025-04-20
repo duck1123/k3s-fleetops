@@ -22,6 +22,7 @@
     ./jupyterhub
     ./lldap
     ./longhorn
+    ./marquez
     ./memos
     ./metabase
     ./mindsdb

@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: imum-marquez-ingress
+  namespace: marquez
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: marquez.localhost
+      http:
+        paths:
+          - backend:
+              service:
+                name: imum-marquez-web
+                port:
+                  name: http
+            path: /api/
+            pathType: Prefix
+  tls:
+    - hosts:
+        - marquez.localhost
+      secretName: marquez-tls

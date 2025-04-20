@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: marquez
+  name: ilum-marquez
+  namespace: marquez
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ilum-marquez
+  template:
+    metadata:
+      labels:
+        app: ilum-marquez
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/arch
+                    operator: In
+                    values:
+                      - amd64
+                      - arm64
+      containers:
+        - env:
+            - name: MARQUEZ_PORT
+              value: "5000"
+            - name: MARQUEZ_ADMIN_PORT
+              value: "5001"
+            - name: MARQUEZ_CONFIG
+              value: /usr/src/app/config.yml
+            - name: POSTGRES_HOST
+              value: ilum-postgresql-0.ilum-postgresql-hl
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_DB
+              value: marquez
+            - name: POSTGRES_USER
+              value: ilum
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: marquez-db-password
+                  name: ilum-marquez
+            - name: MIGRATE_ON_STARTUP
+              value: "true"
+          image: ilum/marquez:0.49.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            httpGet:
+              path: /healthcheck
+              port: http-admin
+          name: ilum-marquez
+          ports:
+            - containerPort: 5000
+              name: http
+              protocol: TCP
+            - containerPort: 5001
+              name: http-admin
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /healthcheck
+              port: http-admin
+          resources:
+            limits: {}
+            requests: {}
+          volumeMounts:
+            - mountPath: /usr/src/app/config.yml
+              name: marquez-volume
+              subPath: config.yml
+      initContainers:
+        - args:
+            - -ec
+            - until pg_isready -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER}; do echo waiting for database; sleep 2; done;
+          command:
+            - /bin/bash
+          env:
+            - name: POSTGRES_HOST
+              value: ilum-postgresql-0.ilum-postgresql-hl
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_USER
+              value: ilum
+          image: bitnami/postgresql:16
+          imagePullPolicy: IfNotPresent
+          name: wait-for-db
+      volumes:
+        - configMap:
+            name: marquez-config
+          name: marquez-volume

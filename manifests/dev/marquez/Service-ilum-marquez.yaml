@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: ilum-marquez
+  name: ilum-marquez
+  namespace: marquez
+spec:
+  ports:
+    - name: http
+      port: 9555
+      targetPort: http
+  selector:
+    app: ilum-marquez
+  type: ClusterIP
