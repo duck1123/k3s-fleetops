@@ -42,7 +42,10 @@ in {
       enable = true;
     };
 
-    marquez.enable = true;
+    marquez = {
+      domain = "marquez.${base-domain}";
+      enable = true;
+    };
 
     minio = {
       api-domain = "api.minio.${tail-domain}";
