@@ -11,7 +11,7 @@ let
   };
 
   values = lib.attrsets.recursiveUpdate {
-    adminPassword = "naughtypassword";
+    # adminPassword = "naughtypassword";
     externalURL = "https://${cfg.domain}";
 
     ingress = {

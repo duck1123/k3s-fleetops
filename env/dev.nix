@@ -23,7 +23,7 @@ in {
 
     cloudbeaver = {
       domain = "cloudbeaver.${tail-domain}";
-      enable = true;
+      enable = false;
     };
 
     harbor = {
@@ -32,7 +32,7 @@ in {
     };
 
     jupyterhub = {
-      enable = true;
+      enable = false;
       domain = "jupyterhub.${tail-domain}";
       ssl = true;
       inherit (secrets.jupyterhub)
@@ -42,7 +42,7 @@ in {
     # ../modules/longhorn/default.nix
     longhorn = {
       domain = "longhorn.${tail-domain}";
-      enable = true;
+      enable = false;
     };
 
     marquez = {
