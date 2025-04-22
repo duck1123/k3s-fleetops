@@ -1,0 +1,22 @@
+apiVersion: v1
+data:
+  CORE_URL: http://harbor-core:80
+  HTTPS_PROXY: ""
+  HTTP_PROXY: ""
+  LOG_LEVEL: debug
+  NO_PROXY: harbor-core,harbor-jobservice,harbor-database,harbor-registry,harbor-portal,harbor-trivy,127.0.0.1,localhost,.local,.internal,%!s(MISSING),%!s(MISSING),%!s(MISSING),%!s(MISSING)
+  REGISTRY_CONTROLLER_URL: http://harbor-registry:8080
+  REGISTRY_CREDENTIAL_USERNAME: harbor_registry_user
+  REGISTRY_URL: http://harbor-registry:5000
+  TOKEN_SERVICE_URL: http://harbor-core:80/service/token
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/component: jobservice
+    app.kubernetes.io/instance: harbor
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: harbor
+    app.kubernetes.io/version: 2.13.0
+    helm.sh/chart: harbor-24.6.0
+  name: harbor-jobservice-envvars
+  namespace: harbor
