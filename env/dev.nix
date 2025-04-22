@@ -26,7 +26,7 @@ in {
       enable = true;
     };
 
-    harbor-nix.enable = true;
+    harbor.enable = true;
 
     jupyterhub = {
       enable = true;

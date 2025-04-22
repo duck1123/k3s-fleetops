@@ -1,0 +1,170 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app.kubernetes.io/component: trivy
+    app.kubernetes.io/instance: harbor
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: harbor
+    app.kubernetes.io/version: 2.13.0
+    helm.sh/chart: harbor-24.6.0
+  name: harbor-trivy
+  namespace: harbor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: trivy
+      app.kubernetes.io/instance: harbor
+      app.kubernetes.io/name: harbor
+  serviceName: harbor-trivy
+  template:
+    metadata:
+      annotations:
+        checksum/configmap-env: 4fe8e441be62f8453027bd09f7d3c36419335a5071febb46f7f0a16a51cc4c33
+        checksum/secret-env: 192f2169eea547fcd03001dcc2e9556726c219bb772b4c61def22e3c4ac6b681
+      labels:
+        app.kubernetes.io/component: trivy
+        app.kubernetes.io/instance: harbor
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: harbor
+        app.kubernetes.io/version: 2.13.0
+        helm.sh/chart: harbor-24.6.0
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/component: trivy
+                    app.kubernetes.io/instance: harbor
+                    app.kubernetes.io/name: harbor
+                topologyKey: kubernetes.io/hostname
+              weight: 1
+      automountServiceAccountToken: false
+      containers:
+        - env:
+            - name: BITNAMI_DEBUG
+              value: "false"
+          envFrom:
+            - configMapRef:
+                name: harbor-trivy-envvars
+            - secretRef:
+                name: harbor-trivy-envvars
+          image: docker.io/bitnami/harbor-adapter-trivy:2.13.0-debian-12-r0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 6
+            httpGet:
+              path: /probe/healthy
+              port: api-server
+              scheme: HTTP
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          name: trivy
+          ports:
+            - containerPort: 8080
+              name: api-server
+          readinessProbe:
+            failureThreshold: 6
+            httpGet:
+              path: /probe/ready
+              port: api-server
+              scheme: HTTP
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          resources:
+            limits:
+              cpu: 750m
+              ephemeral-storage: 2Gi
+              memory: 768Mi
+            requests:
+              cpu: 500m
+              ephemeral-storage: 50Mi
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+            runAsGroup: 1001
+            runAsNonRoot: true
+            runAsUser: 1001
+            seLinuxOptions: {}
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+            - mountPath: /tmp
+              name: empty-dir
+              subPath: tmp-dir
+            - mountPath: /etc/ssl/certs
+              name: empty-dir
+              subPath: etc-ssl-certs
+            - mountPath: /bitnami/harbor-adapter-trivy/.cache
+              name: data
+              readOnly: false
+      initContainers:
+        - args:
+            - -ec
+            - cp -r /etc/ssl/certs/* /certs
+          command:
+            - /bin/bash
+          image: docker.io/bitnami/harbor-adapter-trivy:2.13.0-debian-12-r0
+          imagePullPolicy: IfNotPresent
+          name: certificate-volume
+          resources:
+            limits:
+              cpu: 150m
+              ephemeral-storage: 2Gi
+              memory: 192Mi
+            requests:
+              cpu: 100m
+              ephemeral-storage: 50Mi
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+            runAsGroup: 1001
+            runAsNonRoot: true
+            runAsUser: 1001
+            seLinuxOptions: {}
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+            - mountPath: /certs
+              name: empty-dir
+              subPath: etc-ssl-certs
+      securityContext:
+        fsGroup: 1001
+        fsGroupChangePolicy: Always
+        supplementalGroups: []
+        sysctls: []
+      serviceAccountName: default
+      volumes:
+        - emptyDir: {}
+          name: empty-dir
+  updateStrategy:
+    type: RollingUpdate
+  volumeClaimTemplates:
+    - metadata:
+        labels:
+          app.kubernetes.io/instance: harbor
+          app.kubernetes.io/name: harbor
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 5Gi

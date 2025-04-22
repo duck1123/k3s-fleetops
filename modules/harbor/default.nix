@@ -1,46 +1,37 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 let
-  app-name = "harbor-nix";
+  app-name = "harbor";
   cfg = config.services.${app-name};
 
-  chart = lib.helm.downloadHelmChart {
-    repo = "https://helm.goharbor.io";
-    chart = "harbor";
-    version = "1.16.0";
-    chartHash = "sha256-B1pmsE4zsl8saUnBBzljmJY6Lq6vrVuIeTMStpy3pPc=";
+  # https://artifacthub.io/packages/helm/bitnami/harbor
+  chart = lib.helmChart {
+    inherit pkgs;
+    chartTgz = ../../charts/harbor-24.6.0.tgz;
+    chartName = "harbor";
   };
 
   defaultNamespace = "harbor";
   domain = "harbor.dev.kronkltd.net";
-  registry-domain = "registry.dev.kronkltd.net";
-
   clusterIssuer = "letsencrypt-prod";
 
-  # https://artifacthub.io/packages/helm/harbor/harbor
   values = lib.attrsets.recursiveUpdate {
-    existingSecretAdminPassword = "harbor-admin-password";
+    adminPassword = "naughtypassword";
     externalURL = "https://${domain}";
-    internalTLS.enabled = false;
-    expose = {
-      ingress = {
+
+    ingress = {
+      core = {
+        ingressClassName = "traefik";
+        hostname = domain;
         annotations = {
-          "cert-manager.io/cluster-issuer" = clusterIssuer;
-          "ingress.kubernetes.io/force-ssl-redirect" = "true";
-          "ingress.kubernetes.io/proxy-body-size" = "0";
           "ingress.kubernetes.io/ssl-redirect" = "true";
+          "ingress.kubernetes.io/proxy-body-size" = "0";
+          "nginx.ingress.kubernetes.io/ssl-redirect" = "true";
+          "nginx.ingress.kubernetes.io/proxy-body-size" =  "0";
+          "cert-manager.io/cluster-issuer" = clusterIssuer;
         };
-        type = "traefik";
-        className = "traefik";
-        hosts.core = domain;
-      };
-      tls = {
-        certSource = "secret";
-        enabled = false;
-        secret.secretName = "harbor-tls";
+        tls = true;
       };
     };
-
-    nginx.proxyBodySize = "10g";
   } cfg.values;
 in with lib; {
   options.services.${app-name} = {
@@ -63,38 +54,38 @@ in with lib; {
       inherit (cfg) namespace;
       createNamespace = true;
       finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
-      # helm.releases.${app-name} = { inherit chart values; };
+      helm.releases.${app-name} = { inherit chart values; };
 
       resources = {
-        ingresses.harbor-registry-direct = {
-          metadata = {
-            annotations = {
-              "cert-manager.io/cluster-issuer" = "letsencrypt-prod";
-              "traefik.ingress.kubernetes.io/router.entrypoints" = "websecure";
-              "traefik.ingress.kubernetes.io/router.middlewares" =
-                "harbor-harbor-allow-large-upload@kubernetescrd";
-            };
-          };
+        # ingresses.harbor-registry-direct = {
+        #   metadata = {
+        #     annotations = {
+        #       "cert-manager.io/cluster-issuer" = "letsencrypt-prod";
+        #       "traefik.ingress.kubernetes.io/router.entrypoints" = "websecure";
+        #       "traefik.ingress.kubernetes.io/router.middlewares" =
+        #         "harbor-harbor-allow-large-upload@kubernetescrd";
+        #     };
+        #   };
 
-          spec = {
-            tls = [{
-              hosts = [ registry-domain ];
-              secretName = "harbor-registry-tls";
-            }];
-            rules = [{
-              host = registry-domain;
-              http.paths = [{
-                path = "/";
-                # pathType = "Prefix";
-                pathType = "ImplementationSpecific";
-                backend.service = {
-                  name = "harbor-core";
-                  port.number = 80;
-                };
-              }];
-            }];
-          };
-        };
+        #   spec = {
+        #     tls = [{
+        #       hosts = [ registry-domain ];
+        #       secretName = "harbor-registry-tls";
+        #     }];
+        #     rules = [{
+        #       host = registry-domain;
+        #       http.paths = [{
+        #         path = "/";
+        #         # pathType = "Prefix";
+        #         pathType = "ImplementationSpecific";
+        #         backend.service = {
+        #           name = "harbor-core";
+        #           port.number = 80;
+        #         };
+        #       }];
+        #     }];
+        #   };
+        # };
 
         middlewares.allow-large-upload.spec.buffering = {
           maxRequestBodyBytes = 10737418240;
