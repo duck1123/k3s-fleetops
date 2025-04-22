@@ -10,24 +10,20 @@ let
     chartName = "harbor";
   };
 
-  defaultNamespace = "harbor";
-  domain = "harbor.dev.kronkltd.net";
-  clusterIssuer = "letsencrypt-prod";
-
   values = lib.attrsets.recursiveUpdate {
     adminPassword = "naughtypassword";
-    externalURL = "https://${domain}";
+    externalURL = "https://${cfg.domain}";
 
     ingress = {
       core = {
         ingressClassName = "traefik";
-        hostname = domain;
+        hostname = cfg.domain;
         annotations = {
           "ingress.kubernetes.io/ssl-redirect" = "true";
           "ingress.kubernetes.io/proxy-body-size" = "0";
           "nginx.ingress.kubernetes.io/ssl-redirect" = "true";
-          "nginx.ingress.kubernetes.io/proxy-body-size" =  "0";
-          "cert-manager.io/cluster-issuer" = clusterIssuer;
+          "nginx.ingress.kubernetes.io/proxy-body-size" = "0";
+          "cert-manager.io/cluster-issuer" = cfg.clusterIssuer;
         };
         tls = true;
       };
@@ -35,11 +31,24 @@ let
   } cfg.values;
 in with lib; {
   options.services.${app-name} = {
+    clusterIssuer = mkOption {
+      description = mdDoc "The issuer";
+      type = types.str;
+      default = "letsencrypt-prod";
+    };
+
+    domain = mkOption {
+      description = mdDoc "The domain";
+      type = types.str;
+      default = "harbor.localhost";
+    };
+
     enable = mkEnableOption "Enable application";
+
     namespace = mkOption {
       description = mdDoc "The namespace to install into";
       type = types.str;
-      default = defaultNamespace;
+      default = app-name;
     };
 
     values = mkOption {
@@ -57,36 +66,6 @@ in with lib; {
       helm.releases.${app-name} = { inherit chart values; };
 
       resources = {
-        # ingresses.harbor-registry-direct = {
-        #   metadata = {
-        #     annotations = {
-        #       "cert-manager.io/cluster-issuer" = "letsencrypt-prod";
-        #       "traefik.ingress.kubernetes.io/router.entrypoints" = "websecure";
-        #       "traefik.ingress.kubernetes.io/router.middlewares" =
-        #         "harbor-harbor-allow-large-upload@kubernetescrd";
-        #     };
-        #   };
-
-        #   spec = {
-        #     tls = [{
-        #       hosts = [ registry-domain ];
-        #       secretName = "harbor-registry-tls";
-        #     }];
-        #     rules = [{
-        #       host = registry-domain;
-        #       http.paths = [{
-        #         path = "/";
-        #         # pathType = "Prefix";
-        #         pathType = "ImplementationSpecific";
-        #         backend.service = {
-        #           name = "harbor-core";
-        #           port.number = 80;
-        #         };
-        #       }];
-        #     }];
-        #   };
-        # };
-
         middlewares.allow-large-upload.spec.buffering = {
           maxRequestBodyBytes = 10737418240;
           maxResponseBodyBytes = 0;

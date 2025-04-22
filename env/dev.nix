@@ -26,7 +26,10 @@ in {
       enable = true;
     };
 
-    harbor.enable = true;
+    harbor = {
+      domain = "harbor.${base-domain}";
+      enable = false;
+    };
 
     jupyterhub = {
       enable = true;
