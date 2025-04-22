@@ -28,12 +28,12 @@
 
         pkgs = import nixpkgs { inherit system; };
         encryptString =
-          import ./encryptString.nix { inherit ageRecipients pkgs; };
+          import ./lib/encryptString.nix { inherit ageRecipients pkgs; };
         createSecret = import ./lib/createSecret.nix;
-        helmChart = import ./helmChart.nix;
+        helmChart = import ./lib/helmChart.nix;
         sharedConfig = { inherit inputs system pkgs; };
-        fromYAML = import ./fromYAML.nix;
-        toYAML = import ./toYAML.nix;
+        fromYAML = import ./lib/fromYAML.nix;
+        toYAML = import ./lib/toYAML.nix;
         generators = import ./generators sharedConfig;
         decryptedPath = builtins.getEnv "DECRYPTED_SECRET_FILE";
         hasDecrypted = builtins.pathExists decryptedPath;

@@ -1,3 +1,0 @@
-resources:
-- basic-auth-secret.yaml
-- ingress.yaml
