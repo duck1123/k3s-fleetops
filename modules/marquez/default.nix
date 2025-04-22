@@ -16,6 +16,14 @@ let
       enabled = false;
       hosts = [ cfg.domain ];
     };
+
+    marquez = {
+      hostname = cfg.domain;
+    };
+
+    web = {
+      enabled = true;
+    };
   } cfg.values;
 in with lib; {
   options.services.${app-name} = {

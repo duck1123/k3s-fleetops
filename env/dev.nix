@@ -44,7 +44,7 @@ in {
 
     marquez = {
       domain = "marquez.${base-domain}";
-      enable = true;
+      enable = false;
     };
 
     minio = {
