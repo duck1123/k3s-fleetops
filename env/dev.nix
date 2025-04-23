@@ -32,7 +32,7 @@ in {
     };
 
     jupyterhub = {
-      enable = false;
+      enable = true;
       domain = "jupyterhub.${tail-domain}";
       ssl = true;
       inherit (secrets.jupyterhub)
@@ -42,7 +42,7 @@ in {
     # ../modules/longhorn/default.nix
     longhorn = {
       domain = "longhorn.${tail-domain}";
-      enable = false;
+      enable = true;
     };
 
     marquez = {
