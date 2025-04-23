@@ -86,7 +86,7 @@
     fsGid = 1001;
 
     image = {
-      name = "harbor.dev.kronkltd.net/vallenit/vallenit/jupyter";
+      name = "harbor.bearded-snake.ts.net/vallenit/vallenit/jupyter";
       tag = "latest";
       digest = null;
       pullPolicy = "Always";
