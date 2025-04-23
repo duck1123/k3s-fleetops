@@ -86,8 +86,8 @@
     fsGid = 1001;
 
     image = {
-      name = "docker.io/bitnami/jupyter-base-notebook";
-      tag = "4.1.6-debian-12-r27";
+      name = "harbor.dev.kronkltd.net/vallenit/vallenit/jupyter";
+      tag = "latest";
       digest = null;
       pullPolicy = "Always";
       pullSecrets = null;
