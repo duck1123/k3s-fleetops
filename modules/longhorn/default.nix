@@ -28,7 +28,10 @@ let
     };
 
     longhornUI.replicas = 1;
-    persistence.defaultClassReplicaCount = 1;
+    persistence = {
+      defaultClass = false;
+      defaultClassReplicaCount = 1;
+    };
     preUpgradeChecker.jobEnabled = false;
   } cfg.values;
 in with lib; {
