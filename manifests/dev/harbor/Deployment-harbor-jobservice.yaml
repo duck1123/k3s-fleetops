@@ -24,8 +24,8 @@ spec:
       annotations:
         checksum/configmap-config: 5bad3cd811516a25f0febeca5e3db026af9806569299b1456c3ab5962938af5f
         checksum/configmap-env: 90c20d33c9718e13624f4d2bf504497d2c5f7d69583f6e76ea1f99d489c6db00
-        checksum/secret: bda7a66183fcab8f37f797b2d55333b6af61768deae0c34aade831530dc661d6
-        checksum/secret-core: 89c9b9ac090085dc4fba14942a438ec49aa69d55ee4664b8b1cfa46edf7e0a67
+        checksum/secret: 2b6d47c5dfc30567e77484215551d316d82d292ef8ba3d30d993d4cf45d14fb2
+        checksum/secret-core: ee2174e1068eabc0038fd00a6376ef4262287a0aa03efa530a354f4934bb5ef9
         checksum/secret-env: fb9514b110c4e8e3ae4b67594fa8987333453ea94ac44d6cebc67be642e18666
       labels:
         app.kubernetes.io/component: jobservice
