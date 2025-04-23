@@ -26,7 +26,7 @@ in {
       enable = true;
     };
 
-    harbor = {
+    harbor-nix = {
       domain = "harbor.${base-domain}";
       enable = true;
     };

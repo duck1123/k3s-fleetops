@@ -1,20 +1,17 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: 002-manifests
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  name: harbor-nix
   namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: '3'
 spec:
   destination:
-    namespace: argocd
+    namespace: harbor
     server: https://kubernetes.default.svc
   project: default
   source:
-    directory:
-      jsonnet: {}
-      recurse: true
-    path: target/argo-manifests
+    path: ./manifests/dev/harbor-nix
     repoURL: https://github.com/duck1123/k3s-fleetops.git
     targetRevision: master
   syncPolicy:
@@ -22,5 +19,4 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
-    - CreateNamespace=true
-
+      - CreateNamespace=true

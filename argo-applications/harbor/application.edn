@@ -1,0 +1,18 @@
+;; https://artifacthub.io/packages/helm/harbor/harbor
+{:apiVersion "argoproj.io/v1alpha1"
+ :kind       "Application"
+ :metadata   {:name       "harbor"
+              :namespace  "argocd"
+              :finalizers ["resources-finalizer.argocd.argoproj.io"]}
+ :spec
+ {:project     "default"
+  :sources     [{:chart          "harbor"
+                 :repoURL        "https://helm.goharbor.io"
+                 :targetRevision "1.16.0"
+                 :helm           {:releaseName "harbor"
+                                  :valueFiles  ["$values/target/argo-applications/harbor/values.yaml"]}}
+                {:repoURL        "https://github.com/duck1123/k3s-fleetops"
+                 :targetRevision "master"
+                 :ref            "values"}]
+  :destination {:server "https://kubernetes.default.svc" :namespace "harbor"}
+  :syncPolicy  {:automated {:prune true :selfHeal true} :syncOptions ["CreateNamespace=true"]}}}

@@ -1,0 +1,23 @@
+existingSecretAdminPassword: harbor-admin-password
+externalURL: https://harbor.dev.kronkltd.net
+expose:
+  ingress:
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      ingress.kubernetes.io/force-ssl-redirect: 'true'
+      ingress.kubernetes.io/proxy-body-size: '0'
+      ingress.kubernetes.io/ssl-redirect: 'true'
+      nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+      nginx.ingress.kubernetes.io/proxy-body-size: '0'
+      traefik.ingress.kubernetes.io/router.middlewares: harbor-allow-large-upload@kubernetescrd
+    type: traefik
+    className: traefik
+    hosts:
+      core: harbor.dev.kronkltd.net
+  tls:
+    certSource: secret
+    secret:
+      secretName: harbor-tls
+nginx:
+  proxyBodySize: 10g
+
