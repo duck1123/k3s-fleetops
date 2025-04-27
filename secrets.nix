@@ -81,6 +81,20 @@
     };
   }];
 
+  nocodb = [
+    {
+      ns = "nocodb";
+      secret-name = "nocodb-supper-admin-secret";
+      xml-fields = [
+        {
+          target = "/nocodb/supper/email";
+          path = "/Kubernetes/nocodb";
+          field = "Username";
+        }
+      ];
+    }
+  ];
+
   openldap = [{
     ns = "openldap";
     secret-name = "openldap-passwords";
