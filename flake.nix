@@ -89,6 +89,32 @@
           libOverlay = final: prev: lib;
         };
 
-        packages.nixidy = nixidy.packages.${system}.default;
+        packages = {
+          generate-secrets = pkgs.writeShellScriptBin "generate-secrets" ''
+            #!/usr/bin/env bash
+            set -euo pipefail
+
+            secrets_json=$(nix eval --json --file ./secrets.nix)
+
+            DB_PATH=$1
+            OUTPUT_FILE=$2
+
+            tmpfile=$(mktemp)
+
+            # Loop over JSON and fetch passwords
+            echo "$secrets_json" | jq -r 'to_entries[] | "\(.key) \(.value.keepassPath | join("/"))"' | while read -r key path; do
+              value=$(keepassxc-cli show -s "$DB_PATH" "$path" 2>/dev/null || echo "**MISSING**")
+              yaml_key=$(echo "$key" | sed 's/\./:/g') # We'll nest later
+              echo "$yaml_key: \"$value\"" >> "$tmpfile"
+            done
+
+            # Turn : into nesting
+            yq -n --from-file "$tmpfile" > "$OUTPUT_FILE"
+
+            echo "Secrets written to $OUTPUT_FILE"
+          '';
+
+          nixidy = nixidy.packages.${system}.default;
+        };
       }));
 }
