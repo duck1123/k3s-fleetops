@@ -19,7 +19,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/credentials-secret: f64435a3390c7663284ef1cf13f21cfdf1b47f7f9e92139625677a2c49409960
+        checksum/credentials-secret: 27df916368ea0852a5e143261c5674ad6d447c13704f3784a50d918076f11784
       labels:
         app.kubernetes.io/instance: nocodb
         app.kubernetes.io/managed-by: Helm

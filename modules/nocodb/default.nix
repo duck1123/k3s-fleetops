@@ -35,6 +35,10 @@ let
     minio = {
       enabled = true;
     };
+
+    postgresql = {
+      enabled = true;
+    };
   } cfg.values;
 in with lib; {
   options.services.${app-name} = {

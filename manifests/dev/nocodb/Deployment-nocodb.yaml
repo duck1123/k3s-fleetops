@@ -31,11 +31,11 @@ spec:
               valueFrom:
                 secretKeyRef:
                   key: password
-                  name: nocodb-externaldb
+                  name: nocodb-postgresql
             - name: PORT
               value: "8080"
             - name: NC_DB
-              value: pg://:5432?u=nocodb_user&p=$(NC_DB_PASSWORD)&d=nocodb
+              value: pg://nocodb-postgresql:5432?u=nocodb_user&p=$(NC_DB_PASSWORD)&d=nocodb
             - name: NC_S3_ENDPOINT
               value: http://nocodb-minio:9000
             - name: NC_S3_REGION
@@ -64,25 +64,6 @@ spec:
                 secretKeyRef:
                   key: password
                   name: nocodb-supper-admin-secret
-            - name: POSTGRESQL_CLIENT_DATABASE_HOST
-            - name: POSTGRESQL_CLIENT_DATABASE_PORT_NUMBER
-              value: "5432"
-            - name: POSTGRESQL_CLIENT_POSTGRES_USER
-              value: postgres
-            - name: POSTGRESQL_CLIENT_POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: postgres-password
-                  name: nocodb-externaldb
-            - name: POSTGRESQL_CLIENT_CREATE_DATABASE_NAME
-              value: nocodb
-            - name: POSTGRESQL_CLIENT_CREATE_DATABASE_USERNAME
-              value: nocodb_user
-            - name: POSTGRESQL_CLIENT_CREATE_DATABASE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: password
-                  name: nocodb-externaldb
           envFrom:
             - configMapRef:
                 name: nocodb-config
@@ -156,7 +137,7 @@ spec:
               echo "Database is ready.";
           env:
             - name: NC_DB_HOST
-              value: ""
+              value: nocodb-postgresql
             - name: NC_DB_PORT
               value: "5432"
             - name: NC_DB_USER
