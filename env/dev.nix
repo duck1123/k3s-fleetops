@@ -18,12 +18,28 @@ in {
   };
 
   services = {
+    # ../modules/airflow/default.nix
+    airflow = {
+      enable = false;
+
+      ingress = {
+        domain = "airflow.${base-domain}";
+        clusterIssuer = "letsencrypt-prod";
+      };
+    };
+
     argocd.enable = true;
     cert-manager.enable = true;
 
+    # ../modules/cloudbeaver/default.nix
     cloudbeaver = {
-      domain = "cloudbeaver.${tail-domain}";
       enable = true;
+
+      ingress = {
+        domain = "cloudbeaver.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
     };
 
     harbor-nix = {
@@ -31,30 +47,65 @@ in {
       enable = true;
     };
 
+    # ../modules/homer/default.nix
+    homer = {
+      codeserver.ingress.domain = "codeserver.${tail-domain}";
+      enable = false;
+      ingress.domain = "homer.${tail-domain}";
+    };
+
+    # ../modules/jupyterhub/default.nix
     jupyterhub = {
       enable = true;
-      domain = "jupyterhub.${tail-domain}";
-      ssl = true;
+
       inherit (secrets.jupyterhub)
         cookieSecret cryptkeeperKeys password proxyToken;
+
+      ingress = {
+        domain = "jupyterhub.${tail-domain}";
+        clusterIssuer = "tailscale";
+        ingressClassName = "tailscale";
+        tls.enable = true;
+      };
+    };
+
+    keycloak = {
+      enable = false;
+      ingress = {
+        domain = "keycloak.dev.kronkltd.net";
+        adminDomain = "keycloak-admin.dev.kronkltd.net";
+        clusterIssuer = "letsencrypt-prod";
+      };
     };
 
     # ../modules/longhorn/default.nix
     longhorn = {
-      domain = "longhorn.${tail-domain}";
       enable = true;
+
+      ingress = {
+        domain = "longhorn.${tail-domain}";
+      };
     };
 
     marquez = {
-      domain = "marquez.${base-domain}";
       enable = false;
+
+      ingress = {
+        domain = "marquez.${base-domain}";
+      };
     };
 
+    # ../modules/minio/default.nix
     minio = {
-      api-domain = "api.minio.${tail-domain}";
-      domain = "minio.${tail-domain}";
       enable = true;
-      tls.enable = true;
+
+      ingress = {
+        api-domain = "api.minio.${tail-domain}";
+        domain = "minio.${tail-domain}";
+        clusterIssuer = "tailscale";
+        ingressClassName = "tailscale";
+        tls.enable = true;
+      };
     };
 
     # ../modules/nocodb/default.nix
@@ -89,6 +140,7 @@ in {
 
     spark.enable = false;
 
+    # ../modules/tailscale/default.nix
     tailscale = {
       enable = true;
       oauth = { inherit (secrets.tailscale) authKey clientId clientSecret; };

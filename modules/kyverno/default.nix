@@ -1,6 +1,7 @@
 { config, lib, ... }:
-let
-  cfg = config.services.kyverno;
+with lib;
+mkArgoApp { inherit config lib; } {
+  name = "kyverno";
 
   chart = lib.helm.downloadHelmChart {
     repo = "https://kyverno.github.io/kyverno/";
@@ -9,35 +10,57 @@ let
     chartHash = "sha256-rYlJrh8h1oiq7zRxLqEuFW2Kxst90iFAyEDUJes84x0=";
   };
 
-  defaultNamespace = "kyverno";
+  uses-ingress = true;
 
-  defaultValues = { };
+  extraOptions = {
+    # codeserver.ingress = {
+    #   clusterIssuer = mkOption {
+    #     description = mdDoc "The cookie secret";
+    #     type = types.str;
+    #     default = "CHANGEME";
+    #   };
+    #   domain = mkOption {
+    #     description = mdDoc "The cookie secret";
+    #     type = types.str;
+    #     default = "CHANGEME";
+    #   };
+    #   ingressClassName = mkOption {
+    #     description = mdDoc "The cookie secret";
+    #     type = types.str;
+    #     default = "CHANGEME";
+    #   };
+    # };
 
-  values = lib.attrsets.recursiveUpdate defaultValues cfg.values;
-  namespace = cfg.namespace;
-in with lib; {
-  options.services.kyverno = {
-    enable = mkEnableOption "Enable application";
-    namespace = mkOption {
-      description = mdDoc "The namespace to install into";
-      type = types.str;
-      default = defaultNamespace;
-    };
-
-    values = mkOption {
-      description = "All the values";
-      type = types.attrsOf types.anything;
-      default = { };
-    };
   };
 
-  config = mkIf cfg.enable {
-    applications.kyverno = {
-      inherit namespace;
-      createNamespace = true;
-      finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
-      helm.releases.kyverno = { inherit chart values; };
-      syncPolicy.finalSyncOpts = [ "CreateNamespace=true" ];
+  defaultValues = cfg: {
+    ingress = with cfg.ingress; {
+      main = {
+        enabled = true;
+        hosts = [{
+          host = domain;
+          paths = [{ path = "/"; }];
+        }];
+        tls = [{
+          secretName = tls.secretName;
+          hosts = [ domain ];
+        }];
+      };
+
+      addons.codeserver = with cfg.codeserver.ingress; {
+        enabled = true;
+        ingress = {
+          enabled = true;
+          hosts = [{
+            host = domain;
+            paths = [{ path = "/"; }];
+          }];
+          tls = [{
+            secretName = "codeserver-tls";
+            hosts = [ domain ];
+          }];
+        };
+      };
     };
   };
 }
