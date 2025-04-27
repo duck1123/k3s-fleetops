@@ -3,23 +3,36 @@ let
   app-name = "tailscale";
   cfg = config.services.${app-name};
 
-  chart = lib.helm.downloadHelmChart {
-    repo = "https://pkgs.tailscale.com/helmcharts";
-    chart = "tailscale-operator";
-    version = "1.82.0";
-    chartHash = "sha256-8b9h+ZAls2FHU6fy4mKn+yR4o/p2BYtSWbaBv5BXjvE=";
-  };
-
   # https://github.com/tailscale/tailscale/blob/main/cmd/k8s-operator/deploy/chart/values.yaml
   values = lib.attrsets.recursiveUpdate { } cfg.values;
 in with lib; {
   options.services.${app-name} = {
+    chart = mkOption {
+      type = types.path;
+      default = lib.helm.downloadHelmChart {
+        repo = "https://pkgs.tailscale.com/helmcharts";
+        chart = "tailscale-operator";
+        version = "1.82.0";
+        chartHash = "sha256-8b9h+ZAls2FHU6fy4mKn+yR4o/p2BYtSWbaBv5BXjvE=";
+      };
+      description = ''
+        Optional Helm chart derivation to use for deploying this app.
+        Should point to a path produced by something like `lib.helm.downloadHelmChart`.
+      '';
+    };
+
     enable = mkEnableOption "Enable application";
 
     namespace = mkOption {
       description = mdDoc "The namespace to install into";
       type = types.str;
       default = app-name;
+    };
+
+    neededSecrets = mkOption {
+      type = types.listOf types.str;
+      default = [];
+      description = "List of required secret keys (names, no paths).";
     };
 
     oauth = {
@@ -53,16 +66,17 @@ in with lib; {
       inherit (cfg) namespace;
       createNamespace = true;
       finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
-      helm.releases.${app-name} = { inherit chart values; };
+      helm.releases.${app-name} = {
+        inherit values;
+        inherit (cfg) chart;
+      };
 
       resources.sopsSecrets = {
         tailscale-auth = lib.createSecret {
           inherit lib pkgs;
           inherit (cfg) namespace;
           secretName = "tailscale-auth";
-          values = with cfg.oauth; {
-            TS_AUTHKEY = authKey;
-          };
+          values = with cfg.oauth; { TS_AUTHKEY = authKey; };
         };
 
         operator-oauth = lib.createSecret {
