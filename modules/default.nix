@@ -28,6 +28,7 @@
     ./mindsdb
     ./minio
     ./mssql
+    ./nocodb
     ./openldap
     ./opentelemetry-collector
     ./pi-hole

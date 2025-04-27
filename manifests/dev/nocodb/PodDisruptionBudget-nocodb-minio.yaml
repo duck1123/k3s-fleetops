@@ -1,0 +1,17 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  labels:
+    app.kubernetes.io/instance: nocodb
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: minio
+    app.kubernetes.io/version: 2024.10.2
+    helm.sh/chart: minio-14.7.15
+  name: nocodb-minio
+  namespace: nocodb
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: nocodb
+      app.kubernetes.io/name: minio

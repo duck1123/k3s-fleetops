@@ -57,6 +57,24 @@ in {
       tls.enable = true;
     };
 
+    # ../modules/nocodb/default.nix
+    nocodb = {
+      domain = "nocodb.${tail-domain}";
+      enable = true;
+      ingressClassName = "tailscale";
+      databases = {
+        minio = {
+          inherit (secrets.nocodb.minio)
+            bucketName endpoint region rootPassword rootUser;
+        };
+        postgresql = {
+          inherit (secrets.nocodb.postgresql)
+            database password postgresPassword replicationPassword username;
+        };
+        redis = { inherit (secrets.nocodb.redis) password; };
+      };
+    };
+
     pihole.enable = false;
     postgresql.enable = true;
     satisfactory.enable = false;
