@@ -100,13 +100,15 @@
 
   switch-charts
   {:doc  "Switch nixidy charts"
-   :task (let [env            "dev"
-               args           ["nix"
-                               "build"
-                               (str ".#nixidyEnvs.x86_64-linux." env ".activationPackage")
-                               "--impure"
-                               "--no-link"
-                               "--print-out-paths"]
+   :task (let [show-trace? true
+               env            "dev"
+               args           (concat ["nix"
+                                       "build"
+                                       (str ".#nixidyEnvs.x86_64-linux." env ".activationPackage")
+                                       "--impure"
+                                       "--no-link"
+                                       "--print-out-paths"]
+                                      (when show-trace? ["--show-trace"]))
                cmd            (str/join " " args)
                drv-path       (str/trim (:out (shell {:out :string} cmd)))
                activation-cmd (str drv-path "/activate")]
