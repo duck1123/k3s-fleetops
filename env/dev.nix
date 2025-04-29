@@ -60,7 +60,7 @@ in {
     # ../modules/nocodb/default.nix
     nocodb = {
       domain = "nocodb.${tail-domain}";
-      enable = true;
+      enable = false;
       ingressClassName = "tailscale";
       databases = {
         minio = {
