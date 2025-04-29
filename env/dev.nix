@@ -59,9 +59,13 @@ in {
 
     # ../modules/nocodb/default.nix
     nocodb = {
-      domain = "nocodb.${tail-domain}";
       enable = false;
-      ingressClassName = "tailscale";
+
+      ingress = {
+        domain = "nocodb.${tail-domain}";
+        ingressClassName = "tailscale";
+      };
+
       databases = {
         minio = {
           inherit (secrets.nocodb.minio)

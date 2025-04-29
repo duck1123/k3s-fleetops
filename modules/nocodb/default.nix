@@ -1,7 +1,7 @@
-{ config, lib, pkgs, ... }:
-let
-  app-name = "nocodb";
-  cfg = config.services.${app-name};
+{ config, lib, ... }:
+with lib;
+mkArgoApp { inherit config lib; } {
+  name = "nocodb";
 
   # https://artifacthub.io/packages/helm/one-acre-fund/nocodb
   chart = lib.helm.downloadHelmChart {
@@ -11,37 +11,9 @@ let
     chartHash = "sha256-WPux8CNGrGhC+NXYntUTRNLi2BsJBY7DthqJcRuImyg=";
   };
 
-  values = lib.attrsets.recursiveUpdate {
-    # nocodb = {
-    #   publicUrl = "";
-    # };
+  uses-ingress = true;
 
-    ingress = {
-      enabled = true;
-      className = cfg.ingressClassName;
-      hosts = [{
-        host = cfg.domain;
-        paths = [{
-          path = "/";
-          pathType = "ImplementationSpecific";
-        }];
-      }];
-      tls = [{
-        secretName = "${app-name}-tls";
-        hosts = [ cfg.domain ];
-      }];
-    };
-
-    minio = {
-      enabled = true;
-    };
-
-    postgresql = {
-      enabled = true;
-    };
-  } cfg.values;
-in with lib; {
-  options.services.${app-name} = {
+  extraOptions = {
     databases = {
       minio = {
         bucketName = mkOption {
@@ -115,44 +87,27 @@ in with lib; {
         };
       };
     };
-
-    domain = mkOption {
-      description = mdDoc "The domain";
-      type = types.str;
-      default = "${app-name}.localhost";
-    };
-
-    enable = mkEnableOption "Enable application";
-
-    ingressClassName = mkOption {
-      description = mdDoc "The Ingress class name";
-      type = types.str;
-      default = "traefik";
-    };
-
-    namespace = mkOption {
-      description = mdDoc "The namespace to install into";
-      type = types.str;
-      default = app-name;
-    };
-
-    values = mkOption {
-      description = "All the values";
-      type = types.attrsOf types.anything;
-      default = { };
-    };
   };
 
-  config = mkIf cfg.enable {
-    applications.${app-name} = {
-      inherit (cfg) namespace;
-      createNamespace = true;
-      finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
-      helm.releases.${app-name} = { inherit chart values; };
-
-      resources = { };
-
-      syncPolicy.finalSyncOpts = [ "CreateNamespace=true" ];
+  defaultValues = cfg: {
+    ingress = with cfg.ingress; {
+      enabled = true;
+      className = ingressClassName;
+      hosts = [{
+        host = domain;
+        paths = [{
+          path = "/";
+          pathType = "ImplementationSpecific";
+        }];
+      }];
+      tls = [{
+        secretName = tls.secretName;
+        hosts = [ domain ];
+      }];
     };
+
+    minio = { enabled = true; };
+
+    postgresql = { enabled = true; };
   };
 }
