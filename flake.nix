@@ -31,10 +31,12 @@
           import ./lib/encryptString.nix { inherit ageRecipients pkgs; };
         createSecret = import ./lib/createSecret.nix;
         helmChart = import ./lib/helmChart.nix;
-        sharedConfig = { inherit inputs system pkgs; };
         fromYAML = import ./lib/fromYAML.nix;
+        mkArgoApp = import ./lib/mkArgoApp.nix;
         toYAML = import ./lib/toYAML.nix;
-        generators = import ./generators sharedConfig;
+        generators = import ./generators { inherit inputs system pkgs; };
+
+        # TODO: extract all this
         decryptedPath = builtins.getEnv "DECRYPTED_SECRET_FILE";
         hasDecrypted = builtins.pathExists decryptedPath;
         secrets = if hasDecrypted then
@@ -46,12 +48,13 @@
           throw "Missing decrypted secret: ${decryptedPath}";
         lib = {
           inherit ageRecipients createSecret encryptString fromYAML helmChart
-            toYAML;
+            mkArgoApp toYAML;
           sopsConfig = ./.sops.yaml;
         };
         dev = import ./env/dev.nix { inherit lib nixidy secrets; };
+        modules = [  ./modules ];
       in {
-        inherit lib;
+        inherit lib modules;
         imports = [ generators ];
 
         apps = { inherit (generators.apps) generate; };
@@ -80,11 +83,10 @@
         };
 
         nixidyEnvs = nixidy.lib.mkEnvs {
-          inherit pkgs;
+          inherit modules pkgs;
           charts = nixhelm.chartsDerivations.${system};
           envs.dev.modules = [ dev ];
           libOverlay = final: prev: lib;
-          modules = [ ./modules ];
         };
 
         packages.nixidy = nixidy.packages.${system}.default;
