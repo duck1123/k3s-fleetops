@@ -79,7 +79,10 @@ in {
     postgresql.enable = true;
     satisfactory.enable = false;
     sealed-secrets.enable = true;
+
+    # ../modules/sops/default.nix
     sops.enable = true;
+
     spark.enable = false;
 
     tailscale = {
