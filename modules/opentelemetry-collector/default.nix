@@ -1,7 +1,9 @@
-{ charts, config, lib, ... }:
-let
-  cfg = config.services.opentelemetry-collector;
+{ config, lib, ... }:
+with lib;
+mkArgoApp { inherit config lib; } {
+  name = "opentelemetry-collector";
 
+  # https://artifacthub.io/packages/helm/opentelemetry-helm/opentelemetry-collector
   chart = lib.helm.downloadHelmChart {
     repo = "https://open-telemetry.github.io/opentelemetry-helm-charts";
     chart = "opentelemetry-collector";
@@ -9,9 +11,7 @@ let
     chartHash = "sha256-MVHgArh62dp58Y9TzJ2sEhgBkBHntw+6/u/pcejqIAA=";
   };
 
-  defaultNamespace = "opentelemetry-collector";
-
-  defaultValues = {
+  defaultValues = cfg: {
     mode = "deployment";
     presets.logsCollection.enabled = false;
     image.repository = "otel/opentelemetry-collector-contrib";
@@ -119,34 +119,6 @@ let
           };
         };
       };
-    };
-  };
-
-  values = lib.attrsets.recursiveUpdate defaultValues cfg.values;
-  namespace = cfg.namespace;
-in with lib; {
-  options.services.opentelemetry-collector = {
-    enable = mkEnableOption "Enable application";
-    namespace = mkOption {
-      description = mdDoc "The namespace to install into";
-      type = types.str;
-      default = defaultNamespace;
-    };
-
-    values = mkOption {
-      description = "All the values";
-      type = types.attrsOf types.anything;
-      default = { };
-    };
-  };
-
-  config = mkIf cfg.enable {
-    applications.opentelemetry-collector = {
-      inherit namespace;
-      createNamespace = true;
-      finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
-      helm.releases.opentelemetry-collector = { inherit chart values; };
-      syncPolicy.finalSyncOpts = [ "CreateNamespace=true" ];
     };
   };
 }
