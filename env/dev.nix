@@ -53,7 +53,7 @@ in {
     minio = {
       api-domain = "api.minio.${tail-domain}";
       domain = "minio.${tail-domain}";
-      enable = true;
+      enable = false;
       tls.enable = true;
     };
 
