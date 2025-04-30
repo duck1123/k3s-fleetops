@@ -1,11 +1,7 @@
-{
-  charts,
-  config,
-  lib,
-  ...
-}:
-let
-  cfg = config.services.argo-events;
+{ config, lib, ... }:
+with lib;
+mkArgoApp { inherit config lib; } {
+  name = "argo-events";
 
   # https://artifacthub.io/packages/helm/argo/argo-events
   chart = lib.helm.downloadHelmChart {
@@ -15,39 +11,7 @@ let
     chartHash = "sha256-gLZOCMLYd9lSQfOQKqgYVscsDcsOTc1v25FvY0P95W4=";
   };
 
-  defaultNamespace = "argo-events";
+  uses-ingress = true;
 
-  defaultValues = {
-    metrics.enabled = true;
-  };
-
-  values = lib.attrsets.recursiveUpdate defaultValues cfg.values;
-  namespace = cfg.namespace;
-in
-with lib;
-{
-  options.services.argo-events = {
-    enable = mkEnableOption "Enable application";
-    namespace = mkOption {
-      description = mdDoc "The namespace to install into";
-      type = types.str;
-      default = defaultNamespace;
-    };
-
-    values = mkOption {
-      description = "All the values";
-      type = types.attrsOf types.anything;
-      default = { };
-    };
-  };
-
-  config = mkIf cfg.enable {
-    applications.argo-events = {
-      inherit namespace;
-      createNamespace = true;
-      finalizer = "foreground";
-      helm.releases.argo-events = { inherit chart values; };
-      syncPolicy.finalSyncOpts = [ "CreateNamespace=true" ];
-    };
-  };
+  defaultValues = cfg: { metrics.enabled = true; };
 }
