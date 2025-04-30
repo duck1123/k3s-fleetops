@@ -70,6 +70,7 @@ in
       };
 
     argocd.enable = true;
+    argo-events.enable = true;
 
     argo-workflows = {
       enable = false;
