@@ -29,6 +29,16 @@ in {
     };
 
     argocd.enable = true;
+
+    argo-workflows = {
+      enable = true;
+
+      ingress = {
+        domain = "argo-workflows.${base-domain}";
+        ingressClassName = "traefik";
+      };
+    };
+
     cert-manager.enable = true;
 
     # ../modules/cloudbeaver/default.nix

@@ -1,0 +1,19 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: argo-workflows
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: argo-workflows
+    app.kubernetes.io/version: 3.6.5
+    helm.sh/chart: argo-workflows-11.1.10
+  name: argo-workflows-argo-workflows-controller-cluster-template
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: argo-workflows-argo-workflows-controller-cluster-template
+subjects:
+  - kind: ServiceAccount
+    name: argo-workflows-controller
+    namespace: argo-workflows
