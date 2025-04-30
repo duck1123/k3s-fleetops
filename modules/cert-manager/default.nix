@@ -1,41 +1,15 @@
 { config, lib, ... }:
-let
-  app-name = "cert-manager";
-  cfg = config.services.${app-name};
+with lib;
+mkArgoApp { inherit config lib; } {
+  name = "cert-manager";
 
+  # https://artifacthub.io/packages/helm/cert-manager/cert-manager
   chart = lib.helm.downloadHelmChart {
     repo = "https://charts.jetstack.io";
     chart = "cert-manager";
-    version = "v1.17.1";
-    chartHash = "sha256-CUKd2R911uTfr461MrVcefnfOgzOr96wk+guoIBHH0c=";
+    version = "v1.17.2";
+    chartHash = "sha256-8d/BPet3MNGd8n0r5F1HEW4Rgb/UfdtwqSFuUZTyKl4=";
   };
 
-  values = lib.attrsets.recursiveUpdate { crds.enabled = true; } cfg.values;
-in with lib; {
-  options.services.${app-name} = {
-    enable = mkEnableOption "Enable application";
-    namespace = mkOption {
-      description = mdDoc "The namespace to install into";
-      type = types.str;
-      default = app-name;
-    };
-
-    values = mkOption {
-      description = "All the values";
-      type = types.attrsOf types.anything;
-      default = { };
-    };
-  };
-
-  config = mkIf cfg.enable {
-    nixidy.resourceImports = [ ./generated.nix ];
-
-    applications.${app-name} = {
-      inherit (cfg) namespace;
-      createNamespace = true;
-      finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
-      helm.releases.${app-name} = { inherit chart values; };
-      syncPolicy.finalSyncOpts = [ "CreateNamespace=true" ];
-    };
-  };
+  defaultValues = cfg: { crds.enabled = true; };
 }
