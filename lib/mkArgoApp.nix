@@ -6,7 +6,7 @@
 # The name of the application (string)
 name, namespace ? null,
 # The chart to deploy (path)
-chart,
+chart ? null,
 # A function that takes the config and returns default helm chart values
 defaultValues ? (cfg: { }),
 # A list of secrets that need to be loaded when generating this application
@@ -117,16 +117,18 @@ in {
           inherit (cfg) namespace;
           createNamespace = true;
           finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
-          helm.releases.${name} = {
-            inherit values;
-            inherit (cfg) chart;
-          };
 
           # TODO: Should I be using some sort of overlay here?
           resources =
             lib.recursiveUpdate (extraResources cfg) cfg.extraResources;
           syncPolicy.finalSyncOpts = [ "CreateNamespace=true" ];
         }
+        (mkIf (cfg.chart != null) {
+          helm.releases.${name} = {
+            inherit values;
+            inherit (cfg) chart;
+          };
+        })
         (extraAppConfig cfg)
         cfg.extraAppConfig
       ];
