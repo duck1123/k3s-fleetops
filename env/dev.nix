@@ -42,7 +42,7 @@ in {
     # ../modules/longhorn/default.nix
     longhorn = {
       domain = "longhorn.${tail-domain}";
-      enable = true;
+      enable = false;
     };
 
     marquez = {
