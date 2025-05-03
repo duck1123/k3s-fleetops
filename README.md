@@ -48,6 +48,17 @@ command will read the `secrets.edn` file which describes the mappings between
 entries in that keepass database and
 secret to be encrypted.
 
+You must create a file at `secrets/secrets.yaml` with all the required secrets and
+`$DECRYPTED_SECRET_FILE` should be pointing to it.
+
+### Create Encrypted Secrets
+
+This turns the unencrypted yaml file into an encrypted version
+
+``` nushell
+sops -e secrets/secrets.yaml | save -f secrets/secrets.enc.yaml
+```
+
 # Build
 
 Compile all edn templates to yaml
