@@ -89,7 +89,7 @@ in {
 
     # ../modules/redis/default.nix
     redis = {
-      enable = true;
+      enable = false;
       password = secrets.redis.password;
     };
 
