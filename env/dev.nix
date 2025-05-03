@@ -41,8 +41,13 @@ in {
 
     # ../modules/longhorn/default.nix
     longhorn = {
-      domain = "longhorn.${tail-domain}";
       enable = true;
+
+      ingress = {
+        domain = "longhorn.${tail-domain}";
+        ingressClassName = "tailscale";
+        tls.enable = true;
+      };
     };
 
     marquez = {
