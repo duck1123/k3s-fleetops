@@ -90,6 +90,7 @@ in {
     # ../modules/redis/default.nix
     redis = {
       enable = true;
+      password = secrets.redis.password;
     };
 
     satisfactory.enable = false;

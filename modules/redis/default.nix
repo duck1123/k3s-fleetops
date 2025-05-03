@@ -1,6 +1,7 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 with lib;
-mkArgoApp { inherit config lib; } {
+let redis-password-secret = "redis-password";
+in mkArgoApp { inherit config lib; } {
   name = "redis";
 
   # https://artifacthub.io/packages/helm/bitnami/redis
@@ -13,9 +14,15 @@ mkArgoApp { inherit config lib; } {
 
   uses-ingress = true;
 
+  extraOptions.password = mkOption {
+    description = mdDoc "The password";
+    type = types.str;
+    default = "CHANGEME";
+  };
+
   defaultValues = cfg: {
     auth = {
-      existingSecret = "redis-password";
+      existingSecret = redis-password-secret;
       existingSecretPasswordKey = "password";
     };
 
@@ -24,13 +31,26 @@ mkArgoApp { inherit config lib; } {
   };
 
   extraResources = cfg: {
-    sealedSecrets.redis-password.spec = {
-      encryptedData.password =
-        "AgCa80BfRlf3Crdnd9aaztAxKKv6Ml9C8yE9udSTolUdLYHCuLFDJPV/nKVOghVvS/7qO3H06W+q+K+pAAtLL8Sb5rIkXjbAeS4s7tLXEWtZvp8k0RkwuI4que2XJXwhYRzydCyw2cPtsFaxfP281pSonWbC5A3uiVuZWCyo0QgX7dA3Lzupl1AjAFGyAsonPQy6F5f4Z1f9u3nRJM9VHOjPN6vmTodN6AsRNidNe1MJ5Ji5rswu8QblAhKVc/o8302ytS/CCxdDYdkBqZo1Tqa2FXQF1LoCPskiBFQ5hk6gdMbw2DN4XLaFdaOx2RbD+zuk9H3JVUjvrN3QAeLX9h1QFKfpkRYx3mEWnXfvvFo1OU9mVmqBbDv+5l6vqOoiAaE5g9jyiATRZA/XBAfDGMFEpdiNxzK+HMjemgtG6dE0O0Ks6V2AYZIlKUuOqy+QHM19UHVNG88Q77AoQ/v+t/ernF9JaI5QUORSnN1kHnwbfxVjvQ2g6M72IW+xAptC8ciSUBEXtXYC6QBRYCkDnLiR/7718Um08lhM8yyvHPPvWyIteEnfoEZ/pWCtfuyeYG6EjitT/Iw8kXlfEkbXUMVoyzpFAMSfyF6fDsytLj17apQrofCSt1J5j6J33YwVUwh1BWE9lLS1akMRdE0b0sDwMXBgUiZvudPjeJt0+TAM694X9l0asaorIERaZmC6eYX6pP4axwANWlR6KCqvKBmbZTwkOQ==";
-      template.metadata = {
-        inherit (cfg) namespace;
-        name = "redis-password";
-      };
-    };
+    sopsSecrets.redis-password = let
+      name = redis-password-secret;
+      secret-object = builtins.fromJSON (lib.encryptString {
+        secretName = name;
+        value = lib.toYAML {
+          inherit pkgs;
+          value = {
+            apiVersion = "isindir.github.com/v1alpha3";
+            kind = "SopsSecret";
+            metadata = {
+              inherit name;
+              inherit (cfg) namespace;
+            };
+            spec.secretTemplates = [{
+              inherit name;
+              stringData.password = cfg.password;
+            }];
+          };
+        };
+      });
+    in { inherit (secret-object) sops spec; };
   };
 }
