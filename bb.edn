@@ -100,7 +100,7 @@
 
   switch-charts
   {:doc  "Switch nixidy charts"
-   :task (let [show-trace? true
+   :task (let [show-trace?    false
                env            "dev"
                args           (concat ["nix"
                                        "build"
