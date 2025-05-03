@@ -86,6 +86,12 @@ in {
 
     pihole.enable = false;
     postgresql.enable = true;
+
+    # ../modules/redis/default.nix
+    redis = {
+      enable = true;
+    };
+
     satisfactory.enable = false;
     sealed-secrets.enable = true;
 
