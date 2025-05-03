@@ -32,7 +32,7 @@ in {
     };
 
     jupyterhub = {
-      enable = true;
+      enable = false;
       domain = "jupyterhub.${tail-domain}";
       ssl = true;
       inherit (secrets.jupyterhub)
