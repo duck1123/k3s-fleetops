@@ -28,7 +28,7 @@ in {
 
     harbor-nix = {
       domain = "harbor.${base-domain}";
-      enable = true;
+      enable = false;
     };
 
     jupyterhub = {
