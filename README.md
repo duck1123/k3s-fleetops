@@ -8,7 +8,6 @@ my cluster
 
 # Setup
 
-
 ## List Tasks
 
 List all the available babashka tasks
@@ -27,17 +26,11 @@ age-keygen -o ~/.config/sops/age/keys.txt
 
 This will fail if the file has already been created
 
-## Build
-
-Compile all edn templates to yaml
-
-```sh {"name":"build-code","excludeFromRunAll":"true","id":"01J9DFM8AX7SNGCJJK6XCCV3G3","interactive":"false",}
-bb build
-```
-
 ## Register Git hooks
 
 This ensures all generated yaml is up to date on commit
+
+This only applies to legacy edn-based config
 
 ```sh {"name":"setup-git-hooks"}
 bb apply-git-hooks
@@ -54,6 +47,16 @@ Secrets are ultimately stored in a Keepass database. The `create-sealed-secrets`
 command will read the `secrets.edn` file which describes the mappings between
 entries in that keepass database and
 secret to be encrypted.
+
+# Build
+
+Compile all edn templates to yaml
+
+```sh {"name":"build-code","excludeFromRunAll":"true","id":"01J9DFM8AX7SNGCJJK6XCCV3G3","interactive":"false",}
+bb build
+```
+
+# K3D Setup
 
 ## Registry
 
@@ -72,6 +75,8 @@ bbg k3d-create
 ```
 
 See https://github.com/duck1123/dotfiles
+
+# Other
 
 ### Check Pod Status
 
@@ -129,7 +134,7 @@ EOF
 
 ### Get password
 
-Fetch the default argocd password
+Fetch the default argocd password. This will be used to log in the first time.
 
 ```sh {"id":"01J9HAPD89ZH24ER7CPMKQ1FJW","name":"get-initial-password"}
 argocd admin initial-password -n argocd
@@ -137,7 +142,10 @@ argocd admin initial-password -n argocd
 
 ### Forward ports
 
-Forward argocd interface ports
+Forward argocd interface ports.
+
+Untill the main application installs the ingress controllers, the only way to
+access the argocd interface is by forwarding the ports.
 
 ```sh {"background":"true","id":"01J9HAPD89ZH24ER7CPRARMG51","interactive":"false","name":"forward-argocd-ports"}
 kubectl port-forward svc/argocd-server -n argocd 8080:443
@@ -149,6 +157,8 @@ https://localhost:8080/
 
 Registers the `00-master` Application with argocd.
 
+This will kick off argo installing all the other resources.
+
 ```sh {"id":"01J9HAPD89ZH24ER7CPSBSYNH3","name":"apply-master-application"}
 bb apply-master-application
 ```
@@ -159,6 +169,8 @@ Create cluster issuer record.
 
 This will cause any ingress with the appropriate annotations to obtain a
 certificate from letsencrypt
+
+This must be done after the cert-manager crds have been installed
 
 replace EMAIL with your email
 
