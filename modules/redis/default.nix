@@ -19,6 +19,7 @@ mkArgoApp { inherit config lib; } {
       existingSecretPasswordKey = "password";
     };
 
+    global.defaultStorageClass = "longhorn";
     replicas.replicaCount = 1;
   };
 
