@@ -19,6 +19,9 @@ in {
   };
 
   services = {
+    # ../modules/adventureworks/default.nix
+    adventureworks.enable = false;
+
     argocd.enable = true;
     cert-manager.enable = true;
 
