@@ -1,20 +1,31 @@
 { charts, config, lib, ... }:
-let
-  cfg = config.services.alice-lnd;
+with lib;
+mkArgoApp { inherit config lib; } {
+  name = "alice-lnd";
 
-  chartConfig = {
+  chart = lib.helm.downloadHelmChart {
     repo = "https://chart.kronkltd.net/";
     chart = "lnd";
     version = "0.3.9";
     chartHash = "sha256-PgA65z/LuWvCfCdTSu9j+CpSS4eWcLY20oSqaBxFklA=";
   };
 
-  userEnv = "alice";
-  defaultNamespace = "${userEnv}-lnd";
-  domain = "lnd-${userEnv}.dinsro.com";
-  imageVersion = "v1.10.3";
+  uses-ingress = true;
 
-  defaultValues = {
+  extraOptions = {
+    imageVersion = mkOption {
+      description = mdDoc "The version of bitcoind do deploy";
+      type = types.str;
+      default = "v1.10.3";
+    };
+    user-env = mkOption {
+      description = mdDoc "The name of the user";
+      type = types.str;
+      default = "satoshi";
+    };
+  };
+
+  defaultValues = cfg: {
     autoUnlock = false;
     autoUnlockPassword = "unlockpassword";
     configurationFile."lnd.conf" = ''
@@ -45,32 +56,5 @@ let
     network = "regtest";
     persistence.enable = false;
     pool.enable = false;
-  };
-
-  values = lib.attrsets.recursiveUpdate defaultValues cfg.values;
-  namespace = cfg.namespace;
-in with lib; {
-  options.services.alice-lnd = {
-    enable = mkEnableOption "Enable application";
-    namespace = mkOption {
-      description = mdDoc "The namespace to install into";
-      type = types.str;
-      default = defaultNamespace;
-    };
-
-    values = mkOption {
-      description = "All the values";
-      type = types.attrsOf types.anything;
-      default = { };
-    };
-  };
-
-  config = mkIf cfg.enable {
-    applications.alice-lnd = let chart = helm.downloadHelmChart chartConfig;
-    in {
-      inherit namespace;
-      createNamespace = true;
-      helm.releases.alice-lnd = { inherit chart values; };
-    };
   };
 }
