@@ -32,6 +32,9 @@ in {
       };
     };
 
+    # ../modules/alice-bitcoin/default.nix
+    alice-bitcoin.enable = false;
+
     argocd.enable = true;
     cert-manager.enable = true;
 

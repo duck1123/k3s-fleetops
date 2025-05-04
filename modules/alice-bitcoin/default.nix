@@ -1,7 +1,9 @@
-{ config, lib, ... }:
-let
-  cfg = config.services.alice-bitcoin;
+{ charts, config, lib, ... }:
+with lib;
+mkArgoApp { inherit config lib; } {
+  name = "alice-bitcoin";
 
+  # https://artifacthub.io/packages/helm/kronkltd/bitcoind
   chart = lib.helm.downloadHelmChart {
     repo = "https://chart.kronkltd.net/";
     chart = "bitcoind";
@@ -9,9 +11,7 @@ let
     chartHash = "sha256-iSi8hY8TufXdqdDujPzdbLSOKFfIehVnpshIhUG4NBE=";
   };
 
-  defaultNamespace = "alice-bitcoin";
-
-  defaultValues = {
+  defaultValues = cfg: {
     fullNameOverride = "alice-bitcoin";
     image = {
       repository = "ruimarinho/bitcoin-core";
@@ -34,34 +34,6 @@ let
         [regtest]
         rpcbind=0.0.0.0
       '';
-    };
-  };
-
-  values = lib.attrsets.recursiveUpdate defaultValues cfg.values;
-  namespace = cfg.namespace;
-in with lib; {
-  options.services.alice-bitcoin = {
-    enable = mkEnableOption "Enable application";
-    namespace = mkOption {
-      description = mdDoc "The namespace to install into";
-      type = types.str;
-      default = defaultNamespace;
-    };
-
-    values = mkOption {
-      description = "All the values";
-      type = types.attrsOf types.anything;
-      default = { };
-    };
-  };
-
-  config = mkIf cfg.enable {
-    applications.alice-bitcoin = {
-      inherit namespace;
-      createNamespace = true;
-      finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
-      helm.releases.alice-bitcoin = { inherit chart values; };
-      syncPolicy.finalSyncOpts = [ "CreateNamespace=true" ];
     };
   };
 }
