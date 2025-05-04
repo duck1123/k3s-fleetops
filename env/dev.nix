@@ -22,6 +22,16 @@ in {
     # ../modules/adventureworks/default.nix
     adventureworks.enable = false;
 
+    # ../modules/airflow/default.nix
+    airflow = {
+      enable = false;
+
+      ingress = {
+        inherit clusterIssuer;
+        domain = "airflow.${base-domain}";
+      };
+    };
+
     argocd.enable = true;
     cert-manager.enable = true;
 
