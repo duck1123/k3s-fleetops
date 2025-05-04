@@ -1,6 +1,7 @@
-{ charts, config, lib, ... }:
-let
-  cfg = config.services.argo-workflows;
+{ config, lib, ... }:
+with lib;
+mkArgoApp { inherit config lib; } {
+  name = "argo-workflows";
 
   chart = lib.helm.downloadHelmChart {
     repo = "https://charts.bitnami.com/bitnami";
@@ -9,10 +10,9 @@ let
     chartHash = "sha256-jcwHQUh9nkcsFzF+DI69XXkWnmyNL3QMlnVucAlYtsY=";
   };
 
-  defaultNamespace = "argo-workflows";
-  domain = "argo-workflows.dev.kronkltd.net";
+  uses-ingress = true;
 
-  defaultValues = {
+  defaultValues = cfg: {
     controller = {
       extraEnvVars = [{
         # https://argo-workflows.readthedocs.io/en/latest/executor_plugins/
@@ -23,8 +23,8 @@ let
       persistence.archive.enabled = true;
 
       # These are applied to the ingress?
-      service.annotations = {
-        "cert-manager.io/cluster-issuer" = "letsencrypt-prod";
+      service.annotations = with cfg.ingress; {
+        "cert-manager.io/cluster-issuer" = clusterIssuer;
         "ingress.kubernetes.io/force-ssl-redirect" = "true";
         "ingress.kubernetes.io/proxy-body-size" = "0";
         "ingress.kubernetes.io/ssl-redirect" = "true";
@@ -34,13 +34,14 @@ let
       # workflowNamespaces = [ "default" "argo-workflows" ];
     };
 
-    ingress = {
+    ingress = with cfg.ingress; {
       enabled = true;
       hostname = domain;
-      ingressClassName = "traefik";
+      inherit ingressClassName;
+
       # These have no effect
       annotations = {
-        "cert-manager.io/cluster-issuer" = "letsencrypt-prod";
+        "cert-manager.io/cluster-issuer" = clusterIssuer;
         "ingress.kubernetes.io/force-ssl-redirect" = "true";
         "ingress.kubernetes.io/proxy-body-size" = "0";
         "ingress.kubernetes.io/ssl-redirect" = "true";
@@ -49,36 +50,10 @@ let
     };
   };
 
-  values = lib.attrsets.recursiveUpdate defaultValues cfg.values;
-  namespace = cfg.namespace;
-in with lib; {
-  options.services.argo-workflows = {
-    enable = mkEnableOption "Enable application";
-    namespace = mkOption {
-      description = mdDoc "The namespace to install into";
-      type = types.str;
-      default = defaultNamespace;
-    };
-
-    values = mkOption {
-      description = "All the values";
-      type = types.attrsOf types.anything;
-      default = { };
-    };
-  };
-
-  config = mkIf cfg.enable {
-    applications.argo-workflows = {
-      inherit namespace;
-      finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
-      helm.releases.argo-workflows = { inherit chart values; };
-
-      resources.secrets."duck.service-account-token" = {
-        metadata.annotations."kubernetes.io/service-account.name" = "duck";
-        type = "kubernetes.io/service-account-token";
-      };
-
-      syncPolicy.finalSyncOpts = [ "CreateNamespace=true" ];
+  extraResources = cfg: {
+    secrets."duck.service-account-token" = {
+      metadata.annotations."kubernetes.io/service-account.name" = "duck";
+      type = "kubernetes.io/service-account-token";
     };
   };
 }
