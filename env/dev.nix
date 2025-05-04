@@ -67,6 +67,17 @@ in {
       };
     };
 
+    # ../modules/authentik/default.nix
+    authentik = {
+      enable = false;
+
+      ingress = {
+        inherit clusterIssuer;
+        domain = "authentik.${base-domain}";
+        ingressClassName = "traefik";
+      };
+    };
+
     cert-manager.enable = true;
 
     cloudbeaver = {
