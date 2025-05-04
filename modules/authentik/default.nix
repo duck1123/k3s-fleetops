@@ -10,6 +10,8 @@ mkArgoApp { inherit config lib; } {
     chartHash = "sha256-wMEFXWJDI8pHqKN7jrQ4K8+s1c2kv6iN6QxiLPZ1Ytk=";
   };
 
+  uses-ingress = true;
+
   defaultValues = cfg: with cfg; {
     authentik.error_reporting.enabled = true;
     global.env = [

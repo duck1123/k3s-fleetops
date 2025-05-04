@@ -65,27 +65,28 @@ let
     enable = mkEnableOption "Enable ${name} app";
 
     extraAppConfig = mkOption {
-      type = attrs;
       default = { };
       description = "Extra config merged into the app release.";
+      type = attrs;
     };
 
     extraResources = mkOption {
-      type = attrs;
       default = { };
       description = "Extra Kubernetes resources related to ${name}.";
+      type = attrs;
     };
 
     ingress = mkOption {
+      apply = val: assert uses-ingress || val == { }; val;
+      default = { };
       description = "Ingress Options";
       type = if uses-ingress then
-        submodule {
-          options =
-            lib.recursiveUpdate ingressOptions (extraOptions.ingress or { });
-        }
+        submodule (let
+          extra-ingress = extraOptions.ingress or { };
+          options = recursiveUpdate ingressOptions extra-ingress;
+        in { inherit options; })
       else
         unspecified;
-      default = { };
     };
 
     namespace = mkOption {
