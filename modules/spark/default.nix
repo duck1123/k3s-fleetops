@@ -4,7 +4,7 @@ let
 
   chart = lib.helmChart {
     inherit pkgs;
-    chartTgz = ../../charts/spark-9.3.5.tgz;
+    chartTgz = ../../chart-archives/spark-9.3.5.tgz;
     chartName = "spark";
   };
 

@@ -4,7 +4,7 @@ let
 
   chart = lib.helmChart {
     inherit pkgs;
-    chartTgz = ../../charts/postgresql-16.2.3.tgz;
+    chartTgz = ../../chart-archives/postgresql-16.2.3.tgz;
     chartName = "postgresql";
   };
 

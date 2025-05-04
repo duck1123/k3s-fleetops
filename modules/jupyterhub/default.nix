@@ -7,7 +7,7 @@ let
   # https://artifacthub.io/packages/helm/bitnami/jupyterhub
   chart = lib.helmChart {
     inherit pkgs;
-    chartTgz = ../../charts/jupyterhub-8.1.5.tgz;
+    chartTgz = ../../chart-archives/jupyterhub-8.1.5.tgz;
     chartName = "jupyterhub";
   };
 

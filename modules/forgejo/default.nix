@@ -4,7 +4,7 @@ let
 
   chart = lib.helmChart {
     inherit pkgs;
-    chartTgz = ../../charts/forgejo-11.0.3.tgz;
+    chartTgz = ../../chart-archives/forgejo-11.0.3.tgz;
     chartName = "forgejo";
   };
 

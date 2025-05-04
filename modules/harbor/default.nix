@@ -6,7 +6,7 @@ let
   # https://artifacthub.io/packages/helm/bitnami/harbor
   # chart = lib.helmChart {
   #   inherit pkgs;
-  #   chartTgz = ../../charts/harbor-24.6.0.tgz;
+  #   chartTgz = ../../chart-archives/harbor-24.6.0.tgz;
   #   chartName = "harbor";
   # };
 
