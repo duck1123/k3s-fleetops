@@ -54,7 +54,9 @@ in {
       namespace = "${user-env}-specter";
     };
 
+    # ../modules/argocd/default.nix
     argocd.enable = true;
+
     cert-manager.enable = true;
 
     cloudbeaver = {
