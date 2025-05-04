@@ -2,6 +2,7 @@
 let
   base-domain = "dev.kronkltd.net";
   tail-domain = "bearded-snake.ts.net";
+  clusterIssuer = "letsencrypt-prod";
 in {
   nixidy = {
     defaults.syncPolicy.autoSync = {
@@ -104,6 +105,15 @@ in {
     tailscale = {
       enable = true;
       oauth = { inherit (secrets.tailscale) authKey clientId clientSecret; };
+    };
+
+    tempo = {
+      enable = false;
+      ingress = {
+        inherit clusterIssuer;
+        domain = "tempo.${base-domain}";
+        ingressClassName = "traefik";
+      };
     };
 
     traefik.enable = true;
