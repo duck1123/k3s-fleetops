@@ -41,9 +41,17 @@ in {
       inherit user-env;
       enable = false;
       imageVersion = "v1.10.3";
-      ingress = {
-        domain = "lnd-${user-env}.dinsro.com";
-      };
+      ingress.domain = "lnd-${user-env}.dinsro.com";
+    };
+
+    # ../modules/alice-specter/default.nix
+    alice-specter = let user-env = "alice";
+    in {
+      inherit user-env;
+      enable = false;
+      imageVersion = "v1.10.3";
+      ingress.domain = "specter-${user-env}.dinsro.com";
+      namespace = "${user-env}-specter";
     };
 
     argocd.enable = true;
