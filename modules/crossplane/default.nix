@@ -1,8 +1,9 @@
 { config, lib, ... }:
-let
-  app-name = "crossplane";
-  cfg = config.services.${app-name};
+with lib;
+mkArgoApp { inherit config lib; } {
+  name = "crossplane";
 
+  # https://artifacthub.io/packages/helm/crossplane/crossplane
   chart = lib.helm.downloadHelmChart {
     repo = "https://charts.crossplane.io/master/";
     chart = "crossplane";
@@ -10,37 +11,9 @@ let
     chartHash = "sha256-mzXUVxHhDgJ9bPH+4Msr8lzlQ74PkK/tw+n9n0xYvYA=";
   };
 
-  defaultValues = { image.pullPolicy = "Always"; };
+  defaultValues = cfg: { image.pullPolicy = "Always"; };
 
-  values = lib.attrsets.recursiveUpdate defaultValues cfg.values;
-in with lib; {
+  extraConfig = cfg: { nixidy.resourceImports = [ ./generated.nix ]; };
+} // {
   imports = [ ./providers ];
-
-  options.services.${app-name} = {
-    enable = mkEnableOption "Enable application";
-
-    namespace = mkOption {
-      description = mdDoc "The namespace to install into";
-      type = types.str;
-      default = app-name;
-    };
-
-    values = mkOption {
-      description = "All the values";
-      type = types.attrsOf types.anything;
-      default = { };
-    };
-  };
-
-  config = mkIf cfg.enable {
-    applications.${app-name} = {
-      inherit (cfg) namespace;
-      createNamespace = true;
-      finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
-      helm.releases.${app-name} = { inherit chart values; };
-      syncPolicy.finalSyncOpts = [ "CreateNamespace=true" ];
-    };
-
-    nixidy.resourceImports = [ ./generated.nix ];
-  };
 }
