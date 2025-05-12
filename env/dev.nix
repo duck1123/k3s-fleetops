@@ -88,6 +88,7 @@ in {
     # ../modules/crossplane/default.nix
     crossplane = {
       enable = true;
+      providers.digital-ocean.enable = true;
     };
 
     harbor-nix = {
