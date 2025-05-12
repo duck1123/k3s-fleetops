@@ -85,6 +85,11 @@ in {
       enable = false;
     };
 
+    # ../modules/crossplane/default.nix
+    crossplane = {
+      enable = true;
+    };
+
     harbor-nix = {
       domain = "harbor.${base-domain}";
       enable = false;
