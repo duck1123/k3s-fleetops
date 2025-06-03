@@ -15,7 +15,7 @@ mkArgoApp { inherit config lib; } {
     env = [
       {
         name = "DEBUG";
-        value = "true";
+        value = "false";
       }
       {
         name = "STEAM_BETA";
