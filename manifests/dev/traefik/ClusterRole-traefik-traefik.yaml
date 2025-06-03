@@ -5,20 +5,14 @@ metadata:
     app.kubernetes.io/instance: traefik-traefik
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: traefik
-    helm.sh/chart: traefik-35.2.0
+    helm.sh/chart: traefik-35.4.0
   name: traefik-traefik
 rules:
   - apiGroups:
       - ""
     resources:
+      - configmaps
       - nodes
-    verbs:
-      - get
-      - list
-      - watch
-  - apiGroups:
-      - ""
-    resources:
       - services
     verbs:
       - get
