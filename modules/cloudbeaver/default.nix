@@ -1,26 +1,48 @@
 { config, lib, ... }:
-let
-  app-name = "cloudbeaver";
-  cfg = config.services.${app-name};
+with lib;
+mkArgoApp { inherit config lib; } {
+  name = "cloudbeaver";
 
   # https://artifacthub.io/packages/helm/homeenterpriseinc/cloudbeaver
-  chart = lib.helm.downloadHelmChart {
+  chart = helm.downloadHelmChart {
     repo = "https://homeenterpriseinc.github.io/helm-charts/";
     chart = "cloudbeaver";
     version = "0.6.0";
     chartHash = "sha256-+UuoshmHyNzVlWqpKP+DlWtgALnerkLdhx1ldQSorLk=";
   };
 
-  defaultValues = {
+  uses-ingress = true;
+
+  # extraOptions = {
+  #   codeserver = {
+  #     clusterIssuer  = mkOption {
+  #       description = mdDoc "The cookie secret";
+  #       type = str;
+  #       default = "CHANGEME";
+  #     };
+  #     domain = mkOption {
+  #       description = mdDoc "The cookie secret";
+  #       type = str;
+  #       default = "CHANGEME";
+  #     };
+  #     ingressClassName = mkOption {
+  #       description = mdDoc "The cookie secret";
+  #       type = str;
+  #       default = "CHANGEME";
+  #     };
+  #   };
+  # };
+
+  defaultValues = cfg: {
     image.tag = "24.2.5";
-    ingress = {
+    ingress = with cfg.ingress; {
       annotations = {
-        "cert-manager.io/cluster-issuer" = "letsencrypt-prod";
+        "cert-manager.io/cluster-issuer" = clusterIssuer;
         "ingress.kubernetes.io/force-ssl-redirect" = "true";
       };
       enabled = false;
       hosts = [{
-        host = cfg.domain;
+        host = domain;
         paths = [{
           path = "/";
           pathType = "ImplementationSpecific";
@@ -31,73 +53,33 @@ let
     persistence.enabled = false;
   };
 
-  values = lib.attrsets.recursiveUpdate defaultValues cfg.values;
-  namespace = cfg.namespace;
-in with lib; {
-  options.services.cloudbeaver = {
-    clusterIssuer = mkOption {
-      description = mdDoc "The cluster issuer for certificates";
-      type = types.str;
-      default = "letsencrypt-prod";
-    };
-
-    domain = mkOption {
-      description = mdDoc "The ingress hostname";
-      type = types.str;
-      default = "${app-name}.localhost";
-    };
-
-    enable = mkEnableOption "Enable application";
-    namespace = mkOption {
-      description = mdDoc "The namespace to install into";
-      type = types.str;
-      default = app-name;
-    };
-
-    values = mkOption {
-      description = "All the values";
-      type = types.attrsOf types.anything;
-      default = { };
-    };
-  };
-
-  config = mkIf cfg.enable {
-    applications.${app-name} = {
-      inherit namespace;
-      createNamespace = true;
-      finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
-      helm.releases.${app-name} = { inherit chart values; };
-
-      resources.ingresses.cloudbeaver-ingress = {
-        metadata.annotations = {
-          # "cert-manager.io/cluster-issuer" = cfg.clusterIssuer;
-          # "ingress.kubernetes.io/force-ssl-redirect" = "true";
-          # "ingress.kubernetes.io/proxy-body-size" = "0";
-          # "ingress.kubernetes.io/ssl-redirect" = "true";
-          # "kubernetes.io/ingress.class" = "traefik";
-        };
-        spec = {
-          # ingressClassName = "traefik";
-          ingressClassName = "tailscale";
-          rules = [{
-            host = cfg.domain;
-            http.paths = [{
-              backend.service = {
-                name = "cloudbeaver-svc";
-                port.name = "http";
-              };
-              path = "/";
-              pathType = "ImplementationSpecific";
-            }];
-          }];
-          tls = [{
-            hosts = [ cfg.domain ];
-            secretName = "cloudbeaver-tls";
-          }];
-        };
+  extraResources = cfg: {
+    ingresses.cloudbeaver-ingress = with cfg.ingress; {
+      metadata.annotations = {
+        # "cert-manager.io/cluster-issuer" = cfg.clusterIssuer;
+        # "ingress.kubernetes.io/force-ssl-redirect" = "true";
+        # "ingress.kubernetes.io/proxy-body-size" = "0";
+        # "ingress.kubernetes.io/ssl-redirect" = "true";
+        # "kubernetes.io/ingress.class" = "traefik";
       };
-
-      syncPolicy.finalSyncOpts = [ "CreateNamespace=true" ];
+      spec = {
+        inherit ingressClassName;
+        rules = [{
+          host = domain;
+          http.paths = [{
+            backend.service = {
+              name = "cloudbeaver-svc";
+              port.name = "http";
+            };
+            path = "/";
+            pathType = "ImplementationSpecific";
+          }];
+        }];
+        tls = [{
+          inherit (tls) secretName;
+          hosts = [ domain ];
+        }];
+      };
     };
   };
 }

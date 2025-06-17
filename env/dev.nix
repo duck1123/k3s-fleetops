@@ -80,9 +80,15 @@ in {
 
     cert-manager.enable = true;
 
+    # ../modules/cloudbeaver/default.nix
     cloudbeaver = {
-      domain = "cloudbeaver.${tail-domain}";
-      enable = false;
+      enable = true;
+
+      ingress = {
+        domain = "cloudbeaver.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
     };
 
     # ../modules/crossplane/default.nix
