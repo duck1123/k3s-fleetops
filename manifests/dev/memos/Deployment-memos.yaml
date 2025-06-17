@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/instance: memos
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: memos
+    app.kubernetes.io/version: 0.22.4
+    helm.sh/chart: memos-0.15.1
+  name: memos
+  namespace: memos
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: memos
+      app.kubernetes.io/name: memos
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: memos
+        app.kubernetes.io/name: memos
+    spec:
+      automountServiceAccountToken: true
+      containers:
+        - env:
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: postgres-password
+                  name: memos-postgresql
+            - name: MEMOS_DRIVER
+              value: postgres
+            - name: MEMOS_DSN
+              value: postgresql://postgres:$(DB_PASSWORD)@memos-postgresql/memos?sslmode=disable
+            - name: MEMOS_PORT
+              value: "5230"
+          image: ghcr.io/usememos/memos:0.22.4
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            tcpSocket:
+              port: 5230
+            timeoutSeconds: 1
+          name: memos
+          ports:
+            - containerPort: 5230
+              name: http
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            tcpSocket:
+              port: 5230
+            timeoutSeconds: 1
+          startupProbe:
+            failureThreshold: 30
+            initialDelaySeconds: 0
+            periodSeconds: 5
+            tcpSocket:
+              port: 5230
+            timeoutSeconds: 1
+      dnsPolicy: ClusterFirst
+      enableServiceLinks: true
+      securityContext:
+        fsGroup: 65534
+        runAsGroup: 65534
+        runAsUser: 65534
+      serviceAccountName: default

@@ -145,6 +145,16 @@ in {
       enable = false;
     };
 
+    # ../modules/memos/default.nix
+    memos = {
+      enable = true;
+
+      ingress = {
+        domain = "memos.${tail-domain}";
+        ingressClassName = "tailscale";
+      };
+    };
+
     minio = {
       api-domain = "api.minio.${tail-domain}";
       domain = "minio.${tail-domain}";
