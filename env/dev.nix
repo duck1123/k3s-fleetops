@@ -158,10 +158,10 @@ in {
       password = secrets.redis.password;
     };
 
-    satisfactory = {
-      enable = true;
-    };
+    # ../modules/satisfactory/default.nix
+    satisfactory.enable = false;
 
+    # ../modules/sealed-secrets/default.nix
     sealed-secrets.enable = true;
 
     # ../modules/sops/default.nix
