@@ -102,6 +102,13 @@ in {
       enable = false;
     };
 
+    # ../modules/homer/default.nix
+    homer = {
+      codeserver.ingress.domain = "codeserver.${tail-domain}";
+      enable = true;
+      ingress.domain = "homer.${tail-domain}";
+    };
+
     jupyterhub = {
       enable = false;
       domain = "jupyterhub.${tail-domain}";
