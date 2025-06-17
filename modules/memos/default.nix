@@ -1,6 +1,6 @@
 { config, lib, ... }:
 with lib;
-mkArgoApp { inherit config lib; } {
+mkArgoApp { inherit config lib; } rec {
   name = "memos";
 
   # https://artifacthub.io/packages/helm/gabe565/memos
@@ -15,7 +15,7 @@ mkArgoApp { inherit config lib; } {
 
   defaultValues = cfg: {
     ingress.main = with cfg.ingress; {
-      enabled = true;
+      enabled = false;
       hosts = [{
         host = domain;
         paths = [{ path = "/"; }];
@@ -31,4 +31,30 @@ mkArgoApp { inherit config lib; } {
       primary.persistence.enabled = false;
     };
   };
+
+  extraResources = cfg:
+    with cfg; {
+      ingresses = with cfg.ingress; {
+        memos.spec = {
+          inherit (cfg.ingress) ingressClassName;
+          rules = [{
+            host = domain;
+            http = {
+              paths = [{
+                path = "/";
+                pathType = "ImplementationSpecific";
+                backend.service = {
+                  inherit name;
+                  port.name = "http";
+                };
+              }];
+            };
+          }];
+          tls = [{
+            hosts = [ domain ];
+            secretName = tls.secretName;
+          }];
+        };
+      };
+    };
 }
