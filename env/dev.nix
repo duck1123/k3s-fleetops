@@ -106,7 +106,10 @@ in {
     homer = {
       codeserver.ingress.domain = "codeserver.${tail-domain}";
       enable = true;
-      ingress.domain = "homer.${tail-domain}";
+      ingress = {
+        domain = "homer.${tail-domain}";
+        ingressClassName = "tailscale";
+      };
     };
 
     jupyterhub = {

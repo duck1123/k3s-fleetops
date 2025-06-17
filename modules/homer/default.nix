@@ -37,7 +37,7 @@ mkArgoApp { inherit config lib; } {
   defaultValues = cfg: {
     ingress = with cfg.ingress; {
       main = {
-        enabled = true;
+        enabled = false;
         hosts = [{
           host = domain;
           paths = [{ path = "/"; }];
@@ -49,7 +49,7 @@ mkArgoApp { inherit config lib; } {
       };
 
       addons.codeserver = with cfg.codeserver.ingress; {
-        enabled = true;
+        enabled = false;
         ingress = {
           enabled = true;
           hosts = [{
@@ -61,6 +61,31 @@ mkArgoApp { inherit config lib; } {
             hosts = [ domain ];
           }];
         };
+      };
+    };
+  };
+
+  extraResources = cfg: with cfg; {
+    ingresses = with ingress; {
+      homer.spec = {
+        inherit (cfg.ingress) ingressClassName;
+        rules = [{
+          host = domain;
+          http = {
+            paths = [{
+              path = "/";
+              pathType = "ImplementationSpecific";
+              backend.service = {
+                name = "homer";
+                port.name = "http";
+              };
+            }];
+          };
+        }];
+        tls = [{
+          hosts = [ domain ];
+          secretName = "homer-tls";
+        }];
       };
     };
   };
