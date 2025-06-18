@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ ageRecipients, config, lib, pkgs, ... }:
 let
   app-name = "tailscale";
   cfg = config.services.${app-name};
@@ -57,7 +57,7 @@ in with lib; {
 
       resources.sopsSecrets = {
         tailscale-auth = lib.createSecret {
-          inherit lib pkgs;
+          inherit ageRecipients lib pkgs;
           inherit (cfg) namespace;
           secretName = "tailscale-auth";
           values = with cfg.oauth; {
@@ -66,7 +66,7 @@ in with lib; {
         };
 
         operator-oauth = lib.createSecret {
-          inherit lib pkgs;
+          inherit ageRecipients lib pkgs;
           inherit (cfg) namespace;
           secretName = "operator-oauth";
           values = with cfg.oauth; {

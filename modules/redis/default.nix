@@ -1,6 +1,6 @@
-{ config, lib, pkgs, ... }:
+{ ageRecipients, config, lib, pkgs, ... }:
 with lib;
-let redis-password-secret = "redis-password";
+let password-secret = "redis-password";
 in mkArgoApp { inherit config lib; } {
   name = "redis";
 
@@ -22,7 +22,7 @@ in mkArgoApp { inherit config lib; } {
 
   defaultValues = cfg: {
     auth = {
-      existingSecret = redis-password-secret;
+      existingSecret = password-secret;
       existingSecretPasswordKey = "password";
     };
 
@@ -31,26 +31,11 @@ in mkArgoApp { inherit config lib; } {
   };
 
   extraResources = cfg: {
-    sopsSecrets.redis-password = let
-      name = redis-password-secret;
-      secret-object = builtins.fromJSON (lib.encryptString {
-        secretName = name;
-        value = lib.toYAML {
-          inherit pkgs;
-          value = {
-            apiVersion = "isindir.github.com/v1alpha3";
-            kind = "SopsSecret";
-            metadata = {
-              inherit name;
-              inherit (cfg) namespace;
-            };
-            spec.secretTemplates = [{
-              inherit name;
-              stringData.password = cfg.password;
-            }];
-          };
-        };
-      });
-    in { inherit (secret-object) sops spec; };
+    sopsSecrets.${password-secret} = lib.createSecret {
+      inherit ageRecipients lib pkgs;
+      inherit (cfg) namespace;
+      secretName = password-secret;
+      values = with cfg; { inherit password; };
+    };
   };
 }

@@ -1,0 +1,21 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  labels:
+    app.kubernetes.io/component: console
+    app.kubernetes.io/instance: minio
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: minio
+    app.kubernetes.io/part-of: minio
+    app.kubernetes.io/version: 2.0.1
+    helm.sh/chart: minio-17.0.5
+  name: minio-console
+  namespace: minio
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: console
+      app.kubernetes.io/instance: minio
+      app.kubernetes.io/name: minio
+      app.kubernetes.io/part-of: minio

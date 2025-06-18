@@ -155,11 +155,21 @@ in {
       };
     };
 
+    # ../modules/minio/default.nix
     minio = {
-      api-domain = "api.minio.${tail-domain}";
-      domain = "minio.${tail-domain}";
-      enable = false;
-      tls.enable = true;
+      enable = true;
+
+      ingress = {
+        api-domain = "api.minio.${tail-domain}";
+        domain = "minio.${tail-domain}";
+        clusterIssuer = "tailscale";
+        ingressClassName = "tailscale";
+        tls.enable = true;
+      };
+
+      values = {
+        defaultBuckets = "my-default-bucket";
+      };
     };
 
     # ../modules/nocodb/default.nix

@@ -1,5 +1,5 @@
-{ ageRecipients, pkgs, ... }:
-{ secretName, value }:
+{ pkgs, ... }:
+{ ageRecipients, secretName, value }:
 let
   json-file = builtins.toFile "input.json" value;
   encrypted-drv = pkgs.runCommand secretName {

@@ -82,12 +82,11 @@
     systems.url = "github:nix-systems/default";
   };
 
-  outputs = { nixhelm, nixidy, nixpkgs, ... }@inputs:
-    inputs.flake-parts.lib.mkFlake { inherit inputs; } (_: {
-      imports = [
-        inputs.mkdocs-flake.flakeModules.default
-        inputs.make-shell.flakeModules.default
-      ];
+  outputs = { flake-parts, make-shell, mkdocs-flake, nixhelm, nixidy, nixpkgs
+    , ... }@inputs:
+    flake-parts.lib.mkFlake { inherit inputs; } (_: {
+      imports =
+        [ mkdocs-flake.flakeModules.default make-shell.flakeModules.default ];
       systems = [ "x86_64-linux" ];
       perSystem = { pkgs, system, ... }:
         let generators = import ./generators { inherit inputs system pkgs; };
@@ -125,37 +124,31 @@
     }) // (let
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
-      # naughty config
+      # FIXME: naughty config
       ageRecipients =
         "age1n372e8dgautnjhecllf7uvvldw9g6vyx3kggj0kyduz5jr2upvysue242c";
-      encryptString =
-        import ./lib/encryptString.nix { inherit ageRecipients pkgs; };
+      encryptString = import ./lib/encryptString.nix { inherit pkgs; };
       createSecret = import ./lib/createSecret.nix;
       helmChart = import ./lib/helmChart.nix;
       fromYAML = import ./lib/fromYAML.nix;
+      loadSecrets = import ./lib/loadSecrets.nix;
       mkArgoApp = import ./lib/mkArgoApp.nix;
       toYAML = import ./lib/toYAML.nix;
       lib = {
         inherit ageRecipients createSecret encryptString fromYAML helmChart
-          mkArgoApp toYAML;
+          loadSecrets mkArgoApp toYAML;
         sopsConfig = ./.sops.yaml;
       };
-      decryptedPath = builtins.getEnv "DECRYPTED_SECRET_FILE";
-      hasDecrypted = builtins.pathExists decryptedPath;
-      secrets = if hasDecrypted then
-        fromYAML {
-          inherit pkgs;
-          value = builtins.readFile decryptedPath;
-        }
-      else
-        throw "Missing decrypted secret: ${decryptedPath}";
+      secrets = loadSecrets { inherit fromYAML pkgs; };
       dev = import ./env/dev.nix { inherit lib nixidy secrets; };
     in {
       inherit lib;
 
+      # TODO: Make a flake-parts module for this
       nixidyEnvs.${system} = nixidy.lib.mkEnvs {
         inherit pkgs;
         charts = nixhelm.chartsDerivations.${system};
+        extraSpecialArgs = { inherit ageRecipients; };
         envs.dev.modules = [ dev ];
         libOverlay = final: prev: lib;
         modules = [ ./modules ];

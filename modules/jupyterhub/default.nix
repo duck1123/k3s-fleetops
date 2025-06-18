@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ ageRecipients, config, lib, pkgs, ... }:
 let
   app-name = "jupyterhub";
 
@@ -47,6 +47,7 @@ let
   };
 
   encrypted-secret-config = lib.encryptString {
+    inherit ageRecipients;
     secretName = hub-secret;
     value = hub-secret-config-yaml;
   };
