@@ -172,6 +172,9 @@ in {
       };
     };
 
+    # ../modules/mssql/default.nix
+    mssql.enable = false;
+
     # ../modules/nocodb/default.nix
     nocodb = {
       enable = false;
