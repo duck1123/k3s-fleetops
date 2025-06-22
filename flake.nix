@@ -90,19 +90,14 @@
         "age1n372e8dgautnjhecllf7uvvldw9g6vyx3kggj0kyduz5jr2upvysue242c";
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
-      encryptString = import ./lib/encryptString.nix { inherit pkgs; };
-      createSecret = import ./lib/createSecret.nix;
-      helmChart = import ./lib/helmChart.nix;
-      fromYAML = import ./lib/fromYAML.nix;
-      loadSecrets = import ./lib/loadSecrets.nix;
-      mkArgoApp = import ./lib/mkArgoApp.nix;
-      toYAML = import ./lib/toYAML.nix;
-      lib = {
-        inherit ageRecipients createSecret encryptString fromYAML helmChart
-          loadSecrets mkArgoApp toYAML;
+      lib = (import ./lib) // {
+        inherit ageRecipients;
         sopsConfig = ./.sops.yaml;
       };
-      secrets = loadSecrets { inherit fromYAML pkgs; };
+      secrets = lib.loadSecrets {
+        inherit (lib) fromYAML;
+        inherit pkgs;
+      };
       dev = import ./env/dev.nix { inherit lib nixidy secrets; };
       charts = nixhelm.chartsDerivations.${system};
       defaultEnv = nixidy.lib.mkEnvs {

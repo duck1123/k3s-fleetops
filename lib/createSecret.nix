@@ -3,7 +3,7 @@
 , values ? { }, ... }:
 let
   encrypted-object = builtins.fromJSON (lib.encryptString {
-    inherit ageRecipients secretName;
+    inherit ageRecipients pkgs secretName;
     value = (lib.toYAML {
       inherit pkgs;
       value = {

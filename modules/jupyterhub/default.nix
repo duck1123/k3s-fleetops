@@ -47,7 +47,7 @@ let
   };
 
   encrypted-secret-config = lib.encryptString {
-    inherit ageRecipients;
+    inherit ageRecipients pkgs;
     secretName = hub-secret;
     value = hub-secret-config-yaml;
   };
