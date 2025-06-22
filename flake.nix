@@ -84,10 +84,38 @@
 
   outputs = { flake-parts, make-shell, mkdocs-flake, nixhelm, nixidy, nixpkgs
     , ... }@inputs:
-    flake-parts.lib.mkFlake { inherit inputs; } (_: {
+    let
+      # FIXME: naughty config
+      ageRecipients =
+        "age1n372e8dgautnjhecllf7uvvldw9g6vyx3kggj0kyduz5jr2upvysue242c";
+      system = "x86_64-linux";
+      pkgs = nixpkgs.legacyPackages.${system};
+      encryptString = import ./lib/encryptString.nix { inherit pkgs; };
+      createSecret = import ./lib/createSecret.nix;
+      helmChart = import ./lib/helmChart.nix;
+      fromYAML = import ./lib/fromYAML.nix;
+      loadSecrets = import ./lib/loadSecrets.nix;
+      mkArgoApp = import ./lib/mkArgoApp.nix;
+      toYAML = import ./lib/toYAML.nix;
+      lib = {
+        inherit ageRecipients createSecret encryptString fromYAML helmChart
+          loadSecrets mkArgoApp toYAML;
+        sopsConfig = ./.sops.yaml;
+      };
+      secrets = loadSecrets { inherit fromYAML pkgs; };
+      dev = import ./env/dev.nix { inherit lib nixidy secrets; };
+      charts = nixhelm.chartsDerivations.${system};
+      defaultEnv = nixidy.lib.mkEnvs {
+        inherit charts pkgs;
+        extraSpecialArgs = { inherit ageRecipients; };
+        envs.dev.modules = [ dev ];
+        libOverlay = final: prev: lib;
+        modules = [ ./modules ];
+      };
+    in flake-parts.lib.mkFlake { inherit inputs; } (_: {
       imports =
         [ mkdocs-flake.flakeModules.default make-shell.flakeModules.default ];
-      systems = [ "x86_64-linux" ];
+      systems = [ system ];
       perSystem = { pkgs, system, ... }:
         let generators = import ./generators { inherit inputs system pkgs; };
         in {
@@ -121,37 +149,9 @@
 
           packages = { nixidy = nixidy.packages.${system}.default; };
         };
-    }) // (let
-      system = "x86_64-linux";
-      pkgs = nixpkgs.legacyPackages.${system};
-      # FIXME: naughty config
-      ageRecipients =
-        "age1n372e8dgautnjhecllf7uvvldw9g6vyx3kggj0kyduz5jr2upvysue242c";
-      encryptString = import ./lib/encryptString.nix { inherit pkgs; };
-      createSecret = import ./lib/createSecret.nix;
-      helmChart = import ./lib/helmChart.nix;
-      fromYAML = import ./lib/fromYAML.nix;
-      loadSecrets = import ./lib/loadSecrets.nix;
-      mkArgoApp = import ./lib/mkArgoApp.nix;
-      toYAML = import ./lib/toYAML.nix;
-      lib = {
-        inherit ageRecipients createSecret encryptString fromYAML helmChart
-          loadSecrets mkArgoApp toYAML;
-        sopsConfig = ./.sops.yaml;
-      };
-      secrets = loadSecrets { inherit fromYAML pkgs; };
-      dev = import ./env/dev.nix { inherit lib nixidy secrets; };
-    in {
+    }) // ({
       inherit lib;
-
       # TODO: Make a flake-parts module for this
-      nixidyEnvs.${system} = nixidy.lib.mkEnvs {
-        inherit pkgs;
-        charts = nixhelm.chartsDerivations.${system};
-        extraSpecialArgs = { inherit ageRecipients; };
-        envs.dev.modules = [ dev ];
-        libOverlay = final: prev: lib;
-        modules = [ ./modules ];
-      };
+      nixidyEnvs.${system} = defaultEnv;
     });
 }
