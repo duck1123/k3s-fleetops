@@ -82,7 +82,7 @@ in {
 
     # ../modules/cloudbeaver/default.nix
     cloudbeaver = {
-      enable = true;
+      enable = false;
 
       ingress = {
         domain = "cloudbeaver.${tail-domain}";
@@ -105,7 +105,7 @@ in {
     # ../modules/homer/default.nix
     homer = {
       codeserver.ingress.domain = "codeserver.${tail-domain}";
-      enable = true;
+      enable = false;
       ingress = {
         domain = "homer.${tail-domain}";
         ingressClassName = "tailscale";
@@ -152,7 +152,7 @@ in {
 
     # ../modules/memos/default.nix
     memos = {
-      enable = true;
+      enable = false;
 
       ingress = {
         domain = "memos.${tail-domain}";
