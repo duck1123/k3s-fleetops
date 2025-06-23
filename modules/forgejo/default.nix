@@ -117,7 +117,7 @@ mkArgoApp { inherit config lib; } {
         inherit (cfg) namespace;
         secretName = "postgresql-password";
         values = {
-          inherit (cfg.postgreql)
+          inherit (cfg.postgresql)
             adminPassword adminUsername replicationPassword userPassword;
         };
       };

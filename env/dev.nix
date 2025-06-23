@@ -108,7 +108,7 @@ in {
         ingressClassName = "tailscale";
       };
 
-      postgreql = {
+      postgresql = {
         inherit (secrets.forgejo.postgresql) adminPassword adminUsername;
       };
     };
