@@ -14,8 +14,8 @@ mkArgoApp { inherit config lib; } {
   uses-ingress = true;
 
   defaultValues = cfg: {
-    ingress = let inherit (cfg.ingress) domain tls;
-    in {
+    ingress = with cfg.ingress; {
+      className = ingressClassName;
       enabled = true;
       hosts = [{
         host = domain;
