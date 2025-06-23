@@ -100,9 +100,16 @@ in {
     # ../modules/forgejo/default.nix
     forgejo = {
       enable = true;
+
+      admin = { inherit (secrets.forgejo.admin) password username; };
+
       ingress = {
         domain = "forgejo.${tail-domain}";
         ingressClassName = "tailscale";
+      };
+
+      postgreql = {
+        inherit (secrets.forgejo.postgresql) adminPassword adminUsername;
       };
     };
 
@@ -139,9 +146,7 @@ in {
     };
 
     # ../modules/lldap/default.nix
-    lldap = {
-      enable = false;
-    };
+    lldap.enable = false;
 
     # ../modules/longhorn/default.nix
     longhorn = {
@@ -191,9 +196,7 @@ in {
         tls.enable = true;
       };
 
-      values = {
-        defaultBuckets = "my-default-bucket";
-      };
+      values.defaultBuckets = "my-default-bucket";
     };
 
     # ../modules/mssql/default.nix
