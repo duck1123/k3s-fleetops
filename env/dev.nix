@@ -129,6 +129,11 @@ in {
       };
     };
 
+    # ../modules/lldap/default.nix
+    lldap = {
+      enable = false;
+    };
+
     # ../modules/longhorn/default.nix
     longhorn = {
       enable = true;
