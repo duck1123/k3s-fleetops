@@ -97,6 +97,15 @@ in {
       providers.digital-ocean.enable = true;
     };
 
+    # ../modules/forgejo/default.nix
+    forgejo = {
+      enable = true;
+      ingress = {
+        domain = "forgejo.${tail-domain}";
+        ingressClassName = "tailscale";
+      };
+    };
+
     harbor-nix = {
       domain = "harbor.${base-domain}";
       enable = false;
