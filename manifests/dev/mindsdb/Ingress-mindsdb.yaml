@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  labels:
+    app.kubernetes.io/instance: mindsdb
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: mindsdb
+    app.kubernetes.io/version: 1.16.0
+    helm.sh/chart: mindsdb-0.1.0
+  name: mindsdb
+  namespace: mindsdb
+spec:
+  rules:
+    - host: mindsdb.bearded-snake.ts.net
+      http:
+        paths:
+          - backend:
+              service:
+                name: mindsdb
+                port:
+                  number: 47334
+            path: /
+            pathType: ImplementationSpecific

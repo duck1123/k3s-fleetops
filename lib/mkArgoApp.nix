@@ -26,7 +26,16 @@ let
   inherit (types) attrs listOf nullOr path str submodule unspecified;
   cfg = config.services.${name};
   values = attrsets.recursiveUpdate (defaultValues cfg) cfg.values;
-  ingressOptions = {
+  tls-options = {
+    enable = mkEnableOption "Enable application";
+
+    secretName = mkOption {
+      description = mdDoc "The domain to expost ${name} to";
+      type = str;
+      default = "${name}-tls";
+    };
+  };
+  ingress-options = {
     clusterIssuer = mkOption {
       description = mdDoc "The cluster issuer to use for ${name}'s tls";
       type = str;
@@ -45,15 +54,7 @@ let
       default = "traefik";
     };
 
-    tls = {
-      enable = mkEnableOption "Enable application";
-
-      secretName = mkOption {
-        description = mdDoc "The domain to expost ${name} to";
-        type = str;
-        default = "${name}-tls";
-      };
-    };
+    tls = tls-options;
   };
   basic-options = {
     chart = mkOption {
@@ -83,7 +84,7 @@ let
       type = if uses-ingress then
         submodule (let
           extra-ingress = extraOptions.ingress or { };
-          options = recursiveUpdate ingressOptions extra-ingress;
+          options = recursiveUpdate ingress-options extra-ingress;
         in { inherit options; })
       else
         unspecified;
@@ -113,6 +114,7 @@ in {
 
   config = mkIf cfg.enable (mkMerge [
     {
+      # This is the application config for nixidy
       applications.${name} = mkMerge [
         {
           inherit (cfg) namespace;

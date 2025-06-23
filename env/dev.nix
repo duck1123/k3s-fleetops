@@ -160,6 +160,16 @@ in {
       };
     };
 
+    # ../modules/mindsdb/default.nix
+    mindsdb = {
+      enable = true;
+
+      ingress = {
+        domain = "mindsdb.${tail-domain}";
+        ingressClassName = "tailscale";
+      };
+    };
+
     # ../modules/minio/default.nix
     minio = {
       enable = true;

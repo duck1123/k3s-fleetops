@@ -1,21 +1,21 @@
 { config, lib, ... }:
-let
-  cfg = config.services.mindsdb;
+with lib;
+mkArgoApp { inherit config lib; } {
+  name = "mindsdb";
 
-  chart = lib.helm.downloadHelmChart {
+  # https://artifacthub.io/packages/helm/kronkltd/mindsdb
+  chart = helm.downloadHelmChart {
     repo = "https://chart.kronkltd.net/";
     chart = "mindsdb";
     version = "0.1.0";
     chartHash = "sha256-BExMwx1a2ovklEratuFXVujdmPgLypQJKcNyh+630Ig=";
   };
 
-  defaultNamespace = "mindsdb";
-  domain = "mindsdb.dev.kronkltd.net";
+  uses-ingress = true;
 
-  clusterIssuer = "letsencrypt-prod";
-
-  defaultValues = {
-    ingress = {
+  defaultValues = cfg: {
+    ingress = let inherit (cfg.ingress) domain tls;
+    in {
       enabled = true;
       hosts = [{
         host = domain;
@@ -24,38 +24,10 @@ let
           pathType = "ImplementationSpecific";
         }];
       }];
-      tls = [{
-        secretName = "mindsdb-tls";
+      tls = mkIf tls.enable [{
+        secretName = tls.secretName;
         hosts = [ domain ];
       }];
-    };
-  };
-
-  values = lib.attrsets.recursiveUpdate defaultValues cfg.values;
-  namespace = cfg.namespace;
-in with lib; {
-  options.services.mindsdb = {
-    enable = mkEnableOption "Enable application";
-    namespace = mkOption {
-      description = mdDoc "The namespace to install into";
-      type = types.str;
-      default = defaultNamespace;
-    };
-
-    values = mkOption {
-      description = "All the values";
-      type = types.attrsOf types.anything;
-      default = { };
-    };
-  };
-
-  config = mkIf cfg.enable {
-    applications.mindsdb = {
-      inherit namespace;
-      createNamespace = true;
-      finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
-      helm.releases.mindsdb = { inherit chart values; };
-      syncPolicy.finalSyncOpts = [ "CreateNamespace=true" ];
     };
   };
 }
