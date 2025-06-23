@@ -181,7 +181,7 @@ in {
 
     # ../modules/minio/default.nix
     minio = {
-      enable = true;
+      enable = false;
 
       ingress = {
         api-domain = "api.minio.${tail-domain}";
