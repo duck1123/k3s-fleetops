@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/name: minio
     app.kubernetes.io/part-of: minio
     app.kubernetes.io/version: 2025.5.24
-    helm.sh/chart: minio-17.0.5
+    helm.sh/chart: minio-17.0.6
   name: minio
   namespace: minio
 spec:
@@ -29,7 +29,7 @@ spec:
         app.kubernetes.io/name: minio
         app.kubernetes.io/part-of: minio
         app.kubernetes.io/version: 2025.5.24
-        helm.sh/chart: minio-17.0.5
+        helm.sh/chart: minio-17.0.6
     spec:
       affinity:
         podAntiAffinity:
@@ -69,7 +69,7 @@ spec:
               value: public
             - name: MINIO_DATA_DIR
               value: /bitnami/minio/data
-          image: docker.io/bitnami/minio:2025.5.24-debian-12-r6
+          image: docker.io/bitnami/minio:2025.5.24-debian-12-r7
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5

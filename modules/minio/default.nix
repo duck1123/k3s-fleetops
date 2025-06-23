@@ -8,8 +8,8 @@ in mkArgoApp { inherit config lib; } {
   chart = helm.downloadHelmChart {
     repo = "https://charts.bitnami.com/bitnami";
     chart = "minio";
-    version = "17.0.5";
-    chartHash = "sha256-wF5UYkhwNJWu2encpxQbUrzJY5fQmDpaUunQ7y89tMQ=";
+    version = "17.0.6";
+    chartHash = "sha256-njyO/PNrABMYShQ4Ix0VIMXvqOrPszoDT/s5jag49fQ=";
   };
 
   uses-ingress = true;
@@ -29,18 +29,18 @@ in mkArgoApp { inherit config lib; } {
   };
 
   defaultValues = (cfg: {
-    apiIngress = with cfg.ingress; {
-      inherit ingressClassName;
-      enabled = true;
-      hostname = api-domain;
-      annotations = {
-        "cert-manager.io/cluster-issuer" = clusterIssuer;
-        "ingress.kubernetes.io/force-ssl-redirect" = "true";
-        "ingress.kubernetes.io/proxy-body-size" = "0";
-        "ingress.kubernetes.io/ssl-redirect" = "true";
-      };
-      tls = tls.enable;
-    };
+    # apiIngress = with cfg.ingress; {
+    #   inherit ingressClassName;
+    #   enabled = true;
+    #   hostname = api-domain;
+    #   annotations = {
+    #     "cert-manager.io/cluster-issuer" = clusterIssuer;
+    #     "ingress.kubernetes.io/force-ssl-redirect" = "true";
+    #     "ingress.kubernetes.io/proxy-body-size" = "0";
+    #     "ingress.kubernetes.io/ssl-redirect" = "true";
+    #   };
+    #   tls = tls.enable;
+    # };
 
     auth = {
       existingSecret = password-secret;
@@ -59,6 +59,11 @@ in mkArgoApp { inherit config lib; } {
         "ingress.kubernetes.io/ssl-redirect" = "true";
       };
       tls = tls.enable;
+      # selfSigned = true;
+    };
+
+    persistence = {
+      storageClass = "longhorn";
     };
   });
 

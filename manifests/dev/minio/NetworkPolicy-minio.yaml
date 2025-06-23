@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/name: minio
     app.kubernetes.io/part-of: minio
     app.kubernetes.io/version: 2025.5.24
-    helm.sh/chart: minio-17.0.5
+    helm.sh/chart: minio-17.0.6
   name: minio
   namespace: minio
 spec:
