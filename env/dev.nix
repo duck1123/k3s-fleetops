@@ -82,7 +82,7 @@ in {
 
     # ../modules/cloudbeaver/default.nix
     cloudbeaver = {
-      enable = false;
+      enable = true;
 
       ingress = {
         domain = "cloudbeaver.${tail-domain}";

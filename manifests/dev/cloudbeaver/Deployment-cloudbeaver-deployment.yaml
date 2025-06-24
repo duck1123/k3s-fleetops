@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app-name: cloudbeaver
+    component: db-server
+    created-by: chynten
+    helm.sh/chart: cloudbeaver-0.6
+    hostNetwork: "false"
+    internal-service: "true"
+    managed-by: chynten
+    version: 22.0.4
+  name: cloudbeaver-deployment
+  namespace: cloudbeaver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app-name: cloudbeaver
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app-name: cloudbeaver
+    spec:
+      containers:
+        - image: dbeaver/cloudbeaver:24.2.5
+          imagePullPolicy: IfNotPresent
+          name: cloudbeaver
+          resources: {}
+          volumeMounts:
+            - mountPath: /opt/cloudbeaver/workspace
+              name: data
+              subPath: cloudbeaver
+      restartPolicy: Always
+      securityContext: {}
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: cloudbeaver-pvc
