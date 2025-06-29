@@ -128,12 +128,18 @@ in {
       };
     };
 
+    # ../modules/jupyterhub/default.nix
     jupyterhub = {
-      enable = false;
-      domain = "jupyterhub.${tail-domain}";
-      ssl = true;
+      enable = true;
       inherit (secrets.jupyterhub)
         cookieSecret cryptkeeperKeys password proxyToken;
+
+      ingress = {
+        domain = "jupyterhub.${tail-domain}";
+        clusterIssuer = "tailscale";
+        ingressClassName = "tailscale";
+        tls.enable = true;
+      };
     };
 
     keycloak = {
