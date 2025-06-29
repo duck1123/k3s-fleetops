@@ -182,7 +182,7 @@ in {
 
     # ../modules/mindsdb/default.nix
     mindsdb = {
-      enable = true;
+      enable = false;
 
       ingress = {
         domain = "mindsdb.${tail-domain}";
