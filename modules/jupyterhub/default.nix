@@ -136,7 +136,7 @@ in mkArgoApp { inherit config lib; } {
           secretName = postgresql-secret;
           values = {
             password = cfg.postgresql.adminPassword;
-            postgresPassword = cfg.postgresql.adminPassword;
+            postgres-password = cfg.postgresql.adminPassword;
           };
         };
       };
