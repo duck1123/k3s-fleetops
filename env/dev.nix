@@ -155,6 +155,9 @@ in {
       };
     };
 
+    # ../modules/kyverno/default.nix
+    kyverno.enable = true;
+
     # ../modules/lldap/default.nix
     lldap.enable = false;
 
