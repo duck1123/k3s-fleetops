@@ -34,6 +34,32 @@ in mkArgoApp { inherit config lib; } {
       default = "CHANGEME";
     };
 
+    postgresql = {
+      adminPassword = mkOption {
+        description = mdDoc "The admin password";
+        type = types.str;
+        default = "CHANGEME";
+      };
+
+      adminUsername = mkOption {
+        description = mdDoc "The admin username";
+        type = types.str;
+        default = "admin";
+      };
+
+      replicationPassword = mkOption {
+        description = mdDoc "The replication password";
+        type = types.str;
+        default = "CHANGEME";
+      };
+
+      userPassword = mkOption {
+        description = mdDoc "The user password";
+        type = types.str;
+        default = "CHANGEME";
+      };
+    };
+
     proxyToken = mkOption {
       description = mdDoc "The proxy token";
       type = types.str;
@@ -99,8 +125,20 @@ in mkArgoApp { inherit config lib; } {
       encrypted-secret-config-object =
         builtins.fromJSON encrypted-secret-config;
     in {
-      sopsSecrets.${hub-secret} = {
-        inherit (encrypted-secret-config-object) sops spec;
+      sopsSecrets = {
+        ${hub-secret} = {
+          inherit (encrypted-secret-config-object) sops spec;
+        };
+
+        ${postgresql-secret} = lib.createSecret {
+          inherit ageRecipients lib pkgs;
+          inherit (cfg) namespace;
+          secretName = "postgresql-password";
+          values = {
+            password = cfg.postgresql.adminPassword;
+            postgresPassword = cfg.postgresql.adminPassword;
+          };
+        };
       };
     };
 }

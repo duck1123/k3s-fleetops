@@ -140,6 +140,10 @@ in {
         ingressClassName = "tailscale";
         tls.enable = true;
       };
+
+      postgresql = {
+        inherit (secrets.jupyterhub.postgresql) adminPassword;
+      };
     };
 
     keycloak = {
