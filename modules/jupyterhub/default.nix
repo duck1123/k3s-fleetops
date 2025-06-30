@@ -133,7 +133,7 @@ in mkArgoApp { inherit config lib; } {
         ${postgresql-secret} = lib.createSecret {
           inherit ageRecipients lib pkgs;
           inherit (cfg) namespace;
-          secretName = "postgresql-password";
+          secretName = postgresql-secret;
           values = {
             password = cfg.postgresql.adminPassword;
             postgresPassword = cfg.postgresql.adminPassword;
