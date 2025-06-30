@@ -82,7 +82,7 @@ in {
 
     # ../modules/cloudbeaver/default.nix
     cloudbeaver = {
-      enable = true;
+      enable = false;
 
       ingress = {
         domain = "cloudbeaver.${tail-domain}";
@@ -130,7 +130,7 @@ in {
 
     # ../modules/jupyterhub/default.nix
     jupyterhub = {
-      enable = true;
+      enable = false;
       inherit (secrets.jupyterhub)
         cookieSecret cryptkeeperKeys password proxyToken;
 
@@ -156,7 +156,7 @@ in {
     };
 
     # ../modules/kyverno/default.nix
-    kyverno.enable = true;
+    kyverno.enable = false;
 
     # ../modules/lldap/default.nix
     lldap.enable = false;
