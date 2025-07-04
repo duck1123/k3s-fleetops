@@ -266,7 +266,16 @@ in {
     # ../modules/sops/default.nix
     sops.enable = true;
 
-    spark.enable = false;
+    # ../modules/spark/default.nix
+    spark = {
+      enable = false;
+
+      ingress = {
+        domain = "spark.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+    };
 
     tailscale = {
       enable = true;
