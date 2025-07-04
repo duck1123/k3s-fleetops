@@ -97,6 +97,17 @@ in {
       providers.digital-ocean.enable = true;
     };
 
+    # ../modules/dinsro/default.nix
+    dinsro = {
+      enable = false;
+
+      ingress = {
+        domain = "dinsro.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+    };
+
     # ../modules/forgejo/default.nix
     forgejo = {
       enable = true;

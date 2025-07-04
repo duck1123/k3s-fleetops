@@ -1,7 +1,9 @@
 { config, lib, ... }:
-let
-  cfg = config.services.dinsro;
+with lib;
+mkArgoApp { inherit config lib; } {
+  name = "dinsro";
 
+  # https://artifacthub.io/packages/helm/kronkltd/dinsro
   chart = lib.helm.downloadHelmChart {
     repo = "https://chart.kronkltd.net/";
     chart = "dinsro";
@@ -9,12 +11,9 @@ let
     chartHash = "sha256-hNLltCPAQ3Pibt4K5a+7557sT6Q0/8l1skGbHIsC1J0=";
   };
 
-  defaultNamespace = "dinsro";
-  domain = "dinsro.com";
+  uses-ingress = true;
 
-  clusterIssuer = "letsencrypt-prod";
-
-  defaultValues = {
+  defaultValues = cfg: {
     database = {
       enabled = true;
       seed = true;
@@ -92,7 +91,7 @@ let
       seed = true;
     };
 
-    ingress = {
+    ingress = with cfg.ingress; {
       enabled = true;
       hosts = [{
         host = domain;
@@ -117,34 +116,6 @@ let
           secretName = "dinsro-com-workspaces-tls";
         }];
       };
-    };
-  };
-
-  values = lib.attrsets.recursiveUpdate defaultValues cfg.values;
-  namespace = cfg.namespace;
-in with lib; {
-  options.services.dinsro = {
-    enable = mkEnableOption "Enable application";
-    namespace = mkOption {
-      description = mdDoc "The namespace to install into";
-      type = types.str;
-      default = defaultNamespace;
-    };
-
-    values = mkOption {
-      description = "All the values";
-      type = types.attrsOf types.anything;
-      default = { };
-    };
-  };
-
-  config = mkIf cfg.enable {
-    applications.dinsro = {
-      inherit namespace;
-      createNamespace = true;
-      finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
-      helm.releases.dinsro = { inherit chart values; };
-      syncPolicy.finalSyncOpts = [ "CreateNamespace=true" ];
     };
   };
 }
