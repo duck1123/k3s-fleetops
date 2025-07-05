@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/component: worker
+    app.kubernetes.io/instance: authentik
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: authentik
+    app.kubernetes.io/part-of: authentik
+    app.kubernetes.io/version: 2025.6.3
+    helm.sh/chart: authentik-2025.6.3
+  name: authentik-worker
+  namespace: authentik
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: worker
+      app.kubernetes.io/instance: authentik
+      app.kubernetes.io/name: authentik
+  template:
+    metadata:
+      annotations:
+        checksum/secret: 3b419bc7172bf18ebc329f364757cdc6ab27581b102746a3ed1e1c514bbc4407
+      labels:
+        app.kubernetes.io/component: worker
+        app.kubernetes.io/instance: authentik
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: authentik
+        app.kubernetes.io/part-of: authentik
+        app.kubernetes.io/version: 2025.6.3
+        helm.sh/chart: authentik-2025.6.3
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/component: worker
+                    app.kubernetes.io/instance: authentik
+                    app.kubernetes.io/name: authentik
+                topologyKey: kubernetes.io/hostname
+              weight: 100
+      containers:
+        - args:
+            - worker
+          env:
+            - name: AUTHENTIK_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: authentik-secret-key
+                  name: authentik-secret-key
+            - name: AUTHENTIK_POSTGRESQL__PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: authentik-postgres-auth
+          envFrom:
+            - secretRef:
+                name: authentik
+          image: ghcr.io/goauthentik/server:2025.6.3
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            exec:
+              command:
+                - ak
+                - healthcheck
+            failureThreshold: 3
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: worker
+          readinessProbe:
+            exec:
+              command:
+                - ak
+                - healthcheck
+            failureThreshold: 3
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources: {}
+          startupProbe:
+            exec:
+              command:
+                - ak
+                - healthcheck
+            failureThreshold: 60
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+      enableServiceLinks: true
+      serviceAccountName: authentik
+      terminationGracePeriodSeconds: 30

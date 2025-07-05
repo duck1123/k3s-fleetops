@@ -69,12 +69,17 @@ in {
 
     # ../modules/authentik/default.nix
     authentik = {
-      enable = false;
+      enable = true;
 
       ingress = {
         inherit clusterIssuer;
         domain = "authentik.${base-domain}";
         ingressClassName = "traefik";
+      };
+
+      inherit (secrets.authentik) secret-key;
+      postgresql = {
+        inherit (secrets.authentik.postgresql) password postgres-password replicationPassword;
       };
     };
 
