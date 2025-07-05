@@ -24,6 +24,12 @@ in mkArgoApp { inherit config lib; } {
         default = "authentik-postgresql";
       };
 
+      name = mkOption {
+        description = mdDoc "The postgreql database name";
+        type = types.str;
+        default = "authentik";
+      };
+
       password = mkOption {
         description = mdDoc "The admin password";
         type = types.str;
@@ -58,27 +64,27 @@ in mkArgoApp { inherit config lib; } {
 
   defaultValues = cfg:
     with cfg; {
-      authentik  = {
+      authentik = {
         error_reporting.enabled = true;
-        postgresql = { inherit (cfg.postgresql) host password user; };
+        postgresql = { inherit (cfg.postgresql) host name password user; };
       };
 
-      global.env = [
-        {
-          name = "AUTHENTIK_SECRET_KEY";
-          valueFrom.secretKeyRef = {
-            name = secret-secret;
-            key = "authentik-secret-key";
-          };
-        }
-        {
-          name = "AUTHENTIK_POSTGRESQL__PASSWORD";
-          valueFrom.secretKeyRef = {
-            name = postgresql-secret;
-            key = "password";
-          };
-        }
-      ];
+      # global.env = [
+      #   {
+      #     name = "AUTHENTIK_SECRET_KEY";
+      #     valueFrom.secretKeyRef = {
+      #       name = secret-secret;
+      #       key = "authentik-secret-key";
+      #     };
+      #   }
+      #   {
+      #     name = "AUTHENTIK_POSTGRESQL__PASSWORD";
+      #     valueFrom.secretKeyRef = {
+      #       name = postgresql-secret;
+      #       key = "password";
+      #     };
+      #   }
+      # ];
 
       postgresql = with cfg.postgresql; {
         inherit host;

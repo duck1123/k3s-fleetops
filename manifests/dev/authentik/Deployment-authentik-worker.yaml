@@ -46,17 +46,6 @@ spec:
       containers:
         - args:
             - worker
-          env:
-            - name: AUTHENTIK_SECRET_KEY
-              valueFrom:
-                secretKeyRef:
-                  key: authentik-secret-key
-                  name: authentik-secret-key
-            - name: AUTHENTIK_POSTGRESQL__PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: password
-                  name: authentik-postgres-auth
           envFrom:
             - secretRef:
                 name: authentik
