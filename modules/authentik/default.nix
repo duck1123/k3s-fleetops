@@ -67,6 +67,7 @@ in mkArgoApp { inherit config lib; } {
       authentik = {
         error_reporting.enabled = true;
         postgresql = { inherit (cfg.postgresql) host name password user; };
+        secret_key = "this is a secret";
       };
 
       global.env = [
