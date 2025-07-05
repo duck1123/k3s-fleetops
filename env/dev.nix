@@ -203,6 +203,16 @@ in {
       };
     };
 
+    # ../modules/metabase/default.nix
+    metabase = {
+      enable = true;
+
+      ingress = {
+        domain = "metabase.${tail-domain}";
+        ingressClassName = "tailscale";
+      };
+    };
+
     # ../modules/mindsdb/default.nix
     mindsdb = {
       enable = false;

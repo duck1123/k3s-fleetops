@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsEncrypt-prod
+    ingress.kubernetes.io/force-ssl-redirect: "true"
+  labels:
+    app: metabase
+    chart: metabase-2.21.0
+    heritage: Helm
+    release: metabase
+  name: metabase
+  namespace: metabase
+spec:
+  rules:
+    - host: metabase.bearded-snake.ts.net
+      http:
+        paths:
+          - backend:
+              service:
+                name: metabase
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - metabase.bearded-snake.ts.net
+      secretName: metabase-tls
