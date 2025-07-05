@@ -69,22 +69,22 @@ in mkArgoApp { inherit config lib; } {
         postgresql = { inherit (cfg.postgresql) host name password user; };
       };
 
-      # global.env = [
-      #   {
-      #     name = "AUTHENTIK_SECRET_KEY";
-      #     valueFrom.secretKeyRef = {
-      #       name = secret-secret;
-      #       key = "authentik-secret-key";
-      #     };
-      #   }
-      #   {
-      #     name = "AUTHENTIK_POSTGRESQL__PASSWORD";
-      #     valueFrom.secretKeyRef = {
-      #       name = postgresql-secret;
-      #       key = "password";
-      #     };
-      #   }
-      # ];
+      global.env = [
+        {
+          name = "AUTHENTIK_SECRET_KEY";
+          valueFrom.secretKeyRef = {
+            name = secret-secret;
+            key = "authentik-secret-key";
+          };
+        }
+        # {
+        #   name = "AUTHENTIK_POSTGRESQL__PASSWORD";
+        #   valueFrom.secretKeyRef = {
+        #     name = postgresql-secret;
+        #     key = "password";
+        #   };
+        # }
+      ];
 
       postgresql = with cfg.postgresql; {
         inherit host;

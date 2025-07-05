@@ -46,6 +46,12 @@ spec:
       containers:
         - args:
             - worker
+          env:
+            - name: AUTHENTIK_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: authentik-secret-key
+                  name: authentik-secret-key
           envFrom:
             - secretRef:
                 name: authentik
