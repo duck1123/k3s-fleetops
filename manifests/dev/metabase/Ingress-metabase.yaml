@@ -12,6 +12,7 @@ metadata:
   name: metabase
   namespace: metabase
 spec:
+  ingressClassName: tailscale
   rules:
     - host: metabase.bearded-snake.ts.net
       http:
