@@ -317,7 +317,7 @@ with lib; let
         };
         "port" = mkOption {
           description = "Port defines the port of a Kubernetes Service.\nThis can be a reference to a named port.";
-          type = types.nullOr types.int;
+          type = types.nullOr (types.either types.int types.str);
         };
         "responseForwarding" = mkOption {
           description = "ResponseForwarding defines how Traefik forwards the response from the upstream Kubernetes Service to the client.";
@@ -377,7 +377,7 @@ with lib; let
         };
         "interval" = mkOption {
           description = "Interval defines the frequency of the health check calls.\nDefault: 30s";
-          type = types.nullOr types.int;
+          type = types.nullOr (types.either types.int types.str);
         };
         "method" = mkOption {
           description = "Method defines the healthcheck method.";
@@ -405,7 +405,7 @@ with lib; let
         };
         "timeout" = mkOption {
           description = "Timeout defines the maximum duration Traefik will wait for a health check request before considering the server unhealthy.\nDefault: 5s";
-          type = types.nullOr types.int;
+          type = types.nullOr (types.either types.int types.str);
         };
       };
 
@@ -685,7 +685,7 @@ with lib; let
         };
         "port" = mkOption {
           description = "Port defines the port of a Kubernetes Service.\nThis can be a reference to a named port.";
-          type = types.int;
+          type = types.either types.int types.str;
         };
         "proxyProtocol" = mkOption {
           description = "ProxyProtocol defines the PROXY protocol configuration.\nMore info: https://doc.traefik.io/traefik/v3.4/routing/services/#proxy-protocol";
@@ -892,7 +892,7 @@ with lib; let
         };
         "port" = mkOption {
           description = "Port defines the port of a Kubernetes Service.\nThis can be a reference to a named port.";
-          type = types.int;
+          type = types.either types.int types.str;
         };
         "weight" = mkOption {
           description = "Weight defines the weight used when balancing requests between multiple Kubernetes Service.";
@@ -1168,7 +1168,7 @@ with lib; let
       options = {
         "checkPeriod" = mkOption {
           description = "CheckPeriod is the interval between successive checks of the circuit breaker condition (when in standby state).";
-          type = types.nullOr types.int;
+          type = types.nullOr (types.either types.int types.str);
         };
         "expression" = mkOption {
           description = "Expression is the condition that triggers the tripped state.";
@@ -1176,11 +1176,11 @@ with lib; let
         };
         "fallbackDuration" = mkOption {
           description = "FallbackDuration is the duration for which the circuit breaker will wait before trying to recover (from a tripped state).";
-          type = types.nullOr types.int;
+          type = types.nullOr (types.either types.int types.str);
         };
         "recoveryDuration" = mkOption {
           description = "RecoveryDuration is the duration for which the circuit breaker will try to recover (as soon as it is in recovering state).";
-          type = types.nullOr types.int;
+          type = types.nullOr (types.either types.int types.str);
         };
         "responseCode" = mkOption {
           description = "ResponseCode is the status code that the circuit breaker will return while it is in the open state.";
@@ -1326,7 +1326,7 @@ with lib; let
         };
         "port" = mkOption {
           description = "Port defines the port of a Kubernetes Service.\nThis can be a reference to a named port.";
-          type = types.nullOr types.int;
+          type = types.nullOr (types.either types.int types.str);
         };
         "responseForwarding" = mkOption {
           description = "ResponseForwarding defines how Traefik forwards the response from the upstream Kubernetes Service to the client.";
@@ -1386,7 +1386,7 @@ with lib; let
         };
         "interval" = mkOption {
           description = "Interval defines the frequency of the health check calls.\nDefault: 30s";
-          type = types.nullOr types.int;
+          type = types.nullOr (types.either types.int types.str);
         };
         "method" = mkOption {
           description = "Method defines the healthcheck method.";
@@ -1414,7 +1414,7 @@ with lib; let
         };
         "timeout" = mkOption {
           description = "Timeout defines the maximum duration Traefik will wait for a health check request before considering the server unhealthy.\nDefault: 5s";
-          type = types.nullOr types.int;
+          type = types.nullOr (types.either types.int types.str);
         };
       };
 
@@ -2075,7 +2075,7 @@ with lib; let
         };
         "period" = mkOption {
           description = "Period, in combination with Average, defines the actual maximum rate, such as:\nr = Average / Period. It defaults to a second.";
-          type = types.nullOr types.int;
+          type = types.nullOr (types.either types.int types.str);
         };
         "redis" = mkOption {
           description = "Redis hold the configs of Redis as bucket in rate limiter.";
@@ -2103,7 +2103,7 @@ with lib; let
         };
         "dialTimeout" = mkOption {
           description = "DialTimeout sets the timeout for establishing new connections.\nDefault value is 5 seconds.";
-          type = types.nullOr types.int;
+          type = types.nullOr (types.either types.int types.str);
         };
         "endpoints" = mkOption {
           description = "Endpoints contains either a single address or a seed list of host:port addresses.\nDefault value is [\"localhost:6379\"].";
@@ -2123,7 +2123,7 @@ with lib; let
         };
         "readTimeout" = mkOption {
           description = "ReadTimeout defines the timeout for socket read operations.\nDefault value is 3 seconds.";
-          type = types.nullOr types.int;
+          type = types.nullOr (types.either types.int types.str);
         };
         "secret" = mkOption {
           description = "Secret defines the name of the referenced Kubernetes Secret containing Redis credentials.";
@@ -2135,7 +2135,7 @@ with lib; let
         };
         "writeTimeout" = mkOption {
           description = "WriteTimeout defines the timeout for socket write operations.\nDefault value is 3 seconds.";
-          type = types.nullOr types.int;
+          type = types.nullOr (types.either types.int types.str);
         };
       };
 
@@ -2299,7 +2299,7 @@ with lib; let
         };
         "initialInterval" = mkOption {
           description = "InitialInterval defines the first wait time in the exponential backoff series.\nThe maximum interval is calculated as twice the initialInterval.\nIf unspecified, requests will be retried immediately.\nThe value of initialInterval should be provided in seconds or as a valid duration format,\nsee https://pkg.go.dev/time#ParseDuration.";
-          type = types.nullOr types.int;
+          type = types.nullOr (types.either types.int types.str);
         };
       };
 
@@ -2506,23 +2506,23 @@ with lib; let
       options = {
         "dialTimeout" = mkOption {
           description = "DialTimeout is the amount of time to wait until a connection to a backend server can be established.";
-          type = types.nullOr types.int;
+          type = types.nullOr (types.either types.int types.str);
         };
         "idleConnTimeout" = mkOption {
           description = "IdleConnTimeout is the maximum period for which an idle HTTP keep-alive connection will remain open before closing itself.";
-          type = types.nullOr types.int;
+          type = types.nullOr (types.either types.int types.str);
         };
         "pingTimeout" = mkOption {
           description = "PingTimeout is the timeout after which the HTTP/2 connection will be closed if a response to ping is not received.";
-          type = types.nullOr types.int;
+          type = types.nullOr (types.either types.int types.str);
         };
         "readIdleTimeout" = mkOption {
           description = "ReadIdleTimeout is the timeout after which a health check using ping frame will be carried out if no frame is received on the HTTP/2 connection.";
-          type = types.nullOr types.int;
+          type = types.nullOr (types.either types.int types.str);
         };
         "responseHeaderTimeout" = mkOption {
           description = "ResponseHeaderTimeout is the amount of time to wait for a server's response headers after fully writing the request (including its body, if any).";
-          type = types.nullOr types.int;
+          type = types.nullOr (types.either types.int types.str);
         };
       };
 
@@ -2597,15 +2597,15 @@ with lib; let
       options = {
         "dialKeepAlive" = mkOption {
           description = "DialKeepAlive is the interval between keep-alive probes for an active network connection. If zero, keep-alive probes are sent with a default value (currently 15 seconds), if supported by the protocol and operating system. Network protocols or operating systems that do not support keep-alives ignore this field. If negative, keep-alive probes are disabled.";
-          type = types.nullOr types.int;
+          type = types.nullOr (types.either types.int types.str);
         };
         "dialTimeout" = mkOption {
           description = "DialTimeout is the amount of time to wait until a connection to a backend server can be established.";
-          type = types.nullOr types.int;
+          type = types.nullOr (types.either types.int types.str);
         };
         "terminationDelay" = mkOption {
           description = "TerminationDelay defines the delay to wait before fully terminating the connection, after one connected peer has closed its writing capability.";
-          type = types.nullOr types.int;
+          type = types.nullOr (types.either types.int types.str);
         };
         "tls" = mkOption {
           description = "TLS defines the TLS configuration";
@@ -2978,7 +2978,7 @@ with lib; let
         };
         "port" = mkOption {
           description = "Port defines the port of a Kubernetes Service.\nThis can be a reference to a named port.";
-          type = types.nullOr types.int;
+          type = types.nullOr (types.either types.int types.str);
         };
         "responseForwarding" = mkOption {
           description = "ResponseForwarding defines how Traefik forwards the response from the upstream Kubernetes Service to the client.";
@@ -3041,7 +3041,7 @@ with lib; let
         };
         "interval" = mkOption {
           description = "Interval defines the frequency of the health check calls.\nDefault: 30s";
-          type = types.nullOr types.int;
+          type = types.nullOr (types.either types.int types.str);
         };
         "method" = mkOption {
           description = "Method defines the healthcheck method.";
@@ -3069,7 +3069,7 @@ with lib; let
         };
         "timeout" = mkOption {
           description = "Timeout defines the maximum duration Traefik will wait for a health check request before considering the server unhealthy.\nDefault: 5s";
-          type = types.nullOr types.int;
+          type = types.nullOr (types.either types.int types.str);
         };
       };
 
@@ -3123,7 +3123,7 @@ with lib; let
         };
         "port" = mkOption {
           description = "Port defines the port of a Kubernetes Service.\nThis can be a reference to a named port.";
-          type = types.nullOr types.int;
+          type = types.nullOr (types.either types.int types.str);
         };
         "responseForwarding" = mkOption {
           description = "ResponseForwarding defines how Traefik forwards the response from the upstream Kubernetes Service to the client.";
@@ -3184,7 +3184,7 @@ with lib; let
         };
         "interval" = mkOption {
           description = "Interval defines the frequency of the health check calls.\nDefault: 30s";
-          type = types.nullOr types.int;
+          type = types.nullOr (types.either types.int types.str);
         };
         "method" = mkOption {
           description = "Method defines the healthcheck method.";
@@ -3212,7 +3212,7 @@ with lib; let
         };
         "timeout" = mkOption {
           description = "Timeout defines the maximum duration Traefik will wait for a health check request before considering the server unhealthy.\nDefault: 5s";
-          type = types.nullOr types.int;
+          type = types.nullOr (types.either types.int types.str);
         };
       };
 
@@ -3412,7 +3412,7 @@ with lib; let
         };
         "port" = mkOption {
           description = "Port defines the port of a Kubernetes Service.\nThis can be a reference to a named port.";
-          type = types.nullOr types.int;
+          type = types.nullOr (types.either types.int types.str);
         };
         "responseForwarding" = mkOption {
           description = "ResponseForwarding defines how Traefik forwards the response from the upstream Kubernetes Service to the client.";
@@ -3472,7 +3472,7 @@ with lib; let
         };
         "interval" = mkOption {
           description = "Interval defines the frequency of the health check calls.\nDefault: 30s";
-          type = types.nullOr types.int;
+          type = types.nullOr (types.either types.int types.str);
         };
         "method" = mkOption {
           description = "Method defines the healthcheck method.";
@@ -3500,7 +3500,7 @@ with lib; let
         };
         "timeout" = mkOption {
           description = "Timeout defines the maximum duration Traefik will wait for a health check request before considering the server unhealthy.\nDefault: 5s";
-          type = types.nullOr types.int;
+          type = types.nullOr (types.either types.int types.str);
         };
       };
 
@@ -3850,6 +3850,8 @@ in {
         mkAliasDefinitions options.resources."traefikServices";
     };
 
+    # make all namespaced resources default to the
+    # application's namespace
     defaults = [
       {
         group = "traefik.io";

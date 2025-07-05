@@ -5314,11 +5314,11 @@ with lib; let
       options = {
         "maxSurge" = mkOption {
           description = "The maximum number of pods that can be scheduled above the desired number of\npods.\nValue can be an absolute number (ex: 5) or a percentage of desired pods (ex: 10%).\nThis can not be 0 if MaxUnavailable is 0.\nAbsolute number is calculated from percentage by rounding up.\nDefaults to 25%.\nExample: when this is set to 30%, the new ReplicaSet can be scaled up immediately when\nthe rolling update starts, such that the total number of old and new pods do not exceed\n130% of desired pods. Once old pods have been killed,\nnew ReplicaSet can be scaled up further, ensuring that total number of pods running\nat any time during the update is at most 130% of desired pods.";
-          type = types.nullOr types.int;
+          type = types.nullOr (types.either types.int types.str);
         };
         "maxUnavailable" = mkOption {
           description = "The maximum number of pods that can be unavailable during the update.\nValue can be an absolute number (ex: 5) or a percentage of desired pods (ex: 10%).\nAbsolute number is calculated from percentage by rounding down.\nThis can not be 0 if MaxSurge is 0.\nDefaults to 25%.\nExample: when this is set to 30%, the old ReplicaSet can be scaled down to 70% of desired pods\nimmediately when the rolling update starts. Once new pods are ready, old ReplicaSet\ncan be scaled down further, followed by scaling up the new ReplicaSet, ensuring\nthat the total number of pods available at all times during the update is at\nleast 70% of desired pods.";
-          type = types.nullOr types.int;
+          type = types.nullOr (types.either types.int types.str);
         };
       };
 
@@ -6510,7 +6510,7 @@ with lib; let
         };
         "divisor" = mkOption {
           description = "Specifies the output format of the exposed resources, defaults to \"1\"";
-          type = types.nullOr types.int;
+          type = types.nullOr (types.either types.int types.str);
         };
         "resource" = mkOption {
           description = "Required: resource to select";
@@ -6617,7 +6617,7 @@ with lib; let
         };
         "port" = mkOption {
           description = "Name or number of the port to access on the container.\nNumber must be in the range 1 to 65535.\nName must be an IANA_SVC_NAME.";
-          type = types.int;
+          type = types.either types.int types.str;
         };
         "scheme" = mkOption {
           description = "Scheme to use for connecting to the host.\nDefaults to HTTP.";
@@ -6664,7 +6664,7 @@ with lib; let
         };
         "port" = mkOption {
           description = "Number or name of the port to access on the container.\nNumber must be in the range 1 to 65535.\nName must be an IANA_SVC_NAME.";
-          type = types.int;
+          type = types.either types.int types.str;
         };
       };
 
@@ -6728,7 +6728,7 @@ with lib; let
         };
         "port" = mkOption {
           description = "Name or number of the port to access on the container.\nNumber must be in the range 1 to 65535.\nName must be an IANA_SVC_NAME.";
-          type = types.int;
+          type = types.either types.int types.str;
         };
         "scheme" = mkOption {
           description = "Scheme to use for connecting to the host.\nDefaults to HTTP.";
@@ -6775,7 +6775,7 @@ with lib; let
         };
         "port" = mkOption {
           description = "Number or name of the port to access on the container.\nNumber must be in the range 1 to 65535.\nName must be an IANA_SVC_NAME.";
-          type = types.int;
+          type = types.either types.int types.str;
         };
       };
 
@@ -6885,7 +6885,7 @@ with lib; let
         };
         "port" = mkOption {
           description = "Name or number of the port to access on the container.\nNumber must be in the range 1 to 65535.\nName must be an IANA_SVC_NAME.";
-          type = types.int;
+          type = types.either types.int types.str;
         };
         "scheme" = mkOption {
           description = "Scheme to use for connecting to the host.\nDefaults to HTTP.";
@@ -6922,7 +6922,7 @@ with lib; let
         };
         "port" = mkOption {
           description = "Number or name of the port to access on the container.\nNumber must be in the range 1 to 65535.\nName must be an IANA_SVC_NAME.";
-          type = types.int;
+          type = types.either types.int types.str;
         };
       };
 
@@ -7063,7 +7063,7 @@ with lib; let
         };
         "port" = mkOption {
           description = "Name or number of the port to access on the container.\nNumber must be in the range 1 to 65535.\nName must be an IANA_SVC_NAME.";
-          type = types.int;
+          type = types.either types.int types.str;
         };
         "scheme" = mkOption {
           description = "Scheme to use for connecting to the host.\nDefaults to HTTP.";
@@ -7100,7 +7100,7 @@ with lib; let
         };
         "port" = mkOption {
           description = "Number or name of the port to access on the container.\nNumber must be in the range 1 to 65535.\nName must be an IANA_SVC_NAME.";
-          type = types.int;
+          type = types.either types.int types.str;
         };
       };
 
@@ -7433,7 +7433,7 @@ with lib; let
         };
         "port" = mkOption {
           description = "Name or number of the port to access on the container.\nNumber must be in the range 1 to 65535.\nName must be an IANA_SVC_NAME.";
-          type = types.int;
+          type = types.either types.int types.str;
         };
         "scheme" = mkOption {
           description = "Scheme to use for connecting to the host.\nDefaults to HTTP.";
@@ -7470,7 +7470,7 @@ with lib; let
         };
         "port" = mkOption {
           description = "Number or name of the port to access on the container.\nNumber must be in the range 1 to 65535.\nName must be an IANA_SVC_NAME.";
-          type = types.int;
+          type = types.either types.int types.str;
         };
       };
 
@@ -7856,7 +7856,7 @@ with lib; let
         };
         "divisor" = mkOption {
           description = "Specifies the output format of the exposed resources, defaults to \"1\"";
-          type = types.nullOr types.int;
+          type = types.nullOr (types.either types.int types.str);
         };
         "resource" = mkOption {
           description = "Required: resource to select";
@@ -7963,7 +7963,7 @@ with lib; let
         };
         "port" = mkOption {
           description = "Name or number of the port to access on the container.\nNumber must be in the range 1 to 65535.\nName must be an IANA_SVC_NAME.";
-          type = types.int;
+          type = types.either types.int types.str;
         };
         "scheme" = mkOption {
           description = "Scheme to use for connecting to the host.\nDefaults to HTTP.";
@@ -8010,7 +8010,7 @@ with lib; let
         };
         "port" = mkOption {
           description = "Number or name of the port to access on the container.\nNumber must be in the range 1 to 65535.\nName must be an IANA_SVC_NAME.";
-          type = types.int;
+          type = types.either types.int types.str;
         };
       };
 
@@ -8074,7 +8074,7 @@ with lib; let
         };
         "port" = mkOption {
           description = "Name or number of the port to access on the container.\nNumber must be in the range 1 to 65535.\nName must be an IANA_SVC_NAME.";
-          type = types.int;
+          type = types.either types.int types.str;
         };
         "scheme" = mkOption {
           description = "Scheme to use for connecting to the host.\nDefaults to HTTP.";
@@ -8121,7 +8121,7 @@ with lib; let
         };
         "port" = mkOption {
           description = "Number or name of the port to access on the container.\nNumber must be in the range 1 to 65535.\nName must be an IANA_SVC_NAME.";
-          type = types.int;
+          type = types.either types.int types.str;
         };
       };
 
@@ -8231,7 +8231,7 @@ with lib; let
         };
         "port" = mkOption {
           description = "Name or number of the port to access on the container.\nNumber must be in the range 1 to 65535.\nName must be an IANA_SVC_NAME.";
-          type = types.int;
+          type = types.either types.int types.str;
         };
         "scheme" = mkOption {
           description = "Scheme to use for connecting to the host.\nDefaults to HTTP.";
@@ -8268,7 +8268,7 @@ with lib; let
         };
         "port" = mkOption {
           description = "Number or name of the port to access on the container.\nNumber must be in the range 1 to 65535.\nName must be an IANA_SVC_NAME.";
-          type = types.int;
+          type = types.either types.int types.str;
         };
       };
 
@@ -8409,7 +8409,7 @@ with lib; let
         };
         "port" = mkOption {
           description = "Name or number of the port to access on the container.\nNumber must be in the range 1 to 65535.\nName must be an IANA_SVC_NAME.";
-          type = types.int;
+          type = types.either types.int types.str;
         };
         "scheme" = mkOption {
           description = "Scheme to use for connecting to the host.\nDefaults to HTTP.";
@@ -8446,7 +8446,7 @@ with lib; let
         };
         "port" = mkOption {
           description = "Number or name of the port to access on the container.\nNumber must be in the range 1 to 65535.\nName must be an IANA_SVC_NAME.";
-          type = types.int;
+          type = types.either types.int types.str;
         };
       };
 
@@ -8779,7 +8779,7 @@ with lib; let
         };
         "port" = mkOption {
           description = "Name or number of the port to access on the container.\nNumber must be in the range 1 to 65535.\nName must be an IANA_SVC_NAME.";
-          type = types.int;
+          type = types.either types.int types.str;
         };
         "scheme" = mkOption {
           description = "Scheme to use for connecting to the host.\nDefaults to HTTP.";
@@ -8816,7 +8816,7 @@ with lib; let
         };
         "port" = mkOption {
           description = "Number or name of the port to access on the container.\nNumber must be in the range 1 to 65535.\nName must be an IANA_SVC_NAME.";
-          type = types.int;
+          type = types.either types.int types.str;
         };
       };
 
@@ -9183,7 +9183,7 @@ with lib; let
         };
         "divisor" = mkOption {
           description = "Specifies the output format of the exposed resources, defaults to \"1\"";
-          type = types.nullOr types.int;
+          type = types.nullOr (types.either types.int types.str);
         };
         "resource" = mkOption {
           description = "Required: resource to select";
@@ -9290,7 +9290,7 @@ with lib; let
         };
         "port" = mkOption {
           description = "Name or number of the port to access on the container.\nNumber must be in the range 1 to 65535.\nName must be an IANA_SVC_NAME.";
-          type = types.int;
+          type = types.either types.int types.str;
         };
         "scheme" = mkOption {
           description = "Scheme to use for connecting to the host.\nDefaults to HTTP.";
@@ -9337,7 +9337,7 @@ with lib; let
         };
         "port" = mkOption {
           description = "Number or name of the port to access on the container.\nNumber must be in the range 1 to 65535.\nName must be an IANA_SVC_NAME.";
-          type = types.int;
+          type = types.either types.int types.str;
         };
       };
 
@@ -9401,7 +9401,7 @@ with lib; let
         };
         "port" = mkOption {
           description = "Name or number of the port to access on the container.\nNumber must be in the range 1 to 65535.\nName must be an IANA_SVC_NAME.";
-          type = types.int;
+          type = types.either types.int types.str;
         };
         "scheme" = mkOption {
           description = "Scheme to use for connecting to the host.\nDefaults to HTTP.";
@@ -9448,7 +9448,7 @@ with lib; let
         };
         "port" = mkOption {
           description = "Number or name of the port to access on the container.\nNumber must be in the range 1 to 65535.\nName must be an IANA_SVC_NAME.";
-          type = types.int;
+          type = types.either types.int types.str;
         };
       };
 
@@ -9558,7 +9558,7 @@ with lib; let
         };
         "port" = mkOption {
           description = "Name or number of the port to access on the container.\nNumber must be in the range 1 to 65535.\nName must be an IANA_SVC_NAME.";
-          type = types.int;
+          type = types.either types.int types.str;
         };
         "scheme" = mkOption {
           description = "Scheme to use for connecting to the host.\nDefaults to HTTP.";
@@ -9595,7 +9595,7 @@ with lib; let
         };
         "port" = mkOption {
           description = "Number or name of the port to access on the container.\nNumber must be in the range 1 to 65535.\nName must be an IANA_SVC_NAME.";
-          type = types.int;
+          type = types.either types.int types.str;
         };
       };
 
@@ -9736,7 +9736,7 @@ with lib; let
         };
         "port" = mkOption {
           description = "Name or number of the port to access on the container.\nNumber must be in the range 1 to 65535.\nName must be an IANA_SVC_NAME.";
-          type = types.int;
+          type = types.either types.int types.str;
         };
         "scheme" = mkOption {
           description = "Scheme to use for connecting to the host.\nDefaults to HTTP.";
@@ -9773,7 +9773,7 @@ with lib; let
         };
         "port" = mkOption {
           description = "Number or name of the port to access on the container.\nNumber must be in the range 1 to 65535.\nName must be an IANA_SVC_NAME.";
-          type = types.int;
+          type = types.either types.int types.str;
         };
       };
 
@@ -10106,7 +10106,7 @@ with lib; let
         };
         "port" = mkOption {
           description = "Name or number of the port to access on the container.\nNumber must be in the range 1 to 65535.\nName must be an IANA_SVC_NAME.";
-          type = types.int;
+          type = types.either types.int types.str;
         };
         "scheme" = mkOption {
           description = "Scheme to use for connecting to the host.\nDefaults to HTTP.";
@@ -10143,7 +10143,7 @@ with lib; let
         };
         "port" = mkOption {
           description = "Number or name of the port to access on the container.\nNumber must be in the range 1 to 65535.\nName must be an IANA_SVC_NAME.";
-          type = types.int;
+          type = types.either types.int types.str;
         };
       };
 
@@ -11022,7 +11022,7 @@ with lib; let
         };
         "divisor" = mkOption {
           description = "Specifies the output format of the exposed resources, defaults to \"1\"";
-          type = types.nullOr types.int;
+          type = types.nullOr (types.either types.int types.str);
         };
         "resource" = mkOption {
           description = "Required: resource to select";
@@ -11043,7 +11043,7 @@ with lib; let
         };
         "sizeLimit" = mkOption {
           description = "sizeLimit is the total amount of local storage required for this EmptyDir volume.\nThe size limit is also applicable for memory medium.\nThe maximum usage on memory medium EmptyDir would be the minimum value between\nthe SizeLimit specified here and the sum of memory limits of all containers in a pod.\nThe default is nil which means that the limit is undefined.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#emptydir";
-          type = types.nullOr types.int;
+          type = types.nullOr (types.either types.int types.str);
         };
       };
 
@@ -11788,7 +11788,7 @@ with lib; let
         };
         "divisor" = mkOption {
           description = "Specifies the output format of the exposed resources, defaults to \"1\"";
-          type = types.nullOr types.int;
+          type = types.nullOr (types.either types.int types.str);
         };
         "resource" = mkOption {
           description = "Required: resource to select";
@@ -13532,6 +13532,8 @@ in {
         mkAliasDefinitions options.resources."usages";
     };
 
+    # make all namespaced resources default to the
+    # application's namespace
     defaults = [];
   };
 }

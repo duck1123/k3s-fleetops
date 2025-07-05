@@ -3,64 +3,61 @@
 
   inputs = {
     clj-nix = {
+      inputs = {
+        nix-fetcher-data.follows = "nix-fetcher-data";
+        nixpkgs.follows = "nixpkgs";
+      };
       url = "github:jlesquembre/clj-nix";
-      inputs.nix-fetcher-data.follows = "nix-fetcher-data";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    flake-compat.url = "github:edolstra/flake-compat";
-
     flake-parts = {
-      url = "github:hercules-ci/flake-parts";
       inputs.nixpkgs-lib.follows = "nixpkgs-lib";
+      url = "github:hercules-ci/flake-parts";
     };
 
     flake-utils = {
+      inputs.systems.follows = "systems";
       url = "github:numtide/flake-utils";
-      inputs.systems.follows = "systems";
     };
 
-    kubenix = {
-      url = "github:hall/kubenix";
-      inputs.flake-compat.follows = "flake-compat";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.systems.follows = "systems";
-    };
-
-    make-shell = {
-      url = "github:nicknovitski/make-shell";
-      inputs.flake-compat.follows = "flake-compat";
-    };
+    make-shell.url = "github:nicknovitski/make-shell";
 
     mkdocs-flake = {
+      inputs = {
+        flake-parts.follows = "flake-parts";
+        nixpkgs.follows = "nixpkgs";
+        poetry2nix.follows = "poetry2nix";
+      };
       url = "github:applicative-systems/mkdocs-flake";
-      inputs.flake-parts.follows = "flake-parts";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.poetry2nix.follows = "poetry2nix";
     };
 
     nix-fetcher-data = {
+      inputs = {
+        flake-parts.follows = "flake-parts";
+        nixpkgs.follows = "nixpkgs";
+      };
       url = "github:jlesquembre/nix-fetcher-data";
-      inputs.flake-parts.follows = "flake-parts";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     nix-kube-generators.url = "github:farcaller/nix-kube-generators";
 
     nixhelm = {
+      inputs = {
+        flake-utils.follows = "flake-utils";
+        nix-kube-generators.follows = "nix-kube-generators";
+        nixpkgs.follows = "nixpkgs";
+        poetry2nix.follows = "poetry2nix";
+      };
       url = "github:farcaller/nixhelm";
-      inputs.flake-utils.follows = "flake-utils";
-      inputs.nix-kube-generators.follows = "nix-kube-generators";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.poetry2nix.follows = "poetry2nix";
     };
 
     nixidy = {
+      inputs = {
+        flake-utils.follows = "flake-utils";
+        nix-kube-generators.follows = "nix-kube-generators";
+        nixpkgs.follows = "nixpkgs";
+      };
       url = "github:duck1123/nixidy?ref=feature/chmod";
-      inputs.flake-utils.follows = "flake-utils";
-      inputs.kubenix.follows = "kubenix";
-      inputs.nix-kube-generators.follows = "nix-kube-generators";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
@@ -68,15 +65,17 @@
     nixpkgs-lib.url = "github:nix-community/nixpkgs.lib";
 
     poetry2nix = {
+      inputs = {
+        flake-utils.follows = "flake-utils";
+        nixpkgs.follows = "nixpkgs";
+        systems.follows = "systems";
+      };
       url = "github:nix-community/poetry2nix";
-      inputs.flake-utils.follows = "flake-utils";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.systems.follows = "systems";
     };
 
     sops-nix = {
-      url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:Mic92/sops-nix";
     };
 
     systems.url = "github:nix-systems/default";

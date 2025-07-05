@@ -330,6 +330,8 @@ in {
         mkAliasDefinitions options.resources."sealedSecrets";
     };
 
+    # make all namespaced resources default to the
+    # application's namespace
     defaults = [
       {
         group = "bitnami.com";
