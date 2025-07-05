@@ -80,6 +80,7 @@ in {
       inherit (secrets.authentik) secret-key;
       postgresql = {
         inherit (secrets.authentik.postgresql) password postgres-password replicationPassword;
+        host = "postgreql.postgreql";
       };
     };
 

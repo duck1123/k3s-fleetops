@@ -22,7 +22,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/secret: 3b419bc7172bf18ebc329f364757cdc6ab27581b102746a3ed1e1c514bbc4407
+        checksum/secret: 865cc33bf2adec4a7a436eae7f3761b63ccbb63692a378ef23db87c90e742448
       labels:
         app.kubernetes.io/component: worker
         app.kubernetes.io/instance: authentik
