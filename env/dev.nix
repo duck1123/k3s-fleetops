@@ -69,7 +69,7 @@ in {
 
     # ../modules/authentik/default.nix
     authentik = {
-      enable = true;
+      enable = false;
 
       ingress = {
         inherit clusterIssuer;
@@ -206,7 +206,7 @@ in {
 
     # ../modules/metabase/default.nix
     metabase = {
-      enable = true;
+      enable = false;
 
       ingress = {
         domain = "metabase.${tail-domain}";
