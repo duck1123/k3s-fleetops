@@ -21,6 +21,7 @@ bb tasks
 Create a private key for securing secrets
 
 ```sh {"name":"create-age-key"}
+mkdir -p ~/.config/sops/age
 age-keygen -o ~/.config/sops/age/keys.txt
 ```
 
