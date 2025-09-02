@@ -265,11 +265,11 @@ in {
     };
 
     pihole.enable = false;
-    postgresql.enable = false;
+    postgresql.enable = true;
 
     # ../modules/redis/default.nix
     redis = {
-      enable = false;
+      enable = true;
       password = secrets.redis.password;
     };
 
