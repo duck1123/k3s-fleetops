@@ -183,8 +183,8 @@ in {
       enable = true;
 
       ingress = {
-        domain = "longhorn.${base-domain}";
-        ingressClassName = "traefik";
+        domain = "longhorn.${tail-domain}";
+        ingressClassName = "tailscale";
         tls.enable = true;
       };
     };
