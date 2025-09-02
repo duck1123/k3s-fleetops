@@ -99,8 +99,8 @@ in {
 
     # ../modules/crossplane/default.nix
     crossplane = {
-      enable = true;
-      providers.digital-ocean.enable = true;
+      enable = false;
+      providers.digital-ocean.enable = false;
     };
 
     # ../modules/dinsro/default.nix
@@ -116,7 +116,7 @@ in {
 
     # ../modules/forgejo/default.nix
     forgejo = {
-      enable = true;
+      enable = false;
 
       admin = { inherit (secrets.forgejo.admin) password username; };
 
@@ -180,7 +180,7 @@ in {
 
     # ../modules/longhorn/default.nix
     longhorn = {
-      enable = true;
+      enable = false;
 
       ingress = {
         domain = "longhorn.${tail-domain}";
@@ -265,11 +265,11 @@ in {
     };
 
     pihole.enable = false;
-    postgresql.enable = true;
+    postgresql.enable = false;
 
     # ../modules/redis/default.nix
     redis = {
-      enable = true;
+      enable = false;
       password = secrets.redis.password;
     };
 
