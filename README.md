@@ -60,6 +60,14 @@ This turns the unencrypted yaml file into an encrypted version
 sops -e secrets/secrets.yaml | save -f secrets/secrets.enc.yaml
 ```
 
+### Decrypt Secrets
+
+To unencrypt the stored passwords
+
+```sh
+sops --decrypt secrets/secrets.enc.yaml > secrets/secrets.yaml
+```
+
 # Build
 
 Compile all edn templates to yaml
