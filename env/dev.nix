@@ -180,11 +180,11 @@ in {
 
     # ../modules/longhorn/default.nix
     longhorn = {
-      enable = false;
+      enable = true;
 
       ingress = {
-        domain = "longhorn.${tail-domain}";
-        ingressClassName = "tailscale";
+        domain = "longhorn.${base-domain}";
+        ingressClassName = "traefik";
         tls.enable = true;
       };
     };
