@@ -263,7 +263,10 @@ in {
       };
     };
 
-    pihole.enable = false;
+    # ../modules/pihole/default.nix
+    pihole = {
+      enable = true;
+    };
 
     # ../modules/postgresql/default.nix
     postgresql = {
