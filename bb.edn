@@ -30,10 +30,6 @@
   {:doc  "Clean generated files"
    :task (shell "rm -rf target")}
 
-  create-forgejo-password-secret
-  {:doc  "Create secret for forgejo"
-   :task (c/create-sealed-secret :forgejo)}
-
   create-harbor-password-secret
   {:doc  "Create secret for Harbor"
    :task (c/create-sealed-secret :harbor)}
@@ -100,13 +96,16 @@
 
   switch-charts
   {:doc  "Switch nixidy charts"
-   :task (let [show-trace?    false
+   :task (let [show-trace?    (= (System/getenv "SHOW_TRACE") "true")
                env            "dev"
                args           (concat ["nix"
                                        "build"
                                        (str ".#nixidyEnvs.x86_64-linux." env ".activationPackage")
+                                       ;; Read environment
                                        "--impure"
+                                       ;; Don't create results directory
                                        "--no-link"
+                                       ;; See all output
                                        "--print-out-paths"]
                                       (when show-trace? ["--show-trace"]))
                cmd            (str/join " " args)
