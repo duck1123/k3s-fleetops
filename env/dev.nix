@@ -79,7 +79,8 @@ in {
 
       inherit (secrets.authentik) secret-key;
       postgresql = {
-        inherit (secrets.authentik.postgresql) password postgres-password replicationPassword;
+        inherit (secrets.authentik.postgresql)
+          password postgres-password replicationPassword;
         host = "postgreql.postgreql";
       };
     };
@@ -158,9 +159,7 @@ in {
         tls.enable = true;
       };
 
-      postgresql = {
-        inherit (secrets.jupyterhub.postgresql) adminPassword;
-      };
+      postgresql = { inherit (secrets.jupyterhub.postgresql) adminPassword; };
     };
 
     keycloak = {
@@ -265,7 +264,16 @@ in {
     };
 
     pihole.enable = false;
-    postgresql.enable = true;
+
+    # ../modules/postgresql/default.nix
+    postgresql = {
+      enable = true;
+
+      auth = {
+        inherit (secrets.postgresql)
+          adminPassword adminUsername replicationPassword userPassword;
+      };
+    };
 
     # ../modules/redis/default.nix
     redis = {

@@ -1,6 +1,8 @@
-{ charts, config, lib, pkgs, ... }:
-let
-  cfg = config.services.postgresql;
+{ ageRecipients, config, lib, pkgs, ... }:
+with lib;
+let password-secret = "postgresql-password";
+in mkArgoApp { inherit config lib; } {
+  name = "postgresql";
 
   chart = lib.helmChart {
     inherit pkgs;
@@ -8,11 +10,37 @@ let
     chartName = "postgresql";
   };
 
-  defaultNamespace = "postgresql";
+  extraOptions = {
+    auth = {
+      adminPassword = mkOption {
+        description = mdDoc "The admin password";
+        type = types.str;
+        default = "CHANGEME";
+      };
 
-  defaultValues = {
+      adminUsername = mkOption {
+        description = mdDoc "The admin username";
+        type = types.str;
+        default = "admin";
+      };
+
+      replicationPassword = mkOption {
+        description = mdDoc "The replication password";
+        type = types.str;
+        default = "CHANGEME";
+      };
+
+      userPassword = mkOption {
+        description = mdDoc "The user password";
+        type = types.str;
+        default = "postgres";
+      };
+    };
+  };
+
+  defaultValues = cfg: {
     global.postgresql.auth = {
-      existingSecret = "postgresql-password";
+      existingSecret = password-secret;
       secretKeys = {
         adminPasswordKey = "adminPassword";
         userPasswordKey = "userPassword";
@@ -21,32 +49,14 @@ let
     };
   };
 
-  values = lib.attrsets.recursiveUpdate defaultValues cfg.values;
-  namespace = cfg.namespace;
-in with lib; {
-  options.services.postgresql = {
-    enable = mkEnableOption "Enable application";
-
-    namespace = mkOption {
-      description = mdDoc "The namespace to install into";
-      type = types.str;
-      default = defaultNamespace;
-    };
-
-    values = mkOption {
-      description = "All the values";
-      type = types.attrsOf types.anything;
-      default = { };
-    };
-  };
-
-  config = mkIf cfg.enable {
-    applications.postgresql = {
-      inherit namespace;
-      createNamespace = true;
-      finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
-      helm.releases.postgresql = { inherit chart values; };
-      syncPolicy.finalSyncOpts = [ "CreateNamespace=true" ];
+  extraResources = cfg: {
+    sopsSecrets.${password-secret} = lib.createSecret {
+      inherit ageRecipients lib pkgs;
+      inherit (cfg) namespace;
+      secretName = password-secret;
+      values = with cfg; {
+        inherit (auth) adminPassword adminUsername replicationPassword userPassword;
+      };
     };
   };
 }
