@@ -116,7 +116,7 @@ in {
 
     # ../modules/forgejo/default.nix
     forgejo = {
-      enable = false;
+      enable = true;
 
       admin = { inherit (secrets.forgejo.admin) password username; };
 
