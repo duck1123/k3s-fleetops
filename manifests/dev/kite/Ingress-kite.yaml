@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  labels:
+    app.kubernetes.io/instance: kite
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: kite
+    app.kubernetes.io/version: v0.5.0
+    helm.sh/chart: kite-0.5.0
+  name: kite
+  namespace: kite
+spec:
+  ingressClassName: tailscale
+  rules:
+    - host: kite.bearded-snake.ts.net
+      http:
+        paths:
+          - backend:
+              service:
+                name: kite
+                port:
+                  number: 8080
+            path: /
+            pathType: ImplementationsSpecific
+  tls:
+    - hosts:
+        - kite.bearded-snake.ts.net

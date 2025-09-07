@@ -18,6 +18,7 @@
     ./harbor
     ./homer
     ./keycloak
+    ./kite
     ./kyverno
     ./jupyterhub
     ./lldap

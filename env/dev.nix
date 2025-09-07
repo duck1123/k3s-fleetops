@@ -171,6 +171,19 @@ in {
       };
     };
 
+    # ../modules/kite/default.nix
+    kite = {
+      enable = true;
+      inherit (secrets.kite) encryptKey jwtSecret;
+
+      ingress = {
+        domain = "kite.${tail-domain}";
+        clusterIssuer = "tailscale";
+        ingressClassName = "tailscale";
+        tls.enable = true;
+      };
+    };
+
     # ../modules/kyverno/default.nix
     kyverno.enable = false;
 
@@ -264,9 +277,7 @@ in {
     };
 
     # ../modules/pihole/default.nix
-    pihole = {
-      enable = true;
-    };
+    pihole = { enable = true; };
 
     # ../modules/postgresql/default.nix
     postgresql = {
