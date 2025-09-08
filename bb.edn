@@ -46,12 +46,22 @@
   {:doc  "Create secrets"
    :task (exec 'k3s-fleetops.core/create-secret-command {})}
 
+  decrypt
+  {:doc "Extract secrets from encrypted form"
+   :task
+   (shell "sh -c \"sops --decrypt secrets/secrets.enc.yaml > secrets/secrets.yaml\"")}
+
   delete-secret-controller
   {:doc "Delete the sealed secrets controller"
    :task
    (let [namespace "sealed-secrets"
          command   (str "kubectl -n \"" namespace "\" delete pod -l name=sealed-secrets-controller")]
      (shell command))}
+
+  encrypt
+  {:doc "Update secrets with latest changes"
+   :task
+   (shell "sh -c \"sops --encrypt secrets/secrets.yaml > secrets/secrets.enc.yaml\"")}
 
   format
   {:doc  "format code"

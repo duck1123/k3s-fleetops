@@ -10,13 +10,52 @@ my cluster
 
 ## List Tasks
 
-List all the available babashka tasks
+List all the available babashka tasks.
+
+This is the primary home of most develoment commands and will reveal commands not listed here.
 
 ```sh {"id":"01J9DFJCFCN3TYYMJHEZJVZZCJ","name":"list-tasks"}
 bb tasks
 ```
 
-## Create Key
+## Prepare environment variables
+
+The `.envrc.example` file documents many of the variables available
+
+### Copy Example file
+
+Create an environment config from the example
+
+```sh {"name":"copy-envrc"}
+cp .envrc.example .envrc
+```
+
+### Allow Environment
+
+Allow the current environment config to be used.
+
+For security, any change to the config must be explicitly whitelisted.
+Refer to direnv for mor information
+
+```sh {"name":"allow-direnv"}
+direnv allow
+```
+
+## Age Keys
+
+### Restore existing key
+
+If you already have a keepass database set up in a way identical to what I have,
+this will prepare that key for a new environment.
+
+```sh {"name":"restore-age-key"}
+export KEEPASS_DB_PATH="${HOME}/keepass/passwords.kdbx"
+export SECRET_PATH="/Kubernetes/Age-key"
+mkdir -p ~/.config/sops/age
+keepassxc-cli show -s -a Password ${KEEPASS_DB_PATH?} ${SECRET_PATH?} > ~/.config/sops/age/keys.txt
+```
+
+### Create New Key
 
 Create a private key for securing secrets
 
@@ -57,6 +96,7 @@ You must create a file at `secrets/secrets.yaml` with all the required secrets a
 This turns the unencrypted yaml file into an encrypted version
 
 ``` nushell
+# bb encrypt
 sops -e secrets/secrets.yaml | save -f secrets/secrets.enc.yaml
 ```
 
@@ -65,6 +105,7 @@ sops -e secrets/secrets.yaml | save -f secrets/secrets.enc.yaml
 To unencrypt the stored passwords
 
 ```sh
+# bb decrypt
 sops --decrypt secrets/secrets.enc.yaml > secrets/secrets.yaml
 ```
 
