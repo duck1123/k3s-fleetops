@@ -1,12 +1,7 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}:
-let
-  app-name = "marquez";
-  cfg = config.services.${app-name};
+{ config, lib, ... }:
+with lib;
+mkArgoApp { inherit config lib; } {
+  name = "marquez";
 
   # https://artifacthub.io/packages/helm/ilum/ilum-marquez
   chart = lib.helm.downloadHelmChart {
@@ -16,83 +11,53 @@ let
     chartHash = "sha256-9Z3f8rvSkisrY9b466MiQYgqeHCY5AvjKq7Q8aJ3OKg=";
   };
 
-  values = lib.attrsets.recursiveUpdate {
+  uses-ingress = true;
+
+  extraOptions = {
+  };
+
+  defaultValues = cfg: {
     ingress = {
       enabled = false;
-      hosts = [ cfg.domain ];
+      hosts = [ cfg.ingress.domain ];
     };
 
     marquez = {
-      hostname = cfg.domain;
+      hostname = cfg.ingress.domain;
     };
 
     web = {
       enabled = true;
     };
-  } cfg.values;
-in
-with lib;
-{
-  options.services.${app-name} = {
-    domain = mkOption {
-      description = mdDoc "The domain";
-      type = types.str;
-      default = "${app-name}.localhost";
-    };
-
-    enable = mkEnableOption "Enable application";
-
-    namespace = mkOption {
-      description = mdDoc "The namespace to install into";
-      type = types.str;
-      default = app-name;
-    };
-
-    values = mkOption {
-      description = "All the values";
-      type = types.attrsOf types.anything;
-      default = { };
-    };
   };
 
-  config = mkIf cfg.enable {
-    applications.${app-name} = {
-      inherit (cfg) namespace;
-      createNamespace = true;
-      finalizer = "foreground";
-      helm.releases.${app-name} = { inherit chart values; };
+  extraResources = cfg: {
+    ingresses.imum-marquez-ingress.spec = {
+      ingressClassName = "traefik";
+      rules = [
+        {
+          host = cfg.ingress.domain;
+          http = {
+            paths = [
+              {
+                path = "/api/";
+                pathType = "Prefix";
+                backend.service = {
+                  name = "imum-marquez-web";
+                  port.name = "http";
+                };
+              }
+            ];
+          };
+        }
+      ];
 
-      resources = {
-        ingresses.imum-marquez-ingress.spec = {
-          ingressClassName = "traefik";
-          rules = [
-            {
-              host = cfg.domain;
-              http = {
-                paths = [
-                  {
-                    path = "/api/";
-                    pathType = "Prefix";
-                    backend.service = {
-                      name = "imum-marquez-web";
-                      port.name = "http";
-                    };
-                  }
-                ];
-              };
-            }
-          ];
-
-          tls = [
-            {
-              hosts = [ cfg.domain ];
-              secretName = "marquez-tls";
-            }
-          ];
-        };
-      };
-
-      syncPolicy.finalSyncOpts = [ "CreateNamespace=true" ];
+      tls = [
+        {
+          hosts = [ cfg.ingress.domain ];
+          secretName = "marquez-tls";
+        }
+      ];
     };
   };
 }
