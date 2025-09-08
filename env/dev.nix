@@ -109,17 +109,16 @@ in {
       enable = false;
 
       ingress = {
+        clusterIssuer = "tailscale";
         domain = "dinsro.${tail-domain}";
         ingressClassName = "tailscale";
-        clusterIssuer = "tailscale";
       };
     };
 
     # ../modules/forgejo/default.nix
     forgejo = {
-      enable = true;
-
       admin = { inherit (secrets.forgejo.admin) password username; };
+      enable = true;
 
       ingress = {
         domain = "forgejo.${tail-domain}";
@@ -130,6 +129,8 @@ in {
         inherit (secrets.forgejo.postgresql)
           adminPassword adminUsername replicationPassword userPassword;
       };
+
+      storageClass = "longhorn";
     };
 
     harbor-nix = {
