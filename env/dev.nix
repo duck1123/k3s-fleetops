@@ -380,6 +380,7 @@ in
       };
     };
 
+    # ../modules/keycloak/default.nix
     keycloak = {
       enable = false;
       ingress = {
@@ -897,6 +898,7 @@ in
       namespace = "specter";
     };
 
+    # ../modules/tailscale/default.nix
     tailscale = {
       enable = true;
       oauth = { inherit (secrets.tailscale) authKey clientId clientSecret; };
