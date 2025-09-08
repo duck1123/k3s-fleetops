@@ -28,19 +28,19 @@ in mkArgoApp { inherit config lib; } {
     };
   };
 
-  defaultValues = (cfg: {
-    # apiIngress = with cfg.ingress; {
-    #   inherit ingressClassName;
-    #   enabled = true;
-    #   hostname = api-domain;
-    #   annotations = {
-    #     "cert-manager.io/cluster-issuer" = clusterIssuer;
-    #     "ingress.kubernetes.io/force-ssl-redirect" = "true";
-    #     "ingress.kubernetes.io/proxy-body-size" = "0";
-    #     "ingress.kubernetes.io/ssl-redirect" = "true";
-    #   };
-    #   tls = tls.enable;
-    # };
+  defaultValues = cfg: {
+    apiIngress = with cfg.ingress; {
+      inherit ingressClassName;
+      enabled = true;
+      hostname = api-domain;
+      annotations = {
+        "cert-manager.io/cluster-issuer" = clusterIssuer;
+        "ingress.kubernetes.io/force-ssl-redirect" = "true";
+        "ingress.kubernetes.io/proxy-body-size" = "0";
+        "ingress.kubernetes.io/ssl-redirect" = "true";
+      };
+      tls = tls.enable;
+    };
 
     auth = {
       existingSecret = password-secret;
@@ -62,10 +62,8 @@ in mkArgoApp { inherit config lib; } {
       # selfSigned = true;
     };
 
-    persistence = {
-      storageClass = "longhorn";
-    };
-  });
+    persistence.storageClass = "longhorn";
+  };
 
   extraResources = cfg: {
     sopsSecrets.${password-secret} = lib.createSecret {
