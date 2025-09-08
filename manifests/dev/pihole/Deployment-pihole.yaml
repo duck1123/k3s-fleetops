@@ -43,7 +43,7 @@ spec:
       containers:
         - env:
             - name: TZ
-              value: America/Los_Angeles
+              value: America/Detroit
             - name: WEBPASSWORD_FILE
               valueFrom:
                 secretKeyRef:

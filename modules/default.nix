@@ -32,7 +32,7 @@
     ./nocodb
     ./openldap
     ./opentelemetry-collector
-    ./pi-hole
+    ./pihole
     ./postgresql
     ./redis
     ./satisfactory

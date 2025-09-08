@@ -127,7 +127,8 @@ in {
       };
 
       postgresql = {
-        inherit (secrets.forgejo.postgresql) adminPassword adminUsername replicationPassword userPassword;
+        inherit (secrets.forgejo.postgresql)
+          adminPassword adminUsername replicationPassword userPassword;
       };
     };
 
@@ -277,7 +278,16 @@ in {
     };
 
     # ../modules/pihole/default.nix
-    pihole = { enable = true; };
+    pihole = {
+      enable = true;
+
+      auth = { inherit (secrets.pihole) email password; };
+
+      ingress = {
+        domain = "pihole.${tail-domain}";
+        ingressClassName = "tailscale";
+      };
+    };
 
     # ../modules/postgresql/default.nix
     postgresql = {
