@@ -38,4 +38,8 @@ self.lib.mkArgoApp { inherit config lib; } {
     monitoring.enabled = true;
     replicaCount = 1;
   };
+
+  extraResources = {
+    apps.v1.Deployment.metabase.spec.template.spec.containers.metabase.ports.protocol = "TCP";
+  };
 }
