@@ -560,8 +560,11 @@ in
     };
 
     marquez = {
-      domain = "marquez.${base-domain}";
       enable = false;
+
+      ingress = {
+        domain = "marquez.${base-domain}";
+      };
     };
 
     # ../applications/memos/default.nix
