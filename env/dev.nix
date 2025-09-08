@@ -415,6 +415,14 @@ in
       ];
     };
 
+    marquez = {
+      enable = false;
+
+      ingress = {
+        domain = "marquez.${base-domain}";
+      };
+    };
+
     mealie = {
       enable = true;
       hostAffinity = "edgenix";
