@@ -50,6 +50,8 @@ in mkArgoApp { inherit config lib; } {
       };
 
       ingress = with cfg.ingress; {
+        inherit ingressClassName;
+
         enabled = enable;
         hosts = [ domain ];
         tls = [{

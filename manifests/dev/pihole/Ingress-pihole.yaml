@@ -9,6 +9,7 @@ metadata:
   name: pihole
   namespace: pihole
 spec:
+  ingressClassName: tailscale
   rules:
     - host: pihole.bearded-snake.ts.net
       http:
