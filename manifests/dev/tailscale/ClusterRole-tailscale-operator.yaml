@@ -6,6 +6,14 @@ rules:
   - apiGroups:
       - ""
     resources:
+      - nodes
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
       - events
       - services
       - services/status
@@ -36,6 +44,14 @@ rules:
       - networking.k8s.io
     resources:
       - ingressclasses
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - discovery.k8s.io
+    resources:
+      - endpointslices
     verbs:
       - get
       - list

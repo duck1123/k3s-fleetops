@@ -1,27 +1,17 @@
 { ageRecipients, config, lib, pkgs, ... }:
-let
-  app-name = "tailscale";
-  cfg = config.services.${app-name};
+with lib;
+mkArgoApp { inherit config lib; } {
+  name = "tailscale";
 
-  chart = lib.helm.downloadHelmChart {
+  # https://tailscale.com/kb/1236/kubernetes-operator
+  chart = helm.downloadHelmChart {
     repo = "https://pkgs.tailscale.com/helmcharts";
     chart = "tailscale-operator";
-    version = "1.82.0";
-    chartHash = "sha256-8b9h+ZAls2FHU6fy4mKn+yR4o/p2BYtSWbaBv5BXjvE=";
+    version = "1.88.2";
+    chartHash = "sha256-brC01veNdB36YY1OlDXuoM860or0SiP69uJv7BshuGQ=";
   };
 
-  # https://github.com/tailscale/tailscale/blob/main/cmd/k8s-operator/deploy/chart/values.yaml
-  values = lib.attrsets.recursiveUpdate { } cfg.values;
-in with lib; {
-  options.services.${app-name} = {
-    enable = mkEnableOption "Enable application";
-
-    namespace = mkOption {
-      description = mdDoc "The namespace to install into";
-      type = types.str;
-      default = app-name;
-    };
-
+  extraOptions = {
     oauth = {
       # https://tailscale.com/kb/1185/kubernetes
       authKey = mkOption {
@@ -29,54 +19,39 @@ in with lib; {
         type = types.str;
         default = "";
       };
+
       clientId = mkOption {
         description = mdDoc "The client id";
         type = types.str;
         default = "";
       };
+
       clientSecret = mkOption {
         description = mdDoc "The client secret";
         type = types.str;
         default = "";
       };
     };
-
-    values = mkOption {
-      description = "All the values";
-      type = types.attrsOf types.anything;
-      default = { };
-    };
   };
 
-  config = mkIf cfg.enable {
-    applications.${app-name} = {
-      inherit (cfg) namespace;
-      createNamespace = true;
-      finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
-      helm.releases.${app-name} = { inherit chart values; };
-
-      resources.sopsSecrets = {
-        tailscale-auth = lib.createSecret {
-          inherit ageRecipients lib pkgs;
-          inherit (cfg) namespace;
-          secretName = "tailscale-auth";
-          values = with cfg.oauth; {
-            TS_AUTHKEY = authKey;
-          };
-        };
-
-        operator-oauth = lib.createSecret {
-          inherit ageRecipients lib pkgs;
-          inherit (cfg) namespace;
-          secretName = "operator-oauth";
-          values = with cfg.oauth; {
-            client_id = clientId;
-            client_secret = clientSecret;
-          };
-        };
+  extraResources = cfg: {
+    sopsSecrets = {
+      tailscale-auth = createSecret {
+        inherit ageRecipients lib pkgs;
+        inherit (cfg) namespace;
+        secretName = "tailscale-auth";
+        values.TS_AUTHKEY = cfg.oauth.authKey;
       };
 
-      syncPolicy.finalSyncOpts = [ "CreateNamespace=true" ];
+      operator-oauth = lib.createSecret {
+        inherit ageRecipients lib pkgs;
+        inherit (cfg) namespace;
+        secretName = "operator-oauth";
+        values = with cfg.oauth; {
+          client_id = clientId;
+          client_secret = clientSecret;
+        };
+      };
     };
   };
 }
