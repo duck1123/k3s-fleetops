@@ -38,7 +38,7 @@ mkArgoApp { inherit config lib; } {
         host = domain;
         paths = [{
           path = "/";
-          pathType = "ImplementationsSpecific";
+          pathType = "ImplementationSpecific";
         }];
       }];
       tls = [{ hosts = [ domain ]; }];

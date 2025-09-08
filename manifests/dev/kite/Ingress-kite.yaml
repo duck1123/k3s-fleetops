@@ -21,7 +21,7 @@ spec:
                 port:
                   number: 8080
             path: /
-            pathType: ImplementationsSpecific
+            pathType: ImplementationSpecific
   tls:
     - hosts:
         - kite.bearded-snake.ts.net
