@@ -184,6 +184,7 @@ in {
       postgresql = { inherit (secrets.jupyterhub.postgresql) adminPassword; };
     };
 
+    # ../modules/keycloak/default.nix
     keycloak = {
       enable = false;
       ingress = {
@@ -357,6 +358,7 @@ in {
       };
     };
 
+    # ../modules/tailscale/default.nix
     tailscale = {
       enable = true;
       oauth = { inherit (secrets.tailscale) authKey clientId clientSecret; };
