@@ -1,6 +1,7 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 with lib;
-mkArgoApp { inherit config lib; } {
+let password-secret = "admin-password";
+in mkArgoApp { inherit config lib; } {
   name = "pihole";
 
   # https://artifacthub.io/packages/helm/mojo2600/pihole
@@ -45,7 +46,7 @@ mkArgoApp { inherit config lib; } {
     with cfg; {
       admin = {
         enabled = true;
-        existingSecret = "admin-password";
+        existingSecret = password-secret;
       };
 
       ingress = with cfg.ingress; {
@@ -61,4 +62,13 @@ mkArgoApp { inherit config lib; } {
       pihole = { inherit (cfg) timezone; };
       webui.admin = { inherit (cfg.auth) email password; };
     };
+
+  extraResources = cfg: {
+    sopsSecrets.${password-secret} = lib.createSecret {
+      inherit ageRecipients lib pkgs;
+      inherit (cfg) namespace;
+      secretName = password-secret;
+      values = with cfg; { inherit (auth) password; };
+    };
+  };
 }
