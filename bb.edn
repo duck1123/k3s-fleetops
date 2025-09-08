@@ -14,17 +14,13 @@
   {:doc  "Install 00-master argo application"
    :task (shell "kubectl apply -f target/infra-manifests/00-master.yaml")}
 
-  build
-  {:doc  "Convert all edn files to yaml"
-   :task (exec 'k3s-fleetops.core/build {})}
-
   build-charts
   {:doc  "Build nixidy charts"
    :task (shell "nixidy build .#dev")}
 
   ci
   {:doc     "Run all build steps"
-   :depends [clean generate switch-charts build]}
+   :depends [clean generate switch-charts]}
 
   clean
   {:doc  "Clean generated files"
