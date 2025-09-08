@@ -3,12 +3,12 @@ with lib;
 mkArgoApp { inherit config lib; } {
   name = "pihole";
 
-  # https://artifacthub.io/packages/helm/savepointsam/pihole
+  # https://artifacthub.io/packages/helm/mojo2600/pihole
   chart = lib.helm.downloadHelmChart {
-    repo = "https://savepointsam.github.io/charts";
+    repo = "https://mojo2600.github.io/pihole-kubernetes/";
     chart = "pihole";
-    version = "0.2.0";
-    chartHash = "sha256-jwqcjoQXi41Y24t4uGqnw6JVhB2bBbiv5MasRTbq3hA=";
+    version = "2.34.0";
+    chartHash = "sha256-nhvifpDdM8MoxF43cJAi6o+il2BbHX+udVAvvm1PukM=";
   };
 
   uses-ingress = true;
@@ -41,9 +41,24 @@ mkArgoApp { inherit config lib; } {
     };
   };
 
-  defaultValues = cfg: {
-    persistence = { inherit (cfg) storageClass; };
-    pihole = { inherit (cfg) timezone; };
-    webui.admin = { inherit (cfg.auth) email password; };
-  };
+  defaultValues = cfg:
+    with cfg; {
+      admin = {
+        enabled = true;
+        existingSecret = "admin-password";
+      };
+
+      ingress = with cfg.ingress; {
+        enabled = enable;
+        hosts = [ domain ];
+        tls = [{
+          secretName = "pihole-tls";
+          hosts = [ domain ];
+        }];
+      };
+
+      persistence = { inherit (cfg) storageClass; };
+      pihole = { inherit (cfg) timezone; };
+      webui.admin = { inherit (cfg.auth) email password; };
+    };
 }

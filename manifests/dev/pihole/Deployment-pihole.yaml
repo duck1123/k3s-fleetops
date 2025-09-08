@@ -2,128 +2,115 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app.kubernetes.io/component: pihole
-    app.kubernetes.io/instance: pihole
-    app.kubernetes.io/managed-by: Helm
+    app: pihole
     app.kubernetes.io/name: pihole
-    helm.sh/chart: pihole-0.2.0
+    chart: pihole-2.34.0
+    heritage: Helm
+    release: pihole
   name: pihole
   namespace: pihole
 spec:
   replicas: 1
+  revisionHistoryLimit: 10
   selector:
     matchLabels:
-      app.kubernetes.io/component: pihole
-      app.kubernetes.io/instance: pihole
-      app.kubernetes.io/name: pihole
+      app: pihole
+      release: pihole
   strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
     type: RollingUpdate
   template:
     metadata:
+      annotations:
+        checksum.config.adlists: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546
+        checksum.config.blacklist: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546
+        checksum.config.dnsmasqConfig: 31496ff464b397d41e8bd13fd56d8196ab2b97982356497b8210240f66381e9
+        checksum.config.regex: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546
+        checksum.config.staticDhcpConfig: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546
+        checksum.config.whitelist: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546
       labels:
-        app.kubernetes.io/component: pihole
-        app.kubernetes.io/instance: pihole
-        app.kubernetes.io/managed-by: Helm
+        app: pihole
         app.kubernetes.io/name: pihole
-        helm.sh/chart: pihole-0.2.0
+        release: pihole
     spec:
-      affinity:
-        podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-            - podAffinityTerm:
-                labelSelector:
-                  matchLabels:
-                    app.kubernetes.io/component: pihole
-                    app.kubernetes.io/instance: pihole
-                    app.kubernetes.io/name: pihole
-                namespaces:
-                  - pihole
-                topologyKey: kubernetes.io/hostname
-              weight: 1
       containers:
         - env:
-            - name: TZ
-              value: America/Detroit
-            - name: WEBPASSWORD_FILE
+            - name: FTLCONF_webserver_port
+              value: "80"
+            - name: VIRTUAL_HOST
+              value: pi.hole
+            - name: FTLCONF_misc_etc_dnsmasq_d
+              value: "true"
+            - name: FTLCONF_webserver_api_password
               valueFrom:
                 secretKeyRef:
-                  key: webpassword
-                  name: pihole-webui-password
-            - name: PIHOLE_DNS_
+                  key: password
+                  name: admin-password
+            - name: FTLCONF_dns_listeningMode
+              value: all
+            - name: FTLCONF_dns_upstreams
               value: 8.8.8.8;8.8.4.4
-            - name: DNSSEC
-              value: "false"
-            - name: DNS_BOGUS_PRIV
-              value: "true"
-            - name: DNS_FQDN_REQUIRED
-              value: "true"
-            - name: REV_SERVER
-              value: "false"
-            - name: VIRTUAL_HOST
-              value: ""
-            - name: IPv6
-              value: "true"
-            - name: TEMPERATUREUNIT
-              value: f
-            - name: WEBUIBOXEDLAYOUT
-              value: boxed
-            - name: QUERY_LOGGING
-              value: "true"
-            - name: WEBTHEME
-              value: default-auto
-            - name: WEB_PORT
-              value: ""
-            - name: WEB_BIND_ADDR
-              value: ""
-            - name: CUSTOM_CACHE_SIZE
-              value: "10000"
-            - name: FTL_CMD
-              value: no-daemon
-            - name: ADMIN_EMAIL
-              value: ""
-          image: docker.io/pihole/pihole:2023.05.0
+          image: pihole/pihole:2025.08.0
           imagePullPolicy: IfNotPresent
           livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - curl --silent http://localhost/api/info/login | jq 'if (.dns | not) then halt_error(1) end'
             failureThreshold: 10
-            httpGet:
-              path: /admin.index.php
-              port: http
             initialDelaySeconds: 60
-            periodSeconds: 10
-            successThreshold: 1
             timeoutSeconds: 5
           name: pihole
           ports:
+            - containerPort: 80
+              name: http
+              protocol: TCP
             - containerPort: 53
               name: dns
               protocol: TCP
             - containerPort: 53
               name: dns-udp
               protocol: UDP
-            - containerPort: 80
-              name: http
+            - containerPort: 443
+              name: https
               protocol: TCP
+            - containerPort: 67
+              name: client-udp
+              protocol: UDP
           readinessProbe:
-            failureThreshold: 5
-            httpGet:
-              path: /admin.index.php
-              port: http
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - curl --silent http://localhost/api/info/login | jq 'if (.dns | not) then halt_error(1) end'
+            failureThreshold: 10
             initialDelaySeconds: 60
-            periodSeconds: 10
-            successThreshold: 1
             timeoutSeconds: 5
-          resources:
-            limits:
-              cpu: 250m
-              memory: 512Mi
-            requests:
-              cpu: 100m
-              memory: 256Mi
+          resources: {}
+          securityContext:
+            privileged: false
           volumeMounts:
             - mountPath: /etc/pihole
-              name: pihole
-      serviceAccountName: pihole
+              name: config
+            - mountPath: /etc/dnsmasq.d/02-custom.conf
+              name: custom-dnsmasq
+              subPath: 02-custom.conf
+            - mountPath: /etc/addn-hosts
+              name: custom-dnsmasq
+              subPath: addn-hosts
+      dnsConfig:
+        nameservers:
+          - 127.0.0.1
+          - 8.8.8.8
+      dnsPolicy: None
+      hostNetwork: false
       volumes:
-        - name: pihole
-          persistentVolumeClaim:
-            claimName: pihole
+        - emptyDir: {}
+          name: config
+        - configMap:
+            defaultMode: 420
+            name: pihole-custom-dnsmasq
+          name: custom-dnsmasq
