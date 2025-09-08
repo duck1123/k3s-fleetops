@@ -294,8 +294,11 @@ in {
     };
 
     marquez = {
-      domain = "marquez.${base-domain}";
       enable = false;
+
+      ingress = {
+        domain = "marquez.${base-domain}";
+      };
     };
 
     # ../modules/memos/default.nix
