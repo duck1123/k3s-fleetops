@@ -37,7 +37,7 @@ mkArgoApp { inherit config lib; } {
       adminUsername = mkOption {
         description = mdDoc "The admin username";
         type = types.str;
-        default = "admin";
+        default = "postgres";
       };
 
       replicationPassword = mkOption {
