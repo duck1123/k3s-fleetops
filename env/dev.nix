@@ -89,7 +89,7 @@ in {
 
     # ../modules/cloudbeaver/default.nix
     cloudbeaver = {
-      enable = true;
+      enable = false;
 
       ingress = {
         domain = "cloudbeaver.${tail-domain}";
@@ -120,7 +120,7 @@ in {
     # ../modules/forgejo/default.nix
     forgejo = {
       admin = { inherit (secrets.forgejo.admin) password username; };
-      enable = true;
+      enable = false;
 
       ingress = {
         domain = "forgejo.${tail-domain}";
@@ -147,7 +147,7 @@ in {
         enable = true;
       };
 
-      enable = true;
+      enable = false;
 
       ingress = {
         domain = "homer.${tail-domain}";
@@ -287,7 +287,7 @@ in {
 
     # ../modules/pihole/default.nix
     pihole = {
-      enable = true;
+      enable = false;
 
       auth = { inherit (secrets.pihole) email password; };
 
@@ -304,13 +304,13 @@ in {
           adminPassword adminUsername replicationPassword userPassword;
       };
 
-      enable = true;
+      enable = false;
       storageClass = "longhorn";
     };
 
     # ../modules/redis/default.nix
     redis = {
-      enable = true;
+      enable = false;
       password = secrets.redis.password;
     };
 
