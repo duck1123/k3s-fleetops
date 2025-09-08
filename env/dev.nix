@@ -96,6 +96,8 @@ in {
         ingressClassName = "tailscale";
         clusterIssuer = "tailscale";
       };
+
+      storageClass = "longhorn";
     };
 
     # ../modules/crossplane/default.nix

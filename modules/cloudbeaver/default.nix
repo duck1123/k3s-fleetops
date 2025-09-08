@@ -3,83 +3,41 @@ with lib;
 mkArgoApp { inherit config lib; } {
   name = "cloudbeaver";
 
-  # https://artifacthub.io/packages/helm/homeenterpriseinc/cloudbeaver
+  # https://artifacthub.io/packages/helm/avisto/cloudbeaver
   chart = helm.downloadHelmChart {
-    repo = "https://homeenterpriseinc.github.io/helm-charts/";
+    repo = "https://avistotelecom.github.io/charts/";
     chart = "cloudbeaver";
-    version = "0.6.0";
-    chartHash = "sha256-+UuoshmHyNzVlWqpKP+DlWtgALnerkLdhx1ldQSorLk=";
+    version = "1.0.4";
+    chartHash = "sha256-sCaoErVyNTop9LwiomG9kVIBnVoKPpf0WIf24yam8pY=";
   };
 
   uses-ingress = true;
 
-  # extraOptions = {
-  #   codeserver = {
-  #     clusterIssuer  = mkOption {
-  #       description = mdDoc "The cookie secret";
-  #       type = str;
-  #       default = "CHANGEME";
-  #     };
-  #     domain = mkOption {
-  #       description = mdDoc "The cookie secret";
-  #       type = str;
-  #       default = "CHANGEME";
-  #     };
-  #     ingressClassName = mkOption {
-  #       description = mdDoc "The cookie secret";
-  #       type = str;
-  #       default = "CHANGEME";
-  #     };
-  #   };
-  # };
+  extraOptions = {
+    storageClass = mkOption {
+      description = mdDoc "The storage class to use for persistence";
+      type = types.str;
+      default = "local-path";
+    };
+  };
 
   defaultValues = cfg: {
-    image.tag = "24.2.5";
     ingress = with cfg.ingress; {
+      inherit ingressClassName;
+
       annotations = {
         "cert-manager.io/cluster-issuer" = clusterIssuer;
         "ingress.kubernetes.io/force-ssl-redirect" = "true";
       };
-      enabled = false;
-      hosts = [{
-        host = domain;
-        paths = [{
-          path = "/";
-          pathType = "ImplementationSpecific";
-        }];
-      }];
-      tls = [ ];
-    };
-    persistence.enabled = false;
-  };
 
-  extraResources = cfg: {
-    ingresses.cloudbeaver-ingress = with cfg.ingress; {
-      metadata.annotations = {
-        # "cert-manager.io/cluster-issuer" = cfg.clusterIssuer;
-        # "ingress.kubernetes.io/force-ssl-redirect" = "true";
-        # "ingress.kubernetes.io/proxy-body-size" = "0";
-        # "ingress.kubernetes.io/ssl-redirect" = "true";
-        # "kubernetes.io/ingress.class" = "traefik";
-      };
-      spec = {
-        inherit ingressClassName;
-        rules = [{
-          host = domain;
-          http.paths = [{
-            backend.service = {
-              name = "cloudbeaver-svc";
-              port.name = "http";
-            };
-            path = "/";
-            pathType = "ImplementationSpecific";
-          }];
-        }];
-        tls = [{
-          inherit (tls) secretName;
-          hosts = [ domain ];
-        }];
-      };
+      enabled = true;
+      hostname = domain;
+      tls = true;
+    };
+
+    persistence = {
+      inherit (cfg) storageClass;
+      enabled = true;
     };
   };
 }
