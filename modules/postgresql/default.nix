@@ -4,6 +4,7 @@ let password-secret = "postgresql-password";
 in mkArgoApp { inherit config lib; } {
   name = "postgresql";
 
+  # https://artifacthub.io/packages/helm/bitnami/postgresql
   chart = lib.helmChart {
     inherit pkgs;
     chartTgz = ../../chart-archives/postgresql-16.2.3.tgz;
@@ -36,15 +37,25 @@ in mkArgoApp { inherit config lib; } {
         default = "postgres";
       };
     };
+
+    storageClass = mkOption {
+      description = mdDoc "The storage class to use for persistence";
+      type = types.str;
+      default = "local-path";
+    };
   };
 
   defaultValues = cfg: {
-    global.postgresql.auth = {
-      existingSecret = password-secret;
-      secretKeys = {
-        adminPasswordKey = "adminPassword";
-        userPasswordKey = "userPassword";
-        replicationPasswordKey = "replicationPassword";
+    global = {
+      defaultStorageClass = cfg.storageClass;
+
+      postgresql.auth = {
+        existingSecret = password-secret;
+        secretKeys = {
+          adminPasswordKey = "adminPassword";
+          userPasswordKey = "userPassword";
+          replicationPasswordKey = "replicationPassword";
+        };
       };
     };
   };
@@ -55,7 +66,8 @@ in mkArgoApp { inherit config lib; } {
       inherit (cfg) namespace;
       secretName = password-secret;
       values = with cfg; {
-        inherit (auth) adminPassword adminUsername replicationPassword userPassword;
+        inherit (auth)
+          adminPassword adminUsername replicationPassword userPassword;
       };
     };
   };

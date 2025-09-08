@@ -297,12 +297,13 @@ in {
 
     # ../modules/postgresql/default.nix
     postgresql = {
-      enable = true;
-
       auth = {
         inherit (secrets.postgresql)
           adminPassword adminUsername replicationPassword userPassword;
       };
+
+      enable = true;
+      storageClass = "longhorn";
     };
 
     # ../modules/redis/default.nix
