@@ -12,6 +12,14 @@ mkArgoApp { inherit config lib; } {
 
   uses-ingress = true;
 
+  extraOptions = {
+    ingress.api-domain = mkOption {
+      description = mdDoc "The ingress domain for the API";
+      type = types.str;
+      default = defaultApiDomain;
+    };
+  };
+
   defaultValues = cfg: {
     createUserJob = {
       applyCustomEnv = false;
