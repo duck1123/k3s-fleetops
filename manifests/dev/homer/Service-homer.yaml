@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/instance: homer
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: homer
+    app.kubernetes.io/service: homer
+    app.kubernetes.io/version: v25.02.1
+    helm.sh/chart: homer-0.13.0
+  name: homer
+  namespace: homer
+spec:
+  ports:
+    - name: http
+      port: 8080
+      protocol: TCP
+      targetPort: http
+  selector:
+    app.kubernetes.io/instance: homer
+    app.kubernetes.io/name: homer
+  type: ClusterIP
