@@ -127,7 +127,7 @@ in {
       };
 
       postgresql = {
-        inherit (secrets.forgejo.postgresql) adminPassword adminUsername;
+        inherit (secrets.forgejo.postgresql) adminPassword adminUsername replicationPassword userPassword;
       };
     };
 
