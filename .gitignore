@@ -12,3 +12,4 @@ tls.key
 /result
 /secrets/secrets.yaml
 /target/secrets/secrets.yaml
+/target/

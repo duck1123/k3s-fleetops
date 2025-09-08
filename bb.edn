@@ -11,8 +11,13 @@
    :task (shell "git config core.hooksPath .githooks")}
 
   apply-master-application
-  {:doc  "Install 00-master argo application"
-   :task (shell "kubectl apply -f target/infra-manifests/00-master.yaml")}
+  {:doc     "Install 00-master argo application"
+   :depends [build]
+   :task    (shell "kubectl apply -f target/infra-manifests/00-master.yaml")}
+
+  build
+  {:doc  "Convert all edn files to yaml"
+   :task (exec 'k3s-fleetops.core/build {})}
 
   build-charts
   {:doc  "Build nixidy charts"
