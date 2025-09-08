@@ -2,22 +2,23 @@
 { ageRecipients, lib, namespace ? "default", pkgs, secretName ? "some-secret"
 , values ? { }, ... }:
 let
-  encrypted-object = builtins.fromJSON (lib.encryptString {
-    inherit ageRecipients pkgs secretName;
-    value = (lib.toYAML {
-      inherit pkgs;
-      value = {
-        apiVersion = "isindir.github.com/v1alpha3";
-        kind = "SopsSecret";
-        metadata = {
-          inherit namespace;
-          name = secretName;
-        };
-        spec.secretTemplates = [{
-          name = secretName;
-          stringData = values;
-        }];
-      };
-    });
-  });
+  secret-spec = {
+    apiVersion = "isindir.github.com/v1alpha3";
+    kind = "SopsSecret";
+    metadata = {
+      inherit namespace;
+      name = secretName;
+    };
+    spec.secretTemplates = [{
+      name = secretName;
+      stringData = values;
+    }];
+  };
+  value = lib.toYAML {
+    inherit pkgs;
+    value = secret-spec;
+  };
+  encrypted-string =
+    lib.encryptString { inherit ageRecipients pkgs secretName value; };
+  encrypted-object = builtins.fromJSON encrypted-string;
 in { inherit (encrypted-object) sops spec; }

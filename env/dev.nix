@@ -139,8 +139,13 @@ in {
 
     # ../modules/homer/default.nix
     homer = {
-      codeserver.ingress.domain = "codeserver.${tail-domain}";
+      codeserver.ingress = {
+        domain = "codeserver.${tail-domain}";
+        enable = true;
+      };
+
       enable = true;
+
       ingress = {
         domain = "homer.${tail-domain}";
         ingressClassName = "tailscale";

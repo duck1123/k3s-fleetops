@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 with lib;
 mkArgoApp { inherit config lib; } {
   name = "homer";
@@ -20,11 +20,15 @@ mkArgoApp { inherit config lib; } {
         type = types.str;
         default = "CHANGEME";
       };
+
       domain = mkOption {
         description = mdDoc "The cookie secret";
         type = types.str;
         default = "CHANGEME";
       };
+
+      enable = mkEnableOption "Enable codeserver addon";
+
       ingressClassName = mkOption {
         description = mdDoc "The cookie secret";
         type = types.str;
@@ -35,6 +39,31 @@ mkArgoApp { inherit config lib; } {
   };
 
   defaultValues = cfg: {
+    configMaps = {
+      config = {
+        enable = true;
+
+        data = {
+          "config.yml" = lib.toYAML {
+            inherit pkgs;
+            value = {
+              title = "App Dashboard";
+              columns = 4;
+
+              defaults = { colorTheme = "dark"; };
+
+              links = [{
+                name = "Nostrudel";
+                icon = "fab fa-github";
+                url = "https://nostrudel.ninja/";
+                target = "_balnk";
+              }];
+            };
+          };
+        };
+      };
+    };
+
     ingress = with cfg.ingress; {
       main = {
         enabled = false;
@@ -49,9 +78,11 @@ mkArgoApp { inherit config lib; } {
       };
 
       addons.codeserver = with cfg.codeserver.ingress; {
-        enabled = false;
+        enabled = enable;
+
         ingress = {
-          enabled = true;
+          enabled = false;
+
           hosts = [{
             host = domain;
             paths = [{ path = "/"; }];
@@ -62,13 +93,21 @@ mkArgoApp { inherit config lib; } {
           }];
         };
       };
+
+    };
+
+    persistence = {
+      config = {
+        enabled = true;
+        storageClass = "longhorn";
+      };
     };
   };
 
-  extraResources = cfg: with cfg; {
-    ingresses = with ingress; {
+  extraResources = cfg: {
+    ingresses = with cfg.ingress; {
       homer.spec = {
-        inherit (cfg.ingress) ingressClassName;
+        inherit ingressClassName;
         rules = [{
           host = domain;
           http = {
