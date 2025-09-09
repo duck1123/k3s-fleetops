@@ -304,7 +304,7 @@ in {
           adminPassword adminUsername replicationPassword userPassword;
       };
 
-      enable = false;
+      enable = true;
       storageClass = "longhorn";
     };
 
