@@ -201,7 +201,7 @@ in {
 
     # ../modules/longhorn/default.nix
     longhorn = {
-      enable = true;
+      enable = false;
 
       ingress = {
         domain = "longhorn.${tail-domain}";
@@ -305,7 +305,7 @@ in {
       };
 
       enable = true;
-      storageClass = "longhorn";
+      # storageClass = "longhorn";
     };
 
     # ../modules/redis/default.nix
