@@ -304,8 +304,8 @@ in {
           adminPassword adminUsername replicationPassword userPassword;
       };
 
-      enable = false;
-      # storageClass = "longhorn";
+      enable = true;
+      storageClass = "longhorn";
     };
 
     # ../modules/redis/default.nix
