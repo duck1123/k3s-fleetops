@@ -201,7 +201,7 @@ in {
 
     # ../modules/longhorn/default.nix
     longhorn = {
-      enable = false;
+      enable = true;
 
       ingress = {
         domain = "longhorn.${tail-domain}";
