@@ -7,7 +7,7 @@ in mkArgoApp { inherit config lib; } {
   # https://artifacthub.io/packages/helm/bitnami/postgresql
   chart = lib.helmChart {
     inherit pkgs;
-    chartTgz = ../../chart-archives/postgresql-16.2.3.tgz;
+    chartTgz = ../../chart-archives/postgresql-16.7.27.tgz;
     chartName = "postgresql";
   };
 

@@ -6,8 +6,8 @@ metadata:
     app.kubernetes.io/instance: postgresql
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: postgresql
-    app.kubernetes.io/version: 17.2.0
-    helm.sh/chart: postgresql-16.2.3
+    app.kubernetes.io/version: 17.6.0
+    helm.sh/chart: postgresql-16.7.27
   name: postgresql
   namespace: postgresql
 spec:
@@ -25,8 +25,8 @@ spec:
         app.kubernetes.io/instance: postgresql
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: postgresql
-        app.kubernetes.io/version: 17.2.0
-        helm.sh/chart: postgresql-16.2.3
+        app.kubernetes.io/version: 17.6.0
+        helm.sh/chart: postgresql-16.7.27
       name: postgresql
     spec:
       affinity:
@@ -51,11 +51,8 @@ spec:
               value: /bitnami/postgresql
             - name: PGDATA
               value: /bitnami/postgresql/data
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: adminPassword
-                  name: postgresql-password
+            - name: POSTGRES_PASSWORD_FILE
+              value: /opt/bitnami/postgresql/secrets/adminPassword
             - name: POSTGRESQL_ENABLE_LDAP
               value: "no"
             - name: POSTGRESQL_ENABLE_TLS
@@ -72,7 +69,7 @@ spec:
               value: error
             - name: POSTGRESQL_SHARED_PRELOAD_LIBRARIES
               value: pgaudit
-          image: docker.io/bitnami/postgresql:17.2.0-debian-12-r1
+          image: docker.io/bitnami/postgresql:17.6.0-debian-12-r4
           imagePullPolicy: IfNotPresent
           livenessProbe:
             exec:
@@ -135,6 +132,8 @@ spec:
             - mountPath: /opt/bitnami/postgresql/tmp
               name: empty-dir
               subPath: app-tmp-dir
+            - mountPath: /opt/bitnami/postgresql/secrets/
+              name: postgresql-password
             - mountPath: /dev/shm
               name: dshm
             - mountPath: /bitnami/postgresql
@@ -150,6 +149,9 @@ spec:
       volumes:
         - emptyDir: {}
           name: empty-dir
+        - name: postgresql-password
+          secret:
+            secretName: postgresql-password
         - emptyDir:
             medium: Memory
           name: dshm
