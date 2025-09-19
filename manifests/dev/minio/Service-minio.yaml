@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/component: minio
+    app.kubernetes.io/instance: minio
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: minio
+    app.kubernetes.io/part-of: minio
+    app.kubernetes.io/version: 2025.5.24
+    helm.sh/chart: minio-17.0.6
+  name: minio
+  namespace: minio
+spec:
+  ports:
+    - name: tcp-api
+      port: 9000
+      targetPort: api
+  selector:
+    app.kubernetes.io/component: minio
+    app.kubernetes.io/instance: minio
+    app.kubernetes.io/name: minio
+    app.kubernetes.io/part-of: minio
+  type: ClusterIP

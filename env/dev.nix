@@ -89,7 +89,7 @@ in {
 
     # ../modules/cloudbeaver/default.nix
     cloudbeaver = {
-      enable = false;
+      enable = true;
 
       ingress = {
         domain = "cloudbeaver.${tail-domain}";
@@ -247,7 +247,7 @@ in {
 
     # ../modules/minio/default.nix
     minio = {
-      enable = false;
+      enable = true;
 
       ingress = {
         api-domain = "api.minio.${tail-domain}";
@@ -304,7 +304,7 @@ in {
           adminPassword adminUsername replicationPassword userPassword;
       };
 
-      enable = true;
+      enable = false;
       storageClass = "longhorn";
     };
 
