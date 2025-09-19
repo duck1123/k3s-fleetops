@@ -69,7 +69,7 @@ spec:
               value: error
             - name: POSTGRESQL_SHARED_PRELOAD_LIBRARIES
               value: pgaudit
-          image: docker.io/postgresql:17
+          image: docker.io/chainguard/postgres:latest
           imagePullPolicy: IfNotPresent
           livenessProbe:
             exec:

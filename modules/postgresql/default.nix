@@ -57,11 +57,13 @@ in mkArgoApp { inherit config lib; } {
           replicationPasswordKey = "replicationPassword";
         };
       };
+
+      security.allowInsecureImages = true;
     };
 
     image = {
-      repository = "postgresql";
-      tag = "17";
+      repository = "chainguard/postgres";
+      tag = "latest";
     };
   };
 
