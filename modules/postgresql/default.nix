@@ -60,8 +60,8 @@ in mkArgoApp { inherit config lib; } {
     };
 
     image = {
-      repository = "docker.io/bitnamilegacy/postgresql";
-      tag = "17.6.0-debian-12-r4";
+      repository = "postgresql";
+      tag = "17";
     };
   };
 
