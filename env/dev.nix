@@ -263,6 +263,16 @@ in {
     # ../modules/mssql/default.nix
     mssql.enable = false;
 
+    # ../modules/n8n/default.nix
+    n8n = {
+      enable = true;
+
+      ingress = {
+        domain = "n8n.${tail-domain}";
+        ingressClassName = "tailscale";
+      };
+    };
+
     # ../modules/nocodb/default.nix
     nocodb = {
       enable = false;

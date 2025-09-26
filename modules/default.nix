@@ -29,6 +29,7 @@
     ./mindsdb
     ./minio
     ./mssql
+    ./n8n
     ./nocodb
     ./openldap
     ./opentelemetry-collector
