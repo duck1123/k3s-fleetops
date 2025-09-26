@@ -1,0 +1,27 @@
+apiVersion: v1
+data:
+  01-init-userdb.sh: |
+    #!/bin/sh
+    create_user()
+    {
+    psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -v USERDBNAME="$POSTGRES_DB" -v USERDBUSER="$USERDB_USER" -v USERDBPASSWORD="'$USERDB_PASSWORD'" <<-EOSQL
+      CREATE USER :USERDBUSER WITH PASSWORD :USERDBPASSWORD;
+      GRANT ALL PRIVILEGES ON DATABASE :USERDBNAME TO :USERDBUSER;
+      ALTER DATABASE :USERDBNAME OWNER TO :USERDBUSER;
+    EOSQL
+    }
+    set -e
+    if [ ! -z "$POSTGRES_DB" ] && [ ! -z "$USERDB_USER" ] && [ ! -z "$USERDB_PASSWORD" ]; then
+      create_user
+    fi
+  init.sh: "#!/bin/sh\necho \"Start initialization\"\necho \"Copy init-userdb script\"\ncp /initscripts/01-init-userdb.sh /scripts\nif [ -d /extrascripts ]; then\n  echo \"Copy extra scripts\"\n  cp /extrascripts/* /scripts\nfi\nif [ -d /customscripts ]; then\n  echo \"Copy custom scripts\"\n  cp /customscripts/* /scripts\nfi\nif [ -d /customconfig ]; then\n  echo \"Create postgres config\"\n  cat /customconfig/* >>/configs/postgresql.conf\nfi    \nif [ -d /extraconfigs ]; then\n  echo \"Add extra configs to postgres config\"\n  cat /extraconfigs/* >>/configs/postgresql.conf\nfi\necho \"Initialization done.\"\n"
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/instance: postgresql
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/version: "17.6"
+    helm.sh/chart: postgres-1.5.8
+  name: postgresql-scripts
+  namespace: postgresql

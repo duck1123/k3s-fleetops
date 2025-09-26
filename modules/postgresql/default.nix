@@ -4,11 +4,12 @@ let password-secret = "postgresql-password";
 in mkArgoApp { inherit config lib; } {
   name = "postgresql";
 
-  # https://artifacthub.io/packages/helm/bitnami/postgresql
-  chart = lib.helmChart {
-    inherit pkgs;
-    chartTgz = ../../chart-archives/postgresql-16.7.27.tgz;
-    chartName = "postgresql";
+  # https://artifacthub.io/packages/helm/bitnami/redis
+  chart = lib.helm.downloadHelmChart {
+    repo = "https://groundhog2k.github.io/helm-charts/";
+    chart = "postgres";
+    version = "1.5.8";
+    chartHash = "sha256-Ev3NhEPrTWoAfFDlkYw6N88lstU2OOUJ8SEWY10pxxw=";
   };
 
   extraOptions = {
@@ -46,25 +47,12 @@ in mkArgoApp { inherit config lib; } {
   };
 
   defaultValues = cfg: {
-    global = {
-      defaultStorageClass = cfg.storageClass;
-
-      postgresql.auth = {
-        existingSecret = password-secret;
-        secretKeys = {
-          adminPasswordKey = "adminPassword";
-          userPasswordKey = "userPassword";
-          replicationPasswordKey = "replicationPassword";
-        };
-      };
-
-      security.allowInsecureImages = true;
+    settings = {
+      existingSecret = password-secret;
+      superuserPassword.secretKey = "adminPassword";
     };
 
-    image = {
-      repository = "chainguard/postgres";
-      tag = "latest";
-    };
+    storage.className = cfg.storageClass;
   };
 
   extraResources = cfg: {
