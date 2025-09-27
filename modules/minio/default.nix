@@ -35,10 +35,14 @@ in mkArgoApp { inherit config lib; } {
       rootPasswordSecretKey = "root-password";
     };
 
-    console.ingress = with cfg.ingress; {
-      inherit ingressClassName;
+    console = {
       enabled = true;
-      hostname = api-domain;
+
+      ingress = with cfg.ingress; {
+        inherit ingressClassName;
+        enabled = true;
+        hostname = api-domain;
+      };
     };
 
     ingress = with cfg.ingress; {
