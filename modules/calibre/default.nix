@@ -19,6 +19,12 @@ mkArgoApp { inherit config lib; } {
       inherit ingressClassName;
 
       enabled = true;
+
+      image = {
+        repository = "lscr.io/linuxserver/calibre-web";
+        tag = "latest";
+      };
+      
       hosts = [{
         host = domain;
         paths = [{
