@@ -1,6 +1,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  labels:
+    app.kubernetes.io/instance: kavita
+    app.kubernetes.io/name: kavita
+    app.kubernetes.io/version: 0.8.7
   name: kavita
   namespace: kavita
 spec:
@@ -9,6 +13,10 @@ spec:
       app.kubernetes.io/instance: kavita
       app.kubernetes.io/name: kavita
   template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: kavita
+        app.kubernetes.io/name: kavita
     spec:
       automountServiceAccountToken: true
       containers:

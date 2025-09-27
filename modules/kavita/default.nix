@@ -5,67 +5,89 @@ mkArgoApp { inherit config lib; } rec {
   uses-ingress = true;
 
   extraResources = cfg: {
-    deployments.kavita.spec = {
-      selector.matchLabels = {
-        "app.kubernetes.io/instance" = name;
-        "app.kubernetes.io/name" = name;
-      };
-      template.spec = {
-        automountServiceAccountToken = true;
-        serviceAccountName = "default";
-        containers = [{
-          inherit name;
-          image = "linuxserver/kavita:0.8.7";
-          imagePullPolicy = "IfNotPresent";
-          env = [
-            {
-              name = "PGID";
-              value = "1000";
-            }
-            {
-              name = "PUID";
-              value = "1000";
-            }
-            {
-              name = "TZ";
-              value = "Etc/UTC";
-            }
-          ];
+    deployments.kavita = {
+      metadata = {
+        # inherit name;
 
-          livenessProbe = {
-            failureThreshold = 3;
-            initialDelaySeconds = 0;
-            periodSeconds = 10;
-            tcpSocket.port = 5000;
+        labels = {
+          "app.kubernetes.io/instance" = name;
+          "app.kubernetes.io/name" = name;
+          "app.kubernetes.io/version" = "0.8.7";
+        };
+      };
+      spec = {
+        selector.matchLabels = {
+          "app.kubernetes.io/instance" = name;
+          "app.kubernetes.io/name" = name;
+        };
+
+        template = {
+          metadata = {
+            labels = {
+              "app.kubernetes.io/instance" = name;
+              "app.kubernetes.io/name" = name;
+              # "app.kubernetes.io/version" = "0.8.7";
+            };
           };
 
-          ports = [{
-            containerPort = 5000;
-            name = "http";
-            protocol = "TCP";
-          }];
+          spec = {
+            automountServiceAccountToken = true;
+            serviceAccountName = "default";
+            containers = [{
+              inherit name;
+              image = "linuxserver/kavita:0.8.7";
+              imagePullPolicy = "IfNotPresent";
+              env = [
+                {
+                  name = "PGID";
+                  value = "1000";
+                }
+                {
+                  name = "PUID";
+                  value = "1000";
+                }
+                {
+                  name = "TZ";
+                  value = "Etc/UTC";
+                }
+              ];
 
-          volumeMounts = [
-            {
-              mountPath = "/books";
-              name = "books";
-            }
-            {
-              mountPath = "/config";
-              name = "config";
-            }
-          ];
-        }];
-        volumes = [
-          {
-            name = "books";
-            persistentVolumeClaim.claimName = "${name}-${name}-books";
-          }
-          {
-            name = "config";
-            persistentVolumeClaim.claimName = "${name}-${name}-config";
-          }
-        ];
+              livenessProbe = {
+                failureThreshold = 3;
+                initialDelaySeconds = 0;
+                periodSeconds = 10;
+                tcpSocket.port = 5000;
+              };
+
+              ports = [{
+                containerPort = 5000;
+                name = "http";
+                protocol = "TCP";
+              }];
+
+              volumeMounts = [
+                {
+                  mountPath = "/books";
+                  name = "books";
+                }
+                {
+                  mountPath = "/config";
+                  name = "config";
+                }
+              ];
+            }];
+            volumes = [
+              {
+                name = "books";
+                persistentVolumeClaim.claimName = "${name}-${name}-books";
+              }
+              {
+                name = "config";
+                persistentVolumeClaim.claimName = "${name}-${name}-config";
+              }
+            ];
+          };
+        };
       };
     };
 
