@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/instance: calibre
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: calibre-web
+    app.kubernetes.io/version: 0.6.12
+    helm.sh/chart: calibre-web-8.4.2
+  name: calibre-calibre-web
+  namespace: calibre
+spec:
+  ports:
+    - name: http
+      port: 8083
+      protocol: TCP
+      targetPort: http
+  selector:
+    app.kubernetes.io/instance: calibre
+    app.kubernetes.io/name: calibre-web
+  type: ClusterIP

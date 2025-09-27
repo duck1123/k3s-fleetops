@@ -85,6 +85,19 @@ in {
       };
     };
 
+    # ../modules/calibre/default.nix
+    calibre = {
+      enable = true;
+
+      ingress = {
+        domain = "calibre.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+
+      # storageClass = "longhorn";
+    };
+
     cert-manager.enable = true;
 
     # ../modules/cloudbeaver/default.nix

@@ -9,6 +9,7 @@
     ./argo-events
     ./argo-workflows
     ./authentik
+    ./calibre
     ./cert-manager
     ./cloudbeaver
     ./crossplane
