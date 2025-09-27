@@ -22,15 +22,6 @@
 
     make-shell.url = "github:nicknovitski/make-shell";
 
-    mkdocs-flake = {
-      inputs = {
-        flake-parts.follows = "flake-parts";
-        nixpkgs.follows = "nixpkgs";
-        poetry2nix.follows = "poetry2nix";
-      };
-      url = "github:applicative-systems/mkdocs-flake";
-    };
-
     nix-fetcher-data = {
       inputs = {
         flake-parts.follows = "flake-parts";
@@ -81,8 +72,7 @@
     systems.url = "github:nix-systems/default";
   };
 
-  outputs = { flake-parts, make-shell, mkdocs-flake, nixhelm, nixidy, nixpkgs
-    , ... }@inputs:
+  outputs = { flake-parts, make-shell, nixhelm, nixidy, nixpkgs, ... }@inputs:
     let
       # FIXME: naughty config
       ageRecipients =
@@ -107,16 +97,13 @@
         modules = [ ./modules ];
       };
     in flake-parts.lib.mkFlake { inherit inputs; } (_: {
-      imports =
-        [ mkdocs-flake.flakeModules.default make-shell.flakeModules.default ];
+      imports = [ make-shell.flakeModules.default ];
       systems = [ system ];
       perSystem = { pkgs, system, ... }:
         let generators = import ./generators { inherit inputs system pkgs; };
         in {
           imports = [ generators ];
-
           apps = { inherit (generators.apps) generate; };
-          documentation.mkdocs-root = ./.;
 
           make-shells.default = { pkgs, ... }: {
             packages = with pkgs; [
@@ -141,11 +128,11 @@
             ];
           };
 
-          packages = { nixidy = nixidy.packages.${system}.default; };
+          packages.nixidy = nixidy.packages.${system}.default;
         };
-    }) // ({
+    }) // {
       inherit lib;
       # TODO: Make a flake-parts module for this
       nixidyEnvs.${system} = defaultEnv;
-    });
+    };
 }
