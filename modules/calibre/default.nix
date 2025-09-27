@@ -29,5 +29,20 @@ mkArgoApp { inherit config lib; } {
       }];
       tls = [{ hosts = [ domain ]; }];
     };
+
+    persistence = {
+      books = {
+        enabled = true;
+        storageClass = "longhorn";
+        accessMode = "ReadWriteOnce";
+        size = "1Gi";
+      };
+
+      config = {
+        enabled = true;
+        storageClass = "longhorn";
+        accessMode = "ReadWriteOnce";
+      };
+    };
   };
 }
