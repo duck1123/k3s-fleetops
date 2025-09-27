@@ -47,11 +47,12 @@ in {
     # ../modules/specter/default.nix
     specter = {
       enable = true;
-      imageVersion = "v1.10.3";
+
       ingress = {
         domain = "specter.${tail-domain}";
         ingressClassName = "traefik";
       };
+
       namespace = "specter";
     };
 

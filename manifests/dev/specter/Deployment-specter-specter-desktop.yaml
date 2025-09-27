@@ -26,7 +26,7 @@ spec:
       containers:
         - args:
             - --host=0.0.0.0
-          image: lncm/specter-desktop:v1.10.3
+          image: lncm/specter-desktop:v2.1.1
           imagePullPolicy: IfNotPresent
           livenessProbe:
             httpGet:

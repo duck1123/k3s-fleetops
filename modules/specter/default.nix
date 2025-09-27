@@ -14,7 +14,7 @@ mkArgoApp { inherit config lib; } {
 
   extraOptions = {
     imageVersion = mkOption {
-      description = mdDoc "The version of bitcoind do deploy";
+      description = mdDoc "The version of bitcoind to deploy";
       type = types.str;
       default = "v2.1.1";
     };
