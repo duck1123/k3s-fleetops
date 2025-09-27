@@ -263,7 +263,7 @@ in {
       enable = true;
 
       ingress = {
-        api-domain = "api.minio.${tail-domain}";
+        api-domain = "api-minio.${tail-domain}";
         domain = "minio.${tail-domain}";
         clusterIssuer = "tailscale";
         ingressClassName = "tailscale";

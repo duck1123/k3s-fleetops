@@ -14,7 +14,7 @@ metadata:
 spec:
   ingressClassName: tailscale
   rules:
-    - host: api.minio.bearded-snake.ts.net
+    - host: api-minio.bearded-snake.ts.net
       http:
         paths:
           - backend:
