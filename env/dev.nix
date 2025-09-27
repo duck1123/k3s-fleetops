@@ -265,7 +265,7 @@ in {
 
     # ../modules/n8n/default.nix
     n8n = {
-      enable = true;
+      enable = false;
 
       ingress = {
         domain = "n8n.${tail-domain}";
