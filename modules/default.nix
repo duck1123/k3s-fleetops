@@ -4,7 +4,6 @@
     ./airflow
     ./alice-bitcoin
     ./alice-lnd
-    ./alice-specter
     ./argocd
     ./argo-events
     ./argo-workflows
@@ -42,6 +41,7 @@
     ./sealed-secrets
     ./sops
     ./spark
+    ./specter
     ./sqlpad
     ./tailscale
     ./tempo

@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  labels:
+    app.kubernetes.io/instance: specter
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: specter-desktop
+    app.kubernetes.io/version: v0.10.4
+    helm.sh/chart: specter-desktop-0.1.0
+  name: specter-specter-desktop
+  namespace: specter
+spec:
+  rules:
+    - host: specter.bearded-snake.ts.net
+      http:
+        paths:
+          - backend:
+              service:
+                name: specter-specter-desktop
+                port:
+                  number: 25441
+            path: /
+            pathType: ImplementationSpecific
+  tls:
+    - hosts:
+        - specter.bearded-snake.ts.net
+      secretName: specter-prod-tls

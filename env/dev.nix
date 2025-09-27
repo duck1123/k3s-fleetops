@@ -44,14 +44,15 @@ in {
       ingress.domain = "lnd-${user-env}.dinsro.com";
     };
 
-    # ../modules/alice-specter/default.nix
-    alice-specter = let user-env = "alice";
-    in {
-      inherit user-env;
-      enable = false;
+    # ../modules/specter/default.nix
+    specter = {
+      enable = true;
       imageVersion = "v1.10.3";
-      ingress.domain = "specter-${user-env}.dinsro.com";
-      namespace = "${user-env}-specter";
+      ingress = {
+        domain = "specter.${tail-domain}";
+        ingressClassName = "traefik";
+      };
+      namespace = "specter";
     };
 
     # ../modules/argocd/default.nix

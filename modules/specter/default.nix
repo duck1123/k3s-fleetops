@@ -1,7 +1,7 @@
 { charts, config, lib, ... }:
 with lib;
 mkArgoApp { inherit config lib; } {
-  name = "alice-specter";
+  name = "specter";
 
   chart = lib.helm.downloadHelmChart {
     repo = "https://chart.kronkltd.net/";
@@ -28,6 +28,7 @@ mkArgoApp { inherit config lib; } {
   defaultValues = cfg:
     with cfg; {
       image.tag = imageVersion;
+
       ingress = with ingress; {
         enabled = true;
         hosts = [{
@@ -35,25 +36,26 @@ mkArgoApp { inherit config lib; } {
           paths = [{ path = "/"; }];
         }];
         tls = [{
-          secretName = "${user-env}-specter-prod-tls";
+          secretName = "specter-prod-tls";
           hosts = [ domain ];
         }];
       };
+
       persistence.storageClassName = "local-path";
 
-      nodeConfig = (builtins.toJSON {
-        alias = "bar";
+      nodeConfig = builtins.toJSON rec {
+        alias = "default";
         autodetect = false;
         datadir = "";
         external_node = true;
-        fullpath = "/data/.specter/nodes/${user-env}.json";
-        host = "${user-env}-bitcoin";
-        name = user-env;
+        fullpath = "/data/.specter/nodes/${alias}.json";
+        host = "${alias}-bitcoin";
+        name = alias;
         protocol = "http";
         # TODO: generate a better password
         password = "rpcpassword";
         port = 18443;
         user = "rpcuser";
-      });
+      };
     };
 }
