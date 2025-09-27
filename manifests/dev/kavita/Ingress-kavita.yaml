@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kavita
+  namespace: kavita
+spec:
+  ingressClassName: tailscale
+  rules:
+    - host: kavita.bearded-snake.ts.net
+      http:
+        paths:
+          - backend:
+              service:
+                name: kavita
+                port:
+                  name: http
+            path: /
+            pathType: ImplementationSpecific
+  tls:
+    - hosts:
+        - kavita.bearded-snake.ts.net

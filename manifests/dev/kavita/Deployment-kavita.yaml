@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kavita
+  namespace: kavita
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: kavita
+      app.kubernetes.io/name: kavita
+  template:
+    spec:
+      automountServiceAccountToken: true
+      containers:
+        - env:
+            - name: PGID
+              value: "1000"
+            - name: PUID
+              value: "1000"
+            - name: TZ
+              value: Etc/UTC
+          image: linuxserver/kavita:0.8.7
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            tcpSocket:
+              port: 5000
+          name: kavita
+          ports:
+            - containerPort: 5000
+              name: http
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /books
+              name: books
+            - mountPath: /config
+              name: config
+      serviceAccountName: default
+      volumes:
+        - name: books
+          persistentVolumeClaim:
+            claimName: kavita-kavita-books
+        - name: config
+          persistentVolumeClaim:
+            claimName: kavita-kavita-config

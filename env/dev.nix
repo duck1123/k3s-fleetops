@@ -184,6 +184,18 @@ in {
       postgresql = { inherit (secrets.jupyterhub.postgresql) adminPassword; };
     };
 
+    # ../modules/kavita/default.nix
+    kavita = {
+      enable = true;
+
+      ingress = {
+        domain = "kavita.${tail-domain}";
+        clusterIssuer = "tailscale";
+        ingressClassName = "tailscale";
+        tls.enable = true;
+      };
+    };
+
     keycloak = {
       enable = false;
       ingress = {

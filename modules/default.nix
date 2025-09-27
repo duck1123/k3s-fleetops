@@ -18,6 +18,7 @@
     ./forgejo
     ./harbor
     ./homer
+    ./kavita
     ./keycloak
     ./kite
     ./kyverno
