@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: romm-romm-assets-nfs
+spec:
+  accessModes:
+    - ReadWriteMany
+  capacity:
+    storage: 1Ti
+  nfs:
+    path: /volume1/Roms/assets
+    server: 192.168.0.124
+  persistentVolumeReclaimPolicy: Retain

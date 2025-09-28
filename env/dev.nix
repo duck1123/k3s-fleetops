@@ -454,6 +454,38 @@ in {
       password = secrets.redis.password;
     };
 
+    # ../modules/romm/default.nix
+    romm = {
+      enable = true;
+
+      admin = {
+        username = secrets.romm.admin.username;
+        password = secrets.romm.admin.password;
+      };
+
+      database = {
+        host = "mariadb.mariadb";
+        name = "romm";
+        password = secrets.mariadb.password;
+        port = 3306;
+        username = "mariadb";
+      };
+
+      ingress = {
+        domain = "romm.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+
+      nfs = {
+        enable = true;
+        server = "192.168.0.124";
+        libraryPath = "/volume1/Roms";
+        assetsPath = "/volume1/Roms/assets";
+        resourcesPath = "/volume1/Roms/resources";
+      };
+    };
+
     # ../modules/satisfactory/default.nix
     satisfactory.enable = false;
 
