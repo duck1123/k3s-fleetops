@@ -168,6 +168,15 @@ mkArgoApp { inherit config lib; } rec {
         };
       };
 
+      serviceAccounts = {
+        specter = {
+          metadata.labels = {
+            "app.kubernetes.io/instance" = instance-name;
+            "app.kubernetes.io/name" = name;
+          };
+        };
+      };
+
       services = {
         specter = {
           metadata.labels = {
