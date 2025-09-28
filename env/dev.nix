@@ -365,7 +365,7 @@ in {
 
       ingress = {
         domain = "specter.${tail-domain}";
-        ingressClassName = "traefik";
+        ingressClassName = "tailscale";
       };
 
       namespace = "specter";

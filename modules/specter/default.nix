@@ -134,6 +134,8 @@ mkArgoApp { inherit config lib; } rec {
           };
 
           spec = {
+            inherit ingressClassName;
+
             rules = [{
               host = domain;
               http.paths = [{
