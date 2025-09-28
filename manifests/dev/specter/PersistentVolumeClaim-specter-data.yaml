@@ -4,7 +4,7 @@ metadata:
   labels:
     app.kubernetes.io/instance: specter
     app.kubernetes.io/name: specter
-  name: specter
+  name: specter-data
   namespace: specter
 spec:
   accessModes:

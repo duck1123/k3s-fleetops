@@ -154,7 +154,7 @@ mkArgoApp { inherit config lib; } rec {
       };
 
       persistentVolumeClaims = {
-        specter = {
+        specter-data = {
           metadata.labels = {
             "app.kubernetes.io/instance" = instance-name;
             "app.kubernetes.io/name" = name;
