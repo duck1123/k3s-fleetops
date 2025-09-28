@@ -44,18 +44,6 @@ in {
       ingress.domain = "lnd-${user-env}.dinsro.com";
     };
 
-    # ../modules/specter/default.nix
-    specter = {
-      enable = true;
-
-      ingress = {
-        domain = "specter.${tail-domain}";
-        ingressClassName = "traefik";
-      };
-
-      namespace = "specter";
-    };
-
     # ../modules/argocd/default.nix
     argocd.enable = true;
 
@@ -369,6 +357,18 @@ in {
         ingressClassName = "tailscale";
         clusterIssuer = "tailscale";
       };
+    };
+
+    # ../modules/specter/default.nix
+    specter = {
+      enable = true;
+
+      ingress = {
+        domain = "specter.${tail-domain}";
+        ingressClassName = "traefik";
+      };
+
+      namespace = "specter";
     };
 
     tailscale = {

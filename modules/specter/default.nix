@@ -1,15 +1,7 @@
-{ charts, config, lib, ... }:
+{ config, lib, ... }:
 with lib;
-mkArgoApp { inherit config lib; } {
+mkArgoApp { inherit config lib; } rec {
   name = "specter";
-
-  chart = lib.helm.downloadHelmChart {
-    repo = "https://chart.kronkltd.net/";
-    chart = "specter-desktop";
-    version = "0.1.0";
-    chartHash = "sha256-lzGWuSAzOR/n5iBhg25einXA255SwTm0BRB88lUdEoE=";
-  };
-
   uses-ingress = true;
 
   extraOptions = {
@@ -56,6 +48,149 @@ mkArgoApp { inherit config lib; } {
         password = "rpcpassword";
         port = 18443;
         user = "rpcuser";
+      };
+    };
+
+  extraResources = cfg:
+    let instance-name = name;
+    in {
+      deployments = {
+        specter = {
+          metadata.labels = {
+            "app.kubernetes.io/instance" = instance-name;
+            "app.kubernetes.io/name" = name;
+          };
+
+          spec = {
+            replicas = 1;
+
+            selector.matchLabels = {
+              "app.kubernetes.io/instance" = instance-name;
+              "app.kubernetes.io/name" = name;
+            };
+
+            strategy.type = "Recreate";
+
+            template = {
+              metadata.labels = {
+                "app.kubernetes.io/instance" = instance-name;
+                "app.kubernetes.io/name" = name;
+              };
+
+              spec = {
+                containers = [{
+                  args = [ "--host=0.0.0.0" ];
+                  image = "lncm/specter-desktop:${cfg.imageVersion}";
+                  imagePullPolicy = "IfNotPresent";
+                  livenessProbe = {
+                    httpGet = {
+                      path = "/";
+                      port = "http";
+                    };
+                  };
+
+                  name = "specter-desktop";
+
+                  ports = [{
+                    containerPort = 25441;
+                    name = "http";
+                    protocol = "TCP";
+                  }];
+
+                  readinessProbe = {
+                    httpGet = {
+                      path = "/";
+                      port = "http";
+                    };
+                  };
+
+                  securityContext.runAsUser = 1000;
+
+                  volumeMounts = [{
+                    mountPath = "/data";
+                    name = "specter-data";
+                  }];
+                }];
+
+                securityContext.fsGroup = 1000;
+
+                serviceAccountName = "specter";
+
+                volumes = [{
+                  name = "specter-data";
+                  persistentVolumeClaim.claimName = "specter-data";
+                }];
+              };
+            };
+          };
+        };
+      };
+
+      ingresses = with cfg.ingress; {
+        specter = {
+          metadata.labels = {
+            "app.kubernetes.io/instance" = instance-name;
+            "app.kubernetes.io/name" = name;
+          };
+
+          spec = {
+            rules = [{
+              host = domain;
+              http.paths = [{
+                backend.service = {
+                  name = "specter";
+                  port.name = "http";
+                };
+                path = "/";
+                pathType = "ImplementationSpecific";
+              }];
+            }];
+            tls = [{
+              hosts = [ domain ];
+              secretName = "${name}-tls";
+            }];
+          };
+        };
+      };
+
+      persistentVolumeClaims = {
+        specter = {
+          metadata.labels = {
+            "app.kubernetes.io/instance" = instance-name;
+            "app.kubernetes.io/name" = name;
+          };
+
+          spec = {
+            accessModes = [ "ReadWriteOnce" ];
+            resources.requests.storage = "1Gi";
+            storageClassName = "longhorn";
+          };
+        };
+      };
+
+      services = {
+        specter = {
+          metadata.labels = {
+            "app.kubernetes.io/instance" = instance-name;
+            "app.kubernetes.io/name" = name;
+          };
+
+          spec = {
+            ports = [{
+              name = "http";
+              port = 25441;
+              protocol = "TCP";
+              targetPort = "http";
+            }];
+
+            selector = {
+              "app.kubernetes.io/instance" = instance-name;
+              "app.kubernetes.io/name" = name;
+            };
+
+            type = "ClusterIP";
+          };
+        };
       };
     };
 }

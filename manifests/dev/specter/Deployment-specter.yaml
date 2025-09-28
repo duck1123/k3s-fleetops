@@ -3,25 +3,22 @@ kind: Deployment
 metadata:
   labels:
     app.kubernetes.io/instance: specter
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/name: specter-desktop
-    app.kubernetes.io/version: v0.10.4
-    helm.sh/chart: specter-desktop-0.1.0
-  name: specter-specter-desktop
+    app.kubernetes.io/name: specter
+  name: specter
   namespace: specter
 spec:
   replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/instance: specter
-      app.kubernetes.io/name: specter-desktop
+      app.kubernetes.io/name: specter
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
         app.kubernetes.io/instance: specter
-        app.kubernetes.io/name: specter-desktop
+        app.kubernetes.io/name: specter
     spec:
       containers:
         - args:
@@ -31,26 +28,25 @@ spec:
           livenessProbe:
             httpGet:
               path: /
-              port: specter
+              port: http
           name: specter-desktop
           ports:
             - containerPort: 25441
-              name: specter
+              name: http
               protocol: TCP
           readinessProbe:
             httpGet:
               path: /
-              port: specter
-          resources: {}
+              port: http
           securityContext:
             runAsUser: 1000
           volumeMounts:
             - mountPath: /data
-              name: specter
+              name: specter-data
       securityContext:
         fsGroup: 1000
-      serviceAccountName: specter-specter-desktop
+      serviceAccountName: specter
       volumes:
-        - name: specter
+        - name: specter-data
           persistentVolumeClaim:
-            claimName: specter-specter-desktop
+            claimName: specter-data

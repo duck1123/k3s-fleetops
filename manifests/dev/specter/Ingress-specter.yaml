@@ -3,11 +3,8 @@ kind: Ingress
 metadata:
   labels:
     app.kubernetes.io/instance: specter
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/name: specter-desktop
-    app.kubernetes.io/version: v0.10.4
-    helm.sh/chart: specter-desktop-0.1.0
-  name: specter-specter-desktop
+    app.kubernetes.io/name: specter
+  name: specter
   namespace: specter
 spec:
   rules:
@@ -16,12 +13,12 @@ spec:
         paths:
           - backend:
               service:
-                name: specter-specter-desktop
+                name: specter
                 port:
-                  number: 25441
+                  name: http
             path: /
             pathType: ImplementationSpecific
   tls:
     - hosts:
         - specter.bearded-snake.ts.net
-      secretName: specter-prod-tls
+      secretName: specter-tls
