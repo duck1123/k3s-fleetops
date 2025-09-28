@@ -232,7 +232,7 @@ in {
 
     # ../modules/memos/default.nix
     memos = {
-      enable = false;
+      enable = true;
 
       ingress = {
         domain = "memos.${tail-domain}";
