@@ -440,6 +440,12 @@ in {
       password = secrets.redis.password;
     };
 
+    # ../modules/romm/default.nix
+    romm = {
+      enable = true;
+      # password = secrets.redis.password;
+    };
+
     # ../modules/satisfactory/default.nix
     satisfactory.enable = false;
 
