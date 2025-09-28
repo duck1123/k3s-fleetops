@@ -37,6 +37,7 @@
     ./pihole
     ./postgresql
     ./redis
+    ./romm
     ./satisfactory
     ./sealed-secrets
     ./sops
