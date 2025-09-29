@@ -150,7 +150,7 @@ in {
         enable = true;
       };
 
-      enable = false;
+      enable = true;
 
       ingress = {
         domain = "homer.${tail-domain}";
