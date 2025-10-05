@@ -23,6 +23,13 @@ spec:
       port: 3200
       protocol: TCP
       targetPort: 3200
+    - name: jaeger-metrics
+      port: 16687
+      protocol: TCP
+      targetPort: 16687
+    - name: tempo-query-jaeger-ui
+      port: 16686
+      targetPort: 16686
     - name: tempo-jaeger-thrift-http
       port: 14268
       protocol: TCP

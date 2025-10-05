@@ -391,8 +391,8 @@ in {
       enable = true;
       ingress = {
         inherit clusterIssuer;
-        domain = "tempo.${base-domain}";
-        ingressClassName = "traefik";
+        domain = "tempo.${tail-domain}";
+        ingressClassName = "tailscale";
       };
     };
 

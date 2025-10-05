@@ -1,13 +1,6 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-prod
-    ingress.kubernetes.io/force-ssl-redirect: "true"
-    ingress.kubernetes.io/proxy-body-size: "0"
-    ingress.kubernetes.io/ssl-redirect: "true"
-    traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    traefik.ingress.kubernetes.io/router.middlewares: authentik-middlewares-authenkik@kubernetescrd
   labels:
     app.kubernetes.io/instance: tempo
     app.kubernetes.io/managed-by: Helm
@@ -17,8 +10,9 @@ metadata:
   name: tempo
   namespace: tempo
 spec:
+  ingressClassName: tailscale
   rules:
-    - host: tempo.dev.kronkltd.net
+    - host: tempo.bearded-snake.ts.net
       http:
         paths:
           - backend:
@@ -30,5 +24,5 @@ spec:
             pathType: Prefix
   tls:
     - hosts:
-        - tempo.dev.kronkltd.net
+        - tempo.bearded-snake.ts.net
       secretName: tempo-tls
