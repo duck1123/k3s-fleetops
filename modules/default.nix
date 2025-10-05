@@ -15,6 +15,7 @@
     ./demo
     ./dinsro
     ./forgejo
+    ./grafana
     ./harbor
     ./homer
     ./kavita

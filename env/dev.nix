@@ -138,6 +138,17 @@ in {
       storageClass = "longhorn";
     };
 
+    # ../modules/grafana/default.nix
+    grafana = {
+      enable = true;
+
+      ingress = {
+        clusterIssuer = "tailscale";
+        domain = "grafana.${tail-domain}";
+        ingressClassName = "tailscale";
+      };
+    };
+
     harbor-nix = {
       domain = "harbor.${base-domain}";
       enable = false;
