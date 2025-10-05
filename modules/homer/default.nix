@@ -35,7 +35,6 @@ mkArgoApp { inherit config lib; } {
         default = "CHANGEME";
       };
     };
-
   };
 
   defaultValues = cfg: {
@@ -56,7 +55,7 @@ mkArgoApp { inherit config lib; } {
                 name = "Nostrudel";
                 icon = "fab fa-github";
                 url = "https://nostrudel.ninja/";
-                target = "_balnk";
+                target = "_blank";
               }];
             };
           };
