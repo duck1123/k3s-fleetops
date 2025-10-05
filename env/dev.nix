@@ -77,7 +77,7 @@ in {
 
     # ../modules/calibre/default.nix
     calibre = {
-      enable = true;
+      enable = false;
 
       ingress = {
         domain = "calibre.${tail-domain}";
@@ -176,7 +176,7 @@ in {
 
     # ../modules/kavita/default.nix
     kavita = {
-      enable = true;
+      enable = false;
 
       ingress = {
         domain = "kavita.${tail-domain}";
@@ -262,7 +262,7 @@ in {
 
     # ../modules/minio/default.nix
     minio = {
-      enable = true;
+      enable = false;
 
       ingress = {
         api-domain = "api-minio.${tail-domain}";
@@ -361,7 +361,7 @@ in {
 
     # ../modules/specter/default.nix
     specter = {
-      enable = true;
+      enable = false;
 
       ingress = {
         domain = "specter.${tail-domain}";
