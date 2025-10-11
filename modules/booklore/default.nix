@@ -166,11 +166,11 @@ mkArgoApp { inherit config lib; } rec {
                   failureThreshold = 3;
                   initialDelaySeconds = 0;
                   periodSeconds = 10;
-                  tcpSocket.port = 8080;
+                  tcpSocket.port = 6060;
                 };
 
                 ports = [{
-                  containerPort = 8080;
+                  containerPort = 6060;
                   name = "http";
                   protocol = "TCP";
                 }];
@@ -257,7 +257,7 @@ mkArgoApp { inherit config lib; } rec {
       ${name}.spec = {
         ports = [{
           name = "http";
-          port = 8080;
+          port = 6060;
           protocol = "TCP";
           targetPort = "http";
         }];

@@ -47,10 +47,10 @@ spec:
             initialDelaySeconds: 0
             periodSeconds: 10
             tcpSocket:
-              port: 8080
+              port: 6060
           name: booklore
           ports:
-            - containerPort: 8080
+            - containerPort: 6060
               name: http
               protocol: TCP
           volumeMounts:
