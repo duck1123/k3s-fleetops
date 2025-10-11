@@ -282,7 +282,7 @@ in {
       };
     };
 
-    # file://../modules/mariadb/default.nix
+    # ../modules/mariadb/default.nix
     mariadb = {
       auth = {
         inherit (secrets.mariadb) database password rootPassword username;
