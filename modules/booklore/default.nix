@@ -166,7 +166,7 @@ mkArgoApp { inherit config lib; } rec {
                   failureThreshold = 3;
                   initialDelaySeconds = 0;
                   periodSeconds = 10;
-                  tcpSocket.port = 5000;
+                  tcpSocket.port = 8080;
                 };
 
                 ports = [{

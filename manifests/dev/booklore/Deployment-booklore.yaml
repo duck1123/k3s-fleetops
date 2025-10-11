@@ -47,7 +47,7 @@ spec:
             initialDelaySeconds: 0
             periodSeconds: 10
             tcpSocket:
-              port: 5000
+              port: 8080
           name: booklore
           ports:
             - containerPort: 6060
