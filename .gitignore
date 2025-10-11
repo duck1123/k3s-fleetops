@@ -13,3 +13,4 @@ tls.key
 /secrets/secrets.yaml
 /target/secrets/secrets.yaml
 /target/
+/.cursor/
