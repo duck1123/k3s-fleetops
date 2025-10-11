@@ -263,7 +263,7 @@ in {
         inherit (secrets.mariadb) database password rootPassword username;
       };
 
-      enable = false;
+      enable = true;
       storageClass = "longhorn";
     };
 
