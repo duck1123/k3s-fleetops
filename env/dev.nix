@@ -79,9 +79,7 @@ in {
     booklore = {
       enable = true;
 
-      database = {
-        inherit (secrets.booklore.database) password rootPassword;
-      };
+      database = { inherit (secrets.booklore.database) password rootPassword; };
 
       ingress = {
         domain = "booklore.${tail-domain}";
@@ -251,6 +249,16 @@ in {
         ingressClassName = "tailscale";
         tls.enable = true;
       };
+    };
+
+    # ../modules/mariadb/default.nix
+    mariadb = {
+      auth = {
+        inherit (secrets.mariadb) database password rootPassword username;
+      };
+
+      enable = true;
+      storageClass = "longhorn";
     };
 
     marquez = {
