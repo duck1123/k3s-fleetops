@@ -52,7 +52,7 @@ mkArgoApp { inherit config lib; } rec {
     service.port = mkOption {
       description = mdDoc "The service port";
       type = types.int;
-      default = 6060;
+      default = 8080;
     };
 
     storageClassName = mkOption {
