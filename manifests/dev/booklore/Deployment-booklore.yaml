@@ -37,7 +37,7 @@ spec:
                   key: password
                   name: booklore-database-password
             - name: BOOKLORE_PORT
-              value: "8080"
+              value: "6060"
             - name: SWAGGER_ENABLED
               value: "false"
           image: booklore/booklore:latest

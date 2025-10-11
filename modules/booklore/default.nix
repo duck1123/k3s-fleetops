@@ -52,7 +52,7 @@ mkArgoApp { inherit config lib; } rec {
     service.port = mkOption {
       description = mdDoc "The service port";
       type = types.int;
-      default = 8080;
+      default = 6060;
     };
 
     storageClassName = mkOption {
@@ -170,7 +170,7 @@ mkArgoApp { inherit config lib; } rec {
                 };
 
                 ports = [{
-                  containerPort = cfg.service.port;
+                  containerPort = 8080;
                   name = "http";
                   protocol = "TCP";
                 }];
@@ -257,7 +257,7 @@ mkArgoApp { inherit config lib; } rec {
       ${name}.spec = {
         ports = [{
           name = "http";
-          port = cfg.service.port;
+          port = 8080;
           protocol = "TCP";
           targetPort = "http";
         }];
