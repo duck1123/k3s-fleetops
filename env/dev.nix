@@ -77,7 +77,7 @@ in {
 
     # ../modules/booklore/default.nix
     booklore = {
-      enable = true;
+      enable = false;
 
       database = {
         host = "mariadb.mariadb";
@@ -161,7 +161,7 @@ in {
 
     # ../modules/grafana/default.nix
     grafana = {
-      enable = true;
+      enable = false;
 
       ingress = {
         clusterIssuer = "tailscale";
@@ -182,7 +182,7 @@ in {
         enable = true;
       };
 
-      enable = true;
+      enable = false;
 
       ingress = {
         domain = "homer.${tail-domain}";
@@ -263,7 +263,7 @@ in {
         inherit (secrets.mariadb) database password rootPassword username;
       };
 
-      enable = true;
+      enable = false;
       storageClass = "longhorn";
     };
 
