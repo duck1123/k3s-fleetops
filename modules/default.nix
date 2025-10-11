@@ -8,6 +8,7 @@
     ./argo-events
     ./argo-workflows
     ./authentik
+    ./booklore
     ./calibre
     ./cert-manager
     ./cloudbeaver

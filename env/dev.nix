@@ -59,6 +59,7 @@ in {
 
     # ../modules/authentik/default.nix
     authentik = {
+      inherit (secrets.authentik) secret-key;
       enable = false;
 
       ingress = {
@@ -67,12 +68,28 @@ in {
         ingressClassName = "traefik";
       };
 
-      inherit (secrets.authentik) secret-key;
       postgresql = {
         inherit (secrets.authentik.postgresql)
           password postgres-password replicationPassword;
         host = "postgreql.postgreql";
       };
+    };
+
+    # ../modules/booklore/default.nix
+    booklore = {
+      enable = true;
+
+      database = {
+        inherit (secrets.booklore.database) password rootPassword;
+      };
+
+      ingress = {
+        domain = "booklore.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+
+      storageClassName = "longhorn";
     };
 
     # ../modules/calibre/default.nix

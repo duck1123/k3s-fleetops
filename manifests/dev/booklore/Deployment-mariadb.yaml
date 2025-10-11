@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/instance: booklore
+    app.kubernetes.io/name: booklore
+    app.kubernetes.io/version: 0.8.7
+  name: mariadb
+  namespace: booklore
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: booklore
+      app.kubernetes.io/name: booklore
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: booklore
+        app.kubernetes.io/name: booklore
+    spec:
+      automountServiceAccountToken: true
+      containers:
+        - env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: Etc/UTC
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: rootPassword
+                  name: booklore-database-password
+            - name: MYSQL_DATABASE
+              value: booklore
+            - name: MYSQL_USER
+              value: booklore
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: booklore-database-password
+          image: booklore/booklore:latest
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            tcpSocket:
+              port: 3306
+          name: booklore
+          ports:
+            - containerPort: 3306
+              name: http
+              protocol: TCP
+      serviceAccountName: default
