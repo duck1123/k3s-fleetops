@@ -698,7 +698,7 @@ with lib; let
           type = types.either types.int types.str;
         };
         "proxyProtocol" = mkOption {
-          description = "ProxyProtocol defines the PROXY protocol configuration.\nMore info: https://doc.traefik.io/traefik/v3.5/routing/services/#proxy-protocol";
+          description = "ProxyProtocol defines the PROXY protocol configuration.\nMore info: https://doc.traefik.io/traefik/v3.5/routing/services/#proxy-protocol\nDeprecated: ProxyProtocol will not be supported in future APIVersions, please use ServersTransport to configure ProxyProtocol instead.";
           type = types.nullOr (submoduleOf "traefik.io.v1alpha1.IngressRouteTCPSpecRoutesServicesProxyProtocol");
         };
         "serversTransport" = mkOption {
@@ -2618,6 +2618,10 @@ with lib; let
           description = "DialTimeout is the amount of time to wait until a connection to a backend server can be established.";
           type = types.nullOr (types.either types.int types.str);
         };
+        "proxyProtocol" = mkOption {
+          description = "ProxyProtocol holds the PROXY Protocol configuration.";
+          type = types.nullOr (submoduleOf "traefik.io.v1alpha1.ServersTransportTCPSpecProxyProtocol");
+        };
         "terminationDelay" = mkOption {
           description = "TerminationDelay defines the delay to wait before fully terminating the connection, after one connected peer has closed its writing capability.";
           type = types.nullOr (types.either types.int types.str);
@@ -2631,8 +2635,21 @@ with lib; let
       config = {
         "dialKeepAlive" = mkOverride 1002 null;
         "dialTimeout" = mkOverride 1002 null;
+        "proxyProtocol" = mkOverride 1002 null;
         "terminationDelay" = mkOverride 1002 null;
         "tls" = mkOverride 1002 null;
+      };
+    };
+    "traefik.io.v1alpha1.ServersTransportTCPSpecProxyProtocol" = {
+      options = {
+        "version" = mkOption {
+          description = "Version defines the PROXY Protocol version to use.";
+          type = types.nullOr types.int;
+        };
+      };
+
+      config = {
+        "version" = mkOverride 1002 null;
       };
     };
     "traefik.io.v1alpha1.ServersTransportTCPSpecTls" = {
