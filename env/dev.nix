@@ -77,7 +77,7 @@ in {
 
     # ../modules/booklore/default.nix
     booklore = {
-      enable = true;
+      enable = false;
 
       database = {
         host = "mariadb.mariadb";
