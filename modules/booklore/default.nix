@@ -61,6 +61,26 @@ mkArgoApp { inherit config lib; } rec {
       default = "longhorn";
     };
 
+    nfs = {
+      enable = mkOption {
+        description = mdDoc "Enable NFS for books volume";
+        type = types.bool;
+        default = false;
+      };
+
+      server = mkOption {
+        description = mdDoc "NFS server hostname/IP";
+        type = types.str;
+        default = "nasnix";
+      };
+
+      path = mkOption {
+        description = mdDoc "NFS server path";
+        type = types.str;
+        default = "/mnt/books";
+      };
+    };
+
     tz = mkOption {
       description = mdDoc "The timezone";
       type = types.str;
@@ -216,7 +236,12 @@ mkArgoApp { inherit config lib; } rec {
         accessModes = [ "ReadWriteOnce" ];
         resources.requests.storage = "5Gi";
       };
-      "${name}-${name}-books".spec = {
+      "${name}-${name}-books".spec = if cfg.nfs.enable then {
+        accessModes = [ "ReadWriteMany" ];
+        resources.requests.storage = "1Gi";
+        storageClassName = "";
+        volumeName = "${name}-${name}-books-nfs";
+      } else {
         inherit (cfg) storageClassName;
         accessModes = [ "ReadWriteOnce" ];
         resources.requests.storage = "5Gi";
@@ -243,6 +268,28 @@ mkArgoApp { inherit config lib; } rec {
         };
 
         type = "ClusterIP";
+      };
+    };
+
+    # Create NFS PersistentVolume for books when NFS is enabled
+    persistentVolumes = lib.optionalAttrs cfg.nfs.enable {
+      "${name}-${name}-books-nfs" = {
+        apiVersion = "v1";
+        kind = "PersistentVolume";
+        metadata = {
+          name = "${name}-${name}-books-nfs";
+        };
+        spec = {
+          capacity = {
+            storage = "1Ti";
+          };
+          accessModes = [ "ReadWriteMany" ];
+          nfs = {
+            server = cfg.nfs.server;
+            path = cfg.nfs.path;
+          };
+          persistentVolumeReclaimPolicy = "Retain";
+        };
       };
     };
 

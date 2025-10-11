@@ -87,13 +87,22 @@ in {
         username = secrets.mariadb.username;
       };
 
+      gid = "0";
+
       ingress = {
         domain = "booklore.${tail-domain}";
         ingressClassName = "tailscale";
         clusterIssuer = "tailscale";
       };
 
+      nfs = {
+        enable = true;
+        server = "192.168.0.124";
+        path = "/volume1/Books";
+      };
+
       storageClassName = "longhorn";
+      uid = "0";
     };
 
     # ../modules/calibre/default.nix

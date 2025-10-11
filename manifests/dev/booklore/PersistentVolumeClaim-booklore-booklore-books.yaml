@@ -5,8 +5,9 @@ metadata:
   namespace: booklore
 spec:
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   resources:
     requests:
-      storage: 5Gi
-  storageClassName: longhorn
+      storage: 1Gi
+  storageClassName: ""
+  volumeName: booklore-booklore-books-nfs

@@ -22,9 +22,9 @@ spec:
       containers:
         - env:
             - name: USER_ID
-              value: "1000"
+              value: "0"
             - name: GROUP_ID
-              value: "1000"
+              value: "0"
             - name: TZ
               value: Etc/UTC
             - name: DATABASE_URL
