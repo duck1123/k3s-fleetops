@@ -1,10 +1,47 @@
-{ config, lib, ... }:
+{ ageRecipients, config, lib, pkgs, ... }:
 with lib;
 mkArgoApp { inherit config lib; } rec {
   name = "booklore";
   uses-ingress = true;
 
   extraOptions = {
+    database = {
+      host = mkOption {
+        description = mdDoc "The database host";
+        type = types.str;
+        default = "mariadb";
+      };
+
+      name = mkOption {
+        description = mdDoc "The database name";
+        type = types.str;
+        default = "booklore";
+      };
+
+      password = mkOption {
+        description = mdDoc "The database password";
+        type = types.str;
+        default = "CHANGEME";
+      };
+
+      port = mkOption {
+        description = mdDoc "The database port";
+        type = types.int;
+        default = 3306;
+      };
+
+      username = mkOption {
+        description = mdDoc "The database username";
+        type = types.str;
+        default = "booklore";
+      };
+    };
+
+    gid = mkOption {
+      description = mdDoc "The group id";
+      type = types.str;
+      default = "1000";
+    };
 
     image = mkOption {
       description = mdDoc "The docker image";
@@ -12,24 +49,16 @@ mkArgoApp { inherit config lib; } rec {
       default = "booklore/booklore:latest";
     };
 
-    service = {
-      port = mkOption {
-        description = mdDoc "The service port";
-        type = types.int;
-        default = 6060;
-      };
+    service.port = mkOption {
+      description = mdDoc "The service port";
+      type = types.int;
+      default = 6060;
     };
 
     storageClassName = mkOption {
       description = mdDoc "The storage class";
       type = types.str;
       default = "longhorn";
-    };
-
-    gid = mkOption {
-      description = mdDoc "The group id";
-      type = types.str;
-      default = "1000";
     };
 
     tz = mkOption {
@@ -43,7 +72,6 @@ mkArgoApp { inherit config lib; } rec {
       type = types.str;
       default = "1000";
     };
-
   };
 
   extraResources = cfg: {
@@ -89,23 +117,25 @@ mkArgoApp { inherit config lib; } rec {
                   }
                   {
                     name = "DATABASE_URL";
-                    value = "jdbc:mariadb://mariadb:3306/booklore";
+                    value = "jdbc:mariadb://${cfg.database.host}:${
+                        toString cfg.database.port
+                      }/${cfg.database.name}";
                   }
                   {
                     name = "DATABASE_USERNAME";
-                    value = "booklore";
+                    value = cfg.database.username;
                   }
                   {
                     name = "DATABASE_PASSWORD";
                     valueFrom.secretKeyRef = {
-                      name = "mariadb-password";
+                      name = "booklore-database-password";
                       key = "password";
                     };
                   }
-                  # {
-                  #   name = "BOOKLORE_PORT";
-                  #   value = "${cfg.service.port}";
-                  # }
+                  {
+                    name = "BOOKLORE_PORT";
+                    value = "${toString cfg.service.port}";
+                  }
                   {
                     name = "SWAGGER_ENABLED";
                     value = "false";
@@ -158,7 +188,6 @@ mkArgoApp { inherit config lib; } rec {
           };
         };
       };
-
     };
 
     ingresses.${name}.spec = with cfg.ingress; {
@@ -215,8 +244,14 @@ mkArgoApp { inherit config lib; } rec {
 
         type = "ClusterIP";
       };
-
     };
 
+    # Create a secret in booklore namespace that references MariaDB secret
+    sopsSecrets.booklore-database-password = lib.createSecret {
+      inherit ageRecipients lib pkgs;
+      inherit (cfg) namespace;
+      secretName = "booklore-database-password";
+      values.password = cfg.database.password;
+    };
   };
 }

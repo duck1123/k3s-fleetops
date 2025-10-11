@@ -28,14 +28,16 @@ spec:
             - name: TZ
               value: Etc/UTC
             - name: DATABASE_URL
-              value: jdbc:mariadb://mariadb:3306/booklore
+              value: jdbc:mariadb://mariadb.mariadb:3306/booklore
             - name: DATABASE_USERNAME
               value: booklore
             - name: DATABASE_PASSWORD
               valueFrom:
                 secretKeyRef:
                   key: password
-                  name: mariadb-password
+                  name: booklore-database-password
+            - name: BOOKLORE_PORT
+              value: "6060"
             - name: SWAGGER_ENABLED
               value: "false"
           image: booklore/booklore:latest

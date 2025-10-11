@@ -79,6 +79,14 @@ in {
     booklore = {
       enable = true;
 
+      database = {
+        host = "mariadb.mariadb";
+        password = secrets.booklore.database.password;
+        port = 3306;
+        name = secrets.mariadb.database;
+        username = secrets.mariadb.username;
+      };
+
       ingress = {
         domain = "booklore.${tail-domain}";
         ingressClassName = "tailscale";
