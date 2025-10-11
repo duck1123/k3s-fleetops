@@ -35,7 +35,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   key: password
-                  name: booklore-database-password
+                  name: mariadb-password
             - name: SWAGGER_ENABLED
               value: "false"
           image: booklore/booklore:latest

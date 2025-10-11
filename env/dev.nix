@@ -79,8 +79,6 @@ in {
     booklore = {
       enable = true;
 
-      database = { inherit (secrets.booklore.database) password rootPassword; };
-
       ingress = {
         domain = "booklore.${tail-domain}";
         ingressClassName = "tailscale";
