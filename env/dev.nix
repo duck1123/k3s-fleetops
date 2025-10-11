@@ -19,10 +19,10 @@ in {
   };
 
   services = {
-    # file://modules/adventureworks/default.nix
+    # file://../modules/adventureworks/default.nix
     adventureworks.enable = false;
 
-    # file://modules/airflow/default.nix
+    # file://../modules/airflow/default.nix
     airflow = {
       enable = false;
 
@@ -32,10 +32,10 @@ in {
       };
     };
 
-    # file://modules/alice-bitcoin/default.nix
+    # file://../modules/alice-bitcoin/default.nix
     alice-bitcoin.enable = false;
 
-    # file://modules/alice-lnd/default.nix
+    # file://../modules/alice-lnd/default.nix
     alice-lnd = let user-env = "alice";
     in {
       inherit user-env;
@@ -44,10 +44,10 @@ in {
       ingress.domain = "lnd-${user-env}.dinsro.com";
     };
 
-    # file://modules/argocd/default.nix
+    # file://../modules/argocd/default.nix
     argocd.enable = true;
 
-    # file://modules/argo-workflows/default.nix
+    # file://../modules/argo-workflows/default.nix
     argo-workflows = {
       enable = false;
 
@@ -57,7 +57,7 @@ in {
       };
     };
 
-    # file://modules/authentik/default.nix
+    # file://../modules/authentik/default.nix
     authentik = {
       inherit (secrets.authentik) secret-key;
       enable = false;
@@ -75,7 +75,7 @@ in {
       };
     };
 
-    # file://modules/booklore/default.nix
+    # file://../modules/booklore/default.nix
     booklore = {
       enable = true;
 
@@ -105,7 +105,7 @@ in {
       uid = "0";
     };
 
-    # file://modules/calibre/default.nix
+    # file://../modules/calibre/default.nix
     calibre = {
       enable = false;
 
@@ -120,7 +120,7 @@ in {
 
     cert-manager.enable = true;
 
-    # file://modules/cloudbeaver/default.nix
+    # file://../modules/cloudbeaver/default.nix
     cloudbeaver = {
       enable = true;
 
@@ -133,13 +133,13 @@ in {
       storageClass = "longhorn";
     };
 
-    # file://modules/crossplane/default.nix
+    # file://../modules/crossplane/default.nix
     crossplane = {
       enable = false;
       providers.digital-ocean.enable = false;
     };
 
-    # file://modules/dinsro/default.nix
+    # file://../modules/dinsro/default.nix
     dinsro = {
       enable = false;
 
@@ -166,7 +166,7 @@ in {
       };
     };
 
-    # file://modules/forgejo/default.nix
+    # file://../modules/forgejo/default.nix
     forgejo = {
       admin = { inherit (secrets.forgejo.admin) password username; };
       enable = false;
@@ -184,7 +184,7 @@ in {
       storageClass = "longhorn";
     };
 
-    # file://modules/grafana/default.nix
+    # file://../modules/grafana/default.nix
     grafana = {
       enable = false;
 
@@ -200,7 +200,7 @@ in {
       enable = false;
     };
 
-    # file://modules/homer/default.nix
+    # file://../modules/homer/default.nix
     homer = {
       codeserver.ingress = {
         domain = "codeserver.${tail-domain}";
@@ -215,7 +215,7 @@ in {
       };
     };
 
-    # file://modules/jupyterhub/default.nix
+    # file://../modules/jupyterhub/default.nix
     jupyterhub = {
       enable = false;
       inherit (secrets.jupyterhub)
@@ -231,7 +231,7 @@ in {
       postgresql = { inherit (secrets.jupyterhub.postgresql) adminPassword; };
     };
 
-    # file://modules/kavita/default.nix
+    # file://../modules/kavita/default.nix
     kavita = {
       enable = false;
 
@@ -252,7 +252,7 @@ in {
       };
     };
 
-    # file://modules/kite/default.nix
+    # file://../modules/kite/default.nix
     kite = {
       enable = true;
       inherit (secrets.kite) encryptKey jwtSecret;
@@ -265,13 +265,13 @@ in {
       };
     };
 
-    # file://modules/kyverno/default.nix
+    # file://../modules/kyverno/default.nix
     kyverno.enable = false;
 
-    # file://modules/lldap/default.nix
+    # file://../modules/lldap/default.nix
     lldap.enable = false;
 
-    # file://modules/longhorn/default.nix
+    # file://../modules/longhorn/default.nix
     longhorn = {
       enable = true;
 
@@ -282,7 +282,7 @@ in {
       };
     };
 
-    # file://modules/mariadb/default.nix
+    # file://../modules/mariadb/default.nix
     mariadb = {
       auth = {
         inherit (secrets.mariadb) database password rootPassword username;
@@ -297,7 +297,7 @@ in {
       enable = false;
     };
 
-    # file://modules/memos/default.nix
+    # file://../modules/memos/default.nix
     memos = {
       enable = false;
 
@@ -307,7 +307,7 @@ in {
       };
     };
 
-    # file://modules/metabase/default.nix
+    # file://../modules/metabase/default.nix
     metabase = {
       enable = false;
 
@@ -317,7 +317,7 @@ in {
       };
     };
 
-    # file://modules/mindsdb/default.nix
+    # file://../modules/mindsdb/default.nix
     mindsdb = {
       enable = false;
 
@@ -327,7 +327,7 @@ in {
       };
     };
 
-    # file://modules/minio/default.nix
+    # file://../modules/minio/default.nix
     minio = {
       enable = false;
 
@@ -342,10 +342,10 @@ in {
       values.defaultBuckets = "my-default-bucket";
     };
 
-    # file://modules/mssql/default.nix
+    # file://../modules/mssql/default.nix
     mssql.enable = false;
 
-    # file://modules/n8n/default.nix
+    # file://../modules/n8n/default.nix
     n8n = {
       enable = false;
 
@@ -355,7 +355,7 @@ in {
       };
     };
 
-    # file://modules/nocodb/default.nix
+    # file://../modules/nocodb/default.nix
     nocodb = {
       enable = false;
 
@@ -377,7 +377,7 @@ in {
       };
     };
 
-    # file://modules/pihole/default.nix
+    # file://../modules/pihole/default.nix
     pihole = {
       enable = false;
 
@@ -389,7 +389,7 @@ in {
       };
     };
 
-    # file://modules/postgresql/default.nix
+    # file://../modules/postgresql/default.nix
     postgresql = {
       auth = {
         inherit (secrets.postgresql)
@@ -400,22 +400,22 @@ in {
       storageClass = "longhorn";
     };
 
-    # file://modules/redis/default.nix
+    # file://../modules/redis/default.nix
     redis = {
       enable = false;
       password = secrets.redis.password;
     };
 
-    # file://modules/satisfactory/default.nix
+    # file://../modules/satisfactory/default.nix
     satisfactory.enable = false;
 
-    # file://modules/sealed-secrets/default.nix
+    # file://../modules/sealed-secrets/default.nix
     sealed-secrets.enable = true;
 
-    # file://modules/sops/default.nix
+    # file://../modules/sops/default.nix
     sops.enable = true;
 
-    # file://modules/spark/default.nix
+    # file://../modules/spark/default.nix
     spark = {
       enable = false;
 
@@ -426,7 +426,7 @@ in {
       };
     };
 
-    # file://modules/specter/default.nix
+    # file://../modules/specter/default.nix
     specter = {
       enable = false;
 
