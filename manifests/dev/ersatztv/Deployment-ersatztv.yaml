@@ -46,7 +46,7 @@ spec:
               name: http
               protocol: TCP
           readinessProbe:
-            failureThreshold: 3
+            failureThreshold: 30
             httpGet:
               path: /
               port: 8409

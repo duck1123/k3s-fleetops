@@ -131,7 +131,7 @@ mkArgoApp { inherit config lib; } rec {
                 };
 
                 readinessProbe = {
-                  failureThreshold = 3;
+                  failureThreshold = 30;
                   initialDelaySeconds = 60;
                   periodSeconds = 10;
                   httpGet = {
