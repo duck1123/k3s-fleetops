@@ -25,6 +25,10 @@ spec:
               value: Etc/UTC
             - name: ERSATZTV_PORT
               value: "8409"
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Production
+            - name: ASPNETCORE_URLS
+              value: http://0.0.0.0:8409
           image: jasongdove/ersatztv:latest
           imagePullPolicy: IfNotPresent
           livenessProbe:
@@ -44,11 +48,27 @@ spec:
             httpGet:
               path: /
               port: 8409
-            initialDelaySeconds: 10
-            periodSeconds: 5
+            initialDelaySeconds: 60
+            periodSeconds: 10
+          securityContext:
+            runAsGroup: 1000
+            runAsNonRoot: true
+            runAsUser: 1000
           volumeMounts:
             - mountPath: /media
               name: media
+            - mountPath: /app/data
+              name: data
+      initContainers:
+        - args:
+            - -c
+            - chown -R 1000:1000 /app/data && chmod -R 755 /app/data
+          command:
+            - sh
+          image: jasongdove/ersatztv:latest
+          imagePullPolicy: IfNotPresent
+          name: db-init
+          volumeMounts:
             - mountPath: /app/data
               name: data
       serviceAccountName: default

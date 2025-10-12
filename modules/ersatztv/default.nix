@@ -74,10 +74,28 @@ mkArgoApp { inherit config lib; } rec {
             spec = {
               automountServiceAccountToken = true;
               serviceAccountName = "default";
+              initContainers = [{
+                name = "db-init";
+                image = cfg.image;
+                imagePullPolicy = "IfNotPresent";
+                command = ["sh"];
+                args = ["-c" "chown -R 1000:1000 /app/data && chmod -R 755 /app/data"];
+                volumeMounts = [
+                  {
+                    mountPath = "/app/data";
+                    name = "data";
+                  }
+                ];
+              }];
               containers = [{
                 inherit name;
                 image = cfg.image;
                 imagePullPolicy = "IfNotPresent";
+                securityContext = {
+                  runAsUser = 1000;
+                  runAsGroup = 1000;
+                  runAsNonRoot = true;
+                };
                 env = [
                   {
                     name = "TZ";
@@ -86,6 +104,14 @@ mkArgoApp { inherit config lib; } rec {
                   {
                     name = "ERSATZTV_PORT";
                     value = "${toString cfg.service.port}";
+                  }
+                  {
+                    name = "ASPNETCORE_ENVIRONMENT";
+                    value = "Production";
+                  }
+                  {
+                    name = "ASPNETCORE_URLS";
+                    value = "http://0.0.0.0:${toString cfg.service.port}";
                   }
                 ];
 
@@ -101,8 +127,8 @@ mkArgoApp { inherit config lib; } rec {
 
                 readinessProbe = {
                   failureThreshold = 3;
-                  initialDelaySeconds = 10;
-                  periodSeconds = 5;
+                  initialDelaySeconds = 60;
+                  periodSeconds = 10;
                   httpGet = {
                     path = "/";
                     port = cfg.service.port;
