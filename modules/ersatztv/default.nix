@@ -120,25 +120,25 @@ mkArgoApp { inherit config lib; } rec {
                   }
                 ];
 
-                livenessProbe = {
-                  failureThreshold = 3;
-                  initialDelaySeconds = 120;
-                  periodSeconds = 30;
-                  httpGet = {
-                    path = "/";
-                    port = cfg.service.port;
-                  };
-                };
+                # livenessProbe = {
+                #   failureThreshold = 3;
+                #   initialDelaySeconds = 120;
+                #   periodSeconds = 30;
+                #   httpGet = {
+                #     path = "/";
+                #     port = cfg.service.port;
+                #   };
+                # };
 
-                readinessProbe = {
-                  failureThreshold = 30;
-                  initialDelaySeconds = 60;
-                  periodSeconds = 10;
-                  httpGet = {
-                    path = "/";
-                    port = cfg.service.port;
-                  };
-                };
+                # readinessProbe = {
+                #   failureThreshold = 30;
+                #   initialDelaySeconds = 60;
+                #   periodSeconds = 10;
+                #   httpGet = {
+                #     path = "/";
+                #     port = cfg.service.port;
+                #   };
+                # };
 
                 ports = [{
                   containerPort = cfg.service.port;

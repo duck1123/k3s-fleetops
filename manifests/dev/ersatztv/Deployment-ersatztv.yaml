@@ -33,25 +33,11 @@ spec:
               value: Debug
           image: jasongdove/ersatztv:latest
           imagePullPolicy: IfNotPresent
-          livenessProbe:
-            failureThreshold: 3
-            httpGet:
-              path: /
-              port: 8409
-            initialDelaySeconds: 120
-            periodSeconds: 30
           name: ersatztv
           ports:
             - containerPort: 8409
               name: http
               protocol: TCP
-          readinessProbe:
-            failureThreshold: 30
-            httpGet:
-              path: /
-              port: 8409
-            initialDelaySeconds: 60
-            periodSeconds: 10
           volumeMounts:
             - mountPath: /media
               name: media
