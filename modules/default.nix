@@ -15,6 +15,7 @@
     ./crossplane
     ./demo
     ./dinsro
+    ./ersatztv
     ./forgejo
     ./grafana
     ./harbor

@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ersatztv
+  namespace: ersatztv
+spec:
+  ingressClassName: tailscale
+  rules:
+    - host: ersatztv.bearded-snake.ts.net
+      http:
+        paths:
+          - backend:
+              service:
+                name: ersatztv
+                port:
+                  name: http
+            path: /
+            pathType: ImplementationSpecific
+  tls:
+    - hosts:
+        - ersatztv.bearded-snake.ts.net

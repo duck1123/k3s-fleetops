@@ -83,8 +83,8 @@ in {
         host = "mariadb.mariadb";
         password = secrets.booklore.database.password;
         port = 3306;
-        name = secrets.mariadb.database;
-        username = secrets.mariadb.username;
+        name = "booklore";
+        username = "booklore";
       };
 
       gid = "0";
@@ -147,6 +147,21 @@ in {
         clusterIssuer = "tailscale";
         domain = "dinsro.${tail-domain}";
         ingressClassName = "tailscale";
+      };
+    };
+
+    # ../modules/ersatztv/default.nix
+    ersatztv = {
+      enable = true;
+      ingress = {
+        domain = "ersatztv.${tail-domain}";
+        ingressClassName = "tailscale";
+      };
+
+      nfs = {
+        enable = true;
+        server = "192.168.0.124";
+        path = "/volume1/Videos";
       };
     };
 
