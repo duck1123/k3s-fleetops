@@ -29,6 +29,8 @@ spec:
               value: Production
             - name: ASPNETCORE_URLS
               value: http://0.0.0.0:8409
+            - name: Logging__LogLevel__Default
+              value: Debug
           image: jasongdove/ersatztv:latest
           imagePullPolicy: IfNotPresent
           livenessProbe:

@@ -153,6 +153,7 @@ in {
     # ../modules/ersatztv/default.nix
     ersatztv = {
       enable = true;
+      logLevel = "Debug";
       ingress = {
         domain = "ersatztv.${tail-domain}";
         ingressClassName = "tailscale";

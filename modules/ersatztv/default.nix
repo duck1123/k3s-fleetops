@@ -48,6 +48,12 @@ mkArgoApp { inherit config lib; } rec {
       type = types.str;
       default = "Etc/UTC";
     };
+
+    logLevel = mkOption {
+      description = mdDoc "The log level (Debug, Information, Warning, Error)";
+      type = types.str;
+      default = "Information";
+    };
   };
 
   extraResources = cfg: {
@@ -107,6 +113,10 @@ mkArgoApp { inherit config lib; } rec {
                   {
                     name = "ASPNETCORE_URLS";
                     value = "http://0.0.0.0:${toString cfg.service.port}";
+                  }
+                  {
+                    name = "Logging__LogLevel__Default";
+                    value = cfg.logLevel;
                   }
                 ];
 
