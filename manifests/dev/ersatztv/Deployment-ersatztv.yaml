@@ -36,8 +36,8 @@ spec:
             httpGet:
               path: /
               port: 8409
-            initialDelaySeconds: 30
-            periodSeconds: 10
+            initialDelaySeconds: 120
+            periodSeconds: 30
           name: ersatztv
           ports:
             - containerPort: 8409
