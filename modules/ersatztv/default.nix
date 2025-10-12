@@ -79,7 +79,7 @@ mkArgoApp { inherit config lib; } rec {
                 image = cfg.image;
                 imagePullPolicy = "IfNotPresent";
                 command = ["sh"];
-                args = ["-c" "chown -R 1000:1000 /app/data && chmod -R 755 /app/data"];
+                args = ["-c" "chmod -R 755 /app/data"];
                 volumeMounts = [
                   {
                     mountPath = "/app/data";
@@ -91,11 +91,6 @@ mkArgoApp { inherit config lib; } rec {
                 inherit name;
                 image = cfg.image;
                 imagePullPolicy = "IfNotPresent";
-                securityContext = {
-                  runAsUser = 1000;
-                  runAsGroup = 1000;
-                  runAsNonRoot = true;
-                };
                 env = [
                   {
                     name = "TZ";

@@ -50,10 +50,6 @@ spec:
               port: 8409
             initialDelaySeconds: 60
             periodSeconds: 10
-          securityContext:
-            runAsGroup: 1000
-            runAsNonRoot: true
-            runAsUser: 1000
           volumeMounts:
             - mountPath: /media
               name: media
@@ -62,7 +58,7 @@ spec:
       initContainers:
         - args:
             - -c
-            - chown -R 1000:1000 /app/data && chmod -R 755 /app/data
+            - chmod -R 755 /app/data
           command:
             - sh
           image: jasongdove/ersatztv:latest
