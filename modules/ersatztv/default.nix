@@ -227,6 +227,22 @@ mkArgoApp { inherit config lib; } rec {
 
         type = "ClusterIP";
       };
+
+      "${name}-hdhr".spec = {
+        ports = [{
+          name = "hdhr";
+          port = cfg.service.port;
+          protocol = "TCP";
+          targetPort = "http";
+        }];
+
+        selector = {
+          "app.kubernetes.io/instance" = name;
+          "app.kubernetes.io/name" = name;
+        };
+
+        type = "NodePort";
+      };
     };
 
     # Create NFS PersistentVolume for media when NFS is enabled
