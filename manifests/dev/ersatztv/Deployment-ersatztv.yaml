@@ -39,6 +39,8 @@ spec:
               name: http
               protocol: TCP
           volumeMounts:
+            - mountPath: /config
+              name: config
             - mountPath: /media
               name: media
             - mountPath: /app/data
@@ -57,9 +59,12 @@ spec:
               name: data
       serviceAccountName: default
       volumes:
-        - name: media
+        - name: config
           persistentVolumeClaim:
-            claimName: ersatztv-ersatztv-media
+            claimName: ersatztv-ersatztv-config
         - name: data
           persistentVolumeClaim:
             claimName: ersatztv-ersatztv-data
+        - name: media
+          persistentVolumeClaim:
+            claimName: ersatztv-ersatztv-media

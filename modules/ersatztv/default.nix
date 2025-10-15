@@ -148,6 +148,10 @@ mkArgoApp { inherit config lib; } rec {
 
                 volumeMounts = [
                   {
+                    mountPath = "/config";
+                    name = "config";
+                  }
+                  {
                     mountPath = "/media";
                     name = "media";
                   }
@@ -159,12 +163,16 @@ mkArgoApp { inherit config lib; } rec {
               }];
               volumes = [
                 {
-                  name = "media";
-                  persistentVolumeClaim.claimName = "${name}-${name}-media";
+                  name = "config";
+                  persistentVolumeClaim.claimName = "${name}-${name}-config";
                 }
                 {
                   name = "data";
                   persistentVolumeClaim.claimName = "${name}-${name}-data";
+                }
+                {
+                  name = "media";
+                  persistentVolumeClaim.claimName = "${name}-${name}-media";
                 }
               ];
             };
@@ -194,6 +202,16 @@ mkArgoApp { inherit config lib; } rec {
     };
 
     persistentVolumeClaims = {
+      "${name}-${name}-config".spec = {
+        inherit (cfg) storageClassName;
+        accessModes = [ "ReadWriteOnce" ];
+        resources.requests.storage = "5Gi";
+      };
+      "${name}-${name}-data".spec = {
+        inherit (cfg) storageClassName;
+        accessModes = [ "ReadWriteOnce" ];
+        resources.requests.storage = "5Gi";
+      };
       "${name}-${name}-media".spec = if cfg.nfs.enable then {
         accessModes = [ "ReadWriteMany" ];
         resources.requests.storage = "1Gi";
@@ -203,11 +221,6 @@ mkArgoApp { inherit config lib; } rec {
         inherit (cfg) storageClassName;
         accessModes = [ "ReadWriteOnce" ];
         resources.requests.storage = "10Gi";
-      };
-      "${name}-${name}-data".spec = {
-        inherit (cfg) storageClassName;
-        accessModes = [ "ReadWriteOnce" ];
-        resources.requests.storage = "5Gi";
       };
     };
 
