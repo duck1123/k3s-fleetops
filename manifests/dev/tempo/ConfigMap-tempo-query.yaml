@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/instance: tempo
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: tempo
-    app.kubernetes.io/version: 2.8.2
-    helm.sh/chart: tempo-1.23.3
+    app.kubernetes.io/version: 2.9.0
+    helm.sh/chart: tempo-1.24.1
   name: tempo-query
   namespace: tempo
