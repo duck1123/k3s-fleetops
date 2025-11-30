@@ -252,7 +252,7 @@ in {
         password = secrets.immich.database.password;
         port = 5432;
         name = "immich";
-        username = "immich";
+        username = secrets.immich.database.username;
       };
 
       gid = "0";

@@ -109,7 +109,7 @@
             packages = with pkgs; [
               nixidy.packages.${system}.default
               age
-              argo
+              argo-workflows
               argocd
               babashka
               clojure

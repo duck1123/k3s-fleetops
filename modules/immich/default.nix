@@ -145,7 +145,10 @@ mkArgoApp { inherit config lib; } rec {
                   }
                   {
                     name = "DB_USERNAME";
-                    value = cfg.database.username;
+                    valueFrom.secretKeyRef = {
+                      name = "immich-database-password";
+                      key = "username";
+                    };
                   }
                   {
                     name = "DB_PASSWORD";
@@ -331,7 +334,10 @@ mkArgoApp { inherit config lib; } rec {
       inherit ageRecipients lib pkgs;
       inherit (cfg) namespace;
       secretName = "immich-database-password";
-      values.password = cfg.database.password;
+      values = {
+        password = cfg.database.password;
+        username = cfg.database.username;
+      };
     };
   };
 }
