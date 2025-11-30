@@ -39,6 +39,13 @@ in mkArgoApp { inherit config lib; } {
       };
     };
 
+    image = mkOption {
+      description =
+        mdDoc "The PostgreSQL image (should include pgvector for Immich)";
+      type = types.str;
+      default = "pgvector/pgvector:pg17";
+    };
+
     storageClass = mkOption {
       description = mdDoc "The storage class to use for persistence";
       type = types.str;
@@ -46,14 +53,30 @@ in mkArgoApp { inherit config lib; } {
     };
   };
 
-  defaultValues = cfg: {
-    settings = {
-      existingSecret = password-secret;
-      superuserPassword.secretKey = "adminPassword";
-    };
+  defaultValues = cfg:
+    let
+      imageStr = cfg.image;
+      parts = lib.splitString "/" imageStr;
+      hasExplicitRegistry = lib.length parts > 2
+        || (lib.length parts == 2 && lib.hasInfix "." (lib.head parts));
+      registry = if hasExplicitRegistry then lib.head parts else "docker.io";
+      repoAndTag = if hasExplicitRegistry then
+        lib.concatStringsSep "/" (lib.tail parts)
+      else
+        lib.concatStringsSep "/" parts;
+      tagParts = lib.splitString ":" repoAndTag;
+      repository = lib.head tagParts;
+      tag = if lib.length tagParts > 1 then lib.last tagParts else "latest";
+    in {
+      image = { inherit registry repository tag; };
 
-    storage.className = cfg.storageClass;
-  };
+      settings = {
+        existingSecret = password-secret;
+        superuserPassword.secretKey = "adminPassword";
+      };
+
+      storage.className = cfg.storageClass;
+    };
 
   extraResources = cfg: {
     sopsSecrets.${password-secret} = lib.createSecret {
