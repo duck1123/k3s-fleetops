@@ -32,7 +32,10 @@ spec:
             - name: DB_PORT
               value: "5432"
             - name: DB_USERNAME
-              value: immich
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: immich-database-password
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
