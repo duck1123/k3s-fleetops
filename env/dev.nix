@@ -478,7 +478,7 @@ in {
     };
 
     tempo = {
-      enable = true;
+      enable = false;
       ingress = {
         inherit clusterIssuer;
         domain = "tempo.${tail-domain}";
