@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: tailscale
+  labels:
+    app.kubernetes.io/instance: immich
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: machine-learning
+    app.kubernetes.io/version: v2.0.0
+    helm.sh/chart: immich-0.10.3
+  name: immich-machine-learning
+  namespace: immich
+spec:
+  rules:
+    - host: immich.bearded-snake.ts.net
+      http:
+        paths:
+          - backend:
+              service:
+                name: immich-machine-learning
+                port:
+                  number: 3003
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - immich.bearded-snake.ts.net

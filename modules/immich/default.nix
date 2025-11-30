@@ -197,19 +197,26 @@ in mkArgoApp { inherit config lib; } rec {
     };
 
     # Ingress configuration
-    ingress = with cfg.ingress; {
-      enabled = true;
-      className = ingressClassName;
-      hosts = [{
-        host = domain;
-        paths = [{
-          path = "/";
-          pathType = "ImplementationSpecific";
+    ingress = {
+      main = with cfg.ingress; {
+        enabled = true;
+        inherit ingressClassName;
+        annotations = {
+          "cert-manager.io/cluster-issuer" = clusterIssuer;
+        };
+        hosts = [{
+          host = domain;
+          paths = [{
+            path = "/";
+            service = {
+              identifier = "main";
+            };
+          }];
         }];
-      }];
-      tls = [{
-        hosts = [ domain ];
-      }];
+        tls = [{
+          hosts = [ domain ];
+        }];
+      };
     };
   };
 
