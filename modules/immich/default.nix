@@ -55,6 +55,32 @@ mkArgoApp { inherit config lib; } rec {
       };
     };
 
+    redis = {
+      host = mkOption {
+        description = mdDoc "The Redis host";
+        type = types.str;
+        default = "redis";
+      };
+
+      port = mkOption {
+        description = mdDoc "The Redis port";
+        type = types.int;
+        default = 6379;
+      };
+
+      password = mkOption {
+        description = mdDoc "The Redis password";
+        type = types.str;
+        default = "CHANGEME";
+      };
+
+      dbIndex = mkOption {
+        description = mdDoc "The Redis database index";
+        type = types.int;
+        default = 0;
+      };
+    };
+
     nfs = {
       enable = mkOption {
         description = mdDoc "Enable NFS for library volume";
@@ -160,6 +186,25 @@ mkArgoApp { inherit config lib; } rec {
                   {
                     name = "DB_DATABASE_NAME";
                     value = cfg.database.name;
+                  }
+                  {
+                    name = "REDIS_HOSTNAME";
+                    value = cfg.redis.host;
+                  }
+                  {
+                    name = "REDIS_PORT";
+                    value = "${toString cfg.redis.port}";
+                  }
+                  {
+                    name = "REDIS_PASSWORD";
+                    valueFrom.secretKeyRef = {
+                      name = "immich-redis-password";
+                      key = "password";
+                    };
+                  }
+                  {
+                    name = "REDIS_DBINDEX";
+                    value = "${toString cfg.redis.dbIndex}";
                   }
                   {
                     name = "IMMICH_UPLOAD_LOCATION";
@@ -338,6 +383,14 @@ mkArgoApp { inherit config lib; } rec {
         password = cfg.database.password;
         username = cfg.database.username;
       };
+    };
+
+    # Create a secret in immich namespace for Redis password
+    sopsSecrets.immich-redis-password = lib.createSecret {
+      inherit ageRecipients lib pkgs;
+      inherit (cfg) namespace;
+      secretName = "immich-redis-password";
+      values.password = cfg.redis.password;
     };
   };
 }

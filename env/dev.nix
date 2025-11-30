@@ -269,6 +269,13 @@ in {
         path = "/volume1/Photos";
       };
 
+      redis = {
+        host = "redis.redis";
+        password = secrets.redis.password;
+        port = 6379;
+        dbIndex = 0;
+      };
+
       storageClassName = "longhorn";
       uid = "0";
     };
@@ -432,7 +439,7 @@ in {
 
     # ../modules/redis/default.nix
     redis = {
-      enable = false;
+      enable = true;
       password = secrets.redis.password;
     };
 

@@ -43,6 +43,17 @@ spec:
                   name: immich-database-password
             - name: DB_DATABASE_NAME
               value: immich
+            - name: REDIS_HOSTNAME
+              value: redis.redis
+            - name: REDIS_PORT
+              value: "6379"
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: immich-redis-password
+            - name: REDIS_DBINDEX
+              value: "0"
             - name: IMMICH_UPLOAD_LOCATION
               value: /usr/src/app/upload
             - name: IMMICH_LIBRARY_LOCATION
