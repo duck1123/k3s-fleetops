@@ -18,6 +18,12 @@ self.lib.mkArgoApp { inherit config lib; } {
   };
 
   extraOptions = {
+    loginServer = mkOption {
+      description = mdDoc "The Tailscale login server (e.g., headscale server URL). Leave empty to use Tailscale's default coordination server.";
+      type = types.nullOr types.str;
+      default = null;
+    };
+
     oauth = {
       # https://tailscale.com/kb/1185/kubernetes
       authKey = mkOption {
@@ -39,6 +45,15 @@ self.lib.mkArgoApp { inherit config lib; } {
       };
     };
   };
+
+  defaultValues = cfg:
+    lib.optionalAttrs (cfg.loginServer != null) {
+      operator = {
+        env = {
+          OPERATOR_LOGIN_SERVER = cfg.loginServer;
+        };
+      };
+    };
 
   extraResources = cfg: {
     sopsSecrets = {
