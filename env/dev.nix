@@ -245,7 +245,7 @@ in {
 
     # ../modules/immich/default.nix
     immich = {
-      enable = true;
+      enable = false;
 
       database = {
         host = "postgresql.postgresql";
