@@ -243,6 +243,36 @@ in {
       };
     };
 
+    # ../modules/immich/default.nix
+    immich = {
+      enable = true;
+
+      database = {
+        host = "postgresql.postgresql";
+        password = secrets.immich.database.password;
+        port = 5432;
+        name = "immich";
+        username = "immich";
+      };
+
+      gid = "0";
+
+      ingress = {
+        domain = "immich.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+
+      nfs = {
+        enable = true;
+        server = "192.168.0.124";
+        path = "/volume1/Photos";
+      };
+
+      storageClassName = "longhorn";
+      uid = "0";
+    };
+
     keycloak = {
       enable = false;
       ingress = {

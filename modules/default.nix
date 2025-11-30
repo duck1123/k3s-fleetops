@@ -20,6 +20,7 @@
     ./grafana
     ./harbor
     ./homer
+    ./immich
     ./kavita
     ./keycloak
     ./kite
