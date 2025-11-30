@@ -214,6 +214,7 @@ in mkArgoApp { inherit config lib; } rec {
           }];
         }];
         tls = [{
+          secretName = "${name}-tls";
           hosts = [ domain ];
         }];
       };
