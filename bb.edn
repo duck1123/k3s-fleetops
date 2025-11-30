@@ -123,17 +123,12 @@
                                        "--"
                                        "build"
                                        (str ".#nixidyEnvs.x86_64-linux." env ".activationPackage")
-                                       ;; Read environment
                                        "--impure"
-                                       ;; Don't create results directory
                                        "--no-link"
-                                       ;; See all output
                                        "--print-out-paths"
-                                       ;; Show build logs
                                        "-L"]
                                       (when show-trace? ["--show-trace"]))
                cmd-args       args]
-           (println "Running nix build with args:" (str/join " " cmd-args))
            (try
              (let [proc (process {:cmd cmd-args
                                   :out :string
@@ -143,48 +138,28 @@
                    exit-code (:exit result)
                    drv-path (str/trim (:out result))
                    err-output (:err result)]
-               (when (seq err-output)
-                 (binding [*out* *err*]
-                   (println "\n=== Nix build stderr ===")
-                   (println err-output)
-                   (println "=======================\n")))
                (when (not= exit-code 0)
                  (binding [*out* *err*]
-                   (println "\n=== Nix build FAILED ===")
-                   (println "Exit code:" exit-code)
-                   (println "Command:" (str/join " " cmd-args))
+                   (println "\n❌ Nix build failed")
                    (when (seq err-output)
-                     (println "\nError output:")
                      (println err-output))
-                   (when (seq drv-path)
-                     (println "\nUnexpected output:" drv-path))
-                   (println "======================\n"))
+                   (when (empty? err-output)
+                     (println "No error output captured. Run manually to see error:")
+                     (println (str/join " " cmd-args))))
                  (throw (ex-info (str "Nix build failed with exit code " exit-code)
                                  {:exit exit-code :args cmd-args :err err-output})))
                (when (empty? drv-path)
                  (binding [*out* *err*]
-                   (println "\n=== Error: No derivation path returned ===")
-                   (println "Command:" (str/join " " cmd-args))
-                   (when (seq err-output)
-                     (println "\nError output:")
-                     (println err-output))
-                   (println "==============================\n"))
+                   (println "\n❌ No derivation path returned from nix build"))
                  (throw (ex-info "No derivation path returned" {:args cmd-args :err err-output})))
                (let [activation-cmd (str drv-path "/activate")]
-                 (println "Running activation script:" activation-cmd)
                  (shell activation-cmd)))
              (catch Exception e
-               (binding [*out* *err*]
-                 (println "\n=== Exception in switch-charts ===")
-                 (println "Type:" (str (type e)))
-                 (println "Message:" (.getMessage e))
-                 (when-let [data (ex-data e)]
-                   (println "Data:" data))
-                 (when-let [cause (.getCause e)]
-                   (println "Cause:" (.getMessage cause)))
-                 (println "\nStack trace:")
-                 (.printStackTrace e)
-                 (println "==================================\n"))
+               (when-let [data (ex-data e)]
+                 (when-let [err (:err data)]
+                   (when (seq err)
+                     (binding [*out* *err*]
+                       (println err)))))
                (throw e))))}
 
   update-charts
