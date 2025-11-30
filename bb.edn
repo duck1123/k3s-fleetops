@@ -3,6 +3,7 @@
  :tasks
  {:requires
   ([babashka.fs :as fs]
+   [babashka.process :refer [process shell]]
    [clojure.string :as str]
    [k3s-fleetops.core :as c]
    [k3s-fleetops.postgres :as pg])
@@ -112,9 +113,9 @@
            (shell (str script-path "/bin/post-process-manifests")))}
 
   switch-charts
-  {:doc     "Switch nixidy charts"
-   :depends [post-process-manifests]
-   :task (let [show-trace?    (= (System/getenv "SHOW_TRACE") "true")
+  {:doc  "Switch nixidy charts"
+   :task (let [show-trace?    (or (= (System/getenv "SHOW_TRACE") "true")
+                                   (= (System/getenv "VERBOSE") "true"))
                env            "dev"
                args           (concat ["nix"
                                        "run"
@@ -127,17 +128,64 @@
                                        ;; Don't create results directory
                                        "--no-link"
                                        ;; See all output
-                                       "--print-out-paths"]
+                                       "--print-out-paths"
+                                       ;; Show build logs
+                                       "-L"]
                                       (when show-trace? ["--show-trace"]))
-               cmd            (str/join " " args)
-               drv-path       (str/trim (:out (shell {:out :string} cmd)))
-               activation-cmd (str drv-path "/activate")]
-           #_(binding [*out* *err*] (println "path: " activation-cmd))
-           (shell activation-cmd)
-           ;; Run post-processing after nixidy generates manifests
-           (let [post-process-path (str/trim (:out (shell {:out :string} "nix-build --no-link --expr '(import <nixpkgs> {}).callPackage ./lib/postProcessManifests.nix {}'")))
-                 post-process-cmd  (str post-process-path "/bin/post-process-manifests")]
-             (shell post-process-cmd)))}
+               cmd-args       args]
+           (println "Running nix build with args:" (str/join " " cmd-args))
+           (try
+             (let [proc (process {:cmd cmd-args
+                                  :out :string
+                                  :err :string
+                                  :continue true})
+                   result (deref proc)
+                   exit-code (:exit result)
+                   drv-path (str/trim (:out result))
+                   err-output (:err result)]
+               (when (seq err-output)
+                 (binding [*out* *err*]
+                   (println "\n=== Nix build stderr ===")
+                   (println err-output)
+                   (println "=======================\n")))
+               (when (not= exit-code 0)
+                 (binding [*out* *err*]
+                   (println "\n=== Nix build FAILED ===")
+                   (println "Exit code:" exit-code)
+                   (println "Command:" (str/join " " cmd-args))
+                   (when (seq err-output)
+                     (println "\nError output:")
+                     (println err-output))
+                   (when (seq drv-path)
+                     (println "\nUnexpected output:" drv-path))
+                   (println "======================\n"))
+                 (throw (ex-info (str "Nix build failed with exit code " exit-code)
+                                 {:exit exit-code :args cmd-args :err err-output})))
+               (when (empty? drv-path)
+                 (binding [*out* *err*]
+                   (println "\n=== Error: No derivation path returned ===")
+                   (println "Command:" (str/join " " cmd-args))
+                   (when (seq err-output)
+                     (println "\nError output:")
+                     (println err-output))
+                   (println "==============================\n"))
+                 (throw (ex-info "No derivation path returned" {:args cmd-args :err err-output})))
+               (let [activation-cmd (str drv-path "/activate")]
+                 (println "Running activation script:" activation-cmd)
+                 (shell activation-cmd)))
+             (catch Exception e
+               (binding [*out* *err*]
+                 (println "\n=== Exception in switch-charts ===")
+                 (println "Type:" (str (type e)))
+                 (println "Message:" (.getMessage e))
+                 (when-let [data (ex-data e)]
+                   (println "Data:" data))
+                 (when-let [cause (.getCause e)]
+                   (println "Cause:" (.getMessage cause)))
+                 (println "\nStack trace:")
+                 (.printStackTrace e)
+                 (println "==================================\n"))
+               (throw e))))}
 
   update-charts
   {:doc  "Update Helm chart archives from OCI registries"
