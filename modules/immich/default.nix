@@ -1,20 +1,25 @@
 { ageRecipients, config, lib, pkgs, ... }:
 with lib;
-mkArgoApp { inherit config lib; } rec {
+let password-secret = "immich-database-password";
+    redis-secret = "immich-redis-password";
+in mkArgoApp { inherit config lib; } rec {
   name = "immich";
   uses-ingress = true;
 
-  extraOptions = {
-    image = mkOption {
-      description = mdDoc "The docker image";
-      type = types.str;
-      default = "ghcr.io/immich-app/immich-server:release";
-    };
+  # https://github.com/immich-app/immich-charts
+  # Chart is pulled via OCI and stored in chart-archives/
+  # Run: helm pull oci://ghcr.io/immich-app/immich-charts/immich --version 0.10.3
+  chart = lib.helmChart {
+    inherit pkgs;
+    chartTgz = ../../chart-archives/immich-0.10.3.tgz;
+    chartName = "immich";
+  };
 
-    service.port = mkOption {
-      description = mdDoc "The service port";
-      type = types.int;
-      default = 3001;
+  extraOptions = {
+    image.tag = mkOption {
+      description = mdDoc "The docker image tag";
+      type = types.str;
+      default = "release";
     };
 
     storageClassName = mkOption {
@@ -100,258 +105,107 @@ mkArgoApp { inherit config lib; } rec {
         default = "/mnt/photos";
       };
     };
-
-    tz = mkOption {
-      description = mdDoc "The timezone";
-      type = types.str;
-      default = "Etc/UTC";
-    };
-
-    uid = mkOption {
-      description = mdDoc "The user id";
-      type = types.str;
-      default = "1000";
-    };
-
-    gid = mkOption {
-      description = mdDoc "The group id";
-      type = types.str;
-      default = "1000";
-    };
   };
 
-  extraResources = cfg: {
-    deployments = {
-      immich-server = {
-        metadata.labels = {
-          "app.kubernetes.io/instance" = name;
-          "app.kubernetes.io/name" = "${name}-server";
-          "app.kubernetes.io/component" = "server";
+  defaultValues = cfg: {
+    # Disable built-in Redis (Valkey)
+    # Note: postgresql subchart was removed in 0.10.0, must be deployed separately
+    valkey.enabled = false;
+
+    immich = {
+      image.tag = cfg.image.tag;
+
+      # Database configuration
+      env = {
+        DB_HOSTNAME = cfg.database.host;
+        DB_PORT = "${toString cfg.database.port}";
+        DB_USERNAME = {
+          valueFrom = {
+            secretKeyRef = {
+              name = password-secret;
+              key = "username";
+            };
+          };
         };
-
-        spec = {
-          selector.matchLabels = {
-            "app.kubernetes.io/instance" = name;
-            "app.kubernetes.io/name" = "${name}-server";
-          };
-
-          template = {
-            metadata.labels = {
-              "app.kubernetes.io/instance" = name;
-              "app.kubernetes.io/name" = "${name}-server";
-            };
-
-            spec = {
-              automountServiceAccountToken = true;
-              serviceAccountName = "default";
-              containers = [{
-                name = "immich-server";
-                image = cfg.image;
-                imagePullPolicy = "IfNotPresent";
-                env = [
-                  {
-                    name = "USER_ID";
-                    value = cfg.uid;
-                  }
-                  {
-                    name = "GROUP_ID";
-                    value = cfg.gid;
-                  }
-                  {
-                    name = "TZ";
-                    value = cfg.tz;
-                  }
-                  {
-                    name = "DB_HOSTNAME";
-                    value = cfg.database.host;
-                  }
-                  {
-                    name = "DB_PORT";
-                    value = "${toString cfg.database.port}";
-                  }
-                  {
-                    name = "DB_USERNAME";
-                    valueFrom.secretKeyRef = {
-                      name = "immich-database-password";
-                      key = "username";
-                    };
-                  }
-                  {
-                    name = "DB_PASSWORD";
-                    valueFrom.secretKeyRef = {
-                      name = "immich-database-password";
-                      key = "password";
-                    };
-                  }
-                  {
-                    name = "DB_DATABASE_NAME";
-                    value = cfg.database.name;
-                  }
-                  {
-                    name = "REDIS_HOSTNAME";
-                    value = cfg.redis.host;
-                  }
-                  {
-                    name = "REDIS_PORT";
-                    value = "${toString cfg.redis.port}";
-                  }
-                  {
-                    name = "REDIS_PASSWORD";
-                    valueFrom.secretKeyRef = {
-                      name = "immich-redis-password";
-                      key = "password";
-                    };
-                  }
-                  {
-                    name = "REDIS_DBINDEX";
-                    value = "${toString cfg.redis.dbIndex}";
-                  }
-                  {
-                    name = "IMMICH_UPLOAD_LOCATION";
-                    value = "/usr/src/app/upload";
-                  }
-                  {
-                    name = "IMMICH_LIBRARY_LOCATION";
-                    value = "/usr/src/app/library";
-                  }
-                  {
-                    name = "IMMICH_THUMBNAIL_LOCATION";
-                    value = "/usr/src/app/thumbs";
-                  }
-                  {
-                    name = "IMMICH_MACHINE_LEARNING_LOCATION";
-                    value = "/usr/src/app/ml";
-                  }
-                ];
-
-                ports = [{
-                  containerPort = cfg.service.port;
-                  name = "http";
-                  protocol = "TCP";
-                }];
-
-                volumeMounts = [
-                  {
-                    mountPath = "/usr/src/app/library";
-                    name = "library";
-                  }
-                  {
-                    mountPath = "/usr/src/app/upload";
-                    name = "upload";
-                  }
-                  {
-                    mountPath = "/usr/src/app/thumbs";
-                    name = "thumbs";
-                  }
-                  {
-                    mountPath = "/usr/src/app/ml";
-                    name = "ml";
-                  }
-                  {
-                    mountPath = "/usr/src/app/config";
-                    name = "config";
-                  }
-                ];
-              }];
-              volumes = [
-                {
-                  name = "library";
-                  persistentVolumeClaim.claimName = "${name}-${name}-library";
-                }
-                {
-                  name = "upload";
-                  persistentVolumeClaim.claimName = "${name}-${name}-upload";
-                }
-                {
-                  name = "thumbs";
-                  persistentVolumeClaim.claimName = "${name}-${name}-thumbs";
-                }
-                {
-                  name = "ml";
-                  persistentVolumeClaim.claimName = "${name}-${name}-ml";
-                }
-                {
-                  name = "config";
-                  persistentVolumeClaim.claimName = "${name}-${name}-config";
-                }
-              ];
+        DB_PASSWORD = {
+          valueFrom = {
+            secretKeyRef = {
+              name = password-secret;
+              key = "password";
             };
           };
+        };
+        DB_DATABASE_NAME = cfg.database.name;
+
+        # Redis configuration
+        REDIS_HOSTNAME = cfg.redis.host;
+        REDIS_PORT = "${toString cfg.redis.port}";
+        REDIS_PASSWORD = {
+          valueFrom = {
+            secretKeyRef = {
+              name = redis-secret;
+              key = "password";
+            };
+          };
+        };
+        REDIS_DBINDEX = "${toString cfg.redis.dbIndex}";
+      };
+
+      # Persistence configuration
+      persistence = {
+        library = if cfg.nfs.enable then {
+          existingClaim = "${name}-${name}-library";
+        } else {
+          enabled = true;
+          storageClass = cfg.storageClassName;
+          accessMode = "ReadWriteOnce";
+          size = "100Gi";
+        };
+        upload = {
+          enabled = true;
+          storageClass = cfg.storageClassName;
+          accessMode = "ReadWriteOnce";
+          size = "10Gi";
+        };
+        thumbs = {
+          enabled = true;
+          storageClass = cfg.storageClassName;
+          accessMode = "ReadWriteOnce";
+          size = "50Gi";
+        };
+        ml = {
+          enabled = true;
+          storageClass = cfg.storageClassName;
+          accessMode = "ReadWriteOnce";
+          size = "10Gi";
+        };
+        config = {
+          enabled = true;
+          storageClass = cfg.storageClassName;
+          accessMode = "ReadWriteOnce";
+          size = "1Gi";
         };
       };
     };
 
-    ingresses.${name}.spec = with cfg.ingress; {
-      inherit ingressClassName;
-
-      rules = [{
+    # Ingress configuration
+    ingress = with cfg.ingress; {
+      enabled = true;
+      className = ingressClassName;
+      hosts = [{
         host = domain;
-
-        http.paths = [{
-          backend.service = {
-            name = "${name}-server";
-            port.name = "http";
-          };
-
+        paths = [{
           path = "/";
           pathType = "ImplementationSpecific";
         }];
       }];
-
-      tls = [{ hosts = [ domain ]; }];
+      tls = [{
+        hosts = [ domain ];
+      }];
     };
+  };
 
-    persistentVolumeClaims = {
-      "${name}-${name}-library".spec = if cfg.nfs.enable then {
-        accessModes = [ "ReadWriteMany" ];
-        resources.requests.storage = "1Gi";
-        storageClassName = "";
-        volumeName = "${name}-${name}-library-nfs";
-      } else {
-        inherit (cfg) storageClassName;
-        accessModes = [ "ReadWriteOnce" ];
-        resources.requests.storage = "100Gi";
-      };
-      "${name}-${name}-upload".spec = {
-        inherit (cfg) storageClassName;
-        accessModes = [ "ReadWriteOnce" ];
-        resources.requests.storage = "10Gi";
-      };
-      "${name}-${name}-thumbs".spec = {
-        inherit (cfg) storageClassName;
-        accessModes = [ "ReadWriteOnce" ];
-        resources.requests.storage = "50Gi";
-      };
-      "${name}-${name}-ml".spec = {
-        inherit (cfg) storageClassName;
-        accessModes = [ "ReadWriteOnce" ];
-        resources.requests.storage = "10Gi";
-      };
-      "${name}-${name}-config".spec = {
-        inherit (cfg) storageClassName;
-        accessModes = [ "ReadWriteOnce" ];
-        resources.requests.storage = "1Gi";
-      };
-    };
-
-    services = {
-      "${name}-server".spec = {
-        ports = [{
-          name = "http";
-          port = cfg.service.port;
-          protocol = "TCP";
-          targetPort = "http";
-        }];
-
-        selector = {
-          "app.kubernetes.io/instance" = name;
-          "app.kubernetes.io/name" = "${name}-server";
-        };
-
-        type = "ClusterIP";
-      };
-    };
-
+  extraResources = cfg: {
     # Create NFS PersistentVolume for library when NFS is enabled
     persistentVolumes = lib.optionalAttrs cfg.nfs.enable {
       "${name}-${name}-library-nfs" = {
@@ -374,24 +228,32 @@ mkArgoApp { inherit config lib; } rec {
       };
     };
 
-    # Create a secret in immich namespace that references PostgreSQL secret
-    sopsSecrets.immich-database-password = lib.createSecret {
+    # Create PVC for NFS library volume when NFS is enabled
+    persistentVolumeClaims = lib.optionalAttrs cfg.nfs.enable {
+      "${name}-${name}-library".spec = {
+        accessModes = [ "ReadWriteMany" ];
+        resources.requests.storage = "1Gi";
+        storageClassName = "";
+        volumeName = "${name}-${name}-library-nfs";
+      };
+    };
+
+    # Create secrets for database and Redis
+    sopsSecrets.${password-secret} = lib.createSecret {
       inherit ageRecipients lib pkgs;
       inherit (cfg) namespace;
-      secretName = "immich-database-password";
+      secretName = password-secret;
       values = {
         password = cfg.database.password;
         username = cfg.database.username;
       };
     };
 
-    # Create a secret in immich namespace for Redis password
-    sopsSecrets.immich-redis-password = lib.createSecret {
+    sopsSecrets.${redis-secret} = lib.createSecret {
       inherit ageRecipients lib pkgs;
       inherit (cfg) namespace;
-      secretName = "immich-redis-password";
+      secretName = redis-secret;
       values.password = cfg.redis.password;
     };
   };
 }
-

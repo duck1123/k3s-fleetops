@@ -4,20 +4,20 @@ metadata:
   labels:
     app.kubernetes.io/instance: immich
     app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/name: server
-    app.kubernetes.io/service: immich-server
+    app.kubernetes.io/name: machine-learning
+    app.kubernetes.io/service: immich-machine-learning
     app.kubernetes.io/version: v2.0.0
     helm.sh/chart: immich-0.10.3
-  name: immich-server
+  name: immich-machine-learning
   namespace: immich
 spec:
   ports:
     - name: http
-      port: 2283
+      port: 3003
       protocol: TCP
       targetPort: http
   selector:
     app.kubernetes.io/controller: main
     app.kubernetes.io/instance: immich
-    app.kubernetes.io/name: server
+    app.kubernetes.io/name: machine-learning
   type: ClusterIP

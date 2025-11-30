@@ -255,8 +255,6 @@ in {
         username = secrets.immich.database.username;
       };
 
-      gid = "0";
-
       ingress = {
         domain = "immich.${tail-domain}";
         ingressClassName = "tailscale";
@@ -277,7 +275,6 @@ in {
       };
 
       storageClassName = "longhorn";
-      uid = "0";
     };
 
     keycloak = {

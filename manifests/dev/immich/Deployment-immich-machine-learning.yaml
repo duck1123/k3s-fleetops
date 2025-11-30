@@ -5,10 +5,10 @@ metadata:
     app.kubernetes.io/controller: main
     app.kubernetes.io/instance: immich
     app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/name: server
+    app.kubernetes.io/name: machine-learning
     app.kubernetes.io/version: v2.0.0
     helm.sh/chart: immich-0.10.3
-  name: immich-server
+  name: immich-machine-learning
   namespace: immich
 spec:
   replicas: 1
@@ -17,7 +17,7 @@ spec:
     matchLabels:
       app.kubernetes.io/controller: main
       app.kubernetes.io/instance: immich
-      app.kubernetes.io/name: server
+      app.kubernetes.io/name: machine-learning
   strategy:
     type: RollingUpdate
   template:
@@ -25,49 +25,55 @@ spec:
       labels:
         app.kubernetes.io/controller: main
         app.kubernetes.io/instance: immich
-        app.kubernetes.io/name: server
+        app.kubernetes.io/name: machine-learning
     spec:
       automountServiceAccountToken: true
       containers:
         - env:
+            - name: HF_XET_CACHE
+              value: /cache/huggingface-xet
             - name: IMMICH_MACHINE_LEARNING_URL
               value: http://immich-machine-learning:3003
+            - name: MPLCONFIGDIR
+              value: /cache/matplotlib-config
             - name: REDIS_HOSTNAME
               value: immich-valkey
-          image: ghcr.io/immich-app/immich-server:v2.0.0
+            - name: TRANSFORMERS_CACHE
+              value: /cache
+          image: ghcr.io/immich-app/immich-machine-learning:v2.0.0
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3
             httpGet:
-              path: /api/server/ping
+              path: /ping
               port: http
             initialDelaySeconds: 0
             periodSeconds: 10
             timeoutSeconds: 1
           name: main
           ports:
-            - containerPort: 2283
+            - containerPort: 3003
               name: http
               protocol: TCP
           readinessProbe:
             failureThreshold: 3
             httpGet:
-              path: /api/server/ping
+              path: /ping
               port: http
             initialDelaySeconds: 0
             periodSeconds: 10
             timeoutSeconds: 1
           startupProbe:
-            failureThreshold: 30
+            failureThreshold: 60
             httpGet:
-              path: /api/server/ping
+              path: /ping
               port: http
             initialDelaySeconds: 0
             periodSeconds: 10
             timeoutSeconds: 1
           volumeMounts:
-            - mountPath: /data
-              name: data
+            - mountPath: /cache
+              name: cache
       dnsPolicy: ClusterFirst
       enableServiceLinks: false
       hostIPC: false
@@ -75,6 +81,5 @@ spec:
       hostPID: false
       serviceAccountName: default
       volumes:
-        - name: data
-          persistentVolumeClaim:
-            claimName: immich-immich-library
+        - emptyDir: {}
+          name: cache

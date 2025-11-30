@@ -125,6 +125,10 @@
            #_(binding [*out* *err*] (println "path: " activation-cmd))
            (shell activation-cmd))}
 
+  update-charts
+  {:doc  "Update Helm chart archives from OCI registries"
+   :task (shell "sh -c 'cd chart-archives && sh pull-charts.sh'")}
+
   generate-key-file
   {:doc  "Generate random keyfile"
    :task (shell "openssl rand -out keepass.keyx 256")}
