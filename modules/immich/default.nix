@@ -263,5 +263,50 @@ in mkArgoApp { inherit config lib; } rec {
       secretName = redis-secret;
       values.password = cfg.redis.password;
     };
+
+    # Job to enable vector extension in PostgreSQL database
+    # Uses ArgoCD sync hook to run before Immich is deployed
+    jobs = {
+      "${name}-enable-vector-extension" = {
+        metadata = {
+          annotations = {
+            "argocd.argoproj.io/hook" = "PreSync";
+            "argocd.argoproj.io/hook-delete-policy" = "BeforeHookCreation,HookSucceeded";
+          };
+        };
+        spec = {
+          backoffLimit = 3;
+          template = {
+            spec = {
+              restartPolicy = "OnFailure";
+              containers = [{
+                name = "enable-vector-extension";
+                image = "docker.io/postgres:17.6";
+                imagePullPolicy = "IfNotPresent";
+                command = [ "psql" ];
+                args = [
+                  "-h" cfg.database.host
+                  "-p" "${toString cfg.database.port}"
+                  "-U" cfg.database.username
+                  "-d" cfg.database.name
+                  "-c" "CREATE EXTENSION IF NOT EXISTS vector;"
+                ];
+                env = [
+                  {
+                    name = "PGPASSWORD";
+                    valueFrom = {
+                      secretKeyRef = {
+                        name = password-secret;
+                        key = "password";
+                      };
+                    };
+                  }
+                ];
+              }];
+            };
+          };
+        };
+      };
+    };
   };
 }
