@@ -112,44 +112,52 @@ in mkArgoApp { inherit config lib; } rec {
     # Note: postgresql subchart was removed in 0.10.0, must be deployed separately
     valkey.enabled = false;
 
+    # Environment variables for all Immich components
+    controllers = {
+      main = {
+        containers = {
+          main = {
+            env = {
+              DB_HOSTNAME = cfg.database.host;
+              DB_PORT = "${toString cfg.database.port}";
+              DB_USERNAME = {
+                valueFrom = {
+                  secretKeyRef = {
+                    name = password-secret;
+                    key = "username";
+                  };
+                };
+              };
+              DB_PASSWORD = {
+                valueFrom = {
+                  secretKeyRef = {
+                    name = password-secret;
+                    key = "password";
+                  };
+                };
+              };
+              DB_DATABASE_NAME = cfg.database.name;
+
+              # Redis configuration - override default valkey hostname
+              REDIS_HOSTNAME = cfg.redis.host;
+              REDIS_PORT = "${toString cfg.redis.port}";
+              REDIS_PASSWORD = {
+                valueFrom = {
+                  secretKeyRef = {
+                    name = redis-secret;
+                    key = "password";
+                  };
+                };
+              };
+              REDIS_DBINDEX = "${toString cfg.redis.dbIndex}";
+            };
+          };
+        };
+      };
+    };
+
     immich = {
       image.tag = cfg.image.tag;
-
-      # Database configuration
-      env = {
-        DB_HOSTNAME = cfg.database.host;
-        DB_PORT = "${toString cfg.database.port}";
-        DB_USERNAME = {
-          valueFrom = {
-            secretKeyRef = {
-              name = password-secret;
-              key = "username";
-            };
-          };
-        };
-        DB_PASSWORD = {
-          valueFrom = {
-            secretKeyRef = {
-              name = password-secret;
-              key = "password";
-            };
-          };
-        };
-        DB_DATABASE_NAME = cfg.database.name;
-
-        # Redis configuration
-        REDIS_HOSTNAME = cfg.redis.host;
-        REDIS_PORT = "${toString cfg.redis.port}";
-        REDIS_PASSWORD = {
-          valueFrom = {
-            secretKeyRef = {
-              name = redis-secret;
-              key = "password";
-            };
-          };
-        };
-        REDIS_DBINDEX = "${toString cfg.redis.dbIndex}";
-      };
 
       # Persistence configuration
       persistence = {
