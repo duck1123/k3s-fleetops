@@ -196,32 +196,34 @@ in mkArgoApp { inherit config lib; } rec {
       };
     };
 
-    # Ingress configuration
-    ingress = {
-      main = with cfg.ingress; {
-        enabled = true;
-        inherit ingressClassName;
-        annotations = {
-          "cert-manager.io/cluster-issuer" = clusterIssuer;
-        };
-        hosts = [{
-          host = domain;
-          paths = [{
-            path = "/";
-            service = {
-              identifier = "main";
-            };
-          }];
-        }];
-        tls = [{
-          secretName = "${name}-tls";
-          hosts = [ domain ];
-        }];
-      };
-    };
+    ingress.main.enabled = false;
   };
 
   extraResources = cfg: {
+    ingresses.${name} = {
+      metadata.annotations."cert-manager.io/cluster-issuer" = cfg.ingress.clusterIssuer;
+
+      spec = with cfg.ingress; {
+        inherit ingressClassName;
+
+        rules = [{
+          host = domain;
+
+          http.paths = [{
+            backend.service = {
+              name = "${name}-main";
+              port.name = "http";
+            };
+
+            path = "/";
+            pathType = "ImplementationSpecific";
+          }];
+        }];
+
+        tls = [{ hosts = [ domain ]; }];
+      };
+    };
+
     # Create NFS PersistentVolume for library when NFS is enabled
     persistentVolumes = lib.optionalAttrs cfg.nfs.enable {
       "${name}-${name}-library-nfs" = {
