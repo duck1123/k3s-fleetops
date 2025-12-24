@@ -322,7 +322,7 @@ in {
         inherit (secrets.mariadb) database password replicationPassword rootPassword username;
       };
 
-      enable = false;
+      enable = true;
       storageClass = "longhorn";
     };
 

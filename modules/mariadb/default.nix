@@ -1,7 +1,7 @@
 { ageRecipients, config, lib, pkgs, ... }:
 with lib;
 let password-secret = "mariadb-password";
-in mkArgoApp { inherit config lib; } {
+in mkArgoApp { inherit config lib; } rec {
   name = "mariadb";
 
   # https://artifacthub.io/packages/helm/bitnami/mariadb
