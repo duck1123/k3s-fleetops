@@ -319,10 +319,10 @@ in {
     # ../modules/mariadb/default.nix
     mariadb = {
       auth = {
-        inherit (secrets.mariadb) database password rootPassword username;
+        inherit (secrets.mariadb) database password replicationPassword rootPassword username;
       };
 
-      enable = true;
+      enable = false;
       storageClass = "longhorn";
     };
 

@@ -146,4 +146,88 @@
          command     (str "kubectl -n \"" namespace  "\" label secret \"" secret-name  "\" sealedsecrets.bitnami.com/sealed-secrets-key=active")]
      (if dry-run?
        (println command)
-       (shell command)))}}}
+       (shell command)))}
+
+  mariadb-list-backups
+  {:doc "List available MariaDB backups"
+   :task
+   (let [namespace "mariadb"
+         temp-pod  "mariadb-backup-lister"
+         job-yaml  (str "apiVersion: v1
+kind: Pod
+metadata:
+  name: " temp-pod "
+  namespace: " namespace "
+spec:
+  restartPolicy: Never
+  containers:
+  - name: lister
+    image: bitnami/mariadb:latest
+    command: [\"/bin/bash\", \"-c\", \"ls -lh /backups/*.sql.gz 2>/dev/null || echo 'No backups found'\"]
+    volumeMounts:
+    - name: backups
+      mountPath: /backups
+  volumes:
+  - name: backups
+    persistentVolumeClaim:
+      claimName: mariadb-backups")]
+     (shell {:in job-yaml} "kubectl apply -f -")
+     (shell (str "kubectl wait --for=condition=Ready pod/" temp-pod " -n " namespace " --timeout=30s || true"))
+     (shell (str "kubectl logs " temp-pod " -n " namespace))
+     (shell (str "kubectl delete pod " temp-pod " -n " namespace " --ignore-not-found=true")))}
+
+  mariadb-restore
+  {:doc "Restore MariaDB from a backup file. Usage: BACKUP_FILE=filename.sql.gz bb mariadb-restore"
+   :task
+   (let [namespace "mariadb"
+         backup-file (or (System/getenv "BACKUP_FILE")
+                        (do
+                          (println "Available backups:")
+                          (shell (str "bb mariadb-list-backups"))
+                          (print "Enter backup filename (e.g., mariadb-backup-20250101_020000.sql.gz): ")
+                          (flush)
+                          (read-line)))
+         _          (when (or (nil? backup-file) (empty? backup-file))
+                     (println "Error: Backup file is required")
+                     (System/exit 1))
+         job-name   (str "mariadb-restore-" (System/currentTimeMillis))
+         job-yaml   (str "apiVersion: batch/v1
+kind: Job
+metadata:
+  name: " job-name "
+  namespace: " namespace "
+spec:
+  ttlSecondsAfterFinished: 300
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: restore
+        image: bitnami/mariadb:latest
+        command:
+        - /bin/bash
+        - -c
+        - |
+          set -e
+          echo \"Starting restore from: " backup-file "\"
+          echo \"WARNING: This will replace all existing databases!\"
+          gunzip -c /backups/" backup-file " | mysql -h mariadb.mariadb -u root -p\"$MARIADB_ROOT_PASSWORD\"
+          echo \"Restore completed successfully!\"
+        env:
+        - name: MARIADB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mariadb-password
+              key: mariadb-root-password
+        volumeMounts:
+        - name: backups
+          mountPath: /backups
+      volumes:
+      - name: backups
+        persistentVolumeClaim:
+          claimName: mariadb-backups")]
+     (println "Creating restore job...")
+     (shell {:in job-yaml} "kubectl apply -f -")
+     (println "Restore job created: " job-name)
+     (println "Monitor progress with: kubectl logs -n " namespace " -f job/" job-name)
+     (println "Or watch the job: kubectl get job -n " namespace " " job-name " -w"))}}}
