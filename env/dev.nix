@@ -324,6 +324,20 @@ in {
 
       enable = true;
       storageClass = "longhorn";
+
+      extraDatabases = [
+        {
+          name = "booklore";
+          username = "booklore";
+          password = secrets.booklore.database.password;
+        }
+        # romm uses the existing 'mariadb' user, so we only need to create the database
+        {
+          name = "romm";
+          username = "mariadb";
+          password = secrets.mariadb.password;
+        }
+      ];
     };
 
     marquez = {

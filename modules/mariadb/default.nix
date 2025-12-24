@@ -45,6 +45,27 @@ in mkArgoApp { inherit config lib; } rec {
       };
     };
 
+    extraDatabases = mkOption {
+      description = mdDoc "Additional databases to create (list of {name, username, password})";
+      type = types.listOf (types.submodule {
+        options = {
+          name = mkOption {
+            type = types.str;
+            description = mdDoc "Database name";
+          };
+          username = mkOption {
+            type = types.str;
+            description = mdDoc "Database username";
+          };
+          password = mkOption {
+            type = types.str;
+            description = mdDoc "Database password";
+          };
+        };
+      });
+      default = [ ];
+    };
+
     storageClass = mkOption {
       description = mdDoc "The storage class to use for persistence";
       type = types.str;
@@ -87,6 +108,19 @@ in mkArgoApp { inherit config lib; } rec {
     };
 
     primary.persistence.storageClass = cfg.storageClass;
+
+    # Add initdb scripts for extra databases
+    initdbScripts = lib.listToAttrs (map
+      (db: {
+        name = "init-${db.name}.sql";
+        value = ''
+          CREATE DATABASE IF NOT EXISTS `${db.name}`;
+          CREATE USER IF NOT EXISTS '${db.username}'@'%' IDENTIFIED BY '${db.password}';
+          GRANT ALL PRIVILEGES ON `${db.name}`.* TO '${db.username}'@'%';
+          FLUSH PRIVILEGES;
+        '';
+      })
+      cfg.extraDatabases);
   };
 
   extraResources = cfg: {

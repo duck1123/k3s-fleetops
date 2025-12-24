@@ -125,6 +125,8 @@ spec:
           volumeMounts:
             - mountPath: /bitnami/mariadb
               name: data
+            - mountPath: /docker-entrypoint-initdb.d
+              name: custom-init-scripts
             - mountPath: /opt/bitnami/mariadb/conf/my.cnf
               name: config
               subPath: my.cnf
@@ -198,6 +200,9 @@ spec:
         - configMap:
             name: mariadb
           name: config
+        - configMap:
+            name: mariadb-init-scripts
+          name: custom-init-scripts
         - name: mariadb-credentials
           secret:
             items:
