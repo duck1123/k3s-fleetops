@@ -139,6 +139,31 @@ in mkArgoApp { inherit config lib; } rec {
               image = cfg.image;
               imagePullPolicy = "IfNotPresent";
               env = [
+                # Try DB_* format (without DATABASE_ prefix)
+                {
+                  name = "DB_HOST";
+                  value = cfg.database.host;
+                }
+                {
+                  name = "DB_PORT";
+                  value = "${toString cfg.database.port}";
+                }
+                {
+                  name = "DB_NAME";
+                  value = cfg.database.name;
+                }
+                {
+                  name = "DB_USER";
+                  value = cfg.database.username;
+                }
+                {
+                  name = "DB_PASSWD";
+                  valueFrom.secretKeyRef = {
+                    name = password-secret;
+                    key = "password";
+                  };
+                }
+                # Also provide DATABASE_* format as fallback
                 {
                   name = "DATABASE_HOST";
                   value = cfg.database.host;

@@ -20,6 +20,19 @@ spec:
       automountServiceAccountToken: true
       containers:
         - env:
+            - name: DB_HOST
+              value: mariadb.mariadb
+            - name: DB_PORT
+              value: "3306"
+            - name: DB_NAME
+              value: romm
+            - name: DB_USER
+              value: mariadb
+            - name: DB_PASSWD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: romm-database-password
             - name: DATABASE_HOST
               value: mariadb.mariadb
             - name: DATABASE_PORT
