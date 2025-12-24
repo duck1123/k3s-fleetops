@@ -7,8 +7,8 @@ mkArgoApp { inherit config lib; } {
   chart = helm.downloadHelmChart {
     repo = "https://pkgs.tailscale.com/helmcharts";
     chart = "tailscale-operator";
-    version = "1.88.2";
-    chartHash = "sha256-brC01veNdB36YY1OlDXuoM860or0SiP69uJv7BshuGQ=";
+    version = "1.92.4";
+    chartHash = "sha256-uFzbD6qJqgxwAR7v4+t1fd89S7dyugnFWBlpA8MgtHE=";
   };
 
   extraOptions = {
