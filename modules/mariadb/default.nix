@@ -1,8 +1,16 @@
 { ageRecipients, config, lib, pkgs, ... }:
 with lib;
 let password-secret = "mariadb-password";
-in mkArgoApp { inherit config lib; } rec {
+in mkArgoApp { inherit config lib; } {
   name = "mariadb";
+
+  # https://artifacthub.io/packages/helm/bitnami/mariadb
+  chart = lib.helm.downloadHelmChart {
+    repo = "https://charts.bitnami.com/bitnami";
+    chart = "mariadb";
+    version = "24.0.2";
+    chartHash = "sha256-JAoRQaBNPl5feMOBFHsCfrCgc3UoyKAIs+uo+H2IZio=";
+  };
 
   extraOptions = {
     auth = {
@@ -29,6 +37,12 @@ in mkArgoApp { inherit config lib; } rec {
         type = types.str;
         default = "mydb";
       };
+
+      replicationPassword = mkOption {
+        description = mdDoc "The replication password";
+        type = types.str;
+        default = "CHANGEME";
+      };
     };
 
     storageClass = mkOption {
@@ -38,103 +52,27 @@ in mkArgoApp { inherit config lib; } rec {
     };
   };
 
+  defaultValues = cfg: {
+    auth = {
+      existingSecret = password-secret;
+      username = cfg.auth.username;
+      database = cfg.auth.database;
+    };
+
+    primary.persistence.storageClass = cfg.storageClass;
+  };
+
   extraResources = cfg: {
-    deployments.mariadb = {
-      spec = {
-        replicas = 1;
-        selector.matchLabels.app = name;
-        template = {
-          metadata.labels.app = name;
-          spec = {
-            containers = [{
-              name = name;
-              image = "mariadb:11.0";
-              ports = [{ containerPort = 3306; }];
-              env = [
-                {
-                  name = "MYSQL_ROOT_PASSWORD";
-                  valueFrom = {
-                    secretKeyRef = {
-                      name = password-secret;
-                      key = "rootPassword";
-                    };
-                  };
-                }
-                {
-                  name = "MYSQL_USER";
-                  valueFrom = {
-                    secretKeyRef = {
-                      name = password-secret;
-                      key = "username";
-                    };
-                  };
-                }
-                {
-                  name = "MYSQL_PASSWORD";
-                  valueFrom = {
-                    secretKeyRef = {
-                      name = password-secret;
-                      key = "password";
-                    };
-                  };
-                }
-                {
-                  name = "MYSQL_DATABASE";
-                  valueFrom = {
-                    secretKeyRef = {
-                      name = password-secret;
-                      key = "database";
-                    };
-                  };
-                }
-              ];
-              volumeMounts = [{
-                name = "${name}-storage";
-                mountPath = "/var/lib/mysql";
-              }];
-            }];
-            volumes = [{
-              name = "${name}-storage";
-              persistentVolumeClaim.claimName = "${name}-pvc";
-            }];
-          };
-        };
-      };
-    };
-
-    # Persistent Volume Claim
-    persistentVolumeClaims.mariadb-pvc = {
-      apiVersion = "v1";
-      kind = "PersistentVolumeClaim";
-      metadata = {
-        name = "${name}-pvc";
-        namespace = cfg.namespace;
-      };
-      spec = {
-        accessModes = [ "ReadWriteOnce" ];
-        resources = { requests = { storage = "8Gi"; }; };
-        storageClassName = cfg.storageClass;
-      };
-    };
-
-    # Service
-    services.mariadb = {
-      spec = {
-        selector = { app = name; };
-        ports = [{
-          port = 3306;
-          targetPort = 3306;
-        }];
-        type = "ClusterIP";
-      };
-    };
-
     sopsSecrets.${password-secret} = lib.createSecret {
       inherit ageRecipients lib pkgs;
       inherit (cfg) namespace;
       secretName = password-secret;
-      values = with cfg.auth; {
-        inherit rootPassword username password database;
+      values = {
+        "mariadb-root-password" = cfg.auth.rootPassword;
+        "mariadb-password" = cfg.auth.password;
+        "mariadb-replication-password" = cfg.auth.replicationPassword;
+        username = cfg.auth.username;
+        database = cfg.auth.database;
       };
     };
   };
