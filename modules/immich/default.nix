@@ -211,7 +211,7 @@ in mkArgoApp { inherit config lib; } rec {
 
           http.paths = [{
             backend.service = {
-              name = "${name}-main";
+              name = "${name}-server";
               port.name = "http";
             };
 

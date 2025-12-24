@@ -13,7 +13,7 @@ spec:
         paths:
           - backend:
               service:
-                name: immich-main
+                name: immich-server
                 port:
                   name: http
             path: /
