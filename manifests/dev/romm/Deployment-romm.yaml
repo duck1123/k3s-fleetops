@@ -27,6 +27,11 @@ spec:
                 secretKeyRef:
                   key: password
                   name: romm-database-password
+            - name: ROMM_AUTH_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: authSecretKey
+                  name: romm-admin-password
             - name: ROMM_ADMIN_USERNAME
               valueFrom:
                 secretKeyRef:

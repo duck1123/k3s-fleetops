@@ -27,6 +27,12 @@ in mkArgoApp { inherit config lib; } rec {
       };
     };
 
+    authSecretKey = mkOption {
+      description = mdDoc "The authentication secret key (used for sessions)";
+      type = types.str;
+      default = "CHANGEME";
+    };
+
     database = {
       host = mkOption {
         description = mdDoc "The database host";
@@ -142,6 +148,13 @@ in mkArgoApp { inherit config lib; } rec {
                   valueFrom.secretKeyRef = {
                     name = password-secret;
                     key = "password";
+                  };
+                }
+                {
+                  name = "ROMM_AUTH_SECRET_KEY";
+                  valueFrom.secretKeyRef = {
+                    name = admin-secret;
+                    key = "authSecretKey";
                   };
                 }
                 {
@@ -346,7 +359,7 @@ in mkArgoApp { inherit config lib; } rec {
       values.password = cfg.database.password;
     };
 
-    # Create secret for admin credentials
+    # Create secret for admin credentials and auth secret key
     sopsSecrets.${admin-secret} = lib.createSecret {
       inherit ageRecipients lib pkgs;
       inherit (cfg) namespace;
@@ -354,6 +367,7 @@ in mkArgoApp { inherit config lib; } rec {
       values = {
         username = cfg.admin.username;
         password = cfg.admin.password;
+        authSecretKey = cfg.authSecretKey;
       };
     };
   };

@@ -463,6 +463,8 @@ in {
         password = secrets.romm.admin.password;
       };
 
+      authSecretKey = secrets.romm.authSecretKey;
+
       database = {
         host = "mariadb.mariadb";
         name = "romm";
