@@ -20,9 +20,15 @@ spec:
       automountServiceAccountToken: true
       containers:
         - env:
-            - name: DATABASE_URL
-              value: mariadb://mariadb@mariadb.mariadb:3306/romm
-            - name: DATABASE_PASSWORD
+            - name: ROMM_DB_HOST
+              value: mariadb.mariadb
+            - name: ROMM_DB_PORT
+              value: "3306"
+            - name: ROMM_DB_NAME
+              value: romm
+            - name: ROMM_DB_USER
+              value: mariadb
+            - name: ROMM_DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   key: password
@@ -52,6 +58,8 @@ spec:
           volumeMounts:
             - mountPath: /app/data
               name: data
+            - mountPath: /app/config
+              name: config
             - mountPath: /roms
               name: library
             - mountPath: /app/assets
@@ -63,6 +71,9 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: romm-romm-data
+        - name: config
+          persistentVolumeClaim:
+            claimName: romm-romm-config
         - name: library
           persistentVolumeClaim:
             claimName: romm-library

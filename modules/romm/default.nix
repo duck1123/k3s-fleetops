@@ -140,11 +140,23 @@ in mkArgoApp { inherit config lib; } rec {
               imagePullPolicy = "IfNotPresent";
               env = [
                 {
-                  name = "DATABASE_URL";
-                  value = "mariadb://${cfg.database.username}@${cfg.database.host}:${toString cfg.database.port}/${cfg.database.name}";
+                  name = "ROMM_DB_HOST";
+                  value = cfg.database.host;
                 }
                 {
-                  name = "DATABASE_PASSWORD";
+                  name = "ROMM_DB_PORT";
+                  value = "${toString cfg.database.port}";
+                }
+                {
+                  name = "ROMM_DB_NAME";
+                  value = cfg.database.name;
+                }
+                {
+                  name = "ROMM_DB_USER";
+                  value = cfg.database.username;
+                }
+                {
+                  name = "ROMM_DB_PASSWORD";
                   valueFrom.secretKeyRef = {
                     name = password-secret;
                     key = "password";
@@ -185,6 +197,10 @@ in mkArgoApp { inherit config lib; } rec {
                   name = "data";
                 }
                 {
+                  mountPath = "/app/config";
+                  name = "config";
+                }
+                {
                   mountPath = "/roms";
                   name = "library";
                 }
@@ -202,6 +218,10 @@ in mkArgoApp { inherit config lib; } rec {
               {
                 name = "data";
                 persistentVolumeClaim.claimName = "${name}-${name}-data";
+              }
+              {
+                name = "config";
+                persistentVolumeClaim.claimName = "${name}-${name}-config";
               }
               {
                 name = "library";
@@ -259,6 +279,11 @@ in mkArgoApp { inherit config lib; } rec {
       "${name}-${name}-data".spec = {
         accessModes = [ "ReadWriteOnce" ];
         resources.requests.storage = "5Gi";
+        storageClassName = cfg.storageClassName;
+      };
+      "${name}-${name}-config".spec = {
+        accessModes = [ "ReadWriteOnce" ];
+        resources.requests.storage = "1Gi";
         storageClassName = cfg.storageClassName;
       };
       "${name}-library".spec = if cfg.nfs.enable then {
