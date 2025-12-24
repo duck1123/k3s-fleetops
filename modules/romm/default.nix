@@ -140,23 +140,23 @@ in mkArgoApp { inherit config lib; } rec {
               imagePullPolicy = "IfNotPresent";
               env = [
                 {
-                  name = "ROMM_DB_HOST";
+                  name = "DATABASE_HOST";
                   value = cfg.database.host;
                 }
                 {
-                  name = "ROMM_DB_PORT";
+                  name = "DATABASE_PORT";
                   value = "${toString cfg.database.port}";
                 }
                 {
-                  name = "ROMM_DB_NAME";
+                  name = "DATABASE_NAME";
                   value = cfg.database.name;
                 }
                 {
-                  name = "ROMM_DB_USER";
+                  name = "DATABASE_USER";
                   value = cfg.database.username;
                 }
                 {
-                  name = "ROMM_DB_PASSWORD";
+                  name = "DATABASE_PASSWORD";
                   valueFrom.secretKeyRef = {
                     name = password-secret;
                     key = "password";
@@ -182,6 +182,10 @@ in mkArgoApp { inherit config lib; } rec {
                     name = admin-secret;
                     key = "password";
                   };
+                }
+                {
+                  name = "ROMM_CONFIG_PATH";
+                  value = "/app/config/config.toml";
                 }
               ];
 
