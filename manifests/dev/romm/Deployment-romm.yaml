@@ -66,15 +66,17 @@ spec:
             - name: HOST
               value: 0.0.0.0
             - name: PORT
-              value: "5000"
+              value: "8080"
             - name: ROMM_HOST
               value: 0.0.0.0
             - name: ROMM_PORT
-              value: "5000"
+              value: "8080"
             - name: NGINX_PORT
               value: "8080"
             - name: GUNICORN_PORT
               value: "5000"
+            - name: GUNICORN_HOST
+              value: 127.0.0.1
           image: ghcr.io/rommapp/romm:latest
           imagePullPolicy: IfNotPresent
           name: romm

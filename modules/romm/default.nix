@@ -212,15 +212,17 @@ in mkArgoApp { inherit config lib; } rec {
                   name = "ROMM_CONFIG_PATH";
                   value = "/app/config/config.toml";
                 }
-                # Nginx bind configuration - use 0.0.0.0 to listen on all interfaces
-                # Romm may auto-detect service IP, so we explicitly set the bind address
+                # Nginx bind configuration
+                # Nginx should listen on 8080, gunicorn runs on 5000
+                # Based on Dockerfile: EXPOSE 8080 6379/tcp
+                # The nginx template likely uses PORT for the listen directive
                 {
                   name = "HOST";
                   value = "0.0.0.0";
                 }
                 {
                   name = "PORT";
-                  value = "${toString cfg.service.port}";
+                  value = "8080";
                 }
                 {
                   name = "ROMM_HOST";
@@ -228,10 +230,8 @@ in mkArgoApp { inherit config lib; } rec {
                 }
                 {
                   name = "ROMM_PORT";
-                  value = "${toString cfg.service.port}";
+                  value = "8080";
                 }
-                # Nginx should listen on 8080, application runs on 5000
-                # Based on Dockerfile: EXPOSE 8080 6379/tcp
                 {
                   name = "NGINX_PORT";
                   value = "8080";
@@ -239,6 +239,10 @@ in mkArgoApp { inherit config lib; } rec {
                 {
                   name = "GUNICORN_PORT";
                   value = "${toString cfg.service.port}";
+                }
+                {
+                  name = "GUNICORN_HOST";
+                  value = "127.0.0.1";
                 }
                 # Valkey/Redis configuration - romm uses internal valkey by default
                 # If you want to use external Redis, uncomment and configure:
