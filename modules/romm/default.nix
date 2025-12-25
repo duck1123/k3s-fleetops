@@ -230,13 +230,40 @@ in mkArgoApp { inherit config lib; } rec {
                   name = "ROMM_PORT";
                   value = "${toString cfg.service.port}";
                 }
+                # Nginx should listen on 8080, application runs on 5000
+                # Based on Dockerfile: EXPOSE 8080 6379/tcp
+                {
+                  name = "NGINX_PORT";
+                  value = "8080";
+                }
+                {
+                  name = "GUNICORN_PORT";
+                  value = "${toString cfg.service.port}";
+                }
+                # Valkey/Redis configuration - romm uses internal valkey by default
+                # If you want to use external Redis, uncomment and configure:
+                # {
+                #   name = "REDIS_HOST";
+                #   value = "redis.redis";
+                # }
+                # {
+                #   name = "REDIS_PORT";
+                #   value = "6379";
+                # }
               ];
 
-              ports = [{
-                containerPort = cfg.service.port;
-                name = "http";
-                protocol = "TCP";
-              }];
+              ports = [
+                {
+                  containerPort = 8080;
+                  name = "http";
+                  protocol = "TCP";
+                }
+                {
+                  containerPort = 6379;
+                  name = "redis";
+                  protocol = "TCP";
+                }
+              ];
 
               volumeMounts = [
                 {
@@ -289,12 +316,20 @@ in mkArgoApp { inherit config lib; } rec {
     };
 
     services.${name}.spec = {
-      ports = [{
-        name = "http";
-        port = cfg.service.port;
-        protocol = "TCP";
-        targetPort = "http";
-      }];
+      ports = [
+        {
+          name = "http";
+          port = 8080;
+          protocol = "TCP";
+          targetPort = "http";
+        }
+        {
+          name = "redis";
+          port = 6379;
+          protocol = "TCP";
+          targetPort = "redis";
+        }
+      ];
 
       selector = {
         "app.kubernetes.io/instance" = name;

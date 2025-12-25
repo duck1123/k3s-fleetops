@@ -6,9 +6,13 @@ metadata:
 spec:
   ports:
     - name: http
-      port: 5000
+      port: 8080
       protocol: TCP
       targetPort: http
+    - name: redis
+      port: 6379
+      protocol: TCP
+      targetPort: redis
   selector:
     app.kubernetes.io/instance: romm
     app.kubernetes.io/name: romm

@@ -71,12 +71,19 @@ spec:
               value: 0.0.0.0
             - name: ROMM_PORT
               value: "5000"
+            - name: NGINX_PORT
+              value: "8080"
+            - name: GUNICORN_PORT
+              value: "5000"
           image: ghcr.io/rommapp/romm:latest
           imagePullPolicy: IfNotPresent
           name: romm
           ports:
-            - containerPort: 5000
+            - containerPort: 8080
               name: http
+              protocol: TCP
+            - containerPort: 6379
+              name: redis
               protocol: TCP
           volumeMounts:
             - mountPath: /app/data
