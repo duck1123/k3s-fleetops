@@ -24,6 +24,7 @@
     ./kavita
     ./keycloak
     ./kite
+    ./lidarr
     ./kyverno
     ./jupyterhub
     ./lldap
@@ -41,9 +42,11 @@
     ./opentelemetry-collector
     ./pihole
     ./postgresql
+    ./radarr
     ./redis
     ./romm
     ./satisfactory
+    ./sonarr
     ./sealed-secrets
     ./sops
     ./spark
@@ -52,5 +55,6 @@
     ./tailscale
     ./tempo
     ./traefik
+    ./whisparr
   ];
 }

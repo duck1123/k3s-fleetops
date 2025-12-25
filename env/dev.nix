@@ -3,6 +3,8 @@ let
   base-domain = "dev.kronkltd.net";
   tail-domain = "bearded-snake.ts.net";
   clusterIssuer = "letsencrypt-prod";
+  nas-host = "192.168.0.124";
+  nas-base = "/volume1";
 in {
   nixidy = {
     defaults.syncPolicy.autoSync = {
@@ -97,8 +99,8 @@ in {
 
       nfs = {
         enable = true;
-        server = "192.168.0.124";
-        path = "/volume1/Books";
+        server = nas-host;
+        path = "${nas-base}/Books";
       };
 
       storageClassName = "longhorn";
@@ -161,8 +163,8 @@ in {
 
       nfs = {
         enable = true;
-        server = "192.168.0.124";
-        path = "/volume1/Videos";
+        server = nas-host;
+        path = "${nas-base}/Videos";
       };
     };
 
@@ -243,6 +245,106 @@ in {
       };
     };
 
+    # ../modules/lidarr/default.nix
+    lidarr = {
+      enable = true;
+
+      ingress = {
+        domain = "lidarr.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+
+      vpn = {
+        enable = true;
+        mullvadAccountNumber = secrets.mullvad.id;
+        serverLocation = ""; # Optional: specific server location (e.g., "us-was", "se-sto")
+      };
+
+      nfs = {
+        enable = true;
+        server = nas-host;
+        path = "${nas-base}/arr";
+      };
+
+      storageClassName = "longhorn";
+    };
+
+    # ../modules/radarr/default.nix
+    radarr = {
+      enable = true;
+
+      ingress = {
+        domain = "radarr.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+
+      vpn = {
+        enable = true;
+        mullvadAccountNumber = secrets.mullvad.id;
+        serverLocation = ""; # Optional: specific server location (e.g., "us-was", "se-sto")
+      };
+
+      nfs = {
+        enable = true;
+        server = nas-host;
+        path = "${nas-base}/arr";
+      };
+
+      storageClassName = "longhorn";
+    };
+
+    # ../modules/sonarr/default.nix
+    sonarr = {
+      enable = true;
+
+      ingress = {
+        domain = "sonarr.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+
+      vpn = {
+        enable = true;
+        mullvadAccountNumber = secrets.mullvad.id;
+        serverLocation = ""; # Optional: specific server location (e.g., "us-was", "se-sto")
+      };
+
+      nfs = {
+        enable = true;
+        server = nas-host;
+        path = "${nas-base}/arr";
+      };
+
+      storageClassName = "longhorn";
+    };
+
+    # ../modules/whisparr/default.nix
+    whisparr = {
+      enable = true;
+
+      ingress = {
+        domain = "whisparr.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+
+      vpn = {
+        enable = true;
+        mullvadAccountNumber = secrets.mullvad.id;
+        serverLocation = ""; # Optional: specific server location (e.g., "us-was", "se-sto")
+      };
+
+      nfs = {
+        enable = true;
+        server = nas-host;
+        path = "${nas-base}/arr";
+      };
+
+      storageClassName = "longhorn";
+    };
+
     # ../modules/immich/default.nix
     immich = {
       enable = true;
@@ -263,8 +365,8 @@ in {
 
       nfs = {
         enable = true;
-        server = "192.168.0.124";
-        path = "/volume1/Photos";
+        server = nas-host;
+        path = "${nas-base}/Photos";
       };
 
       redis = {
@@ -481,10 +583,10 @@ in {
 
       nfs = {
         enable = true;
-        server = "192.168.0.124";
-        libraryPath = "/volume1/Roms";
-        assetsPath = "/volume1/Roms/assets";
-        resourcesPath = "/volume1/Roms/resources";
+        server = nas-host;
+        libraryPath = "${nas-base}/Roms";
+        assetsPath = "${nas-base}/Roms/assets";
+        resourcesPath = "${nas-base}/Roms/resources";
       };
     };
 
