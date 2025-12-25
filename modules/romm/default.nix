@@ -314,6 +314,32 @@ in mkArgoApp { inherit config lib; } rec {
                 persistentVolumeClaim.claimName = "${name}-resources";
               }
             ];
+            # Init container to pre-create config file
+            initContainers = [
+              {
+                name = "init-config";
+                image = "busybox:latest";
+                command = [
+                  "sh"
+                  "-c"
+                  ''
+                    if [ ! -f /romm/config/config.yml ]; then
+                      echo "Creating initial config.yml file"
+                      touch /romm/config/config.yml
+                      chmod 644 /romm/config/config.yml
+                    else
+                      echo "config.yml already exists"
+                    fi
+                  ''
+                ];
+                volumeMounts = [
+                  {
+                    mountPath = "/romm/config";
+                    name = "config";
+                  }
+                ];
+              }
+            ];
           };
         };
       };
