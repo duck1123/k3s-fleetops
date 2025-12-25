@@ -210,7 +210,7 @@ in mkArgoApp { inherit config lib; } rec {
                 }
                 {
                   name = "ROMM_CONFIG_PATH";
-                  value = "/app/config/config.toml";
+                  value = "/romm/config/config.yml";
                 }
                 # Nginx bind configuration
                 # Nginx should listen on 8080, gunicorn runs on 5000
@@ -271,23 +271,23 @@ in mkArgoApp { inherit config lib; } rec {
 
               volumeMounts = [
                 {
-                  mountPath = "/app/data";
+                  mountPath = "/romm/data";
                   name = "data";
                 }
                 {
-                  mountPath = "/app/config";
+                  mountPath = "/romm/config";
                   name = "config";
                 }
                 {
-                  mountPath = "/roms";
+                  mountPath = "/romm/library";
                   name = "library";
                 }
                 {
-                  mountPath = "/app/assets";
+                  mountPath = "/romm/assets";
                   name = "assets";
                 }
                 {
-                  mountPath = "/app/resources";
+                  mountPath = "/romm/resources";
                   name = "resources";
                 }
               ];

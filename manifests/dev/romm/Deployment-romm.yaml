@@ -62,7 +62,7 @@ spec:
                   key: password
                   name: romm-admin-password
             - name: ROMM_CONFIG_PATH
-              value: /app/config/config.toml
+              value: /romm/config/config.yml
             - name: HOST
               value: 0.0.0.0
             - name: PORT
@@ -88,15 +88,15 @@ spec:
               name: redis
               protocol: TCP
           volumeMounts:
-            - mountPath: /app/data
+            - mountPath: /romm/data
               name: data
-            - mountPath: /app/config
+            - mountPath: /romm/config
               name: config
-            - mountPath: /roms
+            - mountPath: /romm/library
               name: library
-            - mountPath: /app/assets
+            - mountPath: /romm/assets
               name: assets
-            - mountPath: /app/resources
+            - mountPath: /romm/resources
               name: resources
       serviceAccountName: default
       volumes:
