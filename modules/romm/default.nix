@@ -212,6 +212,24 @@ in mkArgoApp { inherit config lib; } rec {
                   name = "ROMM_CONFIG_PATH";
                   value = "/app/config/config.toml";
                 }
+                # Nginx bind configuration - use 0.0.0.0 to listen on all interfaces
+                # Romm may auto-detect service IP, so we explicitly set the bind address
+                {
+                  name = "HOST";
+                  value = "0.0.0.0";
+                }
+                {
+                  name = "PORT";
+                  value = "${toString cfg.service.port}";
+                }
+                {
+                  name = "ROMM_HOST";
+                  value = "0.0.0.0";
+                }
+                {
+                  name = "ROMM_PORT";
+                  value = "${toString cfg.service.port}";
+                }
               ];
 
               ports = [{
