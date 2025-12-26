@@ -258,10 +258,10 @@ in {
       };
 
       vpn = {
-        inherit serverLocation;
+        # inherit serverLocation;
         enable = true;
         mullvadAccountNumber = secrets.mullvad.id;
-        serverCountry = "USA";
+        # serverCountry = "USA";
       };
 
       nfs = {

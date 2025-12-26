@@ -35,10 +35,6 @@ spec:
                 secretKeyRef:
                   key: accountNumber
                   name: lidarr-mullvad-account
-            - name: SERVER_COUNTRIES
-              value: USA
-            - name: SERVER_CITIES
-              value: Chicago IL
             - name: FIREWALL_VPN_INPUT_PORTS
               value: "8686"
             - name: FIREWALL
