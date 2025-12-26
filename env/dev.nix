@@ -97,6 +97,12 @@ in {
         domain = "booklore.${tail-domain}";
         ingressClassName = "tailscale";
         clusterIssuer = "tailscale";
+        # Optional: Enable local-only ingress using Traefik
+        localIngress = {
+          enable = true;
+          domain = "booklore.local";
+          tls.enable = false; # Set to true if you have cert-manager configured for local domains
+        };
       };
 
       nfs = {
@@ -582,6 +588,12 @@ in {
         domain = "romm.${tail-domain}";
         ingressClassName = "tailscale";
         clusterIssuer = "tailscale";
+        # Optional: Enable local-only ingress using Traefik
+        localIngress = {
+          enable = true;
+          domain = "romm.local";
+          tls.enable = false; # Set to true if you have cert-manager configured for local domains
+        };
       };
 
       nfs = {

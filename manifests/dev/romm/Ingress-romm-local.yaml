@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: romm-local
+  namespace: romm
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: romm.local
+      http:
+        paths:
+          - backend:
+              service:
+                name: romm
+                port:
+                  name: http
+            path: /
+            pathType: ImplementationSpecific
+  tls: []

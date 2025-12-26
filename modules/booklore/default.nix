@@ -92,6 +92,28 @@ mkArgoApp { inherit config lib; } rec {
       type = types.str;
       default = "1000";
     };
+
+    ingress.localIngress = {
+      enable = mkOption {
+        description = mdDoc "Enable a local-only ingress using Traefik";
+        type = types.bool;
+        default = false;
+      };
+
+      domain = mkOption {
+        description = mdDoc "The local domain to expose ${name} to (e.g., ${name}.local)";
+        type = types.str;
+        default = "${name}.local";
+      };
+
+      tls = {
+        enable = mkOption {
+          description = mdDoc "Enable TLS for local ingress";
+          type = types.bool;
+          default = false;
+        };
+      };
+    };
   };
 
   extraResources = cfg: {
@@ -210,24 +232,48 @@ mkArgoApp { inherit config lib; } rec {
       };
     };
 
-    ingresses.${name}.spec = with cfg.ingress; {
-      inherit ingressClassName;
+    ingresses = {
+      ${name} = {
+        spec = with cfg.ingress; {
+          inherit ingressClassName;
 
-      rules = [{
-        host = domain;
+          rules = [{
+            host = domain;
 
-        http.paths = [{
-          backend.service = {
-            inherit name;
-            port.name = "http";
-          };
+            http.paths = [{
+              backend.service = {
+                inherit name;
+                port.name = "http";
+              };
 
-          path = "/";
-          pathType = "ImplementationSpecific";
-        }];
-      }];
+              path = "/";
+              pathType = "ImplementationSpecific";
+            }];
+          }];
 
-      tls = [{ hosts = [ domain ]; }];
+          tls = [{ hosts = [ domain ]; }];
+        };
+      };
+    } // lib.optionalAttrs (cfg.ingress.localIngress.enable) {
+      # Optional local-only ingress using Traefik
+      "${name}-local" = {
+        spec = with cfg.ingress.localIngress; {
+          ingressClassName = "traefik";
+
+          rules = [{
+            host = domain;
+            http.paths = [{
+              backend.service = {
+                inherit name;
+                port.name = "http";
+              };
+              path = "/";
+              pathType = "ImplementationSpecific";
+            }];
+          }];
+          tls = lib.optional tls.enable [{ hosts = [ domain ]; }];
+        };
+      };
     };
 
     persistentVolumeClaims = {
