@@ -135,6 +135,10 @@ mkArgoApp { inherit config lib; } rec {
                       value = "openvpn";
                     }
                     {
+                      name = "OPENVPN_IPV6";
+                      value = "off";
+                    }
+                    {
                       name = "MULLVAD_ACCOUNT_NUMBER";
                       valueFrom.secretKeyRef = {
                         name = "${name}-mullvad-account";
