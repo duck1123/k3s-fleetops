@@ -261,7 +261,7 @@ in {
         inherit serverLocation;
         enable = true;
         mullvadAccountNumber = secrets.mullvad.id;
-        serverCountry = "United States";
+        serverCountry = "USA";
       };
 
       nfs = {
