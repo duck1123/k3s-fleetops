@@ -5,7 +5,7 @@ let
   clusterIssuer = "letsencrypt-prod";
   nas-host = "192.168.0.124";
   nas-base = "/volume1";
-  serverLocation = "USA";
+  serverLocation = "Detroit MI";
 in {
   nixidy = {
     defaults.syncPolicy.autoSync = {
@@ -260,6 +260,7 @@ in {
         inherit serverLocation;
         enable = true;
         mullvadAccountNumber = secrets.mullvad.id;
+        serverCountry = "USA";
       };
 
       nfs = {

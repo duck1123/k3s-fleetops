@@ -36,8 +36,14 @@ mkArgoApp { inherit config lib; } rec {
         default = "";
       };
 
+      serverCountry = mkOption {
+        description = mdDoc "Mullvad server country";
+        type = types.str;
+        default = "";
+      };
+
       serverLocation = mkOption {
-        description = mdDoc "Mullvad server location (e.g., us-was, se-sto)";
+        description = mdDoc "Mullvad server city (e.g., Detroit MI)";
         type = types.str;
         default = "";
       };
@@ -137,7 +143,7 @@ mkArgoApp { inherit config lib; } rec {
                       value = if cfg.vpn.serverLocation != "" then
                         ""
                       else
-                        "United States";
+                        "USA";
                     }
                     {
                       name = "SERVER_CITIES";
