@@ -139,10 +139,6 @@ mkArgoApp { inherit config lib; } rec {
                       value = "false";
                     }
                     {
-                      name = "FIREWALL_OUTBOUND_SUBNETS";
-                      value = "0.0.0.0/0";
-                    }
-                    {
                       name = "MULLVAD_ACCOUNT_NUMBER";
                       valueFrom.secretKeyRef = {
                         name = "${name}-mullvad-account";
