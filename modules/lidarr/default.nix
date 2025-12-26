@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ ageRecipients, config, lib, pkgs, ... }:
 with lib;
 mkArgoApp { inherit config lib; } rec {
   name = "lidarr";
@@ -136,7 +136,17 @@ mkArgoApp { inherit config lib; } rec {
                     }
                     {
                       name = "MULLVAD_ACCOUNT_NUMBER";
-                      value = cfg.vpn.mullvadAccountNumber;
+                      valueFrom.secretKeyRef = {
+                        name = "${name}-mullvad-account";
+                        key = "accountNumber";
+                      };
+                    }
+                    {
+                      name = "OPENVPN_USER";
+                      valueFrom.secretKeyRef = {
+                        name = "${name}-mullvad-account";
+                        key = "accountNumber";
+                      };
                     }
                     {
                       name = "SERVER_COUNTRIES";
@@ -370,5 +380,12 @@ mkArgoApp { inherit config lib; } rec {
       type = "ClusterIP";
     };
 
+    # Create SOPS secret for Mullvad account number
+    sopsSecrets."${name}-mullvad-account" = lib.createSecret {
+      inherit ageRecipients lib pkgs;
+      namespace = cfg.namespace;
+      secretName = "${name}-mullvad-account";
+      values.accountNumber = cfg.vpn.mullvadAccountNumber;
+    };
   };
 }

@@ -26,7 +26,15 @@ spec:
             - name: VPN_TYPE
               value: openvpn
             - name: MULLVAD_ACCOUNT_NUMBER
-              value: "6347636117827710"
+              valueFrom:
+                secretKeyRef:
+                  key: accountNumber
+                  name: lidarr-mullvad-account
+            - name: OPENVPN_USER
+              valueFrom:
+                secretKeyRef:
+                  key: accountNumber
+                  name: lidarr-mullvad-account
             - name: SERVER_COUNTRIES
               value: USA
             - name: SERVER_CITIES
