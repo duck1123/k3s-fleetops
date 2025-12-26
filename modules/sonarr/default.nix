@@ -136,7 +136,11 @@ mkArgoApp { inherit config lib; } rec {
                     }
                     {
                       name = "OPENVPN_IPV6";
-                      value = "off";
+                      value = "false";
+                    }
+                    {
+                      name = "FIREWALL_OUTBOUND_SUBNETS";
+                      value = "0.0.0.0/0";
                     }
                     {
                       name = "MULLVAD_ACCOUNT_NUMBER";
