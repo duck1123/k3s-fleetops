@@ -154,8 +154,7 @@ mkArgoApp { inherit config lib; } rec {
                     }
                     {
                       name = "SERVER_CITIES";
-                      # Remove state abbreviation if present (e.g., "Detroit MI" -> "Detroit")
-                      value = lib.head (lib.splitString " " cfg.vpn.serverLocation);
+                      value = cfg.vpn.serverLocation;
                     }
                     {
                       name = "FIREWALL_VPN_INPUT_PORTS";
