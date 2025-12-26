@@ -125,7 +125,7 @@ mkArgoApp { inherit config lib; } rec {
                     capabilities.add = [ "NET_ADMIN" "MKNOD" ];
                     privileged = false;
                   };
-                  env = [
+                  env = lib.filter (x: x != null) [
                     {
                       name = "VPN_SERVICE_PROVIDER";
                       value = "mullvad";
@@ -148,14 +148,14 @@ mkArgoApp { inherit config lib; } rec {
                         key = "accountNumber";
                       };
                     }
-                    {
+                    (if cfg.vpn.serverCountry != null && cfg.vpn.serverCountry != "" then {
                       name = "SERVER_COUNTRIES";
-                      value = if cfg.vpn.serverCountry != null then cfg.vpn.serverCountry else "";
-                    }
-                    {
+                      value = cfg.vpn.serverCountry;
+                    } else null)
+                    (if cfg.vpn.serverLocation != "" then {
                       name = "SERVER_CITIES";
                       value = cfg.vpn.serverLocation;
-                    }
+                    } else null)
                     {
                       name = "FIREWALL_VPN_INPUT_PORTS";
                       value = "${toString cfg.service.port}";
