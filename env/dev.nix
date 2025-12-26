@@ -5,7 +5,8 @@ let
   clusterIssuer = "letsencrypt-prod";
   nas-host = "192.168.0.124";
   nas-base = "/volume1";
-  serverLocation = "Detroit MI";
+  serverLocation = "Chicago IL";
+  # serverLocation = "Detroit MI";
 in {
   nixidy = {
     defaults.syncPolicy.autoSync = {
