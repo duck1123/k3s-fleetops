@@ -150,11 +150,12 @@ mkArgoApp { inherit config lib; } rec {
                     }
                     {
                       name = "SERVER_COUNTRIES";
-                      value = if cfg.vpn.serverCountry != "" then cfg.vpn.serverCountry else "";
+                      value = cfg.vpn.serverCountry;
                     }
                     {
                       name = "SERVER_CITIES";
-                      value = cfg.vpn.serverLocation;
+                      # Remove state abbreviation if present (e.g., "Detroit MI" -> "Detroit")
+                      value = lib.head (lib.splitString " " cfg.vpn.serverLocation);
                     }
                     {
                       name = "FIREWALL_VPN_INPUT_PORTS";
