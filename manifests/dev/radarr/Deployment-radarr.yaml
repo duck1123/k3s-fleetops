@@ -99,7 +99,6 @@ spec:
             - mountPath: /movies
               name: movies
       serviceAccountName: default
-      shareProcessNamespace: true
       volumes:
         - name: config
           persistentVolumeClaim:

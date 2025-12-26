@@ -99,7 +99,6 @@ spec:
             - mountPath: /music
               name: music
       serviceAccountName: default
-      shareProcessNamespace: true
       volumes:
         - name: config
           persistentVolumeClaim:

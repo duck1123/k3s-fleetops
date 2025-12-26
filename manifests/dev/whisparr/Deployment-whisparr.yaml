@@ -99,7 +99,6 @@ spec:
             - mountPath: /tv
               name: tv
       serviceAccountName: default
-      shareProcessNamespace: true
       volumes:
         - name: config
           persistentVolumeClaim:

@@ -112,9 +112,6 @@ mkArgoApp { inherit config lib; } rec {
             spec = {
               automountServiceAccountToken = true;
               serviceAccountName = "default";
-              # Share process namespace with gluetun when VPN is enabled
-              # This allows containers to communicate via localhost
-              shareProcessNamespace = cfg.vpn.enable;
               containers = lib.flatten [
                 # Gluetun VPN container (only if VPN is enabled)
                 (lib.optional cfg.vpn.enable {
