@@ -28,9 +28,9 @@ spec:
             - name: MULLVAD_ACCOUNT_NUMBER
               value: "6347636117827710"
             - name: SERVER_COUNTRIES
-              value: United States
-            - name: SERVER_CITIES
               value: ""
+            - name: SERVER_CITIES
+              value: USA
             - name: FIREWALL_VPN_INPUT_PORTS
               value: "8686"
             - name: FIREWALL
