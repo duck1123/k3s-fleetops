@@ -24,11 +24,11 @@ spec:
             - name: VPN_SERVICE_PROVIDER
               value: mullvad
             - name: VPN_TYPE
-              value: wireguard
+              value: openvpn
             - name: MULLVAD_ACCOUNT_NUMBER
               value: "6347636117827710"
             - name: SERVER_COUNTRIES
-              value: United States
+              value: ""
             - name: SERVER_CITIES
               value: ""
             - name: FIREWALL_VPN_INPUT_PORTS

@@ -41,6 +41,12 @@ mkArgoApp { inherit config lib; } rec {
         type = types.str;
         default = "";
       };
+
+      serverCountry = mkOption {
+        description = mdDoc "Mullvad server country (e.g., USA, Sweden)";
+        type = types.nullOr types.str;
+        default = null;
+      };
     };
 
     nfs = {
@@ -126,7 +132,7 @@ mkArgoApp { inherit config lib; } rec {
                     }
                     {
                       name = "VPN_TYPE";
-                      value = "wireguard";
+                      value = "openvpn";
                     }
                     {
                       name = "MULLVAD_ACCOUNT_NUMBER";
@@ -134,7 +140,7 @@ mkArgoApp { inherit config lib; } rec {
                     }
                     {
                       name = "SERVER_COUNTRIES";
-                      value = if cfg.vpn.serverLocation != "" then "" else "United States";
+                      value = if cfg.vpn.serverCountry != null then cfg.vpn.serverCountry else "";
                     }
                     {
                       name = "SERVER_CITIES";

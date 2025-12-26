@@ -132,7 +132,7 @@ mkArgoApp { inherit config lib; } rec {
                     }
                     {
                       name = "VPN_TYPE";
-                      value = "wireguard";
+                      value = "openvpn";
                     }
                     {
                       name = "MULLVAD_ACCOUNT_NUMBER";
@@ -140,10 +140,7 @@ mkArgoApp { inherit config lib; } rec {
                     }
                     {
                       name = "SERVER_COUNTRIES";
-                      value = if cfg.vpn.serverLocation != "" then
-                        ""
-                      else
-                        "USA";
+                      value = if cfg.vpn.serverCountry != "" then cfg.vpn.serverCountry else "";
                     }
                     {
                       name = "SERVER_CITIES";
