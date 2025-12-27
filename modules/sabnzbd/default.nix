@@ -76,15 +76,9 @@ mkArgoApp { inherit config lib; } rec {
     };
 
     hostWhitelist = mkOption {
-      description = mdDoc "Comma-separated list of hostnames allowed to access SABnzbd (empty to disable hostname verification). The service name and FQDN are automatically added.";
+      description = mdDoc "Comma-separated list of hostnames allowed to access SABnzbd. The service name and FQDN are automatically added.";
       type = types.str;
       default = "";
-    };
-
-    disableHostnameVerification = mkOption {
-      description = mdDoc "Disable hostname verification entirely (not recommended for production)";
-      type = types.bool;
-      default = false;
     };
   };
 
@@ -114,17 +108,14 @@ mkArgoApp { inherit config lib; } rec {
               serviceAccountName = "default";
               # Init container to set hostname whitelist in config
               initContainers = let
-                hostnameList = if cfg.disableHostnameVerification then
-                  "*"
-                else
-                  lib.concatStringsSep " " (
-                    lib.filter (x: x != "") [
-                      (lib.replaceStrings [","] [" "] cfg.hostWhitelist)
-                      (if cfg.ingress.domain != "" then cfg.ingress.domain else "")
-                      "${name}.${cfg.namespace}"
-                      "${name}.${cfg.namespace}.svc.cluster.local"
-                    ]
-                  );
+                hostnameList = lib.concatStringsSep " " (
+                  lib.filter (x: x != "") [
+                    (lib.replaceStrings [","] [" "] cfg.hostWhitelist)
+                    (if cfg.ingress.domain != "" then cfg.ingress.domain else "")
+                    "${name}.${cfg.namespace}"
+                    "${name}.${cfg.namespace}.svc.cluster.local"
+                  ]
+                );
               in [{
                 name = "set-hostname-whitelist";
                 image = "busybox:latest";
@@ -133,13 +124,10 @@ mkArgoApp { inherit config lib; } rec {
                   "-c"
                   ''
                     CONFIG_FILE="/config/sabnzbd.ini"
-                    SERVICE_NAME="${name}.${cfg.namespace}"
-                    SERVICE_FQDN="${name}.${cfg.namespace}.svc.cluster.local"
                     ALL_HOSTNAMES="${hostnameList}"
-                    # Convert commas to spaces and clean up duplicates (safe even for wildcard)
-                    if [ "$ALL_HOSTNAMES" != "*" ]; then
-                      ALL_HOSTNAMES=$(echo "$ALL_HOSTNAMES" | tr ',' ' ' | tr ' ' '\n' | grep -v '^$' | sort -u | tr '\n' ' ' | sed 's/[[:space:]]*$//')
-                    fi
+
+                    # Convert commas to spaces and clean up duplicates
+                    ALL_HOSTNAMES=$(echo "$ALL_HOSTNAMES" | tr ',' ' ' | tr ' ' '\n' | grep -v '^$' | sort -u | tr '\n' ' ' | sed 's/[[:space:]]*$//')
 
                     # Wait for config volume to be available
                     while [ ! -d /config ]; do
@@ -157,19 +145,8 @@ mkArgoApp { inherit config lib; } rec {
                       echo "[misc]" >> "$CONFIG_FILE"
                     fi
 
-                    # Remove any existing host_whitelist and api_warnings entries
+                    # Remove any existing host_whitelist entry
                     sed -i '/^host_whitelist/d' "$CONFIG_FILE"
-                    sed -i '/^api_warnings/d' "$CONFIG_FILE"
-
-                    # Always set host_whitelist - SABnzbd requires it and cannot be fully disabled
-                    ${lib.optionalString cfg.disableHostnameVerification ''
-                      # Also disable api_warnings to suppress warnings
-                      if grep -q "^\[misc\]" "$CONFIG_FILE"; then
-                        sed -i "/^\[misc\]/a api_warnings = 0" "$CONFIG_FILE"
-                      else
-                        echo "api_warnings = 0" >> "$CONFIG_FILE"
-                      fi
-                    ''}
 
                     # Add host_whitelist to [misc] section
                     if grep -q "^\[misc\]" "$CONFIG_FILE"; then
