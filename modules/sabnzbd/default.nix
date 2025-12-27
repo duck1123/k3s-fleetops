@@ -115,12 +115,13 @@ mkArgoApp { inherit config lib; } rec {
                   "-c"
                   ''
                     CONFIG_FILE="/config/sabnzbd.ini"
+                    SERVICE_NAME="${name}.${cfg.namespace}"
                     ${if cfg.hostWhitelist != "" then ''
-                      HOSTNAME="${cfg.hostWhitelist}"
+                      HOSTNAME="${cfg.hostWhitelist},$SERVICE_NAME"
                     '' else if cfg.ingress.domain != "" then ''
-                      HOSTNAME="${cfg.ingress.domain}"
+                      HOSTNAME="${cfg.ingress.domain},$SERVICE_NAME"
                     '' else ''
-                      HOSTNAME=""
+                      HOSTNAME="$SERVICE_NAME"
                     ''}
 
                     # Wait for config volume to be available
@@ -136,8 +137,15 @@ mkArgoApp { inherit config lib; } rec {
                     # Update or add host_whitelist setting
                     if [ -n "$HOSTNAME" ]; then
                       if grep -q "^host_whitelist" "$CONFIG_FILE"; then
-                        # Update existing setting
-                        sed -i "s|^host_whitelist.*|host_whitelist = $HOSTNAME|" "$CONFIG_FILE"
+                        # Update existing setting, but preserve existing entries
+                        EXISTING=$(grep "^host_whitelist" "$CONFIG_FILE" | cut -d'=' -f2 | tr -d ' ')
+                        if echo "$EXISTING" | grep -q "$SERVICE_NAME"; then
+                          # Service name already in list, just update
+                          sed -i "s|^host_whitelist.*|host_whitelist = $HOSTNAME|" "$CONFIG_FILE"
+                        else
+                          # Add service name to existing list
+                          sed -i "s|^host_whitelist.*|host_whitelist = $EXISTING,$SERVICE_NAME|" "$CONFIG_FILE"
+                        fi
                       else
                         # Add new setting
                         echo "host_whitelist = $HOSTNAME" >> "$CONFIG_FILE"
