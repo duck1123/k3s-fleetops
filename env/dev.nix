@@ -310,7 +310,7 @@ in {
     # ../modules/sabnzbd/default.nix
     sabnzbd = {
       enable = true;
-      debugLogging = true;
+      debugLogging = false;
 
       ingress = {
         domain = "sabnzbd.${tail-domain}";
