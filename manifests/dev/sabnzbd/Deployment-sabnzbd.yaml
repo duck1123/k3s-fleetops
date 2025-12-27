@@ -73,7 +73,7 @@ spec:
               CONFIG_FILE="/config/sabnzbd.ini"
               SERVICE_NAME="sabnzbd.sabnzbd"
               SERVICE_FQDN="sabnzbd.sabnzbd.svc.cluster.local"
-              ALL_HOSTNAMES="*"
+              ALL_HOSTNAMES="sabnzbd.bearded-snake.ts.net sabnzbd.sabnzbd sabnzbd.sabnzbd.svc.cluster.local"
               # Convert commas to spaces and clean up duplicates (safe even for wildcard)
               if [ "$ALL_HOSTNAMES" != "*" ]; then
                 ALL_HOSTNAMES=$(echo "$ALL_HOSTNAMES" | tr ',' ' ' | tr ' ' '\n' | grep -v '^$' | sort -u | tr '\n' ' ' | sed 's/[[:space:]]*$//')
@@ -100,12 +100,6 @@ spec:
               sed -i '/^api_warnings/d' "$CONFIG_FILE"
 
               # Always set host_whitelist - SABnzbd requires it and cannot be fully disabled
-              # Also disable api_warnings to suppress warnings
-              if grep -q "^\[misc\]" "$CONFIG_FILE"; then
-                sed -i "/^\[misc\]/a api_warnings = 0" "$CONFIG_FILE"
-              else
-                echo "api_warnings = 0" >> "$CONFIG_FILE"
-              fi
 
 
               # Add host_whitelist to [misc] section

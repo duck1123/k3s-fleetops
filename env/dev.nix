@@ -311,7 +311,7 @@ in {
 
     # ../modules/sabnzbd/default.nix
     sabnzbd = {
-      disableHostnameVerification = true;
+      disableHostnameVerification = false;
       enable = true;
 
       ingress = {
@@ -320,7 +320,7 @@ in {
         clusterIssuer = "tailscale";
       };
 
-      hostWhitelist = "sabnzbd.${tail-domain},sabnzbd.sabnzbd";
+      # hostWhitelist = "sabnzbd.${tail-domain},sabnzbd.sabnzbd";
 
       vpn = {
         enable = true;
