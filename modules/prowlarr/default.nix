@@ -30,8 +30,20 @@ mkArgoApp { inherit config lib; } rec {
         default = true;
       };
 
+      useSharedGluetun = mkOption {
+        description = mdDoc "Use shared gluetun service instead of sidecar container";
+        type = types.bool;
+        default = false;
+      };
+
+      sharedGluetunService = mkOption {
+        description = mdDoc "Service name for shared gluetun (e.g., gluetun.gluetun)";
+        type = types.str;
+        default = "gluetun.gluetun";
+      };
+
       mullvadAccountNumber = mkOption {
-        description = mdDoc "Mullvad account number";
+        description = mdDoc "Mullvad account number (only used if useSharedGluetun is false)";
         type = types.str;
         default = "";
       };
@@ -92,9 +104,24 @@ mkArgoApp { inherit config lib; } rec {
             spec = {
               automountServiceAccountToken = true;
               serviceAccountName = "default";
+              # Configure DNS to use gluetun's DNS server when VPN is enabled
+              dnsPolicy = if cfg.vpn.enable && !cfg.vpn.useSharedGluetun then "None" else "ClusterFirst";
+              dnsConfig = lib.optionalAttrs (cfg.vpn.enable && !cfg.vpn.useSharedGluetun) {
+                nameservers = [ "127.0.0.1" ];
+                searches = [ ];
+                options = [
+                  {
+                    name = "ndots";
+                    value = "2";
+                  }
+                  {
+                    name = "edns0";
+                  }
+                ];
+              };
               containers = lib.flatten [
-                # Gluetun VPN container (only if VPN is enabled)
-                (lib.optional cfg.vpn.enable {
+                # Gluetun VPN container (only if VPN is enabled and not using shared gluetun)
+                (lib.optional (cfg.vpn.enable && !cfg.vpn.useSharedGluetun) {
                   name = "gluetun";
                   image = "qmcgaw/gluetun:latest";
                   imagePullPolicy = "IfNotPresent";
@@ -161,6 +188,14 @@ mkArgoApp { inherit config lib; } rec {
                       name = "HTTP_CONTROL_SERVER_LOG";
                       value = "on";
                     }
+                    {
+                      name = "DNS_KEEP_NAMESERVER";
+                      value = "off";
+                    }
+                    {
+                      name = "DNS_ADDRESS";
+                      value = "127.0.0.1";
+                    }
                   ];
                   ports = [
                     {
@@ -208,11 +243,17 @@ mkArgoApp { inherit config lib; } rec {
                     # Configure Prowlarr to use gluetun's HTTP proxy
                     {
                       name = "HTTP_PROXY";
-                      value = "http://127.0.0.1:8888";
+                      value = if cfg.vpn.useSharedGluetun then
+                        "http://${cfg.vpn.sharedGluetunService}:8888"
+                      else
+                        "http://127.0.0.1:8888";
                     }
                     {
                       name = "HTTPS_PROXY";
-                      value = "http://127.0.0.1:8888";
+                      value = if cfg.vpn.useSharedGluetun then
+                        "http://${cfg.vpn.sharedGluetunService}:8888"
+                      else
+                        "http://127.0.0.1:8888";
                     }
                     {
                       name = "NO_PROXY";
@@ -237,11 +278,10 @@ mkArgoApp { inherit config lib; } rec {
                   name = "config";
                   persistentVolumeClaim.claimName = "${name}-${name}-config";
                 }
-                (lib.optionalAttrs cfg.vpn.enable {
-                  name = "gluetun";
-                  persistentVolumeClaim.claimName = "${name}-${name}-gluetun";
-                })
-              ];
+              ] ++ (lib.optional (cfg.vpn.enable && !cfg.vpn.useSharedGluetun) {
+                name = "gluetun";
+                persistentVolumeClaim.claimName = "${name}-${name}-gluetun";
+              });
             };
           };
         };
@@ -274,7 +314,7 @@ mkArgoApp { inherit config lib; } rec {
         accessModes = [ "ReadWriteOnce" ];
         resources.requests.storage = "5Gi";
       };
-    } // (lib.optionalAttrs cfg.vpn.enable {
+    } // (lib.optionalAttrs (cfg.vpn.enable && !cfg.vpn.useSharedGluetun) {
       "${name}-${name}-gluetun".spec = {
         inherit (cfg) storageClassName;
         accessModes = [ "ReadWriteOnce" ];
@@ -298,12 +338,14 @@ mkArgoApp { inherit config lib; } rec {
       type = "ClusterIP";
     };
 
-    # Create SOPS secret for Mullvad account number
-    sopsSecrets."${name}-mullvad-account" = lib.createSecret {
-      inherit ageRecipients lib pkgs;
-      namespace = cfg.namespace;
-      secretName = "${name}-mullvad-account";
-      values.accountNumber = cfg.vpn.mullvadAccountNumber;
+    # Create SOPS secret for Mullvad account number (only if not using shared gluetun)
+    sopsSecrets = lib.optionalAttrs (cfg.vpn.enable && !cfg.vpn.useSharedGluetun) {
+      "${name}-mullvad-account" = lib.createSecret {
+        inherit ageRecipients lib pkgs;
+        namespace = cfg.namespace;
+        secretName = "${name}-mullvad-account";
+        values.accountNumber = cfg.vpn.mullvadAccountNumber;
+      };
     };
   };
 }

@@ -176,6 +176,14 @@ in {
       };
     };
 
+    # ../modules/gluetun/default.nix
+    gluetun = {
+      enable = true;
+      mullvadAccountNumber = secrets.mullvad.id;
+      serverLocation = ""; # Optional: specific server location (e.g., "us-was", "se-sto")
+      storageClassName = "longhorn";
+    };
+
     # ../modules/forgejo/default.nix
     forgejo = {
       admin = { inherit (secrets.forgejo.admin) password username; };
@@ -341,7 +349,9 @@ in {
 
       vpn = {
         enable = true;
-        mullvadAccountNumber = secrets.mullvad.id;
+        useSharedGluetun = true;
+        sharedGluetunService = "gluetun.gluetun";
+        # mullvadAccountNumber not needed when using shared gluetun
         serverLocation = ""; # Optional: specific server location (e.g., "us-was", "se-sto")
       };
 

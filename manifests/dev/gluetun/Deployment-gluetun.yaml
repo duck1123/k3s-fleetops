@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/instance: gluetun
+    app.kubernetes.io/name: gluetun
+    app.kubernetes.io/version: latest
+  name: gluetun
+  namespace: gluetun
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: gluetun
+      app.kubernetes.io/name: gluetun
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: gluetun
+        app.kubernetes.io/name: gluetun
+    spec:
+      automountServiceAccountToken: true
+      containers:
+        - env:
+            - name: VPN_SERVICE_PROVIDER
+              value: mullvad
+            - name: VPN_TYPE
+              value: openvpn
+            - name: OPENVPN_IPV6
+              value: "false"
+            - name: MULLVAD_ACCOUNT_NUMBER
+              valueFrom:
+                secretKeyRef:
+                  key: accountNumber
+                  name: gluetun-mullvad-account
+            - name: OPENVPN_USER
+              valueFrom:
+                secretKeyRef:
+                  key: accountNumber
+                  name: gluetun-mullvad-account
+            - name: FIREWALL
+              value: "on"
+            - name: FIREWALL_DEBUG
+              value: "off"
+            - name: UPDATER_PERIOD
+              value: 24h
+            - name: TZ
+              value: Etc/UTC
+            - name: HTTP_CONTROL_SERVER_LOG
+              value: "on"
+            - name: DNS_KEEP_NAMESERVER
+              value: "off"
+            - name: DNS_ADDRESS
+              value: 0.0.0.0
+          image: qmcgaw/gluetun:latest
+          imagePullPolicy: IfNotPresent
+          name: gluetun
+          ports:
+            - containerPort: 8888
+              name: http-proxy
+              protocol: TCP
+            - containerPort: 1080
+              name: socks-proxy
+              protocol: TCP
+          securityContext:
+            capabilities:
+              add:
+                - NET_ADMIN
+                - MKNOD
+            privileged: false
+          volumeMounts:
+            - mountPath: /gluetun
+              name: gluetun
+      dnsConfig:
+        nameservers:
+          - 1.1.1.1
+          - 1.0.0.1
+        options:
+          - name: ndots
+            value: "2"
+          - name: edns0
+        searches: []
+      dnsPolicy: None
+      serviceAccountName: default
+      volumes:
+        - name: gluetun
+          persistentVolumeClaim:
+            claimName: gluetun-gluetun-gluetun

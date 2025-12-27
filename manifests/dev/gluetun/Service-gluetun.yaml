@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: gluetun
+  namespace: gluetun
+spec:
+  ports:
+    - name: http-proxy
+      port: 8888
+      protocol: TCP
+      targetPort: http-proxy
+    - name: socks-proxy
+      port: 1080
+      protocol: TCP
+      targetPort: socks-proxy
+  selector:
+    app.kubernetes.io/instance: gluetun
+    app.kubernetes.io/name: gluetun
+  type: ClusterIP

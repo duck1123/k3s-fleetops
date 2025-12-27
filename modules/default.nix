@@ -17,6 +17,7 @@
     ./dinsro
     ./ersatztv
     ./forgejo
+    ./gluetun
     ./grafana
     ./harbor
     ./homer
