@@ -215,7 +215,7 @@ mkArgoApp { inherit config lib; } rec {
                     }
                     {
                       name = "NO_PROXY";
-                      value = "localhost,127.0.0.1";
+                      value = "localhost,127.0.0.1,.svc,.svc.cluster.local,${name}.${cfg.namespace},${name}.${cfg.namespace}.svc.cluster.local";
                     }
                   ]);
                   ports = [{

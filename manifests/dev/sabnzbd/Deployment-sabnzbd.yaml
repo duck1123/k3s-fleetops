@@ -32,7 +32,7 @@ spec:
             - name: HTTPS_PROXY
               value: http://gluetun.gluetun:8888
             - name: NO_PROXY
-              value: localhost,127.0.0.1
+              value: localhost,127.0.0.1,.svc,.svc.cluster.local,sabnzbd.sabnzbd,sabnzbd.sabnzbd.svc.cluster.local
           image: linuxserver/sabnzbd:latest
           imagePullPolicy: IfNotPresent
           livenessProbe:
