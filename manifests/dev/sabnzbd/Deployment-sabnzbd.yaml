@@ -27,6 +27,8 @@ spec:
               value: "1000"
             - name: TZ
               value: Etc/UTC
+            - name: PYTHONUNBUFFERED
+              value: "1"
             - name: HTTP_PROXY
               value: http://gluetun.gluetun:8888
             - name: HTTPS_PROXY
@@ -69,7 +71,7 @@ spec:
         - command:
             - sh
             - -c
-            - |
+            - |+
               CONFIG_FILE="/config/sabnzbd.ini"
               ALL_HOSTNAMES="sabnzbd.bearded-snake.ts.net,sabnzbd.sabnzbd,sabnzbd.sabnzbd.svc.cluster.local"
 
@@ -102,6 +104,27 @@ spec:
                 echo "host_whitelist = $ALL_HOSTNAMES" >> "$CONFIG_FILE"
               fi
               echo "Hostname whitelist set to: $ALL_HOSTNAMES"
+
+              # Enable debug logging if requested
+              if ! grep -q "^\[logging\]" "$CONFIG_FILE"; then
+                echo "" >> "$CONFIG_FILE"
+                echo "[logging]" >> "$CONFIG_FILE"
+              fi
+
+              sed -i '/^log_level/d' "$CONFIG_FILE"
+              sed -i '/^log_backups/d' "$CONFIG_FILE"
+              sed -i '/^max_log_size/d' "$CONFIG_FILE"
+              if grep -q "^\[logging\]" "$CONFIG_FILE"; then
+                sed -i "/^\[logging\]/a log_level = 2" "$CONFIG_FILE"
+                sed -i "/^\[logging\]/a log_backups = 5" "$CONFIG_FILE"
+                sed -i "/^\[logging\]/a max_log_size = 10M" "$CONFIG_FILE"
+              else
+                echo "log_level = 2" >> "$CONFIG_FILE"
+                echo "log_backups = 5" >> "$CONFIG_FILE"
+                echo "max_log_size = 10M" >> "$CONFIG_FILE"
+              fi
+              echo "Debug logging enabled (log_level = 2)"
+
           image: busybox:latest
           name: set-hostname-whitelist
           volumeMounts:

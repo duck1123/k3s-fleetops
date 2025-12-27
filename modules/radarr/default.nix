@@ -1,4 +1,4 @@
-{ ageRecipients, config, lib, pkgs, ... }:
+{ config, lib, ... }:
 with lib;
 mkArgoApp { inherit config lib; } rec {
   name = "radarr";

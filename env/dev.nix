@@ -5,8 +5,6 @@ let
   clusterIssuer = "letsencrypt-prod";
   nas-host = "192.168.0.124";
   nas-base = "/volume1";
-  serverLocation = "Chicago IL";
-  # serverLocation = "Detroit MI";
 in {
   nixidy = {
     defaults.syncPolicy.autoSync = {
@@ -312,6 +310,7 @@ in {
     # ../modules/sabnzbd/default.nix
     sabnzbd = {
       enable = true;
+      debugLogging = true;
 
       ingress = {
         domain = "sabnzbd.${tail-domain}";

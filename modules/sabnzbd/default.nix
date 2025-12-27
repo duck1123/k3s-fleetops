@@ -1,4 +1,4 @@
-{ ageRecipients, config, lib, pkgs, ... }:
+{ config, lib, ... }:
 with lib;
 mkArgoApp { inherit config lib; } rec {
   name = "sabnzbd";
@@ -80,6 +80,12 @@ mkArgoApp { inherit config lib; } rec {
       type = types.str;
       default = "";
     };
+
+    debugLogging = mkOption {
+      description = mdDoc "Enable debug logging in SABnzbd (log_level = 2)";
+      type = types.bool;
+      default = false;
+    };
   };
 
   extraResources = cfg: {
@@ -155,6 +161,28 @@ mkArgoApp { inherit config lib; } rec {
                       echo "host_whitelist = $ALL_HOSTNAMES" >> "$CONFIG_FILE"
                     fi
                     echo "Hostname whitelist set to: $ALL_HOSTNAMES"
+
+                    ${lib.optionalString cfg.debugLogging ''
+                      # Enable debug logging if requested
+                      if ! grep -q "^\[logging\]" "$CONFIG_FILE"; then
+                        echo "" >> "$CONFIG_FILE"
+                        echo "[logging]" >> "$CONFIG_FILE"
+                      fi
+
+                      sed -i '/^log_level/d' "$CONFIG_FILE"
+                      sed -i '/^log_backups/d' "$CONFIG_FILE"
+                      sed -i '/^max_log_size/d' "$CONFIG_FILE"
+                      if grep -q "^\[logging\]" "$CONFIG_FILE"; then
+                        sed -i "/^\[logging\]/a log_level = 2" "$CONFIG_FILE"
+                        sed -i "/^\[logging\]/a log_backups = 5" "$CONFIG_FILE"
+                        sed -i "/^\[logging\]/a max_log_size = 10M" "$CONFIG_FILE"
+                      else
+                        echo "log_level = 2" >> "$CONFIG_FILE"
+                        echo "log_backups = 5" >> "$CONFIG_FILE"
+                        echo "max_log_size = 10M" >> "$CONFIG_FILE"
+                      fi
+                      echo "Debug logging enabled (log_level = 2)"
+                    ''}
                   ''
                 ];
                 volumeMounts = [{
@@ -179,6 +207,10 @@ mkArgoApp { inherit config lib; } rec {
                     {
                       name = "TZ";
                       value = cfg.tz;
+                    }
+                    {
+                      name = "PYTHONUNBUFFERED";
+                      value = "1";
                     }
                   ] ++ (lib.optionalAttrs cfg.vpn.enable [
                     # Configure Sabnzbd to use shared gluetun's HTTP proxy
