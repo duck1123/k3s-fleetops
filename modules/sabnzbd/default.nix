@@ -172,16 +172,19 @@ mkArgoApp { inherit config lib; } rec {
                       sed -i '/^log_level/d' "$CONFIG_FILE"
                       sed -i '/^log_backups/d' "$CONFIG_FILE"
                       sed -i '/^max_log_size/d' "$CONFIG_FILE"
+                      sed -i '/^log_access/d' "$CONFIG_FILE"
                       if grep -q "^\[logging\]" "$CONFIG_FILE"; then
                         sed -i "/^\[logging\]/a log_level = 2" "$CONFIG_FILE"
                         sed -i "/^\[logging\]/a log_backups = 5" "$CONFIG_FILE"
                         sed -i "/^\[logging\]/a max_log_size = 10M" "$CONFIG_FILE"
+                        sed -i "/^\[logging\]/a log_access = 1" "$CONFIG_FILE"
                       else
                         echo "log_level = 2" >> "$CONFIG_FILE"
                         echo "log_backups = 5" >> "$CONFIG_FILE"
                         echo "max_log_size = 10M" >> "$CONFIG_FILE"
+                        echo "log_access = 1" >> "$CONFIG_FILE"
                       fi
-                      echo "Debug logging enabled (log_level = 2)"
+                      echo "Debug logging enabled (log_level = 2, log_access = 1)"
                     ''}
                   ''
                 ];
