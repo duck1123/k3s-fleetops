@@ -152,7 +152,12 @@ mkArgoApp { inherit config lib; } rec {
 
                     # Update or add host_whitelist setting in [misc] section
                     ${if cfg.disableHostnameVerification then ''
-                      # Hostname verification disabled - leave host_whitelist empty/removed
+                      # Hostname verification disabled - set to * to allow all hosts
+                      if grep -q "^\[misc\]" "$CONFIG_FILE"; then
+                        sed -i "/^\[misc\]/a host_whitelist = *" "$CONFIG_FILE"
+                      else
+                        echo "host_whitelist = *" >> "$CONFIG_FILE"
+                      fi
                     '' else if cfg.hostWhitelist != "" || cfg.ingress.domain != "" then ''
                       # Add the new host_whitelist setting in the [misc] section
                       # Find the [misc] section and add after it
