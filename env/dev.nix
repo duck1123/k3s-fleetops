@@ -311,6 +311,7 @@ in {
 
     # ../modules/sabnzbd/default.nix
     sabnzbd = {
+      disableHostnameVerification = true;
       enable = true;
 
       ingress = {

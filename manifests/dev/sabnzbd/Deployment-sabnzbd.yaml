@@ -96,15 +96,7 @@ spec:
               sed -i '/^host_whitelist/d' "$CONFIG_FILE"
 
               # Update or add host_whitelist setting in [misc] section
-              # Add the new host_whitelist setting in the [misc] section
-              # Find the [misc] section and add after it
-              if grep -q "^\[misc\]" "$CONFIG_FILE"; then
-                # Add after [misc] line
-                sed -i "/^\[misc\]/a host_whitelist = $HOSTNAME" "$CONFIG_FILE"
-              else
-                # Add at the end if [misc] section doesn't exist
-                echo "host_whitelist = $HOSTNAME" >> "$CONFIG_FILE"
-              fi
+              # Hostname verification disabled - leave host_whitelist empty/removed
 
           image: busybox:latest
           name: set-hostname-whitelist
