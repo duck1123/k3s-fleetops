@@ -108,9 +108,9 @@ mkArgoApp { inherit config lib; } rec {
               serviceAccountName = "default";
               # Init container to set hostname whitelist in config
               initContainers = let
-                hostnameList = lib.concatStringsSep " " (
+                hostnameList = lib.concatStringsSep "," (
                   lib.filter (x: x != "") [
-                    (lib.replaceStrings [","] [" "] cfg.hostWhitelist)
+                    cfg.hostWhitelist
                     (if cfg.ingress.domain != "" then cfg.ingress.domain else "")
                     "${name}.${cfg.namespace}"
                     "${name}.${cfg.namespace}.svc.cluster.local"
@@ -126,8 +126,8 @@ mkArgoApp { inherit config lib; } rec {
                     CONFIG_FILE="/config/sabnzbd.ini"
                     ALL_HOSTNAMES="${hostnameList}"
 
-                    # Convert commas to spaces and clean up duplicates
-                    ALL_HOSTNAMES=$(echo "$ALL_HOSTNAMES" | tr ',' ' ' | tr ' ' '\n' | grep -v '^$' | sort -u | tr '\n' ' ' | sed 's/[[:space:]]*$//')
+                    # Clean up duplicates (split by comma, remove empty, sort, rejoin with comma)
+                    ALL_HOSTNAMES=$(echo "$ALL_HOSTNAMES" | tr ',' '\n' | grep -v '^$' | sort -u | tr '\n' ',' | sed 's/,$//')
 
                     # Wait for config volume to be available
                     while [ ! -d /config ]; do

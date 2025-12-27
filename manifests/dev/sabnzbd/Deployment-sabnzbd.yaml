@@ -71,10 +71,10 @@ spec:
             - -c
             - |
               CONFIG_FILE="/config/sabnzbd.ini"
-              ALL_HOSTNAMES="sabnzbd.bearded-snake.ts.net sabnzbd.sabnzbd sabnzbd.sabnzbd.svc.cluster.local"
+              ALL_HOSTNAMES="sabnzbd.bearded-snake.ts.net,sabnzbd.sabnzbd,sabnzbd.sabnzbd.svc.cluster.local"
 
-              # Convert commas to spaces and clean up duplicates
-              ALL_HOSTNAMES=$(echo "$ALL_HOSTNAMES" | tr ',' ' ' | tr ' ' '\n' | grep -v '^$' | sort -u | tr '\n' ' ' | sed 's/[[:space:]]*$//')
+              # Clean up duplicates (split by comma, remove empty, sort, rejoin with comma)
+              ALL_HOSTNAMES=$(echo "$ALL_HOSTNAMES" | tr ',' '\n' | grep -v '^$' | sort -u | tr '\n' ',' | sed 's/,$//')
 
               # Wait for config volume to be available
               while [ ! -d /config ]; do
