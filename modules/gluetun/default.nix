@@ -62,7 +62,7 @@ mkArgoApp { inherit config lib; } rec {
               serviceAccountName = "default";
               dnsPolicy = "None";
               dnsConfig = {
-                nameservers = [ "1.1.1.1" "1.0.0.1" ];
+                nameservers = [ "1.1.1.1" "1.0.0.1" "2606:4700:4700::1111" "2606:4700:4700::1001" ];
                 searches = [ ];
                 options = [
                   {
@@ -93,7 +93,7 @@ mkArgoApp { inherit config lib; } rec {
                   }
                   {
                     name = "OPENVPN_IPV6";
-                    value = "false";
+                    value = "true";
                   }
                   {
                     name = "MULLVAD_ACCOUNT_NUMBER";
@@ -143,7 +143,23 @@ mkArgoApp { inherit config lib; } rec {
                   }
                   {
                     name = "DNS_ADDRESS";
-                    value = "0.0.0.0";
+                    value = "::";
+                  }
+                  {
+                    name = "DNS_IPV6";
+                    value = "on";
+                  }
+                  {
+                    name = "DOT_IPV6";
+                    value = "on";
+                  }
+                  {
+                    name = "HTTPPROXY";
+                    value = "on";
+                  }
+                  {
+                    name = "HTTPPROXY_LISTENING_ADDRESS";
+                    value = ":8888";
                   }
                 ];
                 ports = [

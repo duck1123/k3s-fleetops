@@ -26,7 +26,7 @@ spec:
             - name: VPN_TYPE
               value: openvpn
             - name: OPENVPN_IPV6
-              value: "false"
+              value: "true"
             - name: MULLVAD_ACCOUNT_NUMBER
               valueFrom:
                 secretKeyRef:
@@ -50,7 +50,15 @@ spec:
             - name: DNS_KEEP_NAMESERVER
               value: "off"
             - name: DNS_ADDRESS
-              value: 0.0.0.0
+              value: '::'
+            - name: DNS_IPV6
+              value: "on"
+            - name: DOT_IPV6
+              value: "on"
+            - name: HTTPPROXY
+              value: "on"
+            - name: HTTPPROXY_LISTENING_ADDRESS
+              value: :8888
           image: qmcgaw/gluetun:latest
           imagePullPolicy: IfNotPresent
           name: gluetun
@@ -74,6 +82,8 @@ spec:
         nameservers:
           - 1.1.1.1
           - 1.0.0.1
+          - 2606:4700:4700::1111
+          - 2606:4700:4700::1001
         options:
           - name: ndots
             value: "2"
