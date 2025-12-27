@@ -63,9 +63,9 @@ spec:
           volumeMounts:
             - mountPath: /config
               name: config
-            - mountPath: /downloads
+            - mountPath: /config/Downloads
               name: downloads
-            - mountPath: /incomplete-downloads
+            - mountPath: /config/incomplete-downloads
               name: incomplete-downloads
       initContainers:
         - command:

@@ -263,11 +263,11 @@ mkArgoApp { inherit config lib; } rec {
                       name = "config";
                     }
                     {
-                      mountPath = "/downloads";
+                      mountPath = "/config/Downloads";
                       name = "downloads";
                     }
                     {
-                      mountPath = "/incomplete-downloads";
+                      mountPath = "/config/incomplete-downloads";
                       name = "incomplete-downloads";
                     }
                   ];
@@ -399,4 +399,3 @@ mkArgoApp { inherit config lib; } rec {
 
   };
 }
-
