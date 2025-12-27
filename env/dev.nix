@@ -298,7 +298,7 @@ in {
       nfs = {
         enable = true;
         server = nas-host;
-        path = "${nas-base}/arr";
+        path = "${nas-base}";
       };
 
       storageClassName = "longhorn";
@@ -323,7 +323,7 @@ in {
       nfs = {
         enable = true;
         server = nas-host;
-        path = "${nas-base}/arr";
+        path = "${nas-base}";
       };
 
       storageClassName = "longhorn";
@@ -348,7 +348,7 @@ in {
       nfs = {
         enable = true;
         server = nas-host;
-        path = "${nas-base}/arr";
+        path = "${nas-base}";
       };
 
       storageClassName = "longhorn";

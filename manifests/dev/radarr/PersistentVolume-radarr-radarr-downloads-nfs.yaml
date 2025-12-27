@@ -8,6 +8,6 @@ spec:
   capacity:
     storage: 1Ti
   nfs:
-    path: /volume1/arr/Downloads
+    path: /volume1/Downloads
     server: 192.168.0.124
   persistentVolumeReclaimPolicy: Retain
