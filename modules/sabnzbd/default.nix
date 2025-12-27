@@ -153,31 +153,35 @@ mkArgoApp { inherit config lib; } rec {
 
                     # Update or add host_whitelist setting in [misc] section
                     ${if cfg.disableHostnameVerification then ''
-                      # Hostname verification disabled - set to * to allow all hosts and disable api_warnings
+                      # Hostname verification disabled - remove host_whitelist entirely and disable api_warnings
+                      # SABnzbd will allow all hosts when host_whitelist is not set and api_warnings is 0
                       if grep -q "^\[misc\]" "$CONFIG_FILE"; then
-                        sed -i "/^\[misc\]/a host_whitelist = *" "$CONFIG_FILE"
                         sed -i "/^\[misc\]/a api_warnings = 0" "$CONFIG_FILE"
                       else
-                        echo "host_whitelist = *" >> "$CONFIG_FILE"
                         echo "api_warnings = 0" >> "$CONFIG_FILE"
                       fi
+                      echo "Hostname verification disabled - host_whitelist removed, api_warnings set to 0"
                     '' else if cfg.hostWhitelist != "" || cfg.ingress.domain != "" then ''
                       # Add the new host_whitelist setting in the [misc] section
-                      # Find the [misc] section and add after it
+                      # Convert comma-separated to space-separated (SABnzbd accepts both but space is more reliable)
+                      HOSTNAME_SPACES=$(echo "$HOSTNAME" | tr ',' ' ')
                       if grep -q "^\[misc\]" "$CONFIG_FILE"; then
                         # Add after [misc] line
-                        sed -i "/^\[misc\]/a host_whitelist = $HOSTNAME" "$CONFIG_FILE"
+                        sed -i "/^\[misc\]/a host_whitelist = $HOSTNAME_SPACES" "$CONFIG_FILE"
                       else
                         # Add at the end if [misc] section doesn't exist
-                        echo "host_whitelist = $HOSTNAME" >> "$CONFIG_FILE"
+                        echo "host_whitelist = $HOSTNAME_SPACES" >> "$CONFIG_FILE"
                       fi
+                      echo "Hostname whitelist set to: $HOSTNAME_SPACES"
                     '' else ''
                       # Only service names provided, add them
+                      HOSTNAME_SPACES=$(echo "$HOSTNAME" | tr ',' ' ')
                       if grep -q "^\[misc\]" "$CONFIG_FILE"; then
-                        sed -i "/^\[misc\]/a host_whitelist = $HOSTNAME" "$CONFIG_FILE"
+                        sed -i "/^\[misc\]/a host_whitelist = $HOSTNAME_SPACES" "$CONFIG_FILE"
                       else
-                        echo "host_whitelist = $HOSTNAME" >> "$CONFIG_FILE"
+                        echo "host_whitelist = $HOSTNAME_SPACES" >> "$CONFIG_FILE"
                       fi
+                      echo "Hostname whitelist set to: $HOSTNAME_SPACES"
                     ''}
                   ''
                 ];
