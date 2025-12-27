@@ -86,6 +86,12 @@ mkArgoApp { inherit config lib; } rec {
       type = types.int;
       default = 1000;
     };
+
+    hostWhitelist = mkOption {
+      description = mdDoc "Comma-separated list of hostnames allowed to access SABnzbd (empty to disable hostname verification)";
+      type = types.str;
+      default = "";
+    };
   };
 
   extraResources = cfg: {
@@ -112,6 +118,53 @@ mkArgoApp { inherit config lib; } rec {
             spec = {
               automountServiceAccountToken = true;
               serviceAccountName = "default";
+              # Init container to set hostname whitelist in config
+              initContainers = [{
+                name = "set-hostname-whitelist";
+                image = "busybox:latest";
+                command = [
+                  "sh"
+                  "-c"
+                  ''
+                    CONFIG_FILE="/config/sabnzbd.ini"
+                    ${if cfg.hostWhitelist != "" then ''
+                      HOSTNAME="${cfg.hostWhitelist}"
+                    '' else if cfg.ingress.domain != "" then ''
+                      HOSTNAME="${cfg.ingress.domain}"
+                    '' else ''
+                      HOSTNAME=""
+                    ''}
+
+                    # Wait for config volume to be available
+                    while [ ! -d /config ]; do
+                      sleep 1
+                    done
+
+                    # Create config file if it doesn't exist
+                    if [ ! -f "$CONFIG_FILE" ]; then
+                      touch "$CONFIG_FILE"
+                    fi
+
+                    # Update or add host_whitelist setting
+                    if [ -n "$HOSTNAME" ]; then
+                      if grep -q "^host_whitelist" "$CONFIG_FILE"; then
+                        # Update existing setting
+                        sed -i "s|^host_whitelist.*|host_whitelist = $HOSTNAME|" "$CONFIG_FILE"
+                      else
+                        # Add new setting
+                        echo "host_whitelist = $HOSTNAME" >> "$CONFIG_FILE"
+                      fi
+                    else
+                      # Remove host_whitelist to disable verification
+                      sed -i "/^host_whitelist/d" "$CONFIG_FILE"
+                    fi
+                  ''
+                ];
+                volumeMounts = [{
+                  mountPath = "/config";
+                  name = "config";
+                }];
+              }];
               containers = lib.flatten [
                 # Gluetun VPN container (only if VPN is enabled)
                 (lib.optional cfg.vpn.enable {

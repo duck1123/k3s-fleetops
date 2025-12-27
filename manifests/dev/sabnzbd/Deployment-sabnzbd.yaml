@@ -98,6 +98,43 @@ spec:
               name: downloads
             - mountPath: /incomplete-downloads
               name: incomplete-downloads
+      initContainers:
+        - command:
+            - sh
+            - -c
+            - |
+              CONFIG_FILE="/config/sabnzbd.ini"
+              HOSTNAME="sabnzbd.bearded-snake.ts.net"
+
+
+              # Wait for config volume to be available
+              while [ ! -d /config ]; do
+                sleep 1
+              done
+
+              # Create config file if it doesn't exist
+              if [ ! -f "$CONFIG_FILE" ]; then
+                touch "$CONFIG_FILE"
+              fi
+
+              # Update or add host_whitelist setting
+              if [ -n "$HOSTNAME" ]; then
+                if grep -q "^host_whitelist" "$CONFIG_FILE"; then
+                  # Update existing setting
+                  sed -i "s|^host_whitelist.*|host_whitelist = $HOSTNAME|" "$CONFIG_FILE"
+                else
+                  # Add new setting
+                  echo "host_whitelist = $HOSTNAME" >> "$CONFIG_FILE"
+                fi
+              else
+                # Remove host_whitelist to disable verification
+                sed -i "/^host_whitelist/d" "$CONFIG_FILE"
+              fi
+          image: busybox:latest
+          name: set-hostname-whitelist
+          volumeMounts:
+            - mountPath: /config
+              name: config
       serviceAccountName: default
       volumes:
         - name: config
