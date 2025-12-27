@@ -69,12 +69,15 @@ spec:
         - command:
             - sh
             - -c
-            - |+
+            - |
               CONFIG_FILE="/config/sabnzbd.ini"
               SERVICE_NAME="sabnzbd.sabnzbd"
               SERVICE_FQDN="sabnzbd.sabnzbd.svc.cluster.local"
-              HOSTNAME="sabnzbd.bearded-snake.ts.net,sabnzbd.sabnzbd,$SERVICE_NAME,$SERVICE_FQDN"
-
+              ALL_HOSTNAMES="*"
+              # Convert commas to spaces and clean up duplicates (safe even for wildcard)
+              if [ "$ALL_HOSTNAMES" != "*" ]; then
+                ALL_HOSTNAMES=$(echo "$ALL_HOSTNAMES" | tr ',' ' ' | tr ' ' '\n' | grep -v '^$' | sort -u | tr '\n' ' ' | sed 's/[[:space:]]*$//')
+              fi
 
               # Wait for config volume to be available
               while [ ! -d /config ]; do
@@ -96,16 +99,22 @@ spec:
               sed -i '/^host_whitelist/d' "$CONFIG_FILE"
               sed -i '/^api_warnings/d' "$CONFIG_FILE"
 
-              # Update or add host_whitelist setting in [misc] section
-              # Hostname verification disabled - remove host_whitelist entirely and disable api_warnings
-              # SABnzbd will allow all hosts when host_whitelist is not set and api_warnings is 0
+              # Always set host_whitelist - SABnzbd requires it and cannot be fully disabled
+              # Also disable api_warnings to suppress warnings
               if grep -q "^\[misc\]" "$CONFIG_FILE"; then
                 sed -i "/^\[misc\]/a api_warnings = 0" "$CONFIG_FILE"
               else
                 echo "api_warnings = 0" >> "$CONFIG_FILE"
               fi
-              echo "Hostname verification disabled - host_whitelist removed, api_warnings set to 0"
 
+
+              # Add host_whitelist to [misc] section
+              if grep -q "^\[misc\]" "$CONFIG_FILE"; then
+                sed -i "/^\[misc\]/a host_whitelist = $ALL_HOSTNAMES" "$CONFIG_FILE"
+              else
+                echo "host_whitelist = $ALL_HOSTNAMES" >> "$CONFIG_FILE"
+              fi
+              echo "Hostname whitelist set to: $ALL_HOSTNAMES"
           image: busybox:latest
           name: set-hostname-whitelist
           volumeMounts:

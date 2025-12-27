@@ -113,7 +113,19 @@ mkArgoApp { inherit config lib; } rec {
               automountServiceAccountToken = true;
               serviceAccountName = "default";
               # Init container to set hostname whitelist in config
-              initContainers = [{
+              initContainers = let
+                hostnameList = if cfg.disableHostnameVerification then
+                  "*"
+                else
+                  lib.concatStringsSep " " (
+                    lib.filter (x: x != "") [
+                      (lib.replaceStrings [","] [" "] cfg.hostWhitelist)
+                      (if cfg.ingress.domain != "" then cfg.ingress.domain else "")
+                      "${name}.${cfg.namespace}"
+                      "${name}.${cfg.namespace}.svc.cluster.local"
+                    ]
+                  );
+              in [{
                 name = "set-hostname-whitelist";
                 image = "busybox:latest";
                 command = [
@@ -123,13 +135,11 @@ mkArgoApp { inherit config lib; } rec {
                     CONFIG_FILE="/config/sabnzbd.ini"
                     SERVICE_NAME="${name}.${cfg.namespace}"
                     SERVICE_FQDN="${name}.${cfg.namespace}.svc.cluster.local"
-                    ${if cfg.hostWhitelist != "" then ''
-                      HOSTNAME="${cfg.hostWhitelist},$SERVICE_NAME,$SERVICE_FQDN"
-                    '' else if cfg.ingress.domain != "" then ''
-                      HOSTNAME="${cfg.ingress.domain},$SERVICE_NAME,$SERVICE_FQDN"
-                    '' else ''
-                      HOSTNAME="$SERVICE_NAME,$SERVICE_FQDN"
-                    ''}
+                    ALL_HOSTNAMES="${hostnameList}"
+                    # Convert commas to spaces and clean up duplicates (safe even for wildcard)
+                    if [ "$ALL_HOSTNAMES" != "*" ]; then
+                      ALL_HOSTNAMES=$(echo "$ALL_HOSTNAMES" | tr ',' ' ' | tr ' ' '\n' | grep -v '^$' | sort -u | tr '\n' ' ' | sed 's/[[:space:]]*$//')
+                    fi
 
                     # Wait for config volume to be available
                     while [ ! -d /config ]; do
@@ -151,38 +161,23 @@ mkArgoApp { inherit config lib; } rec {
                     sed -i '/^host_whitelist/d' "$CONFIG_FILE"
                     sed -i '/^api_warnings/d' "$CONFIG_FILE"
 
-                    # Update or add host_whitelist setting in [misc] section
-                    ${if cfg.disableHostnameVerification then ''
-                      # Hostname verification disabled - remove host_whitelist entirely and disable api_warnings
-                      # SABnzbd will allow all hosts when host_whitelist is not set and api_warnings is 0
+                    # Always set host_whitelist - SABnzbd requires it and cannot be fully disabled
+                    ${lib.optionalString cfg.disableHostnameVerification ''
+                      # Also disable api_warnings to suppress warnings
                       if grep -q "^\[misc\]" "$CONFIG_FILE"; then
                         sed -i "/^\[misc\]/a api_warnings = 0" "$CONFIG_FILE"
                       else
                         echo "api_warnings = 0" >> "$CONFIG_FILE"
                       fi
-                      echo "Hostname verification disabled - host_whitelist removed, api_warnings set to 0"
-                    '' else if cfg.hostWhitelist != "" || cfg.ingress.domain != "" then ''
-                      # Add the new host_whitelist setting in the [misc] section
-                      # Convert comma-separated to space-separated (SABnzbd accepts both but space is more reliable)
-                      HOSTNAME_SPACES=$(echo "$HOSTNAME" | tr ',' ' ')
-                      if grep -q "^\[misc\]" "$CONFIG_FILE"; then
-                        # Add after [misc] line
-                        sed -i "/^\[misc\]/a host_whitelist = $HOSTNAME_SPACES" "$CONFIG_FILE"
-                      else
-                        # Add at the end if [misc] section doesn't exist
-                        echo "host_whitelist = $HOSTNAME_SPACES" >> "$CONFIG_FILE"
-                      fi
-                      echo "Hostname whitelist set to: $HOSTNAME_SPACES"
-                    '' else ''
-                      # Only service names provided, add them
-                      HOSTNAME_SPACES=$(echo "$HOSTNAME" | tr ',' ' ')
-                      if grep -q "^\[misc\]" "$CONFIG_FILE"; then
-                        sed -i "/^\[misc\]/a host_whitelist = $HOSTNAME_SPACES" "$CONFIG_FILE"
-                      else
-                        echo "host_whitelist = $HOSTNAME_SPACES" >> "$CONFIG_FILE"
-                      fi
-                      echo "Hostname whitelist set to: $HOSTNAME_SPACES"
                     ''}
+
+                    # Add host_whitelist to [misc] section
+                    if grep -q "^\[misc\]" "$CONFIG_FILE"; then
+                      sed -i "/^\[misc\]/a host_whitelist = $ALL_HOSTNAMES" "$CONFIG_FILE"
+                    else
+                      echo "host_whitelist = $ALL_HOSTNAMES" >> "$CONFIG_FILE"
+                    fi
+                    echo "Hostname whitelist set to: $ALL_HOSTNAMES"
                   ''
                 ];
                 volumeMounts = [{
