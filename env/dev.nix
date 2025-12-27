@@ -162,7 +162,7 @@ in {
 
     # ../modules/ersatztv/default.nix
     ersatztv = {
-      enable = true;
+      enable = false;
       logLevel = "Debug";
       ingress = {
         domain = "ersatztv.${tail-domain}";
@@ -281,7 +281,7 @@ in {
 
     # ../modules/radarr/default.nix
     radarr = {
-      enable = true;
+      enable = false;
 
       ingress = {
         domain = "radarr.${tail-domain}";
@@ -306,7 +306,7 @@ in {
 
     # ../modules/sonarr/default.nix
     sonarr = {
-      enable = true;
+      enable = false;
 
       ingress = {
         domain = "sonarr.${tail-domain}";
@@ -331,7 +331,7 @@ in {
 
     # ../modules/whisparr/default.nix
     whisparr = {
-      enable = true;
+      enable = false;
 
       ingress = {
         domain = "whisparr.${tail-domain}";
@@ -356,7 +356,7 @@ in {
 
     # ../modules/immich/default.nix
     immich = {
-      enable = true;
+      enable = false;
 
       database = {
         host = "postgresql.postgresql";
