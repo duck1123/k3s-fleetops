@@ -359,11 +359,10 @@ in {
       enable = false;
 
       database = {
+        inherit (secrets.immich.database) password username;
         host = "postgresql.postgresql";
-        password = secrets.immich.database.password;
         port = 5432;
         name = "immich";
-        username = secrets.immich.database.username;
       };
 
       ingress = {
@@ -379,8 +378,8 @@ in {
       };
 
       redis = {
+        inherit (secrets.immich.redis) password;
         host = "redis.redis";
-        password = secrets.redis.password;
         port = 6379;
         dbIndex = 0;
       };
