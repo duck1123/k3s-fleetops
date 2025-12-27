@@ -42,6 +42,7 @@
     ./opentelemetry-collector
     ./pihole
     ./postgresql
+    ./prowlarr
     ./radarr
     ./redis
     ./romm

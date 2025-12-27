@@ -1,0 +1,114 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/instance: sabnzbd
+    app.kubernetes.io/name: sabnzbd
+    app.kubernetes.io/version: latest
+  name: sabnzbd
+  namespace: sabnzbd
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: sabnzbd
+      app.kubernetes.io/name: sabnzbd
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: sabnzbd
+        app.kubernetes.io/name: sabnzbd
+    spec:
+      automountServiceAccountToken: true
+      containers:
+        - env:
+            - name: VPN_SERVICE_PROVIDER
+              value: mullvad
+            - name: VPN_TYPE
+              value: openvpn
+            - name: OPENVPN_IPV6
+              value: "false"
+            - name: MULLVAD_ACCOUNT_NUMBER
+              valueFrom:
+                secretKeyRef:
+                  key: accountNumber
+                  name: sabnzbd-mullvad-account
+            - name: OPENVPN_USER
+              valueFrom:
+                secretKeyRef:
+                  key: accountNumber
+                  name: sabnzbd-mullvad-account
+            - name: FIREWALL_VPN_INPUT_PORTS
+              value: "8080"
+            - name: FIREWALL
+              value: "on"
+            - name: FIREWALL_DEBUG
+              value: "off"
+            - name: UPDATER_PERIOD
+              value: 24h
+            - name: TZ
+              value: Etc/UTC
+            - name: HTTP_CONTROL_SERVER_LOG
+              value: "on"
+          image: qmcgaw/gluetun:latest
+          imagePullPolicy: IfNotPresent
+          name: gluetun
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+            - containerPort: 8888
+              name: http-proxy
+              protocol: TCP
+            - containerPort: 1080
+              name: socks-proxy
+              protocol: TCP
+          securityContext:
+            capabilities:
+              add:
+                - NET_ADMIN
+                - MKNOD
+            privileged: false
+          volumeMounts:
+            - mountPath: /gluetun
+              name: gluetun
+        - env:
+            - name: PGID
+              value: "1000"
+            - name: PUID
+              value: "1000"
+            - name: TZ
+              value: Etc/UTC
+            - name: HTTP_PROXY
+              value: http://127.0.0.1:8888
+            - name: HTTPS_PROXY
+              value: http://127.0.0.1:8888
+            - name: NO_PROXY
+              value: localhost,127.0.0.1
+          image: linuxserver/sabnzbd:latest
+          imagePullPolicy: IfNotPresent
+          name: sabnzbd
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /config
+              name: config
+            - mountPath: /downloads
+              name: downloads
+            - mountPath: /incomplete-downloads
+              name: incomplete-downloads
+      serviceAccountName: default
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: sabnzbd-sabnzbd-config
+        - name: downloads
+          persistentVolumeClaim:
+            claimName: sabnzbd-sabnzbd-downloads
+        - name: incomplete-downloads
+          persistentVolumeClaim:
+            claimName: sabnzbd-sabnzbd-incomplete-downloads
+        - name: gluetun
+          persistentVolumeClaim:
+            claimName: sabnzbd-sabnzbd-gluetun

@@ -329,6 +329,25 @@ in {
       storageClassName = "longhorn";
     };
 
+    # ../modules/prowlarr/default.nix
+    prowlarr = {
+      enable = true;
+
+      ingress = {
+        domain = "prowlarr.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+
+      vpn = {
+        enable = true;
+        mullvadAccountNumber = secrets.mullvad.id;
+        serverLocation = ""; # Optional: specific server location (e.g., "us-was", "se-sto")
+      };
+
+      storageClassName = "longhorn";
+    };
+
     # ../modules/sonarr/default.nix
     sonarr = {
       enable = true;

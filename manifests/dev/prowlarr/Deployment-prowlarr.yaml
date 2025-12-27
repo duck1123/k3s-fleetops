@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/instance: prowlarr
+    app.kubernetes.io/name: prowlarr
+    app.kubernetes.io/version: latest
+  name: prowlarr
+  namespace: prowlarr
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: prowlarr
+      app.kubernetes.io/name: prowlarr
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: prowlarr
+        app.kubernetes.io/name: prowlarr
+    spec:
+      automountServiceAccountToken: true
+      containers:
+        - env:
+            - name: VPN_SERVICE_PROVIDER
+              value: mullvad
+            - name: VPN_TYPE
+              value: openvpn
+            - name: OPENVPN_IPV6
+              value: "false"
+            - name: MULLVAD_ACCOUNT_NUMBER
+              valueFrom:
+                secretKeyRef:
+                  key: accountNumber
+                  name: prowlarr-mullvad-account
+            - name: OPENVPN_USER
+              valueFrom:
+                secretKeyRef:
+                  key: accountNumber
+                  name: prowlarr-mullvad-account
+            - name: FIREWALL_VPN_INPUT_PORTS
+              value: "9696"
+            - name: FIREWALL
+              value: "on"
+            - name: FIREWALL_DEBUG
+              value: "off"
+            - name: UPDATER_PERIOD
+              value: 24h
+            - name: TZ
+              value: Etc/UTC
+            - name: HTTP_CONTROL_SERVER_LOG
+              value: "on"
+          image: qmcgaw/gluetun:latest
+          imagePullPolicy: IfNotPresent
+          name: gluetun
+          ports:
+            - containerPort: 9696
+              name: http
+              protocol: TCP
+            - containerPort: 8888
+              name: http-proxy
+              protocol: TCP
+            - containerPort: 1080
+              name: socks-proxy
+              protocol: TCP
+          securityContext:
+            capabilities:
+              add:
+                - NET_ADMIN
+                - MKNOD
+            privileged: false
+          volumeMounts:
+            - mountPath: /gluetun
+              name: gluetun
+        - env:
+            - name: PGID
+              value: "1000"
+            - name: PUID
+              value: "1000"
+            - name: TZ
+              value: Etc/UTC
+            - name: HTTP_PROXY
+              value: http://127.0.0.1:8888
+            - name: HTTPS_PROXY
+              value: http://127.0.0.1:8888
+            - name: NO_PROXY
+              value: localhost,127.0.0.1
+          image: linuxserver/prowlarr:latest
+          imagePullPolicy: IfNotPresent
+          name: prowlarr
+          ports:
+            - containerPort: 9696
+              name: http
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /config
+              name: config
+      serviceAccountName: default
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: prowlarr-prowlarr-config
+        - name: gluetun
+          persistentVolumeClaim:
+            claimName: prowlarr-prowlarr-gluetun
