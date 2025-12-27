@@ -304,6 +304,31 @@ in {
       storageClassName = "longhorn";
     };
 
+    # ../modules/sabnzbd/default.nix
+    sabnzbd = {
+      enable = true;
+
+      ingress = {
+        domain = "sabnzbd.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+
+      vpn = {
+        enable = true;
+        mullvadAccountNumber = secrets.mullvad.id;
+        serverLocation = ""; # Optional: specific server location (e.g., "us-was", "se-sto")
+      };
+
+      nfs = {
+        enable = true;
+        server = nas-host;
+        path = "${nas-base}";
+      };
+
+      storageClassName = "longhorn";
+    };
+
     # ../modules/sonarr/default.nix
     sonarr = {
       enable = true;

@@ -45,6 +45,7 @@
     ./radarr
     ./redis
     ./romm
+    ./sabnzbd
     ./satisfactory
     ./sonarr
     ./sealed-secrets
