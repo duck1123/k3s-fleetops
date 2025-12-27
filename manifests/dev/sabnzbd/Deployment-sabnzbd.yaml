@@ -92,15 +92,18 @@ spec:
                 echo "[misc]" >> "$CONFIG_FILE"
               fi
 
-              # Remove any existing host_whitelist entries
+              # Remove any existing host_whitelist and api_warnings entries
               sed -i '/^host_whitelist/d' "$CONFIG_FILE"
+              sed -i '/^api_warnings/d' "$CONFIG_FILE"
 
               # Update or add host_whitelist setting in [misc] section
-              # Hostname verification disabled - set to * to allow all hosts
+              # Hostname verification disabled - set to * to allow all hosts and disable api_warnings
               if grep -q "^\[misc\]" "$CONFIG_FILE"; then
                 sed -i "/^\[misc\]/a host_whitelist = *" "$CONFIG_FILE"
+                sed -i "/^\[misc\]/a api_warnings = 0" "$CONFIG_FILE"
               else
                 echo "host_whitelist = *" >> "$CONFIG_FILE"
+                echo "api_warnings = 0" >> "$CONFIG_FILE"
               fi
 
           image: busybox:latest
