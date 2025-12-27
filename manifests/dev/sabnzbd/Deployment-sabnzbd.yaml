@@ -54,7 +54,7 @@ spec:
             - |
               CONFIG_FILE="/config/sabnzbd.ini"
               SERVICE_NAME="sabnzbd.sabnzbd"
-              HOSTNAME="sabnzbd.bearded-snake.ts.net,$SERVICE_NAME"
+              HOSTNAME="sabnzbd.bearded-snake.ts.net,sabnzbd.sabnzbd,$SERVICE_NAME"
 
 
               # Wait for config volume to be available

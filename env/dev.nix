@@ -319,6 +319,8 @@ in {
         clusterIssuer = "tailscale";
       };
 
+      hostWhitelist = "sabnzbd.${tail-domain},sabnzbd.sabnzbd";
+
       vpn = {
         enable = true;
         sharedGluetunService = "gluetun.gluetun";
