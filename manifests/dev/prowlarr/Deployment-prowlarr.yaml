@@ -43,8 +43,6 @@ spec:
           volumeMounts:
             - mountPath: /config
               name: config
-      dnsConfig: {}
-      dnsPolicy: ClusterFirst
       serviceAccountName: default
       volumes:
         - name: config

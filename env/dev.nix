@@ -272,10 +272,8 @@ in {
       };
 
       vpn = {
-        # inherit serverLocation;
         enable = true;
-        mullvadAccountNumber = secrets.mullvad.id;
-        # serverCountry = "USA";
+        sharedGluetunService = "gluetun.gluetun";
       };
 
       nfs = {
@@ -299,8 +297,7 @@ in {
 
       vpn = {
         enable = true;
-        mullvadAccountNumber = secrets.mullvad.id;
-        serverLocation = ""; # Optional: specific server location (e.g., "us-was", "se-sto")
+        sharedGluetunService = "gluetun.gluetun";
       };
 
       nfs = {
@@ -324,8 +321,7 @@ in {
 
       vpn = {
         enable = true;
-        mullvadAccountNumber = secrets.mullvad.id;
-        serverLocation = ""; # Optional: specific server location (e.g., "us-was", "se-sto")
+        sharedGluetunService = "gluetun.gluetun";
       };
 
       nfs = {
@@ -349,10 +345,7 @@ in {
 
       vpn = {
         enable = true;
-        useSharedGluetun = true;
         sharedGluetunService = "gluetun.gluetun";
-        # mullvadAccountNumber not needed when using shared gluetun
-        serverLocation = ""; # Optional: specific server location (e.g., "us-was", "se-sto")
       };
 
       storageClassName = "longhorn";
@@ -370,8 +363,7 @@ in {
 
       vpn = {
         enable = true;
-        mullvadAccountNumber = secrets.mullvad.id;
-        serverLocation = ""; # Optional: specific server location (e.g., "us-was", "se-sto")
+        sharedGluetunService = "gluetun.gluetun";
       };
 
       nfs = {
@@ -395,8 +387,7 @@ in {
 
       vpn = {
         enable = true;
-        mullvadAccountNumber = secrets.mullvad.id;
-        serverLocation = ""; # Optional: specific server location (e.g., "us-was", "se-sto")
+        sharedGluetunService = "gluetun.gluetun";
       };
 
       nfs = {

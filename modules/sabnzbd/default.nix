@@ -25,27 +25,15 @@ mkArgoApp { inherit config lib; } rec {
 
     vpn = {
       enable = mkOption {
-        description = mdDoc "Enable VPN routing through Mullvad";
+        description = mdDoc "Enable VPN routing through shared gluetun service";
         type = types.bool;
         default = true;
       };
 
-      mullvadAccountNumber = mkOption {
-        description = mdDoc "Mullvad account number";
+      sharedGluetunService = mkOption {
+        description = mdDoc "Service name for shared gluetun (e.g., gluetun.gluetun)";
         type = types.str;
-        default = "";
-      };
-
-      serverLocation = mkOption {
-        description = mdDoc "Mullvad server location (e.g., us-was, se-sto)";
-        type = types.str;
-        default = "";
-      };
-
-      serverCountry = mkOption {
-        description = mdDoc "Mullvad server country (e.g., USA, Sweden)";
-        type = types.nullOr types.str;
-        default = null;
+        default = "gluetun.gluetun";
       };
     };
 
@@ -165,102 +153,8 @@ mkArgoApp { inherit config lib; } rec {
                   name = "config";
                 }];
               }];
-              containers = lib.flatten [
-                # Gluetun VPN container (only if VPN is enabled)
-                (lib.optional cfg.vpn.enable {
-                  name = "gluetun";
-                  image = "qmcgaw/gluetun:latest";
-                  imagePullPolicy = "IfNotPresent";
-                  securityContext = {
-                    capabilities.add = [ "NET_ADMIN" "MKNOD" ];
-                    privileged = false;
-                  };
-                  env = lib.filter (x: x != null) [
-                    {
-                      name = "VPN_SERVICE_PROVIDER";
-                      value = "mullvad";
-                    }
-                    {
-                      name = "VPN_TYPE";
-                      value = "openvpn";
-                    }
-                    {
-                      name = "OPENVPN_IPV6";
-                      value = "false";
-                    }
-                    {
-                      name = "MULLVAD_ACCOUNT_NUMBER";
-                      valueFrom.secretKeyRef = {
-                        name = "${name}-mullvad-account";
-                        key = "accountNumber";
-                      };
-                    }
-                    {
-                      name = "OPENVPN_USER";
-                      valueFrom.secretKeyRef = {
-                        name = "${name}-mullvad-account";
-                        key = "accountNumber";
-                      };
-                    }
-                    (if cfg.vpn.serverCountry != null && cfg.vpn.serverCountry != "" then {
-                      name = "SERVER_COUNTRIES";
-                      value = cfg.vpn.serverCountry;
-                    } else null)
-                    (if cfg.vpn.serverLocation != "" then {
-                      name = "SERVER_CITIES";
-                      value = cfg.vpn.serverLocation;
-                    } else null)
-                    {
-                      name = "FIREWALL_VPN_INPUT_PORTS";
-                      value = "${toString cfg.service.port}";
-                    }
-                    {
-                      name = "FIREWALL";
-                      value = "on";
-                    }
-                    {
-                      name = "FIREWALL_DEBUG";
-                      value = "off";
-                    }
-                    {
-                      name = "UPDATER_PERIOD";
-                      value = "24h";
-                    }
-                    {
-                      name = "TZ";
-                      value = cfg.tz;
-                    }
-                    {
-                      name = "HTTP_CONTROL_SERVER_LOG";
-                      value = "on";
-                    }
-                  ];
-                  ports = [
-                    {
-                      containerPort = cfg.service.port;
-                      name = "http";
-                      protocol = "TCP";
-                    }
-                    {
-                      containerPort = 8888;
-                      name = "http-proxy";
-                      protocol = "TCP";
-                    }
-                    {
-                      containerPort = 1080;
-                      name = "socks-proxy";
-                      protocol = "TCP";
-                    }
-                  ];
-                  volumeMounts = [
-                    {
-                      mountPath = "/gluetun";
-                      name = "gluetun";
-                    }
-                  ];
-                })
-                # Sabnzbd container
-                [{
+              containers = [
+                {
                   inherit name;
                   image = cfg.image;
                   imagePullPolicy = "IfNotPresent";
@@ -278,14 +172,14 @@ mkArgoApp { inherit config lib; } rec {
                       value = cfg.tz;
                     }
                   ] ++ (lib.optionalAttrs cfg.vpn.enable [
-                    # Configure Sabnzbd to use gluetun's HTTP proxy
+                    # Configure Sabnzbd to use shared gluetun's HTTP proxy
                     {
                       name = "HTTP_PROXY";
-                      value = "http://127.0.0.1:8888";
+                      value = "http://${cfg.vpn.sharedGluetunService}:8888";
                     }
                     {
                       name = "HTTPS_PROXY";
-                      value = "http://127.0.0.1:8888";
+                      value = "http://${cfg.vpn.sharedGluetunService}:8888";
                     }
                     {
                       name = "NO_PROXY";
@@ -311,7 +205,7 @@ mkArgoApp { inherit config lib; } rec {
                       name = "incomplete-downloads";
                     }
                   ];
-                }]
+                }
               ];
               volumes = [
                 {
@@ -326,10 +220,6 @@ mkArgoApp { inherit config lib; } rec {
                   name = "incomplete-downloads";
                   persistentVolumeClaim.claimName = "${name}-${name}-incomplete-downloads";
                 }
-                (lib.optionalAttrs cfg.vpn.enable {
-                  name = "gluetun";
-                  persistentVolumeClaim.claimName = "${name}-${name}-gluetun";
-                })
               ];
             };
           };
@@ -383,13 +273,7 @@ mkArgoApp { inherit config lib; } rec {
         accessModes = [ "ReadWriteOnce" ];
         resources.requests.storage = "20Gi";
       };
-    } // (lib.optionalAttrs cfg.vpn.enable {
-      "${name}-${name}-gluetun".spec = {
-        inherit (cfg) storageClassName;
-        accessModes = [ "ReadWriteOnce" ];
-        resources.requests.storage = "1Gi";
-      };
-    });
+    };
 
     services.${name}.spec = {
       ports = [{
@@ -447,13 +331,6 @@ mkArgoApp { inherit config lib; } rec {
       };
     };
 
-    # Create SOPS secret for Mullvad account number
-    sopsSecrets."${name}-mullvad-account" = lib.createSecret {
-      inherit ageRecipients lib pkgs;
-      namespace = cfg.namespace;
-      secretName = "${name}-mullvad-account";
-      values.accountNumber = cfg.vpn.mullvadAccountNumber;
-    };
   };
 }
 
