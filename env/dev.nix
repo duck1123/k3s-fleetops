@@ -354,7 +354,7 @@ in {
 
     # ../modules/sonarr/default.nix
     sonarr = {
-      enable = false;
+      enable = true;
 
       ingress = {
         domain = "sonarr.${tail-domain}";
