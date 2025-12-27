@@ -140,7 +140,7 @@ mkArgoApp { inherit config lib; } rec {
                   }];
                   readinessProbe = {
                     httpGet = {
-                      path = "/";
+                      path = "/ping";
                       port = cfg.service.port;
                     };
                     initialDelaySeconds = 10;
@@ -151,7 +151,7 @@ mkArgoApp { inherit config lib; } rec {
                   };
                   livenessProbe = {
                     httpGet = {
-                      path = "/";
+                      path = "/ping";
                       port = cfg.service.port;
                     };
                     initialDelaySeconds = 30;

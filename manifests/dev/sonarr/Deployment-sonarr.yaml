@@ -38,7 +38,7 @@ spec:
           livenessProbe:
             failureThreshold: 3
             httpGet:
-              path: /
+              path: /ping
               port: 8989
             initialDelaySeconds: 30
             periodSeconds: 30
@@ -52,7 +52,7 @@ spec:
           readinessProbe:
             failureThreshold: 3
             httpGet:
-              path: /
+              path: /ping
               port: 8989
             initialDelaySeconds: 10
             periodSeconds: 10
