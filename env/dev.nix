@@ -285,7 +285,7 @@ in {
 
     # ../modules/radarr/default.nix
     radarr = {
-      enable = false;
+      enable = true;
 
       ingress = {
         domain = "radarr.${tail-domain}";
