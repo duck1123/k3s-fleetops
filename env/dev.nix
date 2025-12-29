@@ -5,6 +5,21 @@ let
   clusterIssuer = "letsencrypt-prod";
   nas-host = "192.168.0.124";
   nas-base = "/volume1";
+
+  # Helper function to generate database entries for *arr applications
+  # Takes a list of app configs and generates main + log databases
+  arrDatabases = apps: builtins.concatLists (map (app: [
+    {
+      name = if app.name == "prowlarr" then "${app.name}-main" else app.name;
+      username = app.name;
+      password = secrets.postgresql.userPassword;
+    }
+    {
+      name = if app.name == "prowlarr" then "${app.name}-log" else "${app.name}-log";
+      username = app.name;
+      password = secrets.postgresql.userPassword;
+    }
+  ]) apps);
 in {
   nixidy = {
     defaults.syncPolicy.autoSync = {
@@ -688,17 +703,12 @@ in {
       enable = true;
       storageClass = "longhorn";
 
-      extraDatabases = [
-        {
-          name = "prowlarr-main";
-          username = "prowlarr";
-          password = secrets.postgresql.userPassword;
-        }
-        {
-          name = "prowlarr-log";
-          username = "prowlarr";
-          password = secrets.postgresql.userPassword;
-        }
+      extraDatabases = arrDatabases [
+        { name = "prowlarr"; }
+        { name = "sonarr"; }
+        { name = "radarr"; }
+        { name = "lidarr"; }
+        { name = "whisparr"; }
       ];
     };
 

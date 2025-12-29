@@ -63,6 +63,198 @@ spec:
               EOSQL
               echo "Database prowlarr-log created successfully"
 
+              echo "Creating database sonarr and user sonarr..."
+              psql -v ON_ERROR_STOP=1 <<-EOSQL
+                -- Create database if it doesn't exist
+                SELECT format('CREATE DATABASE %I', 'sonarr') WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'sonarr')\gexec
+
+                -- Create user if it doesn't exist
+                DO \$\$
+                BEGIN
+                  IF NOT EXISTS (SELECT FROM pg_user WHERE usename = 'sonarr') THEN
+                    EXECUTE format('CREATE USER %I WITH PASSWORD %L', 'sonarr', 'omE.6H):+]qedMo>ZG;m');
+                  END IF;
+                END
+                \$\$;
+
+                -- Grant privileges (quote database name)
+                DO \$\$
+                BEGIN
+                  EXECUTE format('GRANT ALL PRIVILEGES ON DATABASE %I TO %I', 'sonarr', 'sonarr');
+                  EXECUTE format('ALTER DATABASE %I OWNER TO %I', 'sonarr', 'sonarr');
+                END
+                \$\$;
+              EOSQL
+              echo "Database sonarr created successfully"
+
+              echo "Creating database sonarr-log and user sonarr..."
+              psql -v ON_ERROR_STOP=1 <<-EOSQL
+                -- Create database if it doesn't exist
+                SELECT format('CREATE DATABASE %I', 'sonarr-log') WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'sonarr-log')\gexec
+
+                -- Create user if it doesn't exist
+                DO \$\$
+                BEGIN
+                  IF NOT EXISTS (SELECT FROM pg_user WHERE usename = 'sonarr') THEN
+                    EXECUTE format('CREATE USER %I WITH PASSWORD %L', 'sonarr', 'omE.6H):+]qedMo>ZG;m');
+                  END IF;
+                END
+                \$\$;
+
+                -- Grant privileges (quote database name)
+                DO \$\$
+                BEGIN
+                  EXECUTE format('GRANT ALL PRIVILEGES ON DATABASE %I TO %I', 'sonarr-log', 'sonarr');
+                  EXECUTE format('ALTER DATABASE %I OWNER TO %I', 'sonarr-log', 'sonarr');
+                END
+                \$\$;
+              EOSQL
+              echo "Database sonarr-log created successfully"
+
+              echo "Creating database radarr and user radarr..."
+              psql -v ON_ERROR_STOP=1 <<-EOSQL
+                -- Create database if it doesn't exist
+                SELECT format('CREATE DATABASE %I', 'radarr') WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'radarr')\gexec
+
+                -- Create user if it doesn't exist
+                DO \$\$
+                BEGIN
+                  IF NOT EXISTS (SELECT FROM pg_user WHERE usename = 'radarr') THEN
+                    EXECUTE format('CREATE USER %I WITH PASSWORD %L', 'radarr', 'omE.6H):+]qedMo>ZG;m');
+                  END IF;
+                END
+                \$\$;
+
+                -- Grant privileges (quote database name)
+                DO \$\$
+                BEGIN
+                  EXECUTE format('GRANT ALL PRIVILEGES ON DATABASE %I TO %I', 'radarr', 'radarr');
+                  EXECUTE format('ALTER DATABASE %I OWNER TO %I', 'radarr', 'radarr');
+                END
+                \$\$;
+              EOSQL
+              echo "Database radarr created successfully"
+
+              echo "Creating database radarr-log and user radarr..."
+              psql -v ON_ERROR_STOP=1 <<-EOSQL
+                -- Create database if it doesn't exist
+                SELECT format('CREATE DATABASE %I', 'radarr-log') WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'radarr-log')\gexec
+
+                -- Create user if it doesn't exist
+                DO \$\$
+                BEGIN
+                  IF NOT EXISTS (SELECT FROM pg_user WHERE usename = 'radarr') THEN
+                    EXECUTE format('CREATE USER %I WITH PASSWORD %L', 'radarr', 'omE.6H):+]qedMo>ZG;m');
+                  END IF;
+                END
+                \$\$;
+
+                -- Grant privileges (quote database name)
+                DO \$\$
+                BEGIN
+                  EXECUTE format('GRANT ALL PRIVILEGES ON DATABASE %I TO %I', 'radarr-log', 'radarr');
+                  EXECUTE format('ALTER DATABASE %I OWNER TO %I', 'radarr-log', 'radarr');
+                END
+                \$\$;
+              EOSQL
+              echo "Database radarr-log created successfully"
+
+              echo "Creating database lidarr and user lidarr..."
+              psql -v ON_ERROR_STOP=1 <<-EOSQL
+                -- Create database if it doesn't exist
+                SELECT format('CREATE DATABASE %I', 'lidarr') WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'lidarr')\gexec
+
+                -- Create user if it doesn't exist
+                DO \$\$
+                BEGIN
+                  IF NOT EXISTS (SELECT FROM pg_user WHERE usename = 'lidarr') THEN
+                    EXECUTE format('CREATE USER %I WITH PASSWORD %L', 'lidarr', 'omE.6H):+]qedMo>ZG;m');
+                  END IF;
+                END
+                \$\$;
+
+                -- Grant privileges (quote database name)
+                DO \$\$
+                BEGIN
+                  EXECUTE format('GRANT ALL PRIVILEGES ON DATABASE %I TO %I', 'lidarr', 'lidarr');
+                  EXECUTE format('ALTER DATABASE %I OWNER TO %I', 'lidarr', 'lidarr');
+                END
+                \$\$;
+              EOSQL
+              echo "Database lidarr created successfully"
+
+              echo "Creating database lidarr-log and user lidarr..."
+              psql -v ON_ERROR_STOP=1 <<-EOSQL
+                -- Create database if it doesn't exist
+                SELECT format('CREATE DATABASE %I', 'lidarr-log') WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'lidarr-log')\gexec
+
+                -- Create user if it doesn't exist
+                DO \$\$
+                BEGIN
+                  IF NOT EXISTS (SELECT FROM pg_user WHERE usename = 'lidarr') THEN
+                    EXECUTE format('CREATE USER %I WITH PASSWORD %L', 'lidarr', 'omE.6H):+]qedMo>ZG;m');
+                  END IF;
+                END
+                \$\$;
+
+                -- Grant privileges (quote database name)
+                DO \$\$
+                BEGIN
+                  EXECUTE format('GRANT ALL PRIVILEGES ON DATABASE %I TO %I', 'lidarr-log', 'lidarr');
+                  EXECUTE format('ALTER DATABASE %I OWNER TO %I', 'lidarr-log', 'lidarr');
+                END
+                \$\$;
+              EOSQL
+              echo "Database lidarr-log created successfully"
+
+              echo "Creating database whisparr and user whisparr..."
+              psql -v ON_ERROR_STOP=1 <<-EOSQL
+                -- Create database if it doesn't exist
+                SELECT format('CREATE DATABASE %I', 'whisparr') WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'whisparr')\gexec
+
+                -- Create user if it doesn't exist
+                DO \$\$
+                BEGIN
+                  IF NOT EXISTS (SELECT FROM pg_user WHERE usename = 'whisparr') THEN
+                    EXECUTE format('CREATE USER %I WITH PASSWORD %L', 'whisparr', 'omE.6H):+]qedMo>ZG;m');
+                  END IF;
+                END
+                \$\$;
+
+                -- Grant privileges (quote database name)
+                DO \$\$
+                BEGIN
+                  EXECUTE format('GRANT ALL PRIVILEGES ON DATABASE %I TO %I', 'whisparr', 'whisparr');
+                  EXECUTE format('ALTER DATABASE %I OWNER TO %I', 'whisparr', 'whisparr');
+                END
+                \$\$;
+              EOSQL
+              echo "Database whisparr created successfully"
+
+              echo "Creating database whisparr-log and user whisparr..."
+              psql -v ON_ERROR_STOP=1 <<-EOSQL
+                -- Create database if it doesn't exist
+                SELECT format('CREATE DATABASE %I', 'whisparr-log') WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'whisparr-log')\gexec
+
+                -- Create user if it doesn't exist
+                DO \$\$
+                BEGIN
+                  IF NOT EXISTS (SELECT FROM pg_user WHERE usename = 'whisparr') THEN
+                    EXECUTE format('CREATE USER %I WITH PASSWORD %L', 'whisparr', 'omE.6H):+]qedMo>ZG;m');
+                  END IF;
+                END
+                \$\$;
+
+                -- Grant privileges (quote database name)
+                DO \$\$
+                BEGIN
+                  EXECUTE format('GRANT ALL PRIVILEGES ON DATABASE %I TO %I', 'whisparr-log', 'whisparr');
+                  EXECUTE format('ALTER DATABASE %I OWNER TO %I', 'whisparr-log', 'whisparr');
+                END
+                \$\$;
+              EOSQL
+              echo "Database whisparr-log created successfully"
+
           env:
             - name: PGHOST
               value: postgresql.postgresql
