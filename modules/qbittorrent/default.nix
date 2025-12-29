@@ -157,7 +157,8 @@ in mkArgoApp { inherit config lib; } rec {
                         'if not password:' \
                         '    print("ERROR: PASSWORD not set", file=sys.stderr)' \
                         '    sys.exit(1)' \
-                        'salt = os.urandom(16)' \
+                        'import hashlib as hl' \
+                        'salt = hl.sha256(password.encode("utf-8")).digest()[:16]' \
                         'iterations = 100000' \
                         'dk = hashlib.pbkdf2_hmac("sha512", password.encode("utf-8"), salt, iterations)' \
                         'hash_b64 = base64.b64encode(dk).decode("ascii")' \
