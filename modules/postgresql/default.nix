@@ -1,7 +1,7 @@
 { ageRecipients, config, lib, pkgs, ... }:
 with lib;
 let password-secret = "postgresql-password";
-in mkArgoApp { inherit config lib; } {
+in mkArgoApp { inherit config lib; } rec {
   name = "postgresql";
 
   # https://artifacthub.io/packages/helm/bitnami/redis
@@ -97,19 +97,6 @@ in mkArgoApp { inherit config lib; } {
       };
 
       storage.className = cfg.storageClass;
-
-      # Add initdb scripts for extra databases
-      initdbScripts = lib.listToAttrs (map
-        (db: {
-          name = "init-${db.name}.sql";
-          value = ''
-            CREATE DATABASE ${db.name};
-            CREATE USER ${db.username} WITH PASSWORD '${db.password}';
-            GRANT ALL PRIVILEGES ON DATABASE ${db.name} TO ${db.username};
-            ALTER DATABASE ${db.name} OWNER TO ${db.username};
-          '';
-        })
-        cfg.extraDatabases);
     };
 
   extraResources = cfg: {
@@ -120,6 +107,85 @@ in mkArgoApp { inherit config lib; } {
       values = with cfg; {
         inherit (auth)
           adminPassword adminUsername replicationPassword userPassword;
+      };
+    };
+
+    # Create a Job to initialize extra databases after PostgreSQL is ready
+    jobs = lib.optionalAttrs (cfg.extraDatabases != []) {
+      "${name}-init-databases" = {
+        metadata = {
+          name = "${name}-init-databases";
+          namespace = cfg.namespace;
+          annotations = {
+            "argocd.argoproj.io/hook" = "PostSync";
+            "argocd.argoproj.io/hook-delete-policy" = "HookSucceeded";
+          };
+        };
+        spec = {
+          template = {
+            spec = {
+              restartPolicy = "OnFailure";
+              containers = [
+                {
+                  name = "init-databases";
+                  image = cfg.image;
+                  imagePullPolicy = "IfNotPresent";
+                  env = [
+                    {
+                      name = "PGHOST";
+                      value = "${name}.${cfg.namespace}";
+                    }
+                    {
+                      name = "PGPORT";
+                      value = "5432";
+                    }
+                    {
+                      name = "PGUSER";
+                      value = cfg.auth.adminUsername;
+                    }
+                    {
+                      name = "PGPASSWORD";
+                      valueFrom = {
+                        secretKeyRef = {
+                          name = password-secret;
+                          key = "adminPassword";
+                        };
+                      };
+                    }
+                  ];
+                  command = [
+                    "sh"
+                    "-c"
+                    ''
+                      set -e
+                      ${lib.concatMapStringsSep "\n" (db: ''
+                        echo "Creating database ${db.name} and user ${db.username}..."
+                        psql -v ON_ERROR_STOP=1 <<-EOSQL
+                          -- Create database if it doesn't exist
+                          SELECT 'CREATE DATABASE ${db.name}' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '${db.name}')\gexec
+
+                          -- Create user if it doesn't exist
+                          DO \$\$
+                          BEGIN
+                            IF NOT EXISTS (SELECT FROM pg_user WHERE usename = '${db.username}') THEN
+                              EXECUTE format('CREATE USER %I WITH PASSWORD %L', '${db.username}', '${db.password}');
+                            END IF;
+                          END
+                          \$\$;
+
+                          -- Grant privileges
+                          GRANT ALL PRIVILEGES ON DATABASE ${db.name} TO ${db.username};
+                          ALTER DATABASE ${db.name} OWNER TO ${db.username};
+                        EOSQL
+                        echo "Database ${db.name} created successfully"
+                      '') cfg.extraDatabases}
+                    ''
+                  ];
+                }
+              ];
+            };
+          };
+        };
       };
     };
   };
