@@ -164,8 +164,10 @@ in mkArgoApp { inherit config lib; } rec {
                         'hash_b64 = base64.b64encode(dk).decode("ascii")' \
                         'salt_b64 = base64.b64encode(salt).decode("ascii")' \
                         'pbkdf2_hash = f"PBKDF2:sha512:{iterations}:{salt_b64}:{hash_b64}"' \
+                        'pbkdf2_salt_hash = f"{salt_b64}:{hash_b64}"' \
                         'sha1_hash = hashlib.sha1(password.encode("utf-8")).hexdigest()' \
                         'print(f"export PBKDF2_HASH={chr(39)}{pbkdf2_hash}{chr(39)}")' \
+                        'print(f"export PBKDF2_SALT_HASH={chr(39)}{pbkdf2_salt_hash}{chr(39)}")' \
                         'print(f"export SHA1_HASH={chr(39)}{sha1_hash}{chr(39)}")' \
                         > /tmp/gen_hash.py
                       if ! eval $(python3 /tmp/gen_hash.py); then
@@ -179,8 +181,25 @@ in mkArgoApp { inherit config lib; } rec {
                         echo "[Preferences]" >> "$CONFIG_FILE"
                       fi
 
-                      # Remove all existing WebUI settings to avoid conflicts
-                      sed -i '/^WebUI\\/d' "$CONFIG_FILE" 2>/dev/null || true
+                      # Check if password is already set (user may have changed it in UI)
+                      PASSWORD_ALREADY_SET=false
+                      if grep -q "^WebUI\\\\Password_PBKDF2=" "$CONFIG_FILE" 2>/dev/null; then
+                        EXISTING_HASH=$(grep "^WebUI\\\\Password_PBKDF2=" "$CONFIG_FILE" | head -1)
+                        if [ -n "$EXISTING_HASH" ] && [ "$EXISTING_HASH" != "WebUI\\Password_PBKDF2=\"\"" ]; then
+                          PASSWORD_ALREADY_SET=true
+                          echo "Password already set in config, preserving user-set password"
+                        fi
+                      fi
+
+                      # Remove all existing WebUI settings to avoid conflicts (except password if already set)
+                      if [ "$PASSWORD_ALREADY_SET" = "true" ]; then
+                        # Preserve password settings
+                        TEMP_PASS=$(grep "^WebUI\\\\Password_PBKDF2=" "$CONFIG_FILE" | head -1)
+                        TEMP_HA1=$(grep "^WebUI\\\\Password_ha1=" "$CONFIG_FILE" | head -1)
+                        sed -i '/^WebUI\\/d' "$CONFIG_FILE" 2>/dev/null || true
+                      else
+                        sed -i '/^WebUI\\/d' "$CONFIG_FILE" 2>/dev/null || true
+                      fi
 
                       # Add all required WebUI settings to [Preferences] section
                       # Find the line number of [Preferences] and insert after it
@@ -195,8 +214,13 @@ in mkArgoApp { inherit config lib; } rec {
                           echo "WebUI\\LocalHostAuth=false"
                           echo "WebUI\\AuthSubnetWhitelist=@Invalid()"
                           echo "WebUI\\Username=$USERNAME"
-                          echo "WebUI\\Password_ha1=@ByteArray($SHA1_HASH)"
-                          echo "WebUI\\Password_PBKDF2=\"$PBKDF2_HASH\""
+                          if [ "$PASSWORD_ALREADY_SET" = "true" ]; then
+                            echo "$TEMP_HA1"
+                            echo "$TEMP_PASS"
+                          else
+                            echo "WebUI\\Password_ha1=@ByteArray($SHA1_HASH)"
+                            echo "WebUI\\Password_PBKDF2=@ByteArray($PBKDF2_SALT_HASH)"
+                          fi
                           echo "WebUI\\HostHeaderValidation=false"
                           echo "WebUI\\CSRFProtection=false"
                           echo "WebUI\\ClickjackingProtection=false"
@@ -216,8 +240,17 @@ WebUI\Port=8080
 WebUI\LocalHostAuth=false
 WebUI\AuthSubnetWhitelist=@Invalid()
 WebUI\Username=$USERNAME
+EOF
+                        if [ "$PASSWORD_ALREADY_SET" = "true" ]; then
+                          echo "$TEMP_HA1" >> "$CONFIG_FILE"
+                          echo "$TEMP_PASS" >> "$CONFIG_FILE"
+                        else
+                          cat >> "$CONFIG_FILE" <<PASS_EOF
 WebUI\Password_ha1=@ByteArray($SHA1_HASH)
-WebUI\Password_PBKDF2="$PBKDF2_HASH"
+WebUI\Password_PBKDF2=@ByteArray($PBKDF2_SALT_HASH)
+PASS_EOF
+                        fi
+                        cat >> "$CONFIG_FILE" <<EOF
 WebUI\HostHeaderValidation=false
 WebUI\CSRFProtection=false
 WebUI\ClickjackingProtection=false
