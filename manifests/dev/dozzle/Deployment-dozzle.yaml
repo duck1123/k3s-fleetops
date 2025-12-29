@@ -23,6 +23,8 @@ spec:
         - env:
             - name: DOZZLE_NO_ANALYTICS
               value: "true"
+            - name: DOZZLE_KUBERNETES
+              value: "true"
           image: amir20/dozzle:latest
           imagePullPolicy: IfNotPresent
           name: dozzle
