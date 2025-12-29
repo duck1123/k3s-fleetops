@@ -347,7 +347,7 @@ in {
 
     # ../modules/prowlarr/default.nix
     prowlarr = {
-      enable = false;
+      enable = true;
 
       ingress = {
         domain = "prowlarr.${tail-domain}";
