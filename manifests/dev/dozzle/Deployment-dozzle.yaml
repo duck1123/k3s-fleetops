@@ -37,4 +37,13 @@ spec:
             requests:
               cpu: 50m
               memory: 64Mi
+          volumeMounts:
+            - mountPath: /var/run/docker.sock
+              name: containerd-socket
+              readOnly: true
       serviceAccountName: dozzle
+      volumes:
+        - hostPath:
+            path: /run/k3s/containerd/containerd.sock
+            type: Socket
+          name: containerd-socket

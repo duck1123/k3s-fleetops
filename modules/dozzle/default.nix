@@ -34,6 +34,12 @@ mkArgoApp { inherit config lib; } rec {
       type = types.str;
       default = "all";
     };
+
+    mountContainerdSocket = mkOption {
+      description = mdDoc "Mount containerd socket from host (for k3s). Requires hostPath access.";
+      type = types.bool;
+      default = true;
+    };
   };
 
   extraResources = cfg: {
@@ -136,6 +142,13 @@ mkArgoApp { inherit config lib; } rec {
                     name = "http";
                     protocol = "TCP";
                   }];
+                  volumeMounts = lib.optionals cfg.mountContainerdSocket [
+                    {
+                      mountPath = "/var/run/docker.sock";
+                      name = "containerd-socket";
+                      readOnly = true;
+                    }
+                  ];
                   resources = {
                     requests = {
                       memory = "64Mi";
@@ -145,6 +158,15 @@ mkArgoApp { inherit config lib; } rec {
                       memory = "256Mi";
                       cpu = "200m";
                     };
+                  };
+                }
+              ];
+              volumes = lib.optionals cfg.mountContainerdSocket [
+                {
+                  name = "containerd-socket";
+                  hostPath = {
+                    path = "/run/k3s/containerd/containerd.sock";
+                    type = "Socket";
                   };
                 }
               ];
