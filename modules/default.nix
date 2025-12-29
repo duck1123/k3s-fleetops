@@ -15,6 +15,7 @@
     ./crossplane
     ./demo
     ./dinsro
+    ./dozzle
     ./ersatztv
     ./forgejo
     ./gluetun

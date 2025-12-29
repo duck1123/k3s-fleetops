@@ -158,6 +158,17 @@ in {
       };
     };
 
+    # ../modules/dozzle/default.nix
+    dozzle = {
+      enable = true;
+
+      ingress = {
+        domain = "dozzle.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+    };
+
     # ../modules/ersatztv/default.nix
     ersatztv = {
       enable = false;
