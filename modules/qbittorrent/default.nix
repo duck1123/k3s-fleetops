@@ -200,6 +200,8 @@ in mkArgoApp { inherit config lib; } rec {
                           echo "WebUI\\CSRFProtection=false"
                           echo "WebUI\\ClickjackingProtection=false"
                           echo "WebUI\\ServerDomains=$''${WEBUI_DOMAIN:-*}"
+                          echo "WebUI\\MaxAuthenticationFailCount=0"
+                          echo "WebUI\\BanDuration=3600"
                           tail -n +$((PREF_LINE + 1)) "$CONFIG_FILE"
                         } > "$CONFIG_FILE.tmp" && mv "$CONFIG_FILE.tmp" "$CONFIG_FILE"
                       else
@@ -219,6 +221,8 @@ WebUI\HostHeaderValidation=false
 WebUI\CSRFProtection=false
 WebUI\ClickjackingProtection=false
 WebUI\ServerDomains=$''${WEBUI_DOMAIN:-*}
+WebUI\MaxAuthenticationFailCount=0
+WebUI\BanDuration=3600
 EOF
                       fi
 
