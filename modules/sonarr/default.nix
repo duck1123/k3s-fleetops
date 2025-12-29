@@ -253,10 +253,6 @@ in mkArgoApp { inherit config lib; } rec {
                       mountPath = "/config";
                       name = "config";
                     }
-                    (lib.optionalAttrs (cfg.database.enable && cfg.database.password != "") {
-                      mountPath = "/shared";
-                      name = "shared-env";
-                    })
                     {
                       mountPath = "/downloads";
                       name = "downloads";

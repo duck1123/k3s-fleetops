@@ -58,8 +58,6 @@ spec:
           volumeMounts:
             - mountPath: /config
               name: config
-            - mountPath: /shared
-              name: shared-env
             - mountPath: /downloads
               name: downloads
             - mountPath: /tv
