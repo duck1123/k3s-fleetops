@@ -291,6 +291,15 @@ in {
         path = "${nas-base}";
       };
 
+      database = {
+        enable = true;
+        host = "postgresql.postgresql";
+        port = 5432;
+        name = "lidarr";
+        username = "lidarr";
+        password = secrets.postgresql.userPassword;
+      };
+
       storageClassName = "longhorn";
     };
 
@@ -313,6 +322,15 @@ in {
         enable = true;
         server = nas-host;
         path = "${nas-base}";
+      };
+
+      database = {
+        enable = true;
+        host = "postgresql.postgresql";
+        port = 5432;
+        name = "radarr";
+        username = "radarr";
+        password = secrets.postgresql.userPassword;
       };
 
       storageClassName = "longhorn";
@@ -393,6 +411,15 @@ in {
         path = "${nas-base}";
       };
 
+      database = {
+        enable = true;
+        host = "postgresql.postgresql";
+        port = 5432;
+        name = "sonarr";
+        username = "sonarr";
+        password = secrets.postgresql.userPassword;
+      };
+
       storageClassName = "longhorn";
     };
 
@@ -444,6 +471,15 @@ in {
         enable = true;
         server = nas-host;
         path = "${nas-base}";
+      };
+
+      database = {
+        enable = true;
+        host = "postgresql.postgresql";
+        port = 5432;
+        name = "whisparr";
+        username = "whisparr";
+        password = secrets.postgresql.userPassword;
       };
 
       storageClassName = "longhorn";

@@ -47,11 +47,62 @@ spec:
               name: downloads
             - mountPath: /tv
               name: tv
+      initContainers:
+        - command:
+            - sh
+            - -c
+            - |
+              CONFIG_FILE="/config/config.xml"
+
+              # Wait for config file to exist (created on first run)
+              if [ ! -f "$CONFIG_FILE" ]; then
+                echo "Config file does not exist yet, will be created on first run"
+                exit 0
+              fi
+
+              # Read password from secret file
+              if [ -f /secrets/password ]; then
+                PASSWORD=$(cat /secrets/password)
+              else
+                echo "Warning: Password secret not found, using empty password"
+                PASSWORD=""
+              fi
+
+              # Create connection string
+              CONNECTION_STRING="Host=postgresql.postgresql;Port=5432;Database=sonarr;Username=sonarr;Password=$PASSWORD"
+
+              # Use sed to update or add ConnectionString in config.xml
+              if grep -q "<ConnectionString>" "$CONFIG_FILE"; then
+                # Update existing ConnectionString
+                sed -i "s|<ConnectionString>.*</ConnectionString>|<ConnectionString>$CONNECTION_STRING</ConnectionString>|g" "$CONFIG_FILE"
+                echo "Updated existing ConnectionString"
+              else
+                # Add ConnectionString after <Config> tag
+                if grep -q "<Config>" "$CONFIG_FILE"; then
+                  sed -i "/<Config>/a\  <ConnectionString>$CONNECTION_STRING</ConnectionString>" "$CONFIG_FILE"
+                  echo "Added ConnectionString to config.xml"
+                else
+                  echo "Warning: Could not find <Config> tag in config.xml"
+                fi
+              fi
+
+              echo "Database configuration complete"
+          image: busybox:latest
+          imagePullPolicy: IfNotPresent
+          name: configure-database
+          volumeMounts:
+            - mountPath: /config
+              name: config
+            - mountPath: /secrets
+              name: sonarr-database-password
       serviceAccountName: default
       volumes:
         - name: config
           persistentVolumeClaim:
             claimName: sonarr-sonarr-config
+        - name: sonarr-database-password
+          secret:
+            secretName: sonarr-database-password
         - name: downloads
           persistentVolumeClaim:
             claimName: sonarr-sonarr-downloads
