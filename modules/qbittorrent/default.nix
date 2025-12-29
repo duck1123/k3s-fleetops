@@ -181,25 +181,9 @@ in mkArgoApp { inherit config lib; } rec {
                         echo "[Preferences]" >> "$CONFIG_FILE"
                       fi
 
-                      # Check if password is already set (user may have changed it in UI)
-                      PASSWORD_ALREADY_SET=false
-                      if grep -q "^WebUI\\\\Password_PBKDF2=" "$CONFIG_FILE" 2>/dev/null; then
-                        EXISTING_HASH=$(grep "^WebUI\\\\Password_PBKDF2=" "$CONFIG_FILE" | head -1)
-                        if [ -n "$EXISTING_HASH" ] && [ "$EXISTING_HASH" != "WebUI\\Password_PBKDF2=\"\"" ]; then
-                          PASSWORD_ALREADY_SET=true
-                          echo "Password already set in config, preserving user-set password"
-                        fi
-                      fi
-
-                      # Remove all existing WebUI settings to avoid conflicts (except password if already set)
-                      if [ "$PASSWORD_ALREADY_SET" = "true" ]; then
-                        # Preserve password settings
-                        TEMP_PASS=$(grep "^WebUI\\\\Password_PBKDF2=" "$CONFIG_FILE" | head -1)
-                        TEMP_HA1=$(grep "^WebUI\\\\Password_ha1=" "$CONFIG_FILE" | head -1)
-                        sed -i '/^WebUI\\/d' "$CONFIG_FILE" 2>/dev/null || true
-                      else
-                        sed -i '/^WebUI\\/d' "$CONFIG_FILE" 2>/dev/null || true
-                      fi
+                      # Always regenerate password from secret to ensure correct format
+                      # Remove all existing WebUI settings to avoid conflicts
+                      sed -i '/^WebUI\\/d' "$CONFIG_FILE" 2>/dev/null || true
 
                       # Add all required WebUI settings to [Preferences] section
                       # Find the line number of [Preferences] and insert after it
@@ -241,15 +225,10 @@ WebUI\LocalHostAuth=false
 WebUI\AuthSubnetWhitelist=@Invalid()
 WebUI\Username=$USERNAME
 EOF
-                        if [ "$PASSWORD_ALREADY_SET" = "true" ]; then
-                          echo "$TEMP_HA1" >> "$CONFIG_FILE"
-                          echo "$TEMP_PASS" >> "$CONFIG_FILE"
-                        else
-                          cat >> "$CONFIG_FILE" <<PASS_EOF
+                        cat >> "$CONFIG_FILE" <<PASS_EOF
 WebUI\Password_ha1=@ByteArray($SHA1_HASH)
 WebUI\Password_PBKDF2=@ByteArray($PBKDF2_SALT_HASH)
 PASS_EOF
-                        fi
                         cat >> "$CONFIG_FILE" <<EOF
 WebUI\HostHeaderValidation=false
 WebUI\CSRFProtection=false
