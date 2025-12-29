@@ -59,9 +59,28 @@ spec:
                                     mkdir -p /config/qBittorrent
                                     CONFIG_FILE="/config/qBittorrent/qBittorrent.conf"
 
-                                    # Generate password hash (qBittorrent uses PBKDF2, but for simplicity we'll use SHA1)
-                                    # qBittorrent stores password as: @ByteArray(sha1_hash)
-                                    PASSWORD_HASH=$(echo -n "$PASSWORD" | sha1sum | cut -d' ' -f1)
+                                    # Generate PBKDF2 password hash for qBittorrent
+                                    # qBittorrent uses PBKDF2 with SHA-512, 100000 iterations
+                                    # Write Python script to file
+                                    printf '%s\n' \
+                                      'import hashlib' \
+                                      'import base64' \
+                                      'import os' \
+                                      'import sys' \
+                                      'password = os.environ.get("PASSWORD", "")' \
+                                      'if not password:' \
+                                      '    sys.exit(1)' \
+                                      'salt = os.urandom(16)' \
+                                      'iterations = 100000' \
+                                      'dk = hashlib.pbkdf2_hmac("sha512", password.encode("utf-8"), salt, iterations)' \
+                                      'hash_b64 = base64.b64encode(dk).decode("ascii")' \
+                                      'salt_b64 = base64.b64encode(salt).decode("ascii")' \
+                                      'pbkdf2_hash = f"PBKDF2:sha512:{iterations}:{salt_b64}:{hash_b64}"' \
+                                      'sha1_hash = hashlib.sha1(password.encode("utf-8")).hexdigest()' \
+                                      'print(f"export PBKDF2_HASH={chr(39)}{pbkdf2_hash}{chr(39)}")' \
+                                      'print(f"export SHA1_HASH={chr(39)}{sha1_hash}{chr(39)}")' \
+                                      > /tmp/gen_hash.py
+                                    eval $(python3 /tmp/gen_hash.py)
 
                                     # Ensure [Preferences] section exists
                                     if ! grep -q "^\[Preferences\]" "$CONFIG_FILE" 2>/dev/null; then
@@ -84,8 +103,8 @@ spec:
                                         echo "WebUI\\LocalHostAuth=false"
                                         echo "WebUI\\AuthSubnetWhitelist=@Invalid()"
                                         echo "WebUI\\Username=$USERNAME"
-                                        echo "WebUI\\Password_ha1=@ByteArray($PASSWORD_HASH)"
-                                        echo "WebUI\\Password_PBKDF2=\"@ByteArray($PASSWORD_HASH)\""
+                                        echo "WebUI\\Password_ha1=@ByteArray($SHA1_HASH)"
+                                        echo "WebUI\\Password_PBKDF2=\"@ByteArray($PBKDF2_HASH)\""
                                         echo "WebUI\\HostHeaderValidation=false"
                                         echo "WebUI\\CSRFProtection=false"
                                         echo "WebUI\\ClickjackingProtection=false"
@@ -103,8 +122,8 @@ spec:
               WebUI\LocalHostAuth=false
               WebUI\AuthSubnetWhitelist=@Invalid()
               WebUI\Username=$USERNAME
-              WebUI\Password_ha1=@ByteArray($PASSWORD_HASH)
-              WebUI\Password_PBKDF2="@ByteArray($PASSWORD_HASH)"
+              WebUI\Password_ha1=@ByteArray($SHA1_HASH)
+              WebUI\Password_PBKDF2="@ByteArray($PBKDF2_HASH)"
               WebUI\HostHeaderValidation=false
               WebUI\CSRFProtection=false
               WebUI\ClickjackingProtection=false
@@ -135,7 +154,7 @@ spec:
                   name: qbittorrent-webui-credentials
             - name: WEBUI_DOMAIN
               value: qbittorrent.bearded-snake.ts.net
-          image: busybox:latest
+          image: python:3-alpine
           name: configure-auth
           volumeMounts:
             - mountPath: /config
