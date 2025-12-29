@@ -164,9 +164,9 @@ in mkArgoApp { inherit config lib; } rec {
                         {
                           head -n "$PREF_LINE" "$CONFIG_FILE"
                           echo "WebUI\\Enabled=true"
-                          echo "WebUI\\Address=*"
+                          echo "WebUI\\Address=0.0.0.0"
                           echo "WebUI\\Port=8080"
-                          echo "WebUI\\LocalHostAuth=true"
+                          echo "WebUI\\LocalHostAuth=false"
                           echo "WebUI\\AuthSubnetWhitelist=@Invalid()"
                           echo "WebUI\\Username=$USERNAME"
                           echo "WebUI\\Password_ha1=@ByteArray($PASSWORD_HASH)"
@@ -174,7 +174,7 @@ in mkArgoApp { inherit config lib; } rec {
                           echo "WebUI\\HostHeaderValidation=false"
                           echo "WebUI\\CSRFProtection=false"
                           echo "WebUI\\ClickjackingProtection=false"
-                          echo "WebUI\\ServerDomains=*"
+                          echo "WebUI\\ServerDomains=$''${WEBUI_DOMAIN:-*}"
                           tail -n +$((PREF_LINE + 1)) "$CONFIG_FILE"
                         } > "$CONFIG_FILE.tmp" && mv "$CONFIG_FILE.tmp" "$CONFIG_FILE"
                       else
@@ -183,9 +183,9 @@ in mkArgoApp { inherit config lib; } rec {
 
 [Preferences]
 WebUI\Enabled=true
-WebUI\Address=*
+WebUI\Address=0.0.0.0
 WebUI\Port=8080
-WebUI\LocalHostAuth=true
+WebUI\LocalHostAuth=false
 WebUI\AuthSubnetWhitelist=@Invalid()
 WebUI\Username=$USERNAME
 WebUI\Password_ha1=@ByteArray($PASSWORD_HASH)
@@ -193,7 +193,7 @@ WebUI\Password_PBKDF2="@ByteArray($PASSWORD_HASH)"
 WebUI\HostHeaderValidation=false
 WebUI\CSRFProtection=false
 WebUI\ClickjackingProtection=false
-WebUI\ServerDomains=*
+WebUI\ServerDomains=$''${WEBUI_DOMAIN:-*}
 EOF
                       fi
 
@@ -202,8 +202,8 @@ EOF
                         echo "ERROR: WebUI\\Enabled not set!" >&2
                         exit 1
                       fi
-                      if ! grep -q "^WebUI\\\\LocalHostAuth=true" "$CONFIG_FILE"; then
-                        echo "ERROR: WebUI\\LocalHostAuth not set!" >&2
+                      if ! grep -q "^WebUI\\\\LocalHostAuth=false" "$CONFIG_FILE"; then
+                        echo "ERROR: WebUI\\LocalHostAuth not set correctly!" >&2
                         exit 1
                       fi
                       echo "WebUI configuration updated successfully"
@@ -233,6 +233,10 @@ EOF
                           key = "password";
                         };
                       };
+                    }
+                    {
+                      name = "WEBUI_DOMAIN";
+                      value = cfg.ingress.domain;
                     }
                   ];
                 }
