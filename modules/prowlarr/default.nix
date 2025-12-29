@@ -158,8 +158,12 @@ in mkArgoApp { inherit config lib; } rec {
                       value = toString cfg.database.port;
                     }
                     {
-                      name = "PROWLARR__POSTGRES__DATABASE";
+                      name = "PROWLARR__POSTGRES__MAINDB";
                       value = cfg.database.name;
+                    }
+                    {
+                      name = "PROWLARR__POSTGRES__LOGDB";
+                      value = "${cfg.database.name}-log";
                     }
                     {
                       name = "PROWLARR__POSTGRES__USER";

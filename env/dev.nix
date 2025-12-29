@@ -364,7 +364,7 @@ in {
         enable = true;
         host = "postgresql.postgresql";
         port = 5432;
-        name = "prowlarr";
+        name = "prowlarr-main";
         username = "prowlarr";
         password = secrets.postgresql.userPassword;
       };
@@ -625,7 +625,12 @@ in {
 
       extraDatabases = [
         {
-          name = "prowlarr";
+          name = "prowlarr-main";
+          username = "prowlarr";
+          password = secrets.postgresql.userPassword;
+        }
+        {
+          name = "prowlarr-log";
           username = "prowlarr";
           password = secrets.postgresql.userPassword;
         }

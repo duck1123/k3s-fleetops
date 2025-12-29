@@ -31,8 +31,10 @@ spec:
               value: postgresql.postgresql
             - name: PROWLARR__POSTGRES__PORT
               value: "5432"
-            - name: PROWLARR__POSTGRES__DATABASE
-              value: prowlarr
+            - name: PROWLARR__POSTGRES__MAINDB
+              value: prowlarr-main
+            - name: PROWLARR__POSTGRES__LOGDB
+              value: prowlarr-main-log
             - name: PROWLARR__POSTGRES__USER
               value: prowlarr
             - name: PROWLARR__POSTGRES__PASSWORD

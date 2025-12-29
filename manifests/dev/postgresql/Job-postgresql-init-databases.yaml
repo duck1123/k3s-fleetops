@@ -15,10 +15,10 @@ spec:
             - -c
             - |+
               set -e
-              echo "Creating database prowlarr and user prowlarr..."
+              echo "Creating database prowlarr-main and user prowlarr..."
               psql -v ON_ERROR_STOP=1 <<-EOSQL
                 -- Create database if it doesn't exist
-                SELECT 'CREATE DATABASE prowlarr' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'prowlarr')\gexec
+                SELECT 'CREATE DATABASE prowlarr-main' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'prowlarr-main')\gexec
 
                 -- Create user if it doesn't exist
                 DO \$\$
@@ -30,10 +30,30 @@ spec:
                 \$\$;
 
                 -- Grant privileges
-                GRANT ALL PRIVILEGES ON DATABASE prowlarr TO prowlarr;
-                ALTER DATABASE prowlarr OWNER TO prowlarr;
+                GRANT ALL PRIVILEGES ON DATABASE prowlarr-main TO prowlarr;
+                ALTER DATABASE prowlarr-main OWNER TO prowlarr;
               EOSQL
-              echo "Database prowlarr created successfully"
+              echo "Database prowlarr-main created successfully"
+
+              echo "Creating database prowlarr-log and user prowlarr..."
+              psql -v ON_ERROR_STOP=1 <<-EOSQL
+                -- Create database if it doesn't exist
+                SELECT 'CREATE DATABASE prowlarr-log' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'prowlarr-log')\gexec
+
+                -- Create user if it doesn't exist
+                DO \$\$
+                BEGIN
+                  IF NOT EXISTS (SELECT FROM pg_user WHERE usename = 'prowlarr') THEN
+                    EXECUTE format('CREATE USER %I WITH PASSWORD %L', 'prowlarr', 'omE.6H):+]qedMo>ZG;m');
+                  END IF;
+                END
+                \$\$;
+
+                -- Grant privileges
+                GRANT ALL PRIVILEGES ON DATABASE prowlarr-log TO prowlarr;
+                ALTER DATABASE prowlarr-log OWNER TO prowlarr;
+              EOSQL
+              echo "Database prowlarr-log created successfully"
 
           env:
             - name: PGHOST
