@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/instance: whisparr
+    app.kubernetes.io/name: whisparr
+    app.kubernetes.io/version: latest
+  name: whisparr
+  namespace: whisparr
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: whisparr
+      app.kubernetes.io/name: whisparr
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: whisparr
+        app.kubernetes.io/name: whisparr
+    spec:
+      automountServiceAccountToken: true
+      containers:
+        - env:
+            - name: PGID
+              value: "1000"
+            - name: PUID
+              value: "1000"
+            - name: TZ
+              value: Etc/UTC
+            - name: WHISPARR__POSTGRES__HOST
+              value: postgresql.postgresql
+            - name: WHISPARR__POSTGRES__PORT
+              value: "5432"
+            - name: WHISPARR__POSTGRES__MAINDB
+              value: whisparr
+            - name: WHISPARR__POSTGRES__LOGDB
+              value: whisparr-log
+            - name: WHISPARR__POSTGRES__USER
+              value: whisparr
+            - name: WHISPARR__POSTGRES__PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: whisparr-database-password
+            - name: HTTP_PROXY
+              value: http://gluetun.gluetun:8888
+            - name: HTTPS_PROXY
+              value: http://gluetun.gluetun:8888
+            - name: NO_PROXY
+              value: localhost,127.0.0.1,.svc,.svc.cluster.local,sabnzbd.sabnzbd,sabnzbd.sabnzbd.svc.cluster.local
+          image: ghcr.io/hotio/whisparr:latest
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 9696
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 5
+          name: whisparr
+          ports:
+            - containerPort: 9696
+              name: http
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 9696
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          volumeMounts:
+            - mountPath: /config
+              name: config
+            - mountPath: /downloads
+              name: downloads
+            - mountPath: /tv
+              name: tv
+      serviceAccountName: default
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: whisparr-whisparr-config
+        - name: whisparr-database-password
+          secret:
+            secretName: whisparr-database-password
+        - name: downloads
+          persistentVolumeClaim:
+            claimName: whisparr-whisparr-downloads
+        - name: tv
+          persistentVolumeClaim:
+            claimName: whisparr-whisparr-tv

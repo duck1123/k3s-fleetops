@@ -469,7 +469,7 @@ in {
 
     # ../modules/whisparr/default.nix
     whisparr = {
-      enable = false;
+      enable = true;
 
       ingress = {
         domain = "whisparr.${tail-domain}";
