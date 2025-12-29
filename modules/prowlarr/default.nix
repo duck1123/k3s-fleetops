@@ -1,6 +1,7 @@
-{ config, lib, ... }:
+{ ageRecipients, config, lib, pkgs, ... }:
 with lib;
-mkArgoApp { inherit config lib; } rec {
+let password-secret = "prowlarr-database-password";
+in mkArgoApp { inherit config lib; } rec {
   name = "prowlarr";
   uses-ingress = true;
 
@@ -87,7 +88,7 @@ mkArgoApp { inherit config lib; } rec {
       };
 
       password = mkOption {
-        description = mdDoc "PostgreSQL database password";
+        description = mdDoc "PostgreSQL database password (will be stored in SOPS secret)";
         type = types.str;
         default = "";
       };
@@ -95,6 +96,17 @@ mkArgoApp { inherit config lib; } rec {
   };
 
   extraResources = cfg: {
+    sopsSecrets = lib.optionalAttrs (cfg.database.enable && cfg.database.password != "") {
+      ${password-secret} = lib.createSecret {
+        inherit ageRecipients lib pkgs;
+        inherit (cfg) namespace;
+        secretName = password-secret;
+        values = {
+          password = cfg.database.password;
+        };
+      };
+    };
+
     deployments = {
       ${name} = {
         metadata.labels = {
@@ -153,10 +165,21 @@ mkArgoApp { inherit config lib; } rec {
                       name = "PROWLARR__POSTGRES__USER";
                       value = cfg.database.username;
                     }
-                    {
-                      name = "PROWLARR__POSTGRES__PASSWORD";
-                      value = cfg.database.password;
-                    }
+                    (if cfg.database.password != "" then
+                      {
+                        name = "PROWLARR__POSTGRES__PASSWORD";
+                        valueFrom = {
+                          secretKeyRef = {
+                            name = password-secret;
+                            key = "password";
+                          };
+                        };
+                      }
+                    else
+                      {
+                        name = "PROWLARR__POSTGRES__PASSWORD";
+                        value = "";
+                      })
                   ]) ++ (lib.optionalAttrs cfg.vpn.enable [
                     # Configure Prowlarr to use shared gluetun's HTTP proxy
                     {

@@ -36,7 +36,10 @@ spec:
             - name: PROWLARR__POSTGRES__USER
               value: prowlarr
             - name: PROWLARR__POSTGRES__PASSWORD
-              value: omE.6H):+]qedMo>ZG;m
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: prowlarr-database-password
             - name: HTTP_PROXY
               value: http://gluetun.gluetun:8888
             - name: HTTPS_PROXY
