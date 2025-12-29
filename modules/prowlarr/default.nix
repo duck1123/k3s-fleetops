@@ -198,7 +198,7 @@ in mkArgoApp { inherit config lib; } rec {
                     }
                     {
                       name = "NO_PROXY";
-                      value = "localhost,127.0.0.1,.svc,.svc.cluster.local,sabnzbd.sabnzbd,sabnzbd.sabnzbd.svc.cluster.local";
+                      value = "localhost,127.0.0.1,.svc,.svc.cluster.local,sabnzbd.sabnzbd,sabnzbd.sabnzbd.svc.cluster.local,qbittorrent.qbittorrent,qbittorrent.qbittorrent.svc.cluster.local";
                     }
                   ]);
                   ports = [{
