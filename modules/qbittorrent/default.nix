@@ -198,13 +198,8 @@ in mkArgoApp { inherit config lib; } rec {
                           echo "WebUI\\LocalHostAuth=false"
                           echo "WebUI\\AuthSubnetWhitelist=@Invalid()"
                           echo "WebUI\\Username=$USERNAME"
-                          if [ "$PASSWORD_ALREADY_SET" = "true" ]; then
-                            echo "$TEMP_HA1"
-                            echo "$TEMP_PASS"
-                          else
-                            echo "WebUI\\Password_ha1=@ByteArray($SHA1_HASH)"
-                            echo "WebUI\\Password_PBKDF2=@ByteArray($PBKDF2_SALT_HASH)"
-                          fi
+                          echo "WebUI\\Password_ha1=@ByteArray($SHA1_HASH)"
+                          echo "WebUI\\Password_PBKDF2=@ByteArray($PBKDF2_SALT_HASH)"
                           echo "WebUI\\HostHeaderValidation=false"
                           echo "WebUI\\CSRFProtection=false"
                           echo "WebUI\\ClickjackingProtection=false"
