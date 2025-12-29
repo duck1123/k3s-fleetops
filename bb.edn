@@ -4,7 +4,8 @@
  {:requires
   ([babashka.fs :as fs]
    [clojure.string :as str]
-   [k3s-fleetops.core :as c])
+   [k3s-fleetops.core :as c]
+   [k3s-fleetops.postgres :as pg])
 
   apply-git-hooks
   {:doc  "Register git hooks"
@@ -230,4 +231,19 @@ spec:
      (shell {:in job-yaml} "kubectl apply -f -")
      (println "Restore job created: " job-name)
      (println "Monitor progress with: kubectl logs -n " namespace " -f job/" job-name)
-     (println "Or watch the job: kubectl get job -n " namespace " " job-name " -w"))}}}
+     (println "Or watch the job: kubectl get job -n " namespace " " job-name " -w"))}
+
+  postgres-list
+  {:doc "List all PostgreSQL databases and their sizes. Use --json for JSON output"
+   :task (let [args *command-line-args*
+               json? (some #{"--json" "-j"} args)]
+           (pg/list-databases json?))}
+
+  postgres-backup
+  {:doc "Backup PostgreSQL databases. Usage: DATABASE=dbname OUTPUT_DIR=./backups bb postgres-backup (omit DATABASE to backup all)"
+   :task (pg/backup-databases (System/getenv "DATABASE") (or (System/getenv "OUTPUT_DIR") "./backups/postgresql"))}
+
+  postgres-restore
+  {:doc "Restore PostgreSQL from a backup file. Usage: BACKUP_FILE=path/to/backup.sql.gz DATABASE=dbname [RECREATE=true] bb postgres-restore"
+   :task (pg/restore-database (System/getenv "BACKUP_FILE") (System/getenv "DATABASE") (= "true" (System/getenv "RECREATE")))}
+}}
