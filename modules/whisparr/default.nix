@@ -150,60 +150,28 @@ in mkArgoApp { inherit config lib; } rec {
             spec = {
               automountServiceAccountToken = true;
               serviceAccountName = "default";
-              initContainers = lib.optionals (cfg.database.enable) [
+              initContainers = lib.optionals (cfg.database.enable && cfg.database.password != "") [
                 {
-                  name = "configure-database";
+                  name = "setup-database-env";
                   image = "busybox:latest";
                   imagePullPolicy = "IfNotPresent";
                   command = [
                     "sh"
                     "-c"
                     ''
-                      CONFIG_FILE="/config/config.xml"
-
-                      # Wait for config file to exist (created on first run)
-                      if [ ! -f "$CONFIG_FILE" ]; then
-                        echo "Config file does not exist yet, will be created on first run"
-                        exit 0
-                      fi
-
-                      # Read password from secret file
-                      if [ -f /secrets/password ]; then
-                        PASSWORD=$(cat /secrets/password)
-                      else
-                        echo "Warning: Password secret not found, using empty password"
-                        PASSWORD=""
-                      fi
-
-                      # Create connection string
+                      PASSWORD=$(cat /secrets/password)
                       CONNECTION_STRING="Host=${cfg.database.host};Port=${toString cfg.database.port};Database=${cfg.database.name};Username=${cfg.database.username};Password=$PASSWORD"
-
-                      # Use sed to update or add ConnectionString in config.xml
-                      if grep -q "<ConnectionString>" "$CONFIG_FILE"; then
-                        # Update existing ConnectionString
-                        sed -i "s|<ConnectionString>.*</ConnectionString>|<ConnectionString>$CONNECTION_STRING</ConnectionString>|g" "$CONFIG_FILE"
-                        echo "Updated existing ConnectionString"
-                      else
-                        # Add ConnectionString after <Config> tag
-                        if grep -q "<Config>" "$CONFIG_FILE"; then
-                          sed -i "/<Config>/a\  <ConnectionString>$CONNECTION_STRING</ConnectionString>" "$CONFIG_FILE"
-                          echo "Added ConnectionString to config.xml"
-                        else
-                          echo "Warning: Could not find <Config> tag in config.xml"
-                        fi
-                      fi
-
-                      echo "Database configuration complete"
+                      echo "$CONNECTION_STRING" > /shared/whisparr-connection-string
                     ''
                   ];
                   volumeMounts = [
                     {
-                      mountPath = "/config";
-                      name = "config";
-                    }
-                    {
                       mountPath = "/secrets";
                       name = password-secret;
+                    }
+                    {
+                      mountPath = "/shared";
+                      name = "shared-env";
                     }
                   ];
                 }
@@ -213,6 +181,16 @@ in mkArgoApp { inherit config lib; } rec {
                   inherit name;
                   image = cfg.image;
                   imagePullPolicy = "IfNotPresent";
+                  command = if (cfg.database.enable && cfg.database.password != "") then [
+                    "sh"
+                    "-c"
+                    ''
+                      if [ -f /shared/whisparr-connection-string ]; then
+                        export WHISPARR__CONNECTIONSTRING=$(cat /shared/whisparr-connection-string)
+                      fi
+                      exec /init
+                    ''
+                  ] else null;
                   env = [
                     {
                       name = "PGID";
@@ -226,7 +204,12 @@ in mkArgoApp { inherit config lib; } rec {
                       name = "TZ";
                       value = cfg.tz;
                     }
-                  ] ++ (lib.optionalAttrs cfg.vpn.enable [
+                  ] ++ (lib.optionalAttrs cfg.database.enable [
+                    {
+                      name = "WHISPARR__CONNECTIONTYPE";
+                      value = "PostgreSQL";
+                    }
+                  ]) ++ (lib.optionalAttrs cfg.vpn.enable [
                     # Configure Whisparr to use shared gluetun's HTTP proxy
                     {
                       name = "HTTP_PROXY";
@@ -273,6 +256,10 @@ in mkArgoApp { inherit config lib; } rec {
                       mountPath = "/config";
                       name = "config";
                     }
+                    (lib.optionalAttrs (cfg.database.enable && cfg.database.password != "") {
+                      mountPath = "/shared";
+                      name = "shared-env";
+                    })
                     {
                       mountPath = "/downloads";
                       name = "downloads";
@@ -292,6 +279,10 @@ in mkArgoApp { inherit config lib; } rec {
                 (lib.optionalAttrs (cfg.database.enable && cfg.database.password != "") {
                   name = password-secret;
                   secret.secretName = password-secret;
+                })
+                (lib.optionalAttrs (cfg.database.enable && cfg.database.password != "") {
+                  name = "shared-env";
+                  emptyDir = {};
                 })
                 {
                   name = "downloads";

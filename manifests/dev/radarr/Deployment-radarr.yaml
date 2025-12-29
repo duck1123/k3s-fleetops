@@ -20,13 +20,23 @@ spec:
     spec:
       automountServiceAccountToken: true
       containers:
-        - env:
+        - command:
+            - sh
+            - -c
+            - |
+              if [ -f /shared/radarr-connection-string ]; then
+                export RADARR__CONNECTIONSTRING=$(cat /shared/radarr-connection-string)
+              fi
+              exec /init
+          env:
             - name: PGID
               value: "1000"
             - name: PUID
               value: "1000"
             - name: TZ
               value: Etc/UTC
+            - name: RADARR__CONNECTIONTYPE
+              value: PostgreSQL
             - name: HTTP_PROXY
               value: http://gluetun.gluetun:8888
             - name: HTTPS_PROXY
@@ -43,6 +53,8 @@ spec:
           volumeMounts:
             - mountPath: /config
               name: config
+            - mountPath: /shared
+              name: shared-env
             - mountPath: /downloads
               name: downloads
             - mountPath: /movies
@@ -52,49 +64,17 @@ spec:
             - sh
             - -c
             - |
-              CONFIG_FILE="/config/config.xml"
-
-              # Wait for config file to exist (created on first run)
-              if [ ! -f "$CONFIG_FILE" ]; then
-                echo "Config file does not exist yet, will be created on first run"
-                exit 0
-              fi
-
-              # Read password from secret file
-              if [ -f /secrets/password ]; then
-                PASSWORD=$(cat /secrets/password)
-              else
-                echo "Warning: Password secret not found, using empty password"
-                PASSWORD=""
-              fi
-
-              # Create connection string
+              PASSWORD=$(cat /secrets/password)
               CONNECTION_STRING="Host=postgresql.postgresql;Port=5432;Database=radarr;Username=radarr;Password=$PASSWORD"
-
-              # Use sed to update or add ConnectionString in config.xml
-              if grep -q "<ConnectionString>" "$CONFIG_FILE"; then
-                # Update existing ConnectionString
-                sed -i "s|<ConnectionString>.*</ConnectionString>|<ConnectionString>$CONNECTION_STRING</ConnectionString>|g" "$CONFIG_FILE"
-                echo "Updated existing ConnectionString"
-              else
-                # Add ConnectionString after <Config> tag
-                if grep -q "<Config>" "$CONFIG_FILE"; then
-                  sed -i "/<Config>/a\  <ConnectionString>$CONNECTION_STRING</ConnectionString>" "$CONFIG_FILE"
-                  echo "Added ConnectionString to config.xml"
-                else
-                  echo "Warning: Could not find <Config> tag in config.xml"
-                fi
-              fi
-
-              echo "Database configuration complete"
+              echo "$CONNECTION_STRING" > /shared/radarr-connection-string
           image: busybox:latest
           imagePullPolicy: IfNotPresent
-          name: configure-database
+          name: setup-database-env
           volumeMounts:
-            - mountPath: /config
-              name: config
             - mountPath: /secrets
               name: radarr-database-password
+            - mountPath: /shared
+              name: shared-env
       serviceAccountName: default
       volumes:
         - name: config
@@ -103,6 +83,8 @@ spec:
         - name: radarr-database-password
           secret:
             secretName: radarr-database-password
+        - emptyDir: {}
+          name: shared-env
         - name: downloads
           persistentVolumeClaim:
             claimName: radarr-radarr-downloads
