@@ -141,7 +141,7 @@ in mkArgoApp { inherit config lib; } rec {
                     }
                     {
                       name = "PGUSER";
-                      value = cfg.auth.adminUsername;
+                      value = "postgres";
                     }
                     {
                       name = "PGPASSWORD";

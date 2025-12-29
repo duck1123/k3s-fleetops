@@ -41,7 +41,7 @@ spec:
             - name: PGPORT
               value: "5432"
             - name: PGUSER
-              value: admin
+              value: postgres
             - name: PGPASSWORD
               valueFrom:
                 secretKeyRef:
