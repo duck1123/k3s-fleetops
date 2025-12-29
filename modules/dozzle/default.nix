@@ -127,8 +127,8 @@ mkArgoApp { inherit config lib; } rec {
                       value = if cfg.noAnalytics then "true" else "false";
                     }
                     {
-                      name = "DOZZLE_KUBERNETES";
-                      value = "true";
+                      name = "DOZZLE_MODE";
+                      value = "k8s";
                     }
                   ] ++ lib.optionals (cfg.filter != "") [
                     {
