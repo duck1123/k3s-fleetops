@@ -118,50 +118,6 @@ mkArgoApp { inherit config lib; } rec {
             spec = {
               automountServiceAccountToken = true;
               serviceAccountName = "default";
-              initContainers = lib.optionals (cfg.database.enable) [
-                {
-                  name = "configure-database";
-                  image = "busybox:latest";
-                  imagePullPolicy = "IfNotPresent";
-                  command = [
-                    "sh"
-                    "-c"
-                    ''
-                      CONFIG_FILE="/config/config.xml"
-
-                      # Wait for config file to exist (created on first run)
-                      if [ ! -f "$CONFIG_FILE" ]; then
-                        echo "Config file does not exist yet, will be created on first run"
-                        exit 0
-                      fi
-
-                      # Create connection string
-                      CONNECTION_STRING="Host=${cfg.database.host};Port=${toString cfg.database.port};Database=${cfg.database.name};Username=${cfg.database.username};Password=${cfg.database.password}"
-
-                      # Use sed to update or add ConnectionString in config.xml
-                      if grep -q "<ConnectionString>" "$CONFIG_FILE"; then
-                        # Update existing ConnectionString
-                        sed -i "s|<ConnectionString>.*</ConnectionString>|<ConnectionString>$CONNECTION_STRING</ConnectionString>|g" "$CONFIG_FILE"
-                        echo "Updated existing ConnectionString"
-                      else
-                        # Add ConnectionString after <Config> tag
-                        if grep -q "<Config>" "$CONFIG_FILE"; then
-                          sed -i "/<Config>/a\  <ConnectionString>$CONNECTION_STRING</ConnectionString>" "$CONFIG_FILE"
-                          echo "Added ConnectionString to config.xml"
-                        else
-                          echo "Warning: Could not find <Config> tag in config.xml"
-                        fi
-                      fi
-
-                      echo "Database configuration complete"
-                    ''
-                  ];
-                  volumeMounts = [{
-                    mountPath = "/config";
-                    name = "config";
-                  }];
-                }
-              ];
               containers = [
                 {
                   inherit name;
@@ -180,7 +136,28 @@ mkArgoApp { inherit config lib; } rec {
                       name = "TZ";
                       value = cfg.tz;
                     }
-                  ] ++ (lib.optionalAttrs cfg.vpn.enable [
+                  ] ++ (lib.optionalAttrs cfg.database.enable [
+                    {
+                      name = "PROWLARR__POSTGRES__HOST";
+                      value = cfg.database.host;
+                    }
+                    {
+                      name = "PROWLARR__POSTGRES__PORT";
+                      value = toString cfg.database.port;
+                    }
+                    {
+                      name = "PROWLARR__POSTGRES__DATABASE";
+                      value = cfg.database.name;
+                    }
+                    {
+                      name = "PROWLARR__POSTGRES__USER";
+                      value = cfg.database.username;
+                    }
+                    {
+                      name = "PROWLARR__POSTGRES__PASSWORD";
+                      value = cfg.database.password;
+                    }
+                  ]) ++ (lib.optionalAttrs cfg.vpn.enable [
                     # Configure Prowlarr to use shared gluetun's HTTP proxy
                     {
                       name = "HTTP_PROXY";
