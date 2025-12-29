@@ -45,6 +45,7 @@
     ./pihole
     ./postgresql
     ./prowlarr
+    ./qbittorrent
     ./radarr
     ./redis
     ./romm

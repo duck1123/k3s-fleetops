@@ -396,6 +396,30 @@ in {
       storageClassName = "longhorn";
     };
 
+    # ../modules/qbittorrent/default.nix
+    qbittorrent = {
+      enable = true;
+
+      ingress = {
+        domain = "qbittorrent.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+
+      vpn = {
+        enable = true;
+        sharedGluetunService = "gluetun.gluetun";
+      };
+
+      nfs = {
+        enable = true;
+        server = nas-host;
+        path = "${nas-base}";
+      };
+
+      storageClassName = "longhorn";
+    };
+
     # ../modules/whisparr/default.nix
     whisparr = {
       enable = false;
