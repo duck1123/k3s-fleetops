@@ -287,7 +287,7 @@ in {
 
     # ../modules/lidarr/default.nix
     lidarr = {
-      enable = false;
+      enable = true;
 
       ingress = {
         domain = "lidarr.${tail-domain}";
