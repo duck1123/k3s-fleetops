@@ -8,6 +8,7 @@ rules:
     resources:
       - pods
       - pods/log
+      - nodes
     verbs:
       - get
       - list
@@ -16,6 +17,13 @@ rules:
       - ""
     resources:
       - namespaces
+    verbs:
+      - get
+      - list
+  - apiGroups:
+      - metrics.k8s.io
+    resources:
+      - pods
     verbs:
       - get
       - list

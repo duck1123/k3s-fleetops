@@ -60,12 +60,17 @@ mkArgoApp { inherit config lib; } rec {
         rules = [
           {
             apiGroups = [ "" ];
-            resources = [ "pods" "pods/log" ];
+            resources = [ "pods" "pods/log" "nodes" ];
             verbs = [ "get" "list" "watch" ];
           }
           {
             apiGroups = [ "" ];
             resources = [ "namespaces" ];
+            verbs = [ "get" "list" ];
+          }
+          {
+            apiGroups = [ "metrics.k8s.io" ];
+            resources = [ "pods" ];
             verbs = [ "get" "list" ];
           }
         ];
