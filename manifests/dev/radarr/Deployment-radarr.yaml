@@ -20,23 +20,28 @@ spec:
     spec:
       automountServiceAccountToken: true
       containers:
-        - command:
-            - sh
-            - -c
-            - |
-              if [ -f /shared/radarr-connection-string ]; then
-                export RADARR__CONNECTIONSTRING=$(cat /shared/radarr-connection-string)
-              fi
-              exec /init
-          env:
+        - env:
             - name: PGID
               value: "1000"
             - name: PUID
               value: "1000"
             - name: TZ
               value: Etc/UTC
-            - name: RADARR__CONNECTIONTYPE
-              value: PostgreSQL
+            - name: RADARR__POSTGRES__HOST
+              value: postgresql.postgresql
+            - name: RADARR__POSTGRES__PORT
+              value: "5432"
+            - name: RADARR__POSTGRES__MAINDB
+              value: radarr
+            - name: RADARR__POSTGRES__LOGDB
+              value: radarr-log
+            - name: RADARR__POSTGRES__USER
+              value: radarr
+            - name: RADARR__POSTGRES__PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: radarr-database-password
             - name: HTTP_PROXY
               value: http://gluetun.gluetun:8888
             - name: HTTPS_PROXY
@@ -53,28 +58,10 @@ spec:
           volumeMounts:
             - mountPath: /config
               name: config
-            - mountPath: /shared
-              name: shared-env
             - mountPath: /downloads
               name: downloads
             - mountPath: /movies
               name: movies
-      initContainers:
-        - command:
-            - sh
-            - -c
-            - |
-              PASSWORD=$(cat /secrets/password)
-              CONNECTION_STRING="Host=postgresql.postgresql;Port=5432;Database=radarr;Username=radarr;Password=$PASSWORD"
-              echo "$CONNECTION_STRING" > /shared/radarr-connection-string
-          image: busybox:latest
-          imagePullPolicy: IfNotPresent
-          name: setup-database-env
-          volumeMounts:
-            - mountPath: /secrets
-              name: radarr-database-password
-            - mountPath: /shared
-              name: shared-env
       serviceAccountName: default
       volumes:
         - name: config
@@ -83,8 +70,6 @@ spec:
         - name: radarr-database-password
           secret:
             secretName: radarr-database-password
-        - emptyDir: {}
-          name: shared-env
         - name: downloads
           persistentVolumeClaim:
             claimName: radarr-radarr-downloads

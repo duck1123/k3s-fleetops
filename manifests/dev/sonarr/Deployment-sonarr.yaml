@@ -20,23 +20,28 @@ spec:
     spec:
       automountServiceAccountToken: true
       containers:
-        - command:
-            - sh
-            - -c
-            - |
-              if [ -f /shared/sonarr-connection-string ]; then
-                export SONARR__CONNECTIONSTRING=$(cat /shared/sonarr-connection-string)
-              fi
-              exec /init
-          env:
+        - env:
             - name: PGID
               value: "1000"
             - name: PUID
               value: "1000"
             - name: TZ
               value: Etc/UTC
-            - name: SONARR__CONNECTIONTYPE
-              value: PostgreSQL
+            - name: SONARR__POSTGRES__HOST
+              value: postgresql.postgresql
+            - name: SONARR__POSTGRES__PORT
+              value: "5432"
+            - name: SONARR__POSTGRES__MAINDB
+              value: sonarr
+            - name: SONARR__POSTGRES__LOGDB
+              value: sonarr-log
+            - name: SONARR__POSTGRES__USER
+              value: sonarr
+            - name: SONARR__POSTGRES__PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: sonarr-database-password
             - name: HTTP_PROXY
               value: http://gluetun.gluetun:8888
             - name: HTTPS_PROXY
@@ -59,22 +64,6 @@ spec:
               name: downloads
             - mountPath: /tv
               name: tv
-      initContainers:
-        - command:
-            - sh
-            - -c
-            - |
-              PASSWORD=$(cat /secrets/password)
-              CONNECTION_STRING="Host=postgresql.postgresql;Port=5432;Database=sonarr;Username=sonarr;Password=$PASSWORD"
-              echo "$CONNECTION_STRING" > /shared/sonarr-connection-string
-          image: busybox:latest
-          imagePullPolicy: IfNotPresent
-          name: setup-database-env
-          volumeMounts:
-            - mountPath: /secrets
-              name: sonarr-database-password
-            - mountPath: /shared
-              name: shared-env
       serviceAccountName: default
       volumes:
         - name: config
@@ -83,8 +72,6 @@ spec:
         - name: sonarr-database-password
           secret:
             secretName: sonarr-database-password
-        - emptyDir: {}
-          name: shared-env
         - name: downloads
           persistentVolumeClaim:
             claimName: sonarr-sonarr-downloads

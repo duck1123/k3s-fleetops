@@ -150,47 +150,11 @@ in mkArgoApp { inherit config lib; } rec {
             spec = {
               automountServiceAccountToken = true;
               serviceAccountName = "default";
-              initContainers = lib.optionals (cfg.database.enable && cfg.database.password != "") [
-                {
-                  name = "setup-database-env";
-                  image = "busybox:latest";
-                  imagePullPolicy = "IfNotPresent";
-                  command = [
-                    "sh"
-                    "-c"
-                    ''
-                      PASSWORD=$(cat /secrets/password)
-                      CONNECTION_STRING="Host=${cfg.database.host};Port=${toString cfg.database.port};Database=${cfg.database.name};Username=${cfg.database.username};Password=$PASSWORD"
-                      echo "$CONNECTION_STRING" > /shared/sonarr-connection-string
-                    ''
-                  ];
-                  volumeMounts = [
-                    {
-                      mountPath = "/secrets";
-                      name = password-secret;
-                    }
-                    {
-                      mountPath = "/shared";
-                      name = "shared-env";
-                    }
-                  ];
-                }
-              ];
               containers = [
                 {
                   inherit name;
                   image = cfg.image;
                   imagePullPolicy = "IfNotPresent";
-                  command = if (cfg.database.enable && cfg.database.password != "") then [
-                    "sh"
-                    "-c"
-                    ''
-                      if [ -f /shared/sonarr-connection-string ]; then
-                        export SONARR__CONNECTIONSTRING=$(cat /shared/sonarr-connection-string)
-                      fi
-                      exec /init
-                    ''
-                  ] else null;
                   env = [
                     {
                       name = "PGID";
@@ -206,9 +170,42 @@ in mkArgoApp { inherit config lib; } rec {
                     }
                   ] ++ (lib.optionalAttrs cfg.database.enable [
                     {
-                      name = "SONARR__CONNECTIONTYPE";
-                      value = "PostgreSQL";
+                      name = "SONARR__POSTGRES__HOST";
+                      value = cfg.database.host;
                     }
+                    {
+                      name = "SONARR__POSTGRES__PORT";
+                      value = toString cfg.database.port;
+                    }
+                    {
+                      name = "SONARR__POSTGRES__MAINDB";
+                      value = cfg.database.name;
+                    }
+                    {
+                      name = "SONARR__POSTGRES__LOGDB";
+                      value = if lib.hasSuffix "-main" cfg.database.name
+                        then lib.removeSuffix "-main" cfg.database.name + "-log"
+                        else "${cfg.database.name}-log";
+                    }
+                    {
+                      name = "SONARR__POSTGRES__USER";
+                      value = cfg.database.username;
+                    }
+                    (if cfg.database.password != "" then
+                      {
+                        name = "SONARR__POSTGRES__PASSWORD";
+                        valueFrom = {
+                          secretKeyRef = {
+                            name = password-secret;
+                            key = "password";
+                          };
+                        };
+                      }
+                    else
+                      {
+                        name = "SONARR__POSTGRES__PASSWORD";
+                        value = "";
+                      })
                   ]) ++ (lib.optionalAttrs cfg.vpn.enable [
                     # Configure Sonarr to use shared gluetun's HTTP proxy
                     {
@@ -279,10 +276,6 @@ in mkArgoApp { inherit config lib; } rec {
                 (lib.optionalAttrs (cfg.database.enable && cfg.database.password != "") {
                   name = password-secret;
                   secret.secretName = password-secret;
-                })
-                (lib.optionalAttrs (cfg.database.enable && cfg.database.password != "") {
-                  name = "shared-env";
-                  emptyDir = {};
                 })
                 {
                   name = "downloads";

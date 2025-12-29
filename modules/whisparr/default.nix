@@ -150,47 +150,11 @@ in mkArgoApp { inherit config lib; } rec {
             spec = {
               automountServiceAccountToken = true;
               serviceAccountName = "default";
-              initContainers = lib.optionals (cfg.database.enable && cfg.database.password != "") [
-                {
-                  name = "setup-database-env";
-                  image = "busybox:latest";
-                  imagePullPolicy = "IfNotPresent";
-                  command = [
-                    "sh"
-                    "-c"
-                    ''
-                      PASSWORD=$(cat /secrets/password)
-                      CONNECTION_STRING="Host=${cfg.database.host};Port=${toString cfg.database.port};Database=${cfg.database.name};Username=${cfg.database.username};Password=$PASSWORD"
-                      echo "$CONNECTION_STRING" > /shared/whisparr-connection-string
-                    ''
-                  ];
-                  volumeMounts = [
-                    {
-                      mountPath = "/secrets";
-                      name = password-secret;
-                    }
-                    {
-                      mountPath = "/shared";
-                      name = "shared-env";
-                    }
-                  ];
-                }
-              ];
               containers = [
                 {
                   inherit name;
                   image = cfg.image;
                   imagePullPolicy = "IfNotPresent";
-                  command = if (cfg.database.enable && cfg.database.password != "") then [
-                    "sh"
-                    "-c"
-                    ''
-                      if [ -f /shared/whisparr-connection-string ]; then
-                        export WHISPARR__CONNECTIONSTRING=$(cat /shared/whisparr-connection-string)
-                      fi
-                      exec /init
-                    ''
-                  ] else null;
                   env = [
                     {
                       name = "PGID";
@@ -206,9 +170,42 @@ in mkArgoApp { inherit config lib; } rec {
                     }
                   ] ++ (lib.optionalAttrs cfg.database.enable [
                     {
-                      name = "WHISPARR__CONNECTIONTYPE";
-                      value = "PostgreSQL";
+                      name = "WHISPARR__POSTGRES__HOST";
+                      value = cfg.database.host;
                     }
+                    {
+                      name = "WHISPARR__POSTGRES__PORT";
+                      value = toString cfg.database.port;
+                    }
+                    {
+                      name = "WHISPARR__POSTGRES__MAINDB";
+                      value = cfg.database.name;
+                    }
+                    {
+                      name = "WHISPARR__POSTGRES__LOGDB";
+                      value = if lib.hasSuffix "-main" cfg.database.name
+                        then lib.removeSuffix "-main" cfg.database.name + "-log"
+                        else "${cfg.database.name}-log";
+                    }
+                    {
+                      name = "WHISPARR__POSTGRES__USER";
+                      value = cfg.database.username;
+                    }
+                    (if cfg.database.password != "" then
+                      {
+                        name = "WHISPARR__POSTGRES__PASSWORD";
+                        valueFrom = {
+                          secretKeyRef = {
+                            name = password-secret;
+                            key = "password";
+                          };
+                        };
+                      }
+                    else
+                      {
+                        name = "WHISPARR__POSTGRES__PASSWORD";
+                        value = "";
+                      })
                   ]) ++ (lib.optionalAttrs cfg.vpn.enable [
                     # Configure Whisparr to use shared gluetun's HTTP proxy
                     {
@@ -256,10 +253,6 @@ in mkArgoApp { inherit config lib; } rec {
                       mountPath = "/config";
                       name = "config";
                     }
-                    (lib.optionalAttrs (cfg.database.enable && cfg.database.password != "") {
-                      mountPath = "/shared";
-                      name = "shared-env";
-                    })
                     {
                       mountPath = "/downloads";
                       name = "downloads";
@@ -279,10 +272,6 @@ in mkArgoApp { inherit config lib; } rec {
                 (lib.optionalAttrs (cfg.database.enable && cfg.database.password != "") {
                   name = password-secret;
                   secret.secretName = password-secret;
-                })
-                (lib.optionalAttrs (cfg.database.enable && cfg.database.password != "") {
-                  name = "shared-env";
-                  emptyDir = {};
                 })
                 {
                   name = "downloads";
