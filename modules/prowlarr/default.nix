@@ -54,6 +54,44 @@ mkArgoApp { inherit config lib; } rec {
       type = types.int;
       default = 1000;
     };
+
+    database = {
+      enable = mkOption {
+        description = mdDoc "Enable PostgreSQL database";
+        type = types.bool;
+        default = false;
+      };
+
+      host = mkOption {
+        description = mdDoc "PostgreSQL database host";
+        type = types.str;
+        default = "postgresql.postgresql";
+      };
+
+      port = mkOption {
+        description = mdDoc "PostgreSQL database port";
+        type = types.int;
+        default = 5432;
+      };
+
+      name = mkOption {
+        description = mdDoc "PostgreSQL database name";
+        type = types.str;
+        default = "prowlarr";
+      };
+
+      username = mkOption {
+        description = mdDoc "PostgreSQL database username";
+        type = types.str;
+        default = "prowlarr";
+      };
+
+      password = mkOption {
+        description = mdDoc "PostgreSQL database password";
+        type = types.str;
+        default = "";
+      };
+    };
   };
 
   extraResources = cfg: {
@@ -80,6 +118,50 @@ mkArgoApp { inherit config lib; } rec {
             spec = {
               automountServiceAccountToken = true;
               serviceAccountName = "default";
+              initContainers = lib.optionals (cfg.database.enable) [
+                {
+                  name = "configure-database";
+                  image = "busybox:latest";
+                  imagePullPolicy = "IfNotPresent";
+                  command = [
+                    "sh"
+                    "-c"
+                    ''
+                      CONFIG_FILE="/config/config.xml"
+
+                      # Wait for config file to exist (created on first run)
+                      if [ ! -f "$CONFIG_FILE" ]; then
+                        echo "Config file does not exist yet, will be created on first run"
+                        exit 0
+                      fi
+
+                      # Create connection string
+                      CONNECTION_STRING="Host=${cfg.database.host};Port=${toString cfg.database.port};Database=${cfg.database.name};Username=${cfg.database.username};Password=${cfg.database.password}"
+
+                      # Use sed to update or add ConnectionString in config.xml
+                      if grep -q "<ConnectionString>" "$CONFIG_FILE"; then
+                        # Update existing ConnectionString
+                        sed -i "s|<ConnectionString>.*</ConnectionString>|<ConnectionString>$CONNECTION_STRING</ConnectionString>|g" "$CONFIG_FILE"
+                        echo "Updated existing ConnectionString"
+                      else
+                        # Add ConnectionString after <Config> tag
+                        if grep -q "<Config>" "$CONFIG_FILE"; then
+                          sed -i "/<Config>/a\  <ConnectionString>$CONNECTION_STRING</ConnectionString>" "$CONFIG_FILE"
+                          echo "Added ConnectionString to config.xml"
+                        else
+                          echo "Warning: Could not find <Config> tag in config.xml"
+                        fi
+                      fi
+
+                      echo "Database configuration complete"
+                    ''
+                  ];
+                  volumeMounts = [{
+                    mountPath = "/config";
+                    name = "config";
+                  }];
+                }
+              ];
               containers = [
                 {
                   inherit name;

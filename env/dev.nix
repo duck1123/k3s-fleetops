@@ -347,7 +347,7 @@ in {
 
     # ../modules/prowlarr/default.nix
     prowlarr = {
-      enable = false;
+      enable = true;
 
       ingress = {
         domain = "prowlarr.${tail-domain}";
@@ -358,6 +358,15 @@ in {
       vpn = {
         enable = true;
         sharedGluetunService = "gluetun.gluetun";
+      };
+
+      database = {
+        enable = true;
+        host = "postgresql.postgresql";
+        port = 5432;
+        name = "prowlarr";
+        username = "prowlarr";
+        password = secrets.postgresql.userPassword;
       };
 
       storageClassName = "longhorn";
@@ -613,6 +622,14 @@ in {
 
       enable = true;
       storageClass = "longhorn";
+
+      extraDatabases = [
+        {
+          name = "prowlarr";
+          username = "prowlarr";
+          password = secrets.postgresql.userPassword;
+        }
+      ];
     };
 
     # ../modules/redis/default.nix

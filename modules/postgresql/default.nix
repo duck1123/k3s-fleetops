@@ -51,6 +51,27 @@ in mkArgoApp { inherit config lib; } {
       type = types.str;
       default = "local-path";
     };
+
+    extraDatabases = mkOption {
+      description = mdDoc "Additional databases to create (list of {name, username, password})";
+      type = types.listOf (types.submodule {
+        options = {
+          name = mkOption {
+            type = types.str;
+            description = mdDoc "Database name";
+          };
+          username = mkOption {
+            type = types.str;
+            description = mdDoc "Database username";
+          };
+          password = mkOption {
+            type = types.str;
+            description = mdDoc "Database password";
+          };
+        };
+      });
+      default = [ ];
+    };
   };
 
   defaultValues = cfg:
@@ -76,6 +97,19 @@ in mkArgoApp { inherit config lib; } {
       };
 
       storage.className = cfg.storageClass;
+
+      # Add initdb scripts for extra databases
+      initdbScripts = lib.listToAttrs (map
+        (db: {
+          name = "init-${db.name}.sql";
+          value = ''
+            CREATE DATABASE ${db.name};
+            CREATE USER ${db.username} WITH PASSWORD '${db.password}';
+            GRANT ALL PRIVILEGES ON DATABASE ${db.name} TO ${db.username};
+            ALTER DATABASE ${db.name} OWNER TO ${db.username};
+          '';
+        })
+        cfg.extraDatabases);
     };
 
   extraResources = cfg: {
