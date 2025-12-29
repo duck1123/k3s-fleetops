@@ -417,6 +417,11 @@ in {
         path = "${nas-base}";
       };
 
+      webui = {
+        username = secrets.qbittorrent.username;
+        password = secrets.qbittorrent.password;
+      };
+
       storageClassName = "longhorn";
     };
 

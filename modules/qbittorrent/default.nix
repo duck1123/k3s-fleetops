@@ -1,6 +1,7 @@
-{ config, lib, ... }:
+{ ageRecipients, config, lib, pkgs, ... }:
 with lib;
-mkArgoApp { inherit config lib; } rec {
+let password-secret = "qbittorrent-webui-credentials";
+in mkArgoApp { inherit config lib; } rec {
   name = "qbittorrent";
   uses-ingress = true;
 
@@ -74,9 +75,41 @@ mkArgoApp { inherit config lib; } rec {
       type = types.int;
       default = 1000;
     };
+
+    webui = {
+      username = mkOption {
+        description = mdDoc "Web UI username (will be stored in SOPS secret)";
+        type = types.str;
+        default = "";
+      };
+
+      password = mkOption {
+        description = mdDoc "Web UI password (will be stored in SOPS secret)";
+        type = types.str;
+        default = "";
+      };
+
+      disableAuthentication = mkOption {
+        description = mdDoc "Disable Web UI authentication (not recommended)";
+        type = types.bool;
+        default = false;
+      };
+    };
   };
 
   extraResources = cfg: {
+    sopsSecrets = lib.optionalAttrs (cfg.webui.username != "" && cfg.webui.password != "") {
+      ${password-secret} = lib.createSecret {
+        inherit ageRecipients lib pkgs;
+        inherit (cfg) namespace;
+        secretName = password-secret;
+        values = {
+          username = cfg.webui.username;
+          password = cfg.webui.password;
+        };
+      };
+    };
+
     deployments = {
       ${name} = {
         metadata.labels = {
@@ -100,6 +133,131 @@ mkArgoApp { inherit config lib; } rec {
             spec = {
               automountServiceAccountToken = true;
               serviceAccountName = "default";
+              initContainers = (lib.optionals (cfg.webui.username != "" && cfg.webui.password != "") [
+                {
+                  name = "configure-auth";
+                  image = "busybox:latest";
+                  command = [
+                    "sh"
+                    "-c"
+                    ''
+                      mkdir -p /config/qBittorrent
+                      CONFIG_FILE="/config/qBittorrent/qBittorrent.conf"
+
+                      # Generate password hash (qBittorrent uses PBKDF2, but for simplicity we'll use SHA1)
+                      # qBittorrent stores password as: @ByteArray(sha1_hash)
+                      PASSWORD_HASH=$(echo -n "$PASSWORD" | sha1sum | cut -d' ' -f1)
+
+                      if [ ! -f "$CONFIG_FILE" ]; then
+                        # Create new config with credentials
+                        cat > "$CONFIG_FILE" <<EOF
+[Preferences]
+WebUI\Enabled=true
+WebUI\Address=*
+WebUI\Port=8080
+WebUI\LocalHostAuth=true
+WebUI\AuthSubnetWhitelist=
+WebUI\Username=$USERNAME
+WebUI\Password_ha1=@ByteArray($PASSWORD_HASH)
+WebUI\Password_PBKDF2="@ByteArray($PASSWORD_HASH)"
+WebUI\HostHeaderValidation=false
+WebUI\CSRFProtection=false
+WebUI\ClickjackingProtection=false
+EOF
+                      else
+                        # Update existing config with new credentials
+                        # Update username
+                        if grep -q "^WebUI\\\\Username=" "$CONFIG_FILE"; then
+                          sed -i "s/^WebUI\\\\Username=.*/WebUI\\\\Username=$USERNAME/" "$CONFIG_FILE"
+                        else
+                          echo "WebUI\\Username=$USERNAME" >> "$CONFIG_FILE"
+                        fi
+
+                        # Update password hash
+                        if grep -q "^WebUI\\\\Password_ha1=" "$CONFIG_FILE"; then
+                          sed -i "s|^WebUI\\\\Password_ha1=.*|WebUI\\\\Password_ha1=@ByteArray($PASSWORD_HASH)|" "$CONFIG_FILE"
+                        else
+                          echo "WebUI\\Password_ha1=@ByteArray($PASSWORD_HASH)" >> "$CONFIG_FILE"
+                        fi
+
+                        if grep -q "^WebUI\\\\Password_PBKDF2=" "$CONFIG_FILE"; then
+                          sed -i "s|^WebUI\\\\Password_PBKDF2=.*|WebUI\\\\Password_PBKDF2=\"@ByteArray($PASSWORD_HASH)\"|" "$CONFIG_FILE"
+                        else
+                          echo "WebUI\\Password_PBKDF2=\"@ByteArray($PASSWORD_HASH)\"" >> "$CONFIG_FILE"
+                        fi
+
+                        # Ensure authentication is enabled
+                        sed -i 's/^WebUI\\LocalHostAuth=.*/WebUI\\LocalHostAuth=true/' "$CONFIG_FILE" || echo "WebUI\\LocalHostAuth=true" >> "$CONFIG_FILE"
+                        sed -i 's/^WebUI\\HostHeaderValidation=.*/WebUI\\HostHeaderValidation=false/' "$CONFIG_FILE" || echo "WebUI\\HostHeaderValidation=false" >> "$CONFIG_FILE"
+                      fi
+                    ''
+                  ];
+                  volumeMounts = [
+                    {
+                      mountPath = "/config";
+                      name = "config";
+                    }
+                  ];
+                  env = [
+                    {
+                      name = "USERNAME";
+                      valueFrom = {
+                        secretKeyRef = {
+                          name = password-secret;
+                          key = "username";
+                        };
+                      };
+                    }
+                    {
+                      name = "PASSWORD";
+                      valueFrom = {
+                        secretKeyRef = {
+                          name = password-secret;
+                          key = "password";
+                        };
+                      };
+                    }
+                  ];
+                }
+              ]) ++ (lib.optionals cfg.webui.disableAuthentication [
+                {
+                  name = "disable-auth";
+                  image = "busybox:latest";
+                  command = [
+                    "sh"
+                    "-c"
+                    ''
+                      mkdir -p /config/qBittorrent
+                      CONFIG_FILE="/config/qBittorrent/qBittorrent.conf"
+
+                      if [ ! -f "$CONFIG_FILE" ]; then
+                        cat > "$CONFIG_FILE" <<'EOF'
+[Preferences]
+WebUI\Enabled=true
+WebUI\Address=*
+WebUI\Port=8080
+WebUI\LocalHostAuth=false
+WebUI\AuthSubnetWhitelist=
+WebUI\HostHeaderValidation=false
+WebUI\CSRFProtection=false
+WebUI\ClickjackingProtection=false
+EOF
+                      else
+                        sed -i 's/^WebUI\\LocalHostAuth=.*/WebUI\\LocalHostAuth=false/' "$CONFIG_FILE" || true
+                        sed -i 's/^WebUI\\HostHeaderValidation=.*/WebUI\\HostHeaderValidation=false/' "$CONFIG_FILE" || true
+                        grep -q "WebUI\\\\LocalHostAuth" "$CONFIG_FILE" || echo "WebUI\\LocalHostAuth=false" >> "$CONFIG_FILE"
+                        grep -q "WebUI\\\\HostHeaderValidation" "$CONFIG_FILE" || echo "WebUI\\HostHeaderValidation=false" >> "$CONFIG_FILE"
+                      fi
+                    ''
+                  ];
+                  volumeMounts = [
+                    {
+                      mountPath = "/config";
+                      name = "config";
+                    }
+                  ];
+                }
+              ]);
               containers = [
                 {
                   inherit name;
@@ -269,4 +427,3 @@ mkArgoApp { inherit config lib; } rec {
     };
   };
 }
-
