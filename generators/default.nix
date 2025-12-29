@@ -2,6 +2,9 @@
 let
   inherit (inputs) nixpkgs self;
   pkgs = import nixpkgs { inherit system; };
+  sharedConfigWithPkgs = sharedConfig // {
+    inherit pkgs;
+  };
   gFiles = builtins.attrNames (builtins.readDir ./.);
   generatorFiles = builtins.filter (
     file: builtins.match ".*\\.nix" file != null && file != "default.nix"
@@ -9,7 +12,7 @@ let
   generators = builtins.listToAttrs (
     map (file: {
       name = builtins.replaceStrings [ ".nix" ] [ "" ] file;
-      value = import (./. + "/${file}") sharedConfig;
+      value = import (./. + "/${file}") sharedConfigWithPkgs;
     }) generatorFiles
   );
 in
@@ -48,5 +51,10 @@ in
         mkdir -p applications/traefik
         cat ${generators.traefik} > applications/traefik/generated.nix
       '').outPath;
+  };
+
+  apps.generate-docs = {
+    type = "app";
+    program = generators.docs;
   };
 }
