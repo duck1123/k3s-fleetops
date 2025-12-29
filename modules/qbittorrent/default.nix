@@ -148,48 +148,65 @@ in mkArgoApp { inherit config lib; } rec {
                       # qBittorrent stores password as: @ByteArray(sha1_hash)
                       PASSWORD_HASH=$(echo -n "$PASSWORD" | sha1sum | cut -d' ' -f1)
 
-                      if [ ! -f "$CONFIG_FILE" ]; then
-                        # Create new config with credentials
-                        cat > "$CONFIG_FILE" <<EOF
+                      # Ensure [Preferences] section exists
+                      if ! grep -q "^\[Preferences\]" "$CONFIG_FILE" 2>/dev/null; then
+                        echo "[Preferences]" >> "$CONFIG_FILE"
+                      fi
+
+                      # Remove all existing WebUI settings to avoid conflicts
+                      sed -i '/^WebUI\\/d' "$CONFIG_FILE" 2>/dev/null || true
+
+                      # Add all required WebUI settings to [Preferences] section
+                      # Find the line number of [Preferences] and insert after it
+                      PREF_LINE=$(grep -n "^\[Preferences\]" "$CONFIG_FILE" | cut -d: -f1)
+                      if [ -n "$PREF_LINE" ]; then
+                        # Insert settings after [Preferences] line using sed
+                        {
+                          head -n "$PREF_LINE" "$CONFIG_FILE"
+                          echo "WebUI\\Enabled=true"
+                          echo "WebUI\\Address=*"
+                          echo "WebUI\\Port=8080"
+                          echo "WebUI\\LocalHostAuth=true"
+                          echo "WebUI\\AuthSubnetWhitelist=@Invalid()"
+                          echo "WebUI\\Username=$USERNAME"
+                          echo "WebUI\\Password_ha1=@ByteArray($PASSWORD_HASH)"
+                          echo "WebUI\\Password_PBKDF2=\"@ByteArray($PASSWORD_HASH)\""
+                          echo "WebUI\\HostHeaderValidation=false"
+                          echo "WebUI\\CSRFProtection=false"
+                          echo "WebUI\\ClickjackingProtection=false"
+                          echo "WebUI\\ServerDomains=*"
+                          tail -n +$((PREF_LINE + 1)) "$CONFIG_FILE"
+                        } > "$CONFIG_FILE.tmp" && mv "$CONFIG_FILE.tmp" "$CONFIG_FILE"
+                      else
+                        # If [Preferences] not found, append to end
+                        cat >> "$CONFIG_FILE" <<EOF
+
 [Preferences]
 WebUI\Enabled=true
 WebUI\Address=*
 WebUI\Port=8080
 WebUI\LocalHostAuth=true
-WebUI\AuthSubnetWhitelist=
+WebUI\AuthSubnetWhitelist=@Invalid()
 WebUI\Username=$USERNAME
 WebUI\Password_ha1=@ByteArray($PASSWORD_HASH)
 WebUI\Password_PBKDF2="@ByteArray($PASSWORD_HASH)"
 WebUI\HostHeaderValidation=false
 WebUI\CSRFProtection=false
 WebUI\ClickjackingProtection=false
+WebUI\ServerDomains=*
 EOF
-                      else
-                        # Update existing config with new credentials
-                        # Update username
-                        if grep -q "^WebUI\\\\Username=" "$CONFIG_FILE"; then
-                          sed -i "s/^WebUI\\\\Username=.*/WebUI\\\\Username=$USERNAME/" "$CONFIG_FILE"
-                        else
-                          echo "WebUI\\Username=$USERNAME" >> "$CONFIG_FILE"
-                        fi
-
-                        # Update password hash
-                        if grep -q "^WebUI\\\\Password_ha1=" "$CONFIG_FILE"; then
-                          sed -i "s|^WebUI\\\\Password_ha1=.*|WebUI\\\\Password_ha1=@ByteArray($PASSWORD_HASH)|" "$CONFIG_FILE"
-                        else
-                          echo "WebUI\\Password_ha1=@ByteArray($PASSWORD_HASH)" >> "$CONFIG_FILE"
-                        fi
-
-                        if grep -q "^WebUI\\\\Password_PBKDF2=" "$CONFIG_FILE"; then
-                          sed -i "s|^WebUI\\\\Password_PBKDF2=.*|WebUI\\\\Password_PBKDF2=\"@ByteArray($PASSWORD_HASH)\"|" "$CONFIG_FILE"
-                        else
-                          echo "WebUI\\Password_PBKDF2=\"@ByteArray($PASSWORD_HASH)\"" >> "$CONFIG_FILE"
-                        fi
-
-                        # Ensure authentication is enabled
-                        sed -i 's/^WebUI\\LocalHostAuth=.*/WebUI\\LocalHostAuth=true/' "$CONFIG_FILE" || echo "WebUI\\LocalHostAuth=true" >> "$CONFIG_FILE"
-                        sed -i 's/^WebUI\\HostHeaderValidation=.*/WebUI\\HostHeaderValidation=false/' "$CONFIG_FILE" || echo "WebUI\\HostHeaderValidation=false" >> "$CONFIG_FILE"
                       fi
+
+                      # Verify critical settings were added
+                      if ! grep -q "^WebUI\\\\Enabled=true" "$CONFIG_FILE"; then
+                        echo "ERROR: WebUI\\Enabled not set!" >&2
+                        exit 1
+                      fi
+                      if ! grep -q "^WebUI\\\\LocalHostAuth=true" "$CONFIG_FILE"; then
+                        echo "ERROR: WebUI\\LocalHostAuth not set!" >&2
+                        exit 1
+                      fi
+                      echo "WebUI configuration updated successfully"
                     ''
                   ];
                   volumeMounts = [
