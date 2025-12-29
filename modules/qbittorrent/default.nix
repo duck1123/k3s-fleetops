@@ -145,7 +145,8 @@ in mkArgoApp { inherit config lib; } rec {
                       CONFIG_FILE="/config/qBittorrent/qBittorrent.conf"
 
                       # Generate PBKDF2 password hash for qBittorrent
-                      # qBittorrent uses PBKDF2 with SHA-512, 100000 iterations
+                      # qBittorrent stores PBKDF2 as: PBKDF2:sha512:100000:<salt_base64>:<hash_base64>
+                      # But in @ByteArray() it might need hex format
                       # Write Python script to file
                       printf '%s\n' \
                         'import hashlib' \
@@ -154,6 +155,7 @@ in mkArgoApp { inherit config lib; } rec {
                         'import sys' \
                         'password = os.environ.get("PASSWORD", "")' \
                         'if not password:' \
+                        '    print("ERROR: PASSWORD not set", file=sys.stderr)' \
                         '    sys.exit(1)' \
                         'salt = os.urandom(16)' \
                         'iterations = 100000' \
@@ -165,7 +167,11 @@ in mkArgoApp { inherit config lib; } rec {
                         'print(f"export PBKDF2_HASH={chr(39)}{pbkdf2_hash}{chr(39)}")' \
                         'print(f"export SHA1_HASH={chr(39)}{sha1_hash}{chr(39)}")' \
                         > /tmp/gen_hash.py
-                      eval $(python3 /tmp/gen_hash.py)
+                      if ! eval $(python3 /tmp/gen_hash.py); then
+                        echo "ERROR: Failed to generate password hash" >&2
+                        exit 1
+                      fi
+                      echo "Generated password hashes successfully"
 
                       # Ensure [Preferences] section exists
                       if ! grep -q "^\[Preferences\]" "$CONFIG_FILE" 2>/dev/null; then
@@ -189,7 +195,7 @@ in mkArgoApp { inherit config lib; } rec {
                           echo "WebUI\\AuthSubnetWhitelist=@Invalid()"
                           echo "WebUI\\Username=$USERNAME"
                           echo "WebUI\\Password_ha1=@ByteArray($SHA1_HASH)"
-                          echo "WebUI\\Password_PBKDF2=\"@ByteArray($PBKDF2_HASH)\""
+                          echo "WebUI\\Password_PBKDF2=\"$PBKDF2_HASH\""
                           echo "WebUI\\HostHeaderValidation=false"
                           echo "WebUI\\CSRFProtection=false"
                           echo "WebUI\\ClickjackingProtection=false"
@@ -208,7 +214,7 @@ WebUI\LocalHostAuth=false
 WebUI\AuthSubnetWhitelist=@Invalid()
 WebUI\Username=$USERNAME
 WebUI\Password_ha1=@ByteArray($SHA1_HASH)
-WebUI\Password_PBKDF2="@ByteArray($PBKDF2_HASH)"
+WebUI\Password_PBKDF2="$PBKDF2_HASH"
 WebUI\HostHeaderValidation=false
 WebUI\CSRFProtection=false
 WebUI\ClickjackingProtection=false
