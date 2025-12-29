@@ -47,7 +47,7 @@ spec:
             - name: HTTPS_PROXY
               value: http://gluetun.gluetun:8888
             - name: NO_PROXY
-              value: localhost,127.0.0.1,.svc,.svc.cluster.local,sabnzbd.sabnzbd,sabnzbd.sabnzbd.svc.cluster.local
+              value: localhost,127.0.0.1,.svc,.svc.cluster.local,sabnzbd.sabnzbd,sabnzbd.sabnzbd.svc.cluster.local,qbittorrent.qbittorrent,qbittorrent.qbittorrent.svc.cluster.local
           image: linuxserver/prowlarr:latest
           imagePullPolicy: IfNotPresent
           livenessProbe:
