@@ -76,9 +76,9 @@ in mkArgoApp { inherit config lib; } rec {
       };
 
       name = mkOption {
-        description = mdDoc "PostgreSQL database name";
+        description = mdDoc "PostgreSQL main database name (default: prowlarr-main, log database will be {name}-log)";
         type = types.str;
-        default = "prowlarr";
+        default = "prowlarr-main";
       };
 
       username = mkOption {
@@ -163,7 +163,9 @@ in mkArgoApp { inherit config lib; } rec {
                     }
                     {
                       name = "PROWLARR__POSTGRES__LOGDB";
-                      value = "${cfg.database.name}-log";
+                      value = if lib.hasSuffix "-main" cfg.database.name
+                        then lib.removeSuffix "-main" cfg.database.name + "-log"
+                        else "${cfg.database.name}-log";
                     }
                     {
                       name = "PROWLARR__POSTGRES__USER";

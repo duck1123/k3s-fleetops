@@ -34,7 +34,7 @@ spec:
             - name: PROWLARR__POSTGRES__MAINDB
               value: prowlarr-main
             - name: PROWLARR__POSTGRES__LOGDB
-              value: prowlarr-main-log
+              value: prowlarr-log
             - name: PROWLARR__POSTGRES__USER
               value: prowlarr
             - name: PROWLARR__POSTGRES__PASSWORD

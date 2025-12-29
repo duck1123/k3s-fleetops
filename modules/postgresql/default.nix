@@ -162,7 +162,7 @@ in mkArgoApp { inherit config lib; } rec {
                         echo "Creating database ${db.name} and user ${db.username}..."
                         psql -v ON_ERROR_STOP=1 <<-EOSQL
                           -- Create database if it doesn't exist
-                          SELECT 'CREATE DATABASE ${db.name}' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '${db.name}')\gexec
+                          SELECT format('CREATE DATABASE %I', '${db.name}') WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '${db.name}')\gexec
 
                           -- Create user if it doesn't exist
                           DO \$\$
@@ -173,9 +173,13 @@ in mkArgoApp { inherit config lib; } rec {
                           END
                           \$\$;
 
-                          -- Grant privileges
-                          GRANT ALL PRIVILEGES ON DATABASE ${db.name} TO ${db.username};
-                          ALTER DATABASE ${db.name} OWNER TO ${db.username};
+                          -- Grant privileges (quote database name)
+                          DO \$\$
+                          BEGIN
+                            EXECUTE format('GRANT ALL PRIVILEGES ON DATABASE %I TO %I', '${db.name}', '${db.username}');
+                            EXECUTE format('ALTER DATABASE %I OWNER TO %I', '${db.name}', '${db.username}');
+                          END
+                          \$\$;
                         EOSQL
                         echo "Database ${db.name} created successfully"
                       '') cfg.extraDatabases}
