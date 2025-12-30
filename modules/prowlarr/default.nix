@@ -137,23 +137,8 @@ in mkArgoApp { inherit config lib; } rec {
             spec = {
               automountServiceAccountToken = true;
               serviceAccountName = "default";
-              initContainers = lib.optionalAttrs cfg.vpn.enable [
-                {
-                  name = "wait-for-gluetun";
-                  image = "curlimages/curl:latest";
-                  command = ["sh"];
-                  args = [
-                    "-c"
-                    ''
-                      until curl -f http://${cfg.vpn.sharedGluetunService}:8000/v1/openvpn/status; do
-                        echo "Waiting for gluetun to be ready..."
-                        sleep 5
-                      done
-                      echo "Gluetun is ready!"
-                    ''
-                  ];
-                }
-              ];
+              initContainers = lib.optionalAttrs cfg.vpn.enable
+                (lib.waitForGluetun { inherit lib; } cfg.vpn.sharedGluetunService);
               containers = [
                 {
                   inherit name;
