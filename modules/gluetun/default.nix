@@ -35,6 +35,12 @@ mkArgoApp { inherit config lib; } rec {
       default = "Etc/UTC";
     };
 
+    enableIPv6 = mkOption {
+      description = mdDoc "Enable IPv6 support (requires IPv6 to be configured in the cluster)";
+      type = types.bool;
+      default = false;
+    };
+
     controlServer = {
       username = mkOption {
         description = mdDoc "HTTP control server username";
@@ -107,7 +113,7 @@ mkArgoApp { inherit config lib; } rec {
                   }
                   {
                     name = "OPENVPN_IPV6";
-                    value = "true";
+                    value = if cfg.enableIPv6 then "true" else "off";
                   }
                   {
                     name = "MULLVAD_ACCOUNT_NUMBER";
@@ -161,15 +167,15 @@ mkArgoApp { inherit config lib; } rec {
                   }
                   {
                     name = "DNS_ADDRESS";
-                    value = "::";
+                    value = if cfg.enableIPv6 then "::" else "";
                   }
                   {
                     name = "DNS_IPV6";
-                    value = "on";
+                    value = if cfg.enableIPv6 then "on" else "off";
                   }
                   {
                     name = "DOT_IPV6";
-                    value = "on";
+                    value = if cfg.enableIPv6 then "on" else "off";
                   }
                   {
                     name = "HTTPPROXY";
