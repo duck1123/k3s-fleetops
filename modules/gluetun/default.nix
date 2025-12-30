@@ -221,25 +221,8 @@ mkArgoApp { inherit config lib; } rec {
                     protocol = "TCP";
                   }
                 ];
-                readinessProbe = if cfg.controlServer.username != "" && cfg.controlServer.password != "" then {
-                  exec = {
-                    command = [
-                      "sh"
-                      "-c"
-                      ''
-                        AUTH=$(cat /etc/gluetun-control-server/authHeader)
-                        curl -sf -H "Authorization: $AUTH" http://localhost:8000/v1/openvpn/status | grep -q '"status":"running"'
-                      ''
-                    ];
-                  };
-                  initialDelaySeconds = 10;
-                  periodSeconds = 10;
-                  timeoutSeconds = 5;
-                  successThreshold = 1;
-                  failureThreshold = 3;
-                } else {
-                  httpGet = {
-                    path = "/v1/openvpn/status";
+                readinessProbe = {
+                  tcpSocket = {
                     port = 8000;
                   };
                   initialDelaySeconds = 10;
@@ -248,25 +231,8 @@ mkArgoApp { inherit config lib; } rec {
                   successThreshold = 1;
                   failureThreshold = 3;
                 };
-                livenessProbe = if cfg.controlServer.username != "" && cfg.controlServer.password != "" then {
-                  exec = {
-                    command = [
-                      "sh"
-                      "-c"
-                      ''
-                        AUTH=$(cat /etc/gluetun-control-server/authHeader)
-                        curl -sf -H "Authorization: $AUTH" http://localhost:8000/v1/openvpn/status | grep -q '"status":"running"'
-                      ''
-                    ];
-                  };
-                  initialDelaySeconds = 30;
-                  periodSeconds = 30;
-                  timeoutSeconds = 5;
-                  successThreshold = 1;
-                  failureThreshold = 3;
-                } else {
-                  httpGet = {
-                    path = "/v1/openvpn/status";
+                livenessProbe = {
+                  tcpSocket = {
                     port = 8000;
                   };
                   initialDelaySeconds = 30;
@@ -280,23 +246,12 @@ mkArgoApp { inherit config lib; } rec {
                     mountPath = "/gluetun";
                     name = "gluetun";
                   }
-                ] ++ lib.optionalAttrs (cfg.controlServer.username != "" && cfg.controlServer.password != "") [
-                  {
-                    mountPath = "/etc/gluetun-control-server";
-                    name = "control-server-secret";
-                    readOnly = true;
-                  }
                 ];
               }];
               volumes = [
                 {
                   name = "gluetun";
                   persistentVolumeClaim.claimName = "${name}-${name}-gluetun";
-                }
-              ] ++ lib.optionalAttrs (cfg.controlServer.username != "" && cfg.controlServer.password != "") [
-                {
-                  name = "control-server-secret";
-                  secret.secretName = "${name}-control-server";
                 }
               ];
             };
