@@ -63,6 +63,19 @@ spec:
               name: downloads
             - mountPath: /tv
               name: tv
+      initContainers:
+        - args:
+            - -c
+            - |
+              until curl -f http://gluetun.gluetun:8000/v1/openvpn/status; do
+                echo "Waiting for gluetun to be ready..."
+                sleep 5
+              done
+              echo "Gluetun is ready!"
+          command:
+            - sh
+          image: curlimages/curl:latest
+          name: wait-for-gluetun
       serviceAccountName: default
       volumes:
         - name: config

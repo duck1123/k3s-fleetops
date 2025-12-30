@@ -246,6 +246,12 @@ mkArgoApp { inherit config lib; } rec {
           protocol = "TCP";
           targetPort = "socks-proxy";
         }
+        {
+          name = "http-control";
+          port = 8000;
+          protocol = "TCP";
+          targetPort = "http-control";
+        }
       ];
 
       selector = {

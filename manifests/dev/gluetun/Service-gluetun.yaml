@@ -13,6 +13,10 @@ spec:
       port: 1080
       protocol: TCP
       targetPort: socks-proxy
+    - name: http-control
+      port: 8000
+      protocol: TCP
+      targetPort: http-control
   selector:
     app.kubernetes.io/instance: gluetun
     app.kubernetes.io/name: gluetun
