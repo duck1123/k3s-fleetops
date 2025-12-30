@@ -76,6 +76,12 @@ in mkArgoApp { inherit config lib; } rec {
       default = 1000;
     };
 
+    replicas = mkOption {
+      description = mdDoc "Number of replicas";
+      type = types.int;
+      default = 1;
+    };
+
     database = {
       enable = mkOption {
         description = mdDoc "Enable PostgreSQL database";
@@ -136,6 +142,7 @@ in mkArgoApp { inherit config lib; } rec {
         };
 
         spec = {
+          replicas = cfg.replicas;
           selector.matchLabels = {
             "app.kubernetes.io/instance" = name;
             "app.kubernetes.io/name" = name;

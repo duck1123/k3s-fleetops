@@ -348,6 +348,8 @@ in {
         password = secrets.postgresql.userPassword;
       };
 
+      replicas = 0;
+
       storageClassName = "longhorn";
     };
 
