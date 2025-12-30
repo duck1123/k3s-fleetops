@@ -59,8 +59,19 @@ spec:
               value: "on"
             - name: HTTPPROXY_LISTENING_ADDRESS
               value: :8888
+            - name: HTTP_CONTROL_SERVER_LISTENING_ADDRESS
+              value: :8000
           image: qmcgaw/gluetun:latest
           imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /v1/openvpn/status
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 5
           name: gluetun
           ports:
             - containerPort: 8888
@@ -69,6 +80,18 @@ spec:
             - containerPort: 1080
               name: socks-proxy
               protocol: TCP
+            - containerPort: 8000
+              name: http-control
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /v1/openvpn/status
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
           securityContext:
             capabilities:
               add:

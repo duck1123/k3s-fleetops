@@ -161,6 +161,10 @@ mkArgoApp { inherit config lib; } rec {
                     name = "HTTPPROXY_LISTENING_ADDRESS";
                     value = ":8888";
                   }
+                  {
+                    name = "HTTP_CONTROL_SERVER_LISTENING_ADDRESS";
+                    value = ":8000";
+                  }
                 ];
                 ports = [
                   {
@@ -173,7 +177,34 @@ mkArgoApp { inherit config lib; } rec {
                     name = "socks-proxy";
                     protocol = "TCP";
                   }
+                  {
+                    containerPort = 8000;
+                    name = "http-control";
+                    protocol = "TCP";
+                  }
                 ];
+                readinessProbe = {
+                  httpGet = {
+                    path = "/v1/openvpn/status";
+                    port = 8000;
+                  };
+                  initialDelaySeconds = 10;
+                  periodSeconds = 10;
+                  timeoutSeconds = 5;
+                  successThreshold = 1;
+                  failureThreshold = 3;
+                };
+                livenessProbe = {
+                  httpGet = {
+                    path = "/v1/openvpn/status";
+                    port = 8000;
+                  };
+                  initialDelaySeconds = 30;
+                  periodSeconds = 30;
+                  timeoutSeconds = 5;
+                  successThreshold = 1;
+                  failureThreshold = 3;
+                };
                 volumeMounts = [
                   {
                     mountPath = "/gluetun";
