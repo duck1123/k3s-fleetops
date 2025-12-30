@@ -8,7 +8,7 @@ metadata:
   name: radarr
   namespace: radarr
 spec:
-  replicas: 0
+  replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/instance: radarr
