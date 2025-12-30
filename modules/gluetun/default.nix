@@ -34,6 +34,20 @@ mkArgoApp { inherit config lib; } rec {
       type = types.str;
       default = "Etc/UTC";
     };
+
+    controlServer = {
+      username = mkOption {
+        description = mdDoc "HTTP control server username";
+        type = types.str;
+        default = "";
+      };
+
+      password = mkOption {
+        description = mdDoc "HTTP control server password";
+        type = types.str;
+        default = "";
+      };
+    };
   };
 
   extraResources = cfg: {
@@ -169,6 +183,20 @@ mkArgoApp { inherit config lib; } rec {
                     name = "HTTP_CONTROL_SERVER_LISTENING_ADDRESS";
                     value = ":8000";
                   }
+                  (if cfg.controlServer.username != "" then {
+                    name = "HTTP_CONTROL_SERVER_USER";
+                    valueFrom.secretKeyRef = {
+                      name = "${name}-control-server";
+                      key = "username";
+                    };
+                  } else null)
+                  (if cfg.controlServer.password != "" then {
+                    name = "HTTP_CONTROL_SERVER_PASSWORD";
+                    valueFrom.secretKeyRef = {
+                      name = "${name}-control-server";
+                      key = "password";
+                    };
+                  } else null)
                 ];
                 ports = [
                   {
@@ -187,7 +215,23 @@ mkArgoApp { inherit config lib; } rec {
                     protocol = "TCP";
                   }
                 ];
-                readinessProbe = {
+                readinessProbe = if cfg.controlServer.username != "" && cfg.controlServer.password != "" then {
+                  exec = {
+                    command = [
+                      "sh"
+                      "-c"
+                      ''
+                        AUTH=$(cat /etc/gluetun-control-server/authHeader)
+                        curl -sf -H "Authorization: $AUTH" http://localhost:8000/v1/openvpn/status | grep -q '"status":"running"'
+                      ''
+                    ];
+                  };
+                  initialDelaySeconds = 10;
+                  periodSeconds = 10;
+                  timeoutSeconds = 5;
+                  successThreshold = 1;
+                  failureThreshold = 3;
+                } else {
                   httpGet = {
                     path = "/v1/openvpn/status";
                     port = 8000;
@@ -198,7 +242,23 @@ mkArgoApp { inherit config lib; } rec {
                   successThreshold = 1;
                   failureThreshold = 3;
                 };
-                livenessProbe = {
+                livenessProbe = if cfg.controlServer.username != "" && cfg.controlServer.password != "" then {
+                  exec = {
+                    command = [
+                      "sh"
+                      "-c"
+                      ''
+                        AUTH=$(cat /etc/gluetun-control-server/authHeader)
+                        curl -sf -H "Authorization: $AUTH" http://localhost:8000/v1/openvpn/status | grep -q '"status":"running"'
+                      ''
+                    ];
+                  };
+                  initialDelaySeconds = 30;
+                  periodSeconds = 30;
+                  timeoutSeconds = 5;
+                  successThreshold = 1;
+                  failureThreshold = 3;
+                } else {
                   httpGet = {
                     path = "/v1/openvpn/status";
                     port = 8000;
@@ -214,12 +274,23 @@ mkArgoApp { inherit config lib; } rec {
                     mountPath = "/gluetun";
                     name = "gluetun";
                   }
+                ] ++ lib.optionalAttrs (cfg.controlServer.username != "" && cfg.controlServer.password != "") [
+                  {
+                    mountPath = "/etc/gluetun-control-server";
+                    name = "control-server-secret";
+                    readOnly = true;
+                  }
                 ];
               }];
               volumes = [
                 {
                   name = "gluetun";
                   persistentVolumeClaim.claimName = "${name}-${name}-gluetun";
+                }
+              ] ++ lib.optionalAttrs (cfg.controlServer.username != "" && cfg.controlServer.password != "") [
+                {
+                  name = "control-server-secret";
+                  secret.secretName = "${name}-control-server";
                 }
               ];
             };
@@ -266,12 +337,32 @@ mkArgoApp { inherit config lib; } rec {
       type = "ClusterIP";
     };
 
-    # Create SOPS secret for Mullvad account number
-    sopsSecrets."${name}-mullvad-account" = lib.createSecret {
-      inherit ageRecipients lib pkgs;
-      namespace = cfg.namespace;
-      secretName = "${name}-mullvad-account";
-      values.accountNumber = cfg.mullvadAccountNumber;
+    # Create SOPS secrets
+    sopsSecrets = {
+      "${name}-mullvad-account" = lib.createSecret {
+        inherit ageRecipients lib pkgs;
+        namespace = cfg.namespace;
+        secretName = "${name}-mullvad-account";
+        values.accountNumber = cfg.mullvadAccountNumber;
+      };
+    } // lib.optionalAttrs (cfg.controlServer.username != "" || cfg.controlServer.password != "") {
+      "${name}-control-server" = lib.createSecret {
+        inherit ageRecipients lib pkgs;
+        namespace = cfg.namespace;
+        secretName = "${name}-control-server";
+        values = let
+          # Create basic auth header: Basic base64(username:password)
+          authHeader = "Basic " + (builtins.readFile (
+            pkgs.runCommand "gluetun-auth-header" { } ''
+              echo -n "${cfg.controlServer.username}:${cfg.controlServer.password}" | ${pkgs.coreutils}/bin/base64 > $out
+            ''
+          ));
+        in {
+          username = cfg.controlServer.username;
+          password = cfg.controlServer.password;
+          authHeader = authHeader;
+        };
+      };
     };
   };
 }

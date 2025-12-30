@@ -2,6 +2,9 @@
 # Creates an init container that waits for gluetun to be ready
 # Parameters:
 #   gluetunService: The service name for gluetun (e.g., "gluetun.gluetun")
+# Note: If gluetun control server requires authentication, the init containers
+# may need access to the secret. For now, this assumes no auth or that the
+# endpoint is accessible from within the cluster.
 gluetunService: [
   {
     name = "wait-for-gluetun";

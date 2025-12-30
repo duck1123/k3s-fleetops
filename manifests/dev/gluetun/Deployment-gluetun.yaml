@@ -63,13 +63,27 @@ spec:
               value: :8888
             - name: HTTP_CONTROL_SERVER_LISTENING_ADDRESS
               value: :8000
+            - name: HTTP_CONTROL_SERVER_USER
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: gluetun-control-server
+            - name: HTTP_CONTROL_SERVER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: gluetun-control-server
           image: qmcgaw/gluetun:latest
           imagePullPolicy: IfNotPresent
           livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - |
+                  AUTH=$(cat /etc/gluetun-control-server/authHeader)
+                  curl -sf -H "Authorization: $AUTH" http://localhost:8000/v1/openvpn/status | grep -q '"status":"running"'
             failureThreshold: 3
-            httpGet:
-              path: /v1/openvpn/status
-              port: 8000
             initialDelaySeconds: 30
             periodSeconds: 30
             successThreshold: 1
@@ -86,10 +100,14 @@ spec:
               name: http-control
               protocol: TCP
           readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - |
+                  AUTH=$(cat /etc/gluetun-control-server/authHeader)
+                  curl -sf -H "Authorization: $AUTH" http://localhost:8000/v1/openvpn/status | grep -q '"status":"running"'
             failureThreshold: 3
-            httpGet:
-              path: /v1/openvpn/status
-              port: 8000
             initialDelaySeconds: 10
             periodSeconds: 10
             successThreshold: 1
@@ -103,6 +121,9 @@ spec:
           volumeMounts:
             - mountPath: /gluetun
               name: gluetun
+            - mountPath: /etc/gluetun-control-server
+              name: control-server-secret
+              readOnly: true
       dnsConfig:
         nameservers:
           - 1.1.1.1
@@ -119,3 +140,6 @@ spec:
         - name: gluetun
           persistentVolumeClaim:
             claimName: gluetun-gluetun-gluetun
+        - name: control-server-secret
+          secret:
+            secretName: gluetun-control-server

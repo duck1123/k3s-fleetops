@@ -205,6 +205,10 @@ in {
       enable = true;
       mullvadAccountNumber = secrets.mullvad.id;
       serverLocation = ""; # Optional: specific server location (e.g., "us-was", "se-sto")
+      controlServer = {
+        username = secrets.gluetun.username;
+        password = secrets.gluetun.password;
+      };
       storageClassName = "longhorn";
     };
 
