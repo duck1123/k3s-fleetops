@@ -226,28 +226,28 @@ in mkArgoApp { inherit config lib; } rec {
                     name = "http";
                     protocol = "TCP";
                   }];
-                  readinessProbe = {
-                    httpGet = {
-                      path = "/";
-                      port = cfg.service.port;
-                    };
-                    initialDelaySeconds = 10;
-                    periodSeconds = 10;
-                    timeoutSeconds = 5;
-                    successThreshold = 1;
-                    failureThreshold = 3;
-                  };
-                  livenessProbe = {
-                    httpGet = {
-                      path = "/";
-                      port = cfg.service.port;
-                    };
-                    initialDelaySeconds = 30;
-                    periodSeconds = 30;
-                    timeoutSeconds = 5;
-                    successThreshold = 1;
-                    failureThreshold = 3;
-                  };
+                  # readinessProbe = {
+                  #   httpGet = {
+                  #     path = "/ping";
+                  #     port = cfg.service.port;
+                  #   };
+                  #   initialDelaySeconds = 10;
+                  #   periodSeconds = 10;
+                  #   timeoutSeconds = 5;
+                  #   successThreshold = 1;
+                  #   failureThreshold = 3;
+                  # };
+                  # livenessProbe = {
+                  #   httpGet = {
+                  #     path = "/ping";
+                  #     port = cfg.service.port;
+                  #   };
+                  #   initialDelaySeconds = 30;
+                  #   periodSeconds = 30;
+                  #   timeoutSeconds = 5;
+                  #   successThreshold = 1;
+                  #   failureThreshold = 3;
+                  # };
                   volumeMounts = [
                     {
                       mountPath = "/config";
