@@ -4,6 +4,8 @@ metadata:
   name: gluetun
   namespace: gluetun
 spec:
+  ipFamilies:
+    - IPv4
   ports:
     - name: http-proxy
       port: 8888

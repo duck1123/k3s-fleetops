@@ -27,6 +27,8 @@ spec:
               value: openvpn
             - name: OPENVPN_IPV6
               value: "off"
+            - name: SERVER_ADDRESS_IPV6
+              value: "off"
             - name: MULLVAD_ACCOUNT_NUMBER
               valueFrom:
                 secretKeyRef:
@@ -107,6 +109,7 @@ spec:
               add:
                 - NET_ADMIN
                 - MKNOD
+                - NET_RAW
             privileged: false
           volumeMounts:
             - mountPath: /gluetun
@@ -115,7 +118,6 @@ spec:
         nameservers:
           - 1.1.1.1
           - 1.0.0.1
-          - 2606:4700:4700::1111
         options:
           - name: ndots
             value: "2"

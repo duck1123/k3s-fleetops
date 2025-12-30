@@ -36,7 +36,16 @@ mkArgoApp { inherit config lib; } rec {
     };
 
     enableIPv6 = mkOption {
-      description = mdDoc "Enable IPv6 support (requires IPv6 to be configured in the cluster)";
+      description = mdDoc ''
+        Enable IPv6 support. This requires:
+        1. Kubernetes cluster with dual-stack networking enabled
+        2. CNI plugin that supports IPv6 (e.g., Cilium, Calico with IPv6)
+        3. IPv6 addresses assigned to nodes
+        4. IPv6 routing configured in the cluster
+        
+        If IPv6 is not properly configured in your cluster, you'll see
+        "Network unreachable" errors. In that case, set this to false.
+      '';
       type = types.bool;
       default = false;
     };
@@ -82,7 +91,10 @@ mkArgoApp { inherit config lib; } rec {
               serviceAccountName = "default";
               dnsPolicy = "None";
               dnsConfig = {
-                nameservers = [ "1.1.1.1" "1.0.0.1" "2606:4700:4700::1111" ];
+                nameservers = if cfg.enableIPv6 then
+                  [ "1.1.1.1" "1.0.0.1" "2606:4700:4700::1111" "2606:4700:4700::1001" ]
+                else
+                  [ "1.1.1.1" "1.0.0.1" ];
                 searches = [ ];
                 options = [
                   {
@@ -99,7 +111,7 @@ mkArgoApp { inherit config lib; } rec {
                 image = "qmcgaw/gluetun:latest";
                 imagePullPolicy = "IfNotPresent";
                 securityContext = {
-                  capabilities.add = [ "NET_ADMIN" "MKNOD" ];
+                  capabilities.add = [ "NET_ADMIN" "MKNOD" "NET_RAW" ];
                   privileged = false;
                 };
                 env = lib.filter (x: x != null) [
@@ -115,6 +127,10 @@ mkArgoApp { inherit config lib; } rec {
                     name = "OPENVPN_IPV6";
                     value = if cfg.enableIPv6 then "true" else "off";
                   }
+                  (if !cfg.enableIPv6 then {
+                    name = "SERVER_ADDRESS_IPV6";
+                    value = "off";
+                  } else null)
                   {
                     name = "MULLVAD_ACCOUNT_NUMBER";
                     valueFrom.secretKeyRef = {
@@ -296,6 +312,9 @@ mkArgoApp { inherit config lib; } rec {
       };
 
       type = "ClusterIP";
+      # Enable dual-stack if IPv6 is enabled and cluster supports it
+      ipFamilyPolicy = if cfg.enableIPv6 then "RequireDualStack" else null;
+      ipFamilies = if cfg.enableIPv6 then [ "IPv4" "IPv6" ] else [ "IPv4" ];
     };
 
     # Create SOPS secrets
