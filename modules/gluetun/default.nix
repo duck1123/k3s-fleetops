@@ -50,6 +50,12 @@ mkArgoApp { inherit config lib; } rec {
       default = false;
     };
 
+    logLevel = mkOption {
+      description = mdDoc "Log level (debug, info, warning, error). Use 'debug' for maximum verbosity.";
+      type = types.str;
+      default = "info";
+    };
+
     controlServer = {
       username = mkOption {
         description = mdDoc "HTTP control server username";
@@ -159,7 +165,23 @@ mkArgoApp { inherit config lib; } rec {
                   }
                   {
                     name = "FIREWALL_DEBUG";
-                    value = "off";
+                    value = "on";
+                  }
+                  {
+                    name = "LOG_LEVEL";
+                    value = cfg.logLevel;
+                  }
+                  {
+                    name = "LOG_CALLER";
+                    value = "on";
+                  }
+                  {
+                    name = "HTTPPROXY_LOG";
+                    value = "on";
+                  }
+                  {
+                    name = "OPENVPN_VERBOSITY";
+                    value = "3";
                   }
                   {
                     name = "UPDATER_PERIOD";

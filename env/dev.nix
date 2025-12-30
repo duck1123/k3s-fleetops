@@ -210,6 +210,7 @@ in {
         password = secrets.gluetun.password;
       };
       storageClassName = "longhorn";
+      logLevel = "debug";
     };
 
     # ../modules/forgejo/default.nix
