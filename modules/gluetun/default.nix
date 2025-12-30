@@ -137,6 +137,10 @@ mkArgoApp { inherit config lib; } rec {
                     name = "SERVER_ADDRESS_IPV6";
                     value = "off";
                   } else null)
+                  (if !cfg.enableIPv6 then {
+                    name = "MULLVAD_SERVER_IPV6";
+                    value = "off";
+                  } else null)
                   {
                     name = "MULLVAD_ACCOUNT_NUMBER";
                     valueFrom.secretKeyRef = {
@@ -212,7 +216,7 @@ mkArgoApp { inherit config lib; } rec {
                     value = if cfg.enableIPv6 then "on" else "off";
                   }
                   {
-                    name = "DOT_IPV6";
+                    name = "DNS_UPSTREAM_IPV6";
                     value = if cfg.enableIPv6 then "on" else "off";
                   }
                   {

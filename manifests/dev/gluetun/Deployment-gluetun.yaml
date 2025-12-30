@@ -29,6 +29,8 @@ spec:
               value: "off"
             - name: SERVER_ADDRESS_IPV6
               value: "off"
+            - name: MULLVAD_SERVER_IPV6
+              value: "off"
             - name: MULLVAD_ACCOUNT_NUMBER
               valueFrom:
                 secretKeyRef:
@@ -65,7 +67,7 @@ spec:
               value: ""
             - name: DNS_IPV6
               value: "off"
-            - name: DOT_IPV6
+            - name: DNS_UPSTREAM_IPV6
               value: "off"
             - name: HTTPPROXY
               value: "on"
