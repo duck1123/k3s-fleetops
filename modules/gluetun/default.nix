@@ -138,6 +138,10 @@ mkArgoApp { inherit config lib; } rec {
                     value = "on";
                   }
                   {
+                    name = "HTTP_CONTROL_SERVER";
+                    value = "on";
+                  }
+                  {
                     name = "DNS_KEEP_NAMESERVER";
                     value = "off";
                   }

@@ -47,6 +47,8 @@ spec:
               value: Etc/UTC
             - name: HTTP_CONTROL_SERVER_LOG
               value: "on"
+            - name: HTTP_CONTROL_SERVER
+              value: "on"
             - name: DNS_KEEP_NAMESERVER
               value: "off"
             - name: DNS_ADDRESS
