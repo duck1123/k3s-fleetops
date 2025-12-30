@@ -80,41 +80,7 @@ spec:
       initContainers:
         - args:
             - -c
-            - |
-              echo "Waiting for gluetun VPN connection..."
-              until curl -sf http://gluetun.gluetun:8000/v1/openvpn/status | grep -q '"status":"running"'; do
-                echo "VPN not connected yet, waiting..."
-                sleep 5
-              done
-              echo "VPN connection established!"
-              echo "Waiting for proxy to be ready..."
-              # Wait additional time for proxy to fully initialize after VPN connects
-              sleep 15
-              # Try to verify proxy is accepting connections by attempting a simple proxy request
-              MAX_ATTEMPTS=12
-              for i in $(seq 1 $MAX_ATTEMPTS); do
-                # Test if proxy actually works by making a request through it
-                if curl -sf --connect-timeout 5 --max-time 10 \
-                   --proxy http://gluetun.gluetun:8888 \
-                   --proxy-connect-timeout 5 \
-                   http://www.google.com > /dev/null 2>&1; then
-                  echo "Gluetun proxy is ready and working!"
-                  exit 0
-                fi
-                # Also check if we can at least connect to the proxy port (even if proxy request fails)
-                if curl -sf --connect-timeout 2 --max-time 3 http://gluetun.gluetun:8888 > /dev/null 2>&1; then
-                  echo "Proxy port is accessible but proxy request failed (attempt $i/$MAX_ATTEMPTS), retrying..."
-                else
-                  echo "Proxy port not accessible yet (attempt $i/$MAX_ATTEMPTS), waiting..."
-                fi
-                sleep 5
-              done
-              echo "ERROR: Gluetun proxy is not available after $MAX_ATTEMPTS attempts!"
-              echo "VPN status:"
-              curl -sf http://gluetun.gluetun:8000/v1/openvpn/status || echo "Could not get VPN status"
-              echo "Attempting to check proxy port directly:"
-              curl -v --connect-timeout 3 --max-time 5 http://gluetun.gluetun:8888 2>&1 | head -20 || echo "Failed to connect to proxy port 8888"
-              exit 1
+            - "echo \"Waiting for gluetun VPN connection...\"\nuntil curl -sf http://gluetun.gluetun:8000/v1/openvpn/status | grep -q '\"status\":\"running\"'; do\n  echo \"VPN not connected yet, waiting...\"\n  sleep 5\ndone\necho \"VPN connection established!\"\necho \"Waiting for proxy to be ready...\"\n# Wait additional time for proxy to fully initialize after VPN connects\nsleep 15\n# Try to verify proxy is accepting connections by attempting a simple proxy request\nMAX_ATTEMPTS=12\nfor i in $(seq 1 $MAX_ATTEMPTS); do\n  # Test if proxy actually works by making a request through it\n  # Try multiple test URLs in case one is blocked\n  PROXY_WORKING=false\n  for TEST_URL in \"http://www.google.com\" \"http://1.1.1.1\" \"http://8.8.8.8\"; do\n    if curl -sf --connect-timeout 5 --max-time 10 \\\n       --proxy http://gluetun.gluetun:8888 \\\n       --proxy-connect-timeout 5 \\\n       \"$TEST_URL\" > /dev/null 2>&1; then\n      echo \"Gluetun proxy is ready and working! (tested with $TEST_URL)\"\n      exit 0\n    fi\n  done\n  \n  # If proxy requests failed, check if port is at least accessible\n  # Use a simple TCP connection test\n  if timeout 2 bash -c \"exec 3<>/dev/tcp/gluetun.gluetun/8888\" 2>/dev/null; then\n    exec 3<&-\n    exec 3>&-\n    echo \"Proxy port is accessible but proxy requests failing (attempt $i/$MAX_ATTEMPTS), retrying...\"\n  else\n    echo \"Proxy port not accessible yet (attempt $i/$MAX_ATTEMPTS), waiting...\"\n  fi\n  sleep 5\ndone\necho \"ERROR: Gluetun proxy is not available after $MAX_ATTEMPTS attempts!\"\necho \"VPN status:\"\ncurl -sf http://gluetun.gluetun:8000/v1/openvpn/status || echo \"Could not get VPN status\"\necho \"Testing proxy connectivity:\"\necho \"  - Proxy port is accessible (connection established)\"\necho \"  - But proxy requests are failing\"\necho \"  - This may indicate the proxy is not fully initialized or there's a network issue\"\nexit 1\n"
           command:
             - sh
           image: curlimages/curl:latest
