@@ -139,6 +139,16 @@ spec:
           - name: edns0
         searches: []
       dnsPolicy: None
+      initContainers:
+        - command:
+            - sh
+            - -c
+            - if [ -f /gluetun/servers.json ]; then echo 'Clearing cached server data to ensure IPv4-only selection...'; rm -f /gluetun/servers.json; fi
+          image: busybox:latest
+          name: clear-ipv6-cache
+          volumeMounts:
+            - mountPath: /gluetun
+              name: gluetun
       serviceAccountName: default
       volumes:
         - name: gluetun

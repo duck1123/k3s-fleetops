@@ -111,6 +111,21 @@ mkArgoApp { inherit config lib; } rec {
                   }
                 ];
               };
+              # Init container to clear cached server data if IPv6 is disabled
+              # This prevents IPv6 addresses from being used even if cached
+              initContainers = lib.optionals (!cfg.enableIPv6) [
+                {
+                  name = "clear-ipv6-cache";
+                  image = "busybox:latest";
+                  command = [ "sh" "-c" "if [ -f /gluetun/servers.json ]; then echo 'Clearing cached server data to ensure IPv4-only selection...'; rm -f /gluetun/servers.json; fi" ];
+                  volumeMounts = [
+                    {
+                      mountPath = "/gluetun";
+                      name = "gluetun";
+                    }
+                  ];
+                }
+              ];
               containers = [{
                 inherit name;
                 image = "qmcgaw/gluetun:latest";
