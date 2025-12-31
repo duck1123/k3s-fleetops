@@ -28,6 +28,8 @@ spec:
               value: "1000"
             - name: TZ
               value: Etc/UTC
+            - name: WEBUI_PORTS
+              value: 9696/tcp
             - name: WHISPARR__POSTGRES__HOST
               value: postgresql.postgresql
             - name: WHISPARR__POSTGRES__PORT
@@ -89,6 +91,28 @@ spec:
             - sh
           image: curlimages/curl:latest
           name: wait-for-gluetun
+        - command:
+            - sh
+            - -c
+            - |
+              CONFIG_FILE="/config/config.xml"
+              if [ -f "$CONFIG_FILE" ]; then
+                # Update port in config.xml if it doesn't match
+                CURRENT_PORT=$(grep -oP '<Port>\K[0-9]+(?=</Port>)' "$CONFIG_FILE" || echo "")
+                if [ "$CURRENT_PORT" != "9696" ]; then
+                  echo "Updating whisparr port from $CURRENT_PORT to 9696 in config.xml"
+                  sed -i "s|<Port>[0-9]*</Port>|<Port>9696</Port>|g" "$CONFIG_FILE"
+                else
+                  echo "Port already set to 9696"
+                fi
+              else
+                echo "Config file not found, whisparr will create it with default port"
+              fi
+          image: busybox:latest
+          name: fix-port-config
+          volumeMounts:
+            - mountPath: /config
+              name: config
       serviceAccountName: default
       volumes:
         - name: config

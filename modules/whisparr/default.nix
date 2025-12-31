@@ -163,8 +163,34 @@ in mkArgoApp { inherit config lib; } rec {
             spec = {
               automountServiceAccountToken = true;
               serviceAccountName = "default";
-              initContainers = lib.optionalAttrs cfg.vpn.enable
-                (lib.waitForGluetun { inherit lib; } cfg.vpn.sharedGluetunService);
+              initContainers = (lib.optionalAttrs cfg.vpn.enable
+                (lib.waitForGluetun { inherit lib; } cfg.vpn.sharedGluetunService)) ++ [
+                {
+                  name = "fix-port-config";
+                  image = "busybox:latest";
+                  command = [ "sh" "-c" ''
+                    CONFIG_FILE="/config/config.xml"
+                    if [ -f "$CONFIG_FILE" ]; then
+                      # Update port in config.xml if it doesn't match
+                      CURRENT_PORT=$(grep -oP '<Port>\K[0-9]+(?=</Port>)' "$CONFIG_FILE" || echo "")
+                      if [ "$CURRENT_PORT" != "${toString cfg.service.port}" ]; then
+                        echo "Updating whisparr port from $CURRENT_PORT to ${toString cfg.service.port} in config.xml"
+                        sed -i "s|<Port>[0-9]*</Port>|<Port>${toString cfg.service.port}</Port>|g" "$CONFIG_FILE"
+                      else
+                        echo "Port already set to ${toString cfg.service.port}"
+                      fi
+                    else
+                      echo "Config file not found, whisparr will create it with default port"
+                    fi
+                  '' ];
+                  volumeMounts = [
+                    {
+                      mountPath = "/config";
+                      name = "config";
+                    }
+                  ];
+                }
+              ];
               containers = [
                 {
                   inherit name;
@@ -182,6 +208,10 @@ in mkArgoApp { inherit config lib; } rec {
                     {
                       name = "TZ";
                       value = cfg.tz;
+                    }
+                    {
+                      name = "WEBUI_PORTS";
+                      value = "${toString cfg.service.port}/tcp";
                     }
                   ] ++ (lib.optionalAttrs cfg.database.enable [
                     {
