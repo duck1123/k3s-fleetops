@@ -269,25 +269,23 @@ mkArgoApp { inherit config lib; } rec {
                       "sh"
                       "-c"
                       ''
-                        # Check control server port (8000) is listening
-                        if ! timeout 1 bash -c 'exec 3<>/dev/tcp/127.0.0.1/8000' 2>/dev/null; then
+                        # First check VPN is connected
+                        VPN_STATUS=$(wget -q -O- --timeout=2 http://127.0.0.1:8000/v1/openvpn/status 2>/dev/null || echo "")
+                        if [ -z "$VPN_STATUS" ] || ! echo "$VPN_STATUS" | grep -q '"status":"running"'; then
                           exit 1
                         fi
-                        exec 3<&-
-                        exec 3>&-
-                        # Check proxy port (8888) is listening
-                        if ! timeout 1 bash -c 'exec 3<>/dev/tcp/127.0.0.1/8888' 2>/dev/null; then
+                        # Test proxy functionality by making a request through it
+                        # Use wget with proxy settings
+                        if ! wget -q -O- --timeout=5 --proxy=on --http-proxy=127.0.0.1:8888 http://1.1.1.1 2>/dev/null > /dev/null; then
                           exit 1
                         fi
-                        exec 3<&-
-                        exec 3>&-
                         exit 0
                       ''
                     ];
                   };
                   initialDelaySeconds = 30;
                   periodSeconds = 10;
-                  timeoutSeconds = 2;
+                  timeoutSeconds = 6;
                   successThreshold = 1;
                   failureThreshold = 3;
                 };
