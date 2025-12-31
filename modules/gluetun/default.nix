@@ -172,6 +172,18 @@ mkArgoApp { inherit config lib; } rec {
                     value = "on";
                   }
                   {
+                    name = "FIREWALL_VPN_INPUT_PORTS";
+                    value = "8888,8000";
+                  }
+                  {
+                    name = "FIREWALL_OUTBOUND_SUBNETS";
+                    value = "0.0.0.0/0";
+                  }
+                  {
+                    name = "FIREWALL_ALLOWED_SUBNETS";
+                    value = "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16";
+                  }
+                  {
                     name = "LOG_LEVEL";
                     value = cfg.logLevel;
                   }
