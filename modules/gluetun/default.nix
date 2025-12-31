@@ -42,7 +42,7 @@ mkArgoApp { inherit config lib; } rec {
         2. CNI plugin that supports IPv6 (e.g., Cilium, Calico with IPv6)
         3. IPv6 addresses assigned to nodes
         4. IPv6 routing configured in the cluster
-        
+
         If IPv6 is not properly configured in your cluster, you'll see
         "Network unreachable" errors. In that case, set this to false.
       '';
@@ -287,12 +287,10 @@ mkArgoApp { inherit config lib; } rec {
                           exit 1
                         fi
                         # Test proxy port is listening and accepting connections
-                        # Use a simple connection test instead of full HTTP request to avoid timeouts
-                        if ! timeout 3 bash -c "exec 3<>/dev/tcp/127.0.0.1/8888" 2>/dev/null; then
+                        # Use nc (netcat) to test if port is open (works with BusyBox)
+                        if ! echo "" | timeout 2 nc 127.0.0.1 8888 >/dev/null 2>&1; then
                           exit 1
                         fi
-                        exec 3<&-
-                        exec 3>&-
                         exit 0
                       ''
                     ];
