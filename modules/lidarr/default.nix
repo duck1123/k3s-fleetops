@@ -229,16 +229,28 @@ in mkArgoApp { inherit config lib; } rec {
                       name = "NO_PROXY";
                       value = "localhost,127.0.0.1,.svc,.svc.cluster.local,sabnzbd.sabnzbd,sabnzbd.sabnzbd.svc.cluster.local";
                     }
-                  ]);
+                  ]) ++ [
+                    # Configure Lidarr to bind to all interfaces (IPv4 and IPv6)
+                    # This ensures health probes work regardless of IP version
+                    # Note: Lidarr may still bind to IPv6 by default, but this helps
+                    {
+                      name = "LIDARR__PORT";
+                      value = toString cfg.service.port;
+                    }
+                  ];
                   ports = [{
                     containerPort = cfg.service.port;
                     name = "http";
                     protocol = "TCP";
                   }];
                   readinessProbe = {
-                    httpGet = {
-                      path = "/";
-                      port = cfg.service.port;
+                    # Use exec probe to test from inside container (works with IPv6 binding)
+                    exec = {
+                      command = [
+                        "sh"
+                        "-c"
+                        "wget -q -O- --timeout=2 http://127.0.0.1:${toString cfg.service.port}/ || wget -q -O- --timeout=2 http://[::1]:${toString cfg.service.port}/ || exit 1"
+                      ];
                     };
                     initialDelaySeconds = 60;
                     periodSeconds = 10;
@@ -247,9 +259,13 @@ in mkArgoApp { inherit config lib; } rec {
                     failureThreshold = 5;
                   };
                   livenessProbe = {
-                    httpGet = {
-                      path = "/";
-                      port = cfg.service.port;
+                    # Use exec probe to test from inside container (works with IPv6 binding)
+                    exec = {
+                      command = [
+                        "sh"
+                        "-c"
+                        "wget -q -O- --timeout=2 http://127.0.0.1:${toString cfg.service.port}/ || wget -q -O- --timeout=2 http://[::1]:${toString cfg.service.port}/ || exit 1"
+                      ];
                     };
                     initialDelaySeconds = 90;
                     periodSeconds = 30;
