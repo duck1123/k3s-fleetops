@@ -80,7 +80,56 @@ spec:
       initContainers:
         - args:
             - -c
-            - "echo \"Waiting for gluetun VPN connection...\"\nuntil curl -sf http://gluetun.gluetun:8000/v1/openvpn/status | grep -q '\"status\":\"running\"'; do\n  echo \"VPN not connected yet, waiting...\"\n  sleep 5\ndone\necho \"VPN connection established!\"\necho \"Waiting for proxy to be ready...\"\n# Wait additional time for proxy to fully initialize after VPN connects\nsleep 10\n# Try to verify proxy is accepting connections\nMAX_ATTEMPTS=12\nfor i in $(seq 1 $MAX_ATTEMPTS); do\n  # First check if proxy port is accessible using curl (works in curl image)\n  if curl -sf --connect-timeout 3 --max-time 5 \\\n     --proxy http://gluetun.gluetun:8888 \\\n     --proxy-connect-timeout 3 \\\n     \"http://1.1.1.1\" > /dev/null 2>&1; then\n    echo \"Gluetun proxy is ready and working!\"\n    exit 0\n  fi\n  \n  # If that fails, try a simpler test - just check if we can connect to the proxy port\n  # Use curl to test TCP connectivity (curl can test without making HTTP request)\n  if curl -sf --connect-timeout 2 --max-time 3 \\\n     \"http://gluetun.gluetun:8888\" > /dev/null 2>&1; then\n    echo \"Proxy port is accessible (attempt $i/$MAX_ATTEMPTS), but proxy requests may need more time...\"\n  else\n    echo \"Proxy port not accessible yet (attempt $i/$MAX_ATTEMPTS), waiting...\"\n  fi\n  sleep 5\ndone\n\n# If we get here, check VPN status one more time\necho \"Proxy test timed out after $MAX_ATTEMPTS attempts\"\necho \"VPN status:\"\ncurl -sf http://gluetun.gluetun:8000/v1/openvpn/status || echo \"Could not get VPN status\"\necho \"Attempting final proxy test with longer timeout...\"\n# Final attempt with longer timeout\nif curl -sf --connect-timeout 10 --max-time 15 \\\n   --proxy http://gluetun.gluetun:8888 \\\n   --proxy-connect-timeout 10 \\\n   \"http://1.1.1.1\" > /dev/null 2>&1; then\n  echo \"Gluetun proxy is ready!\"\n  exit 0\nfi\n\necho \"WARNING: Could not verify proxy connectivity, but continuing anyway...\"\necho \"The proxy may still be initializing. Applications will retry if needed.\"\nexit 0\n"
+            - |
+              echo "Waiting for gluetun VPN connection..."
+              until curl -sf http://gluetun.gluetun:8000/v1/openvpn/status | grep -q '"status":"running"'; do
+                echo "VPN not connected yet, waiting..."
+                sleep 5
+              done
+              echo "VPN connection established!"
+              echo "Waiting for proxy to be ready..."
+              # Wait additional time for proxy to fully initialize after VPN connects
+              sleep 10
+              # Try to verify proxy is accepting connections
+              MAX_ATTEMPTS=12
+              for i in $(seq 1 $MAX_ATTEMPTS); do
+                # First check if proxy port is accessible using curl (works in curl image)
+                if curl -sf --connect-timeout 3 --max-time 5 \
+                   --proxy http://gluetun.gluetun:8888 \
+                   --proxy-connect-timeout 3 \
+                   "http://1.1.1.1" > /dev/null 2>&1; then
+                  echo "Gluetun proxy is ready and working!"
+                  exit 0
+                fi
+
+                # If that fails, try a simpler test - just check if we can connect to the proxy port
+                # Use curl to test TCP connectivity (curl can test without making HTTP request)
+                if curl -sf --connect-timeout 2 --max-time 3 \
+                   "http://gluetun.gluetun:8888" > /dev/null 2>&1; then
+                  echo "Proxy port is accessible (attempt $i/$MAX_ATTEMPTS), but proxy requests may need more time..."
+                else
+                  echo "Proxy port not accessible yet (attempt $i/$MAX_ATTEMPTS), waiting..."
+                fi
+                sleep 5
+              done
+
+              # If we get here, check VPN status one more time
+              echo "Proxy test timed out after $MAX_ATTEMPTS attempts"
+              echo "VPN status:"
+              curl -sf http://gluetun.gluetun:8000/v1/openvpn/status || echo "Could not get VPN status"
+              echo "Attempting final proxy test with longer timeout..."
+              # Final attempt with longer timeout
+              if curl -sf --connect-timeout 10 --max-time 15 \
+                 --proxy http://gluetun.gluetun:8888 \
+                 --proxy-connect-timeout 10 \
+                 "http://1.1.1.1" > /dev/null 2>&1; then
+                echo "Gluetun proxy is ready!"
+                exit 0
+              fi
+
+              echo "WARNING: Could not verify proxy connectivity, but continuing anyway..."
+              echo "The proxy may still be initializing. Applications will retry if needed."
+              exit 0
           command:
             - sh
           image: curlimages/curl:latest

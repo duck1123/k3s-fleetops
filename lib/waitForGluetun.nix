@@ -33,7 +33,7 @@ gluetunService: [
             echo "Gluetun proxy is ready and working!"
             exit 0
           fi
-          
+
           # If that fails, try a simpler test - just check if we can connect to the proxy port
           # Use curl to test TCP connectivity (curl can test without making HTTP request)
           if curl -sf --connect-timeout 2 --max-time 3 \
@@ -44,7 +44,7 @@ gluetunService: [
           fi
           sleep 5
         done
-        
+
         # If we get here, check VPN status one more time
         echo "Proxy test timed out after $MAX_ATTEMPTS attempts"
         echo "VPN status:"
@@ -58,7 +58,7 @@ gluetunService: [
           echo "Gluetun proxy is ready!"
           exit 0
         fi
-        
+
         echo "WARNING: Could not verify proxy connectivity, but continuing anyway..."
         echo "The proxy may still be initializing. Applications will retry if needed."
         exit 0
