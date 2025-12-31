@@ -229,11 +229,11 @@ mkArgoApp { inherit config lib; } rec {
                   }
                   {
                     name = "HTTPPROXY_LISTENING_ADDRESS";
-                    value = ":8888";
+                    value = "0.0.0.0:8888";
                   }
                   {
                     name = "HTTP_CONTROL_SERVER_LISTENING_ADDRESS";
-                    value = ":8000";
+                    value = "0.0.0.0:8000";
                   }
                   (if cfg.controlServer.username != "" then {
                     name = "HTTP_CONTROL_SERVER_USER";
@@ -294,9 +294,15 @@ mkArgoApp { inherit config lib; } rec {
                   failureThreshold = 3;
                 };
                 startupProbe = {
-                  httpGet = {
-                    path = "/v1/openvpn/status";
-                    port = 8000;
+                  exec = {
+                    command = [
+                      "sh"
+                      "-c"
+                      ''
+                        # Check if VPN is connected using localhost (may not require auth)
+                        wget -q -O- --timeout=2 http://127.0.0.1:8000/v1/openvpn/status 2>/dev/null | grep -q '"status":"running"' || exit 1
+                      ''
+                    ];
                   };
                   initialDelaySeconds = 10;
                   periodSeconds = 5;
