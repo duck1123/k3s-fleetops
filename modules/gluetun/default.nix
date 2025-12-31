@@ -269,28 +269,38 @@ mkArgoApp { inherit config lib; } rec {
                       "sh"
                       "-c"
                       ''
-                        # Check if control server is responding (VPN status)
-                        if ! wget -q -O- --timeout=3 http://127.0.0.1:8000/v1/openvpn/status 2>/dev/null | grep -q '"status":"running"'; then
+                        # Check control server port (8000) is listening
+                        if ! timeout 1 bash -c 'exec 3<>/dev/tcp/127.0.0.1/8000' 2>/dev/null; then
                           exit 1
                         fi
-                        # Check if proxy port is listening
-                        if ! nc -z 127.0.0.1 8888 2>/dev/null; then
+                        exec 3<&-
+                        exec 3>&-
+                        # Check proxy port (8888) is listening
+                        if ! timeout 1 bash -c 'exec 3<>/dev/tcp/127.0.0.1/8888' 2>/dev/null; then
                           exit 1
                         fi
-                        # Test if proxy actually works by making a request through it
-                        # Use HTTP_PROXY environment variable for wget
-                        if ! HTTP_PROXY=http://127.0.0.1:8888 wget -q -O- --timeout=5 http://1.1.1.1 2>/dev/null > /dev/null; then
-                          exit 1
-                        fi
+                        exec 3<&-
+                        exec 3>&-
                         exit 0
                       ''
                     ];
                   };
                   initialDelaySeconds = 30;
                   periodSeconds = 10;
-                  timeoutSeconds = 8;
+                  timeoutSeconds = 2;
                   successThreshold = 1;
                   failureThreshold = 3;
+                };
+                startupProbe = {
+                  httpGet = {
+                    path = "/v1/openvpn/status";
+                    port = 8000;
+                  };
+                  initialDelaySeconds = 10;
+                  periodSeconds = 5;
+                  timeoutSeconds = 3;
+                  successThreshold = 1;
+                  failureThreshold = 30;
                 };
                 livenessProbe = {
                   tcpSocket = {
