@@ -124,8 +124,8 @@ spec:
                     exit 1
                   fi
                   # Test proxy functionality by making a request through it
-                  # Use wget with proxy settings
-                  if ! wget -q -O- --timeout=5 --proxy=on --http-proxy=127.0.0.1:8888 http://1.1.1.1 2>/dev/null > /dev/null; then
+                  # Use wget with http_proxy environment variable (correct syntax)
+                  if ! http_proxy=http://127.0.0.1:8888 wget -q -O- --timeout=5 http://1.1.1.1 2>/dev/null > /dev/null; then
                     exit 1
                   fi
                   exit 0
