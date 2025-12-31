@@ -159,8 +159,7 @@ spec:
               name: gluetun
       dnsConfig:
         nameservers:
-          - 1.1.1.1
-          - 1.0.0.1
+          - 127.0.0.1
         options:
           - name: ndots
             value: "2"

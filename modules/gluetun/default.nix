@@ -97,10 +97,9 @@ mkArgoApp { inherit config lib; } rec {
               serviceAccountName = "default";
               dnsPolicy = "None";
               dnsConfig = {
-                nameservers = if cfg.enableIPv6 then
-                  [ "1.1.1.1" "1.0.0.1" "2606:4700:4700::1111" "2606:4700:4700::1001" ]
-                else
-                  [ "1.1.1.1" "1.0.0.1" ];
+                # Use gluetun's internal DNS server (listening on port 53)
+                # This ensures DNS queries go through the VPN and aren't blocked by firewall
+                nameservers = [ "127.0.0.1" ];
                 searches = [ ];
                 options = [
                   {
