@@ -343,9 +343,15 @@ self.lib.mkArgoApp
                       failureThreshold = 3;
                     };
                     startupProbe = {
-                      httpGet = {
-                        path = "/v1/openvpn/status";
-                        port = 8000;
+                      exec = {
+                        command = [
+                          "sh"
+                          "-c"
+                          ''
+                            # Check if VPN is connected using localhost (may not require auth)
+                            wget -q -O- --timeout=2 http://127.0.0.1:8000/v1/openvpn/status 2>/dev/null | grep -q '"status":"running"' || exit 1
+                          ''
+                        ];
                       };
                       initialDelaySeconds = 10;
                       periodSeconds = 5;
