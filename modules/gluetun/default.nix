@@ -188,6 +188,14 @@ mkArgoApp { inherit config lib; } rec {
                     value = "on";
                   }
                   {
+                    name = "HTTPPROXY_LOG_LEVEL";
+                    value = "info";
+                  }
+                  {
+                    name = "HTTPPROXY_LOG_HEADERS";
+                    value = "on";
+                  }
+                  {
                     name = "OPENVPN_VERBOSITY";
                     value = "3";
                   }
