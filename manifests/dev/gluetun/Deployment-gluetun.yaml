@@ -123,17 +123,19 @@ spec:
                   if [ -z "$VPN_STATUS" ] || ! echo "$VPN_STATUS" | grep -q '"status":"running"'; then
                     exit 1
                   fi
-                  # Test proxy functionality by making a request through it
-                  # Use wget with http_proxy environment variable (correct syntax)
-                  if ! http_proxy=http://127.0.0.1:8888 wget -q -O- --timeout=5 http://1.1.1.1 2>/dev/null > /dev/null; then
+                  # Test proxy port is listening and accepting connections
+                  # Use a simple connection test instead of full HTTP request to avoid timeouts
+                  if ! timeout 3 bash -c "exec 3<>/dev/tcp/127.0.0.1/8888" 2>/dev/null; then
                     exit 1
                   fi
+                  exec 3<&-
+                  exec 3>&-
                   exit 0
             failureThreshold: 3
             initialDelaySeconds: 30
             periodSeconds: 10
             successThreshold: 1
-            timeoutSeconds: 6
+            timeoutSeconds: 5
           securityContext:
             capabilities:
               add:
