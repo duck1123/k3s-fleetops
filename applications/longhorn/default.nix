@@ -20,7 +20,11 @@ self.lib.mkArgoApp { inherit config lib; } {
   uses-ingress = true;
 
   defaultValues = cfg: {
-    defaultSettings.defaultReplicaCount = 1;
+    # Increase default replica count to 2 for better redundancy
+    # This prevents volume failures when a single replica fails
+    defaultSettings.defaultReplicaCount = 2;
+    # Enable replica soft anti-affinity to spread replicas across nodes when possible
+    defaultSettings.replicaSoftAntiAffinity = "true";
 
     ingress = with cfg.ingress; {
       inherit ingressClassName;
@@ -33,7 +37,8 @@ self.lib.mkArgoApp { inherit config lib; } {
 
     persistence = {
       defaultClass = false;
-      defaultClassReplicaCount = 1;
+      # Update default class replica count to match defaultSettings
+      defaultClassReplicaCount = 2;
     };
 
     preUpgradeChecker.jobEnabled = false;
