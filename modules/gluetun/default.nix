@@ -264,12 +264,31 @@ mkArgoApp { inherit config lib; } rec {
                   }
                 ];
                 readinessProbe = {
-                  tcpSocket = {
-                    port = 8000;
+                  exec = {
+                    command = [
+                      "sh"
+                      "-c"
+                      ''
+                        # Check if control server is responding (VPN status)
+                        if ! wget -q -O- --timeout=3 http://127.0.0.1:8000/v1/openvpn/status 2>/dev/null | grep -q '"status":"running"'; then
+                          exit 1
+                        fi
+                        # Check if proxy port is listening
+                        if ! nc -z 127.0.0.1 8888 2>/dev/null; then
+                          exit 1
+                        fi
+                        # Test if proxy actually works by making a request through it
+                        # Use HTTP_PROXY environment variable for wget
+                        if ! HTTP_PROXY=http://127.0.0.1:8888 wget -q -O- --timeout=5 http://1.1.1.1 2>/dev/null > /dev/null; then
+                          exit 1
+                        fi
+                        exit 0
+                      ''
+                    ];
                   };
-                  initialDelaySeconds = 10;
+                  initialDelaySeconds = 30;
                   periodSeconds = 10;
-                  timeoutSeconds = 5;
+                  timeoutSeconds = 8;
                   successThreshold = 1;
                   failureThreshold = 3;
                 };
