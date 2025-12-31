@@ -167,10 +167,6 @@ mkArgoApp { inherit config lib; } rec {
                     value = "on";
                   }
                   {
-                    name = "FIREWALL_DEBUG";
-                    value = "on";
-                  }
-                  {
                     name = "FIREWALL_VPN_INPUT_PORTS";
                     value = "8888,8000";
                   }
@@ -179,24 +175,8 @@ mkArgoApp { inherit config lib; } rec {
                     value = cfg.logLevel;
                   }
                   {
-                    name = "LOG_CALLER";
-                    value = "on";
-                  }
-                  {
                     name = "HTTPPROXY_LOG";
                     value = "on";
-                  }
-                  {
-                    name = "HTTPPROXY_LOG_LEVEL";
-                    value = "info";
-                  }
-                  {
-                    name = "HTTPPROXY_LOG_HEADERS";
-                    value = "on";
-                  }
-                  {
-                    name = "OPENVPN_VERBOSITY";
-                    value = "3";
                   }
                   {
                     name = "UPDATER_PERIOD";
@@ -275,24 +255,9 @@ mkArgoApp { inherit config lib; } rec {
                   }
                 ];
                 readinessProbe = {
-                  exec = {
-                    command = [
-                      "sh"
-                      "-c"
-                      ''
-                        # First check VPN is connected
-                        VPN_STATUS=$(wget -q -O- --timeout=2 http://127.0.0.1:8000/v1/openvpn/status 2>/dev/null || echo "")
-                        if [ -z "$VPN_STATUS" ] || ! echo "$VPN_STATUS" | grep -q '"status":"running"'; then
-                          exit 1
-                        fi
-                        # Test proxy port is listening and accepting connections
-                        # Use nc (netcat) to test if port is open (works with BusyBox)
-                        if ! echo "" | timeout 2 nc 127.0.0.1 8888 >/dev/null 2>&1; then
-                          exit 1
-                        fi
-                        exit 0
-                      ''
-                    ];
+                  httpGet = {
+                    path = "/v1/openvpn/status";
+                    port = 8000;
                   };
                   initialDelaySeconds = 30;
                   periodSeconds = 10;
@@ -301,15 +266,9 @@ mkArgoApp { inherit config lib; } rec {
                   failureThreshold = 3;
                 };
                 startupProbe = {
-                  exec = {
-                    command = [
-                      "sh"
-                      "-c"
-                      ''
-                        # Check if VPN is connected using localhost (may not require auth)
-                        wget -q -O- --timeout=2 http://127.0.0.1:8000/v1/openvpn/status 2>/dev/null | grep -q '"status":"running"' || exit 1
-                      ''
-                    ];
+                  httpGet = {
+                    path = "/v1/openvpn/status";
+                    port = 8000;
                   };
                   initialDelaySeconds = 10;
                   periodSeconds = 5;

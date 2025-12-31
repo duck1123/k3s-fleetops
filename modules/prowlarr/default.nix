@@ -24,6 +24,12 @@ in mkArgoApp { inherit config lib; } rec {
       default = "longhorn";
     };
 
+    useProbes = mkOption {
+      description = mdDoc "Enable readiness and liveness probes";
+      type = types.bool;
+      default = true;
+    };
+
     vpn = {
       enable = mkOption {
         description = mdDoc "Enable VPN routing through shared gluetun service";
@@ -215,7 +221,7 @@ in mkArgoApp { inherit config lib; } rec {
                     name = "http";
                     protocol = "TCP";
                   }];
-                  readinessProbe = {
+                  readinessProbe = lib.mkIf cfg.useProbes {
                     httpGet = {
                       path = "/";
                       port = cfg.service.port;
@@ -226,7 +232,7 @@ in mkArgoApp { inherit config lib; } rec {
                     successThreshold = 1;
                     failureThreshold = 3;
                   };
-                  livenessProbe = {
+                  livenessProbe = lib.mkIf cfg.useProbes {
                     httpGet = {
                       path = "/";
                       port = cfg.service.port;

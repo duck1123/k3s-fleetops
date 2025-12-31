@@ -321,6 +321,7 @@ in {
       };
 
       storageClassName = "longhorn";
+      useProbes = false;
     };
 
     # ../modules/radarr/default.nix
@@ -356,6 +357,7 @@ in {
       replicas = 1;
 
       storageClassName = "longhorn";
+      useProbes = false;
     };
 
     # ../modules/sabnzbd/default.nix
@@ -443,6 +445,7 @@ in {
       };
 
       storageClassName = "longhorn";
+      useProbes = false;
     };
 
     # ../modules/qbittorrent/default.nix
@@ -505,6 +508,7 @@ in {
       };
 
       storageClassName = "longhorn";
+      useProbes = false;
     };
 
     # ../modules/immich/default.nix

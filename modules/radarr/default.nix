@@ -82,6 +82,12 @@ in mkArgoApp { inherit config lib; } rec {
       default = 1;
     };
 
+    useProbes = mkOption {
+      description = mdDoc "Enable readiness and liveness probes";
+      type = types.bool;
+      default = true;
+    };
+
     database = {
       enable = mkOption {
         description = mdDoc "Enable PostgreSQL database";
@@ -235,28 +241,28 @@ in mkArgoApp { inherit config lib; } rec {
                     name = "http";
                     protocol = "TCP";
                   }];
-                  # readinessProbe = {
-                  #   httpGet = {
-                  #     path = "/ping";
-                  #     port = cfg.service.port;
-                  #   };
-                  #   initialDelaySeconds = 10;
-                  #   periodSeconds = 10;
-                  #   timeoutSeconds = 5;
-                  #   successThreshold = 1;
-                  #   failureThreshold = 3;
-                  # };
-                  # livenessProbe = {
-                  #   httpGet = {
-                  #     path = "/ping";
-                  #     port = cfg.service.port;
-                  #   };
-                  #   initialDelaySeconds = 30;
-                  #   periodSeconds = 30;
-                  #   timeoutSeconds = 5;
-                  #   successThreshold = 1;
-                  #   failureThreshold = 3;
-                  # };
+                  readinessProbe = lib.mkIf cfg.useProbes {
+                    httpGet = {
+                      path = "/ping";
+                      port = cfg.service.port;
+                    };
+                    initialDelaySeconds = 10;
+                    periodSeconds = 10;
+                    timeoutSeconds = 5;
+                    successThreshold = 1;
+                    failureThreshold = 3;
+                  };
+                  livenessProbe = lib.mkIf cfg.useProbes {
+                    httpGet = {
+                      path = "/ping";
+                      port = cfg.service.port;
+                    };
+                    initialDelaySeconds = 30;
+                    periodSeconds = 30;
+                    timeoutSeconds = 5;
+                    successThreshold = 1;
+                    failureThreshold = 3;
+                  };
                   volumeMounts = [
                     {
                       mountPath = "/config";

@@ -82,6 +82,12 @@ in mkArgoApp { inherit config lib; } rec {
       default = 1;
     };
 
+    useProbes = mkOption {
+      description = mdDoc "Enable readiness and liveness probes";
+      type = types.bool;
+      default = true;
+    };
+
     database = {
       enable = mkOption {
         description = mdDoc "Enable PostgreSQL database";
@@ -229,21 +235,13 @@ in mkArgoApp { inherit config lib; } rec {
                       name = "NO_PROXY";
                       value = "localhost,127.0.0.1,.svc,.svc.cluster.local,sabnzbd.sabnzbd,sabnzbd.sabnzbd.svc.cluster.local";
                     }
-                  ]) ++ [
-                    # Configure Lidarr to bind to all interfaces (IPv4 and IPv6)
-                    # This ensures health probes work regardless of IP version
-                    # Note: Lidarr may still bind to IPv6 by default, but this helps
-                    {
-                      name = "LIDARR__PORT";
-                      value = toString cfg.service.port;
-                    }
-                  ];
+                  ]);
                   ports = [{
                     containerPort = cfg.service.port;
                     name = "http";
                     protocol = "TCP";
                   }];
-                  readinessProbe = {
+                  readinessProbe = lib.mkIf cfg.useProbes {
                     # Use exec probe to test from inside container (works with IPv6 binding)
                     exec = {
                       command = [
@@ -258,7 +256,7 @@ in mkArgoApp { inherit config lib; } rec {
                     successThreshold = 1;
                     failureThreshold = 5;
                   };
-                  livenessProbe = {
+                  livenessProbe = lib.mkIf cfg.useProbes {
                     # Use exec probe to test from inside container (works with IPv6 binding)
                     exec = {
                       command = [
