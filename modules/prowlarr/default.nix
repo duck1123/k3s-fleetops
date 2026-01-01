@@ -226,7 +226,7 @@ in mkArgoApp { inherit config lib; } rec {
                       path = "/";
                       port = cfg.service.port;
                     };
-                    initialDelaySeconds = 10;
+                    initialDelaySeconds = 60;
                     periodSeconds = 10;
                     timeoutSeconds = 5;
                     successThreshold = 1;
@@ -237,7 +237,7 @@ in mkArgoApp { inherit config lib; } rec {
                       path = "/";
                       port = cfg.service.port;
                     };
-                    initialDelaySeconds = 30;
+                    initialDelaySeconds = 90;
                     periodSeconds = 30;
                     timeoutSeconds = 5;
                     successThreshold = 1;
