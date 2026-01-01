@@ -207,16 +207,10 @@ in {
 
     # ../modules/gluetun/default.nix
     gluetun = {
+      controlServer = { inherit (secrets.gluetun) password username; };
       enable = true;
       mullvadAccountNumber = secrets.mullvad.id;
-      serverLocation =
-        ""; # Optional: specific server location (e.g., "us-was", "se-sto")
-      controlServer = {
-        username = secrets.gluetun.username;
-        password = secrets.gluetun.password;
-      };
       storageClassName = "longhorn";
-      logLevel = "debug";
     };
 
     # ../modules/forgejo/default.nix
@@ -268,236 +262,6 @@ in {
       };
     };
 
-    # ../modules/jupyterhub/default.nix
-    jupyterhub = {
-      enable = false;
-      inherit (secrets.jupyterhub)
-        cookieSecret cryptkeeperKeys password proxyToken;
-
-      ingress = {
-        domain = "jupyterhub.${tail-domain}";
-        clusterIssuer = "tailscale";
-        ingressClassName = "tailscale";
-        tls.enable = true;
-      };
-
-      postgresql = { inherit (secrets.jupyterhub.postgresql) adminPassword; };
-    };
-
-    # ../modules/kavita/default.nix
-    kavita = {
-      enable = false;
-
-      ingress = {
-        domain = "kavita.${tail-domain}";
-        clusterIssuer = "tailscale";
-        ingressClassName = "tailscale";
-        tls.enable = true;
-      };
-    };
-
-    # ../modules/lidarr/default.nix
-    lidarr = {
-      enable = true;
-
-      ingress = {
-        domain = "lidarr.${tail-domain}";
-        ingressClassName = "tailscale";
-        clusterIssuer = "tailscale";
-      };
-
-      vpn = {
-        enable = true;
-        sharedGluetunService = "gluetun.gluetun";
-      };
-
-      nfs = {
-        enable = true;
-        server = nas-host;
-        path = "${nas-base}";
-      };
-
-      replicas = 0;
-
-      database = {
-        enable = true;
-        host = "postgresql.postgresql";
-        port = 5432;
-        name = "lidarr";
-        username = "lidarr";
-        password = secrets.postgresql.userPassword;
-      };
-
-      storageClassName = "longhorn";
-    };
-
-    # ../modules/radarr/default.nix
-    radarr = {
-      enable = true;
-
-      ingress = {
-        domain = "radarr.${tail-domain}";
-        ingressClassName = "tailscale";
-        clusterIssuer = "tailscale";
-      };
-
-      nfs = {
-        enable = true;
-        server = nas-host;
-        path = "${nas-base}";
-      };
-
-      database = {
-        enable = true;
-        password = secrets.postgresql.userPassword;
-      };
-
-      replicas = 0;
-    };
-
-    # ../modules/sabnzbd/default.nix
-    sabnzbd = {
-      enable = true;
-
-      ingress = {
-        domain = "sabnzbd.${tail-domain}";
-        ingressClassName = "tailscale";
-        clusterIssuer = "tailscale";
-      };
-
-      nfs = {
-        enable = true;
-        server = nas-host;
-        path = "${nas-base}";
-      };
-
-      replicas = 0;
-    };
-
-    # ../modules/prowlarr/default.nix
-    prowlarr = {
-      enable = true;
-
-      ingress = {
-        domain = "prowlarr.${tail-domain}";
-        ingressClassName = "tailscale";
-        clusterIssuer = "tailscale";
-      };
-
-      vpn = {
-        enable = true;
-        sharedGluetunService = "gluetun.gluetun";
-      };
-
-      database = {
-        enable = true;
-        host = "postgresql.postgresql";
-        port = 5432;
-        name = "prowlarr-main";
-        username = "prowlarr";
-        password = secrets.postgresql.userPassword;
-      };
-
-      replicas = 0;
-
-      storageClassName = "longhorn";
-    };
-
-    # ../modules/sonarr/default.nix
-    sonarr = {
-      enable = true;
-
-      ingress = {
-        domain = "sonarr.${tail-domain}";
-        ingressClassName = "tailscale";
-        clusterIssuer = "tailscale";
-      };
-
-      vpn = {
-        enable = true;
-        sharedGluetunService = "gluetun.gluetun";
-      };
-
-      nfs = {
-        enable = true;
-        server = nas-host;
-        path = "${nas-base}";
-      };
-
-      database = {
-        enable = true;
-        host = "postgresql.postgresql";
-        port = 5432;
-        name = "sonarr";
-        username = "sonarr";
-        password = secrets.postgresql.userPassword;
-      };
-
-      replicas = 0;
-
-      storageClassName = "longhorn";
-    };
-
-    # ../modules/qbittorrent/default.nix
-    qbittorrent = {
-      enable = true;
-
-      ingress = {
-        domain = "qbittorrent.${tail-domain}";
-        ingressClassName = "tailscale";
-        clusterIssuer = "tailscale";
-      };
-
-      vpn = {
-        enable = true;
-        sharedGluetunService = "gluetun.gluetun";
-      };
-
-      nfs = {
-        enable = true;
-        server = nas-host;
-        path = "${nas-base}";
-      };
-
-      storageClassName = "longhorn";
-      webui = { inherit (secrets.qbittorrent) password username; };
-    };
-
-    # ../modules/whisparr/default.nix
-    whisparr = {
-      enable = true;
-
-      ingress = {
-        domain = "whisparr.${tail-domain}";
-        ingressClassName = "tailscale";
-        clusterIssuer = "tailscale";
-      };
-
-      vpn = {
-        enable = true;
-        sharedGluetunService = "gluetun.gluetun";
-      };
-
-      nfs = {
-        enable = true;
-        server = nas-host;
-        path = "${nas-base}";
-      };
-
-      database = {
-        enable = true;
-        host = "postgresql.postgresql";
-        port = 5432;
-        name = "whisparr";
-        username = "whisparr";
-        password = secrets.postgresql.userPassword;
-      };
-
-      replicas = 0;
-
-      storageClassName = "longhorn";
-    };
-
     # ../modules/immich/default.nix
     immich = {
       enable = false;
@@ -531,6 +295,34 @@ in {
       storageClassName = "longhorn";
     };
 
+    # ../modules/jupyterhub/default.nix
+    jupyterhub = {
+      enable = false;
+      inherit (secrets.jupyterhub)
+        cookieSecret cryptkeeperKeys password proxyToken;
+
+      ingress = {
+        domain = "jupyterhub.${tail-domain}";
+        clusterIssuer = "tailscale";
+        ingressClassName = "tailscale";
+        tls.enable = true;
+      };
+
+      postgresql = { inherit (secrets.jupyterhub.postgresql) adminPassword; };
+    };
+
+    # ../modules/kavita/default.nix
+    kavita = {
+      enable = false;
+
+      ingress = {
+        domain = "kavita.${tail-domain}";
+        clusterIssuer = "tailscale";
+        ingressClassName = "tailscale";
+        tls.enable = true;
+      };
+    };
+
     keycloak = {
       enable = false;
       ingress = {
@@ -555,6 +347,40 @@ in {
 
     # ../modules/kyverno/default.nix
     kyverno.enable = false;
+
+    # ../modules/lidarr/default.nix
+    lidarr = {
+      enable = true;
+
+      ingress = {
+        domain = "lidarr.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+
+      vpn = {
+        enable = true;
+        sharedGluetunService = "gluetun.gluetun";
+      };
+
+      nfs = {
+        enable = true;
+        server = nas-host;
+        path = "${nas-base}";
+      };
+
+      database = {
+        enable = true;
+        host = "postgresql.postgresql";
+        port = 5432;
+        name = "lidarr";
+        username = "lidarr";
+        password = secrets.postgresql.userPassword;
+      };
+
+      replicas = 0;
+      storageClassName = "longhorn";
+    };
 
     # ../modules/lldap/default.nix
     lldap.enable = false;
@@ -711,6 +537,76 @@ in {
       ];
     };
 
+    # ../modules/prowlarr/default.nix
+    prowlarr = {
+      database = {
+        enable = true;
+        host = "postgresql.postgresql";
+        port = 5432;
+        name = "prowlarr-main";
+        username = "prowlarr";
+        password = secrets.postgresql.userPassword;
+      };
+
+      enable = true;
+
+      ingress = {
+        domain = "prowlarr.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+
+      replicas = 0;
+    };
+
+    # ../modules/qbittorrent/default.nix
+    qbittorrent = {
+      enable = true;
+
+      ingress = {
+        domain = "qbittorrent.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+
+      nfs = {
+        enable = true;
+        server = nas-host;
+        path = "${nas-base}";
+      };
+
+      webui = { inherit (secrets.qbittorrent) password username; };
+    };
+
+    # ../modules/radarr/default.nix
+    radarr = {
+      database = {
+        enable = true;
+        host = "postgresql.postgresql";
+        port = 5432;
+        name = "radarr";
+        username = "radarr";
+        password = secrets.postgresql.userPassword;
+      };
+
+      enable = true;
+
+      ingress = {
+        domain = "radarr.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+
+      nfs = {
+        enable = true;
+        server = nas-host;
+        path = "${nas-base}";
+      };
+
+      replicas = 0;
+      storageClassName = "longhorn";
+    };
+
     # ../modules/redis/default.nix
     redis = {
       enable = true;
@@ -761,8 +657,55 @@ in {
     # ../modules/satisfactory/default.nix
     satisfactory.enable = false;
 
+    # ../modules/sabnzbd/default.nix
+    sabnzbd = {
+      enable = true;
+
+      ingress = {
+        domain = "sabnzbd.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+
+      nfs = {
+        enable = true;
+        server = nas-host;
+        path = "${nas-base}";
+      };
+
+      replicas = 0;
+    };
+
     # ../modules/sealed-secrets/default.nix
     sealed-secrets.enable = true;
+
+    # ../modules/sonarr/default.nix
+    sonarr = {
+      database = {
+        enable = true;
+        host = "postgresql.postgresql";
+        port = 5432;
+        name = "sonarr";
+        username = "sonarr";
+        password = secrets.postgresql.userPassword;
+      };
+
+      enable = true;
+
+      ingress = {
+        domain = "sonarr.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+
+      nfs = {
+        enable = true;
+        server = nas-host;
+        path = "${nas-base}";
+      };
+
+      replicas = 0;
+    };
 
     # ../modules/sops/default.nix
     sops.enable = true;
@@ -805,5 +748,33 @@ in {
     };
 
     traefik.enable = true;
+
+    # ../modules/whisparr/default.nix
+    whisparr = {
+      database = {
+        enable = true;
+        host = "postgresql.postgresql";
+        port = 5432;
+        name = "whisparr";
+        username = "whisparr";
+        password = secrets.postgresql.userPassword;
+      };
+
+      enable = true;
+
+      ingress = {
+        domain = "whisparr.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+
+      nfs = {
+        enable = true;
+        server = nas-host;
+        path = "${nas-base}";
+      };
+
+      replicas = 0;
+    };
   };
 }
