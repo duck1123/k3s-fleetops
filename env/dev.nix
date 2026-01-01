@@ -8,18 +8,22 @@ let
 
   # Helper function to generate database entries for *arr applications
   # Takes a list of app configs and generates main + log databases
-  arrDatabases = apps: builtins.concatLists (map (app: [
-    {
-      name = if app.name == "prowlarr" then "${app.name}-main" else app.name;
-      username = app.name;
-      password = secrets.postgresql.userPassword;
-    }
-    {
-      name = if app.name == "prowlarr" then "${app.name}-log" else "${app.name}-log";
-      username = app.name;
-      password = secrets.postgresql.userPassword;
-    }
-  ]) apps);
+  arrDatabases = apps:
+    builtins.concatLists (map (app: [
+      {
+        name = if app.name == "prowlarr" then "${app.name}-main" else app.name;
+        username = app.name;
+        password = secrets.postgresql.userPassword;
+      }
+      {
+        name = if app.name == "prowlarr" then
+          "${app.name}-log"
+        else
+          "${app.name}-log";
+        username = app.name;
+        password = secrets.postgresql.userPassword;
+      }
+    ]) apps);
 in {
   nixidy = {
     defaults.syncPolicy.autoSync = {
@@ -114,7 +118,8 @@ in {
         localIngress = {
           enable = true;
           domain = "booklore.local";
-          tls.enable = false; # Set to true if you have cert-manager configured for local domains
+          tls.enable =
+            false; # Set to true if you have cert-manager configured for local domains
         };
       };
 
@@ -204,7 +209,8 @@ in {
     gluetun = {
       enable = true;
       mullvadAccountNumber = secrets.mullvad.id;
-      serverLocation = ""; # Optional: specific server location (e.g., "us-was", "se-sto")
+      serverLocation =
+        ""; # Optional: specific server location (e.g., "us-was", "se-sto")
       controlServer = {
         username = secrets.gluetun.username;
         password = secrets.gluetun.password;
@@ -321,7 +327,6 @@ in {
       };
 
       storageClassName = "longhorn";
-      useProbes = false;
     };
 
     # ../modules/radarr/default.nix
@@ -334,11 +339,6 @@ in {
         clusterIssuer = "tailscale";
       };
 
-      vpn = {
-        enable = true;
-        sharedGluetunService = "gluetun.gluetun";
-      };
-
       nfs = {
         enable = true;
         server = nas-host;
@@ -347,23 +347,13 @@ in {
 
       database = {
         enable = true;
-        host = "postgresql.postgresql";
-        port = 5432;
-        name = "radarr";
-        username = "radarr";
         password = secrets.postgresql.userPassword;
       };
-
-      replicas = 1;
-
-      storageClassName = "longhorn";
-      useProbes = false;
     };
 
     # ../modules/sabnzbd/default.nix
     sabnzbd = {
       enable = true;
-      debugLogging = false;
 
       ingress = {
         domain = "sabnzbd.${tail-domain}";
@@ -371,20 +361,11 @@ in {
         clusterIssuer = "tailscale";
       };
 
-      # hostWhitelist = "sabnzbd.${tail-domain},sabnzbd.sabnzbd";
-
-      vpn = {
-        enable = true;
-        sharedGluetunService = "gluetun.gluetun";
-      };
-
       nfs = {
         enable = true;
         server = nas-host;
         path = "${nas-base}";
       };
-
-      storageClassName = "longhorn";
     };
 
     # ../modules/prowlarr/default.nix
@@ -445,7 +426,6 @@ in {
       };
 
       storageClassName = "longhorn";
-      useProbes = false;
     };
 
     # ../modules/qbittorrent/default.nix
@@ -469,12 +449,8 @@ in {
         path = "${nas-base}";
       };
 
-      webui = {
-        username = secrets.qbittorrent.username;
-        password = secrets.qbittorrent.password;
-      };
-
       storageClassName = "longhorn";
+      webui = { inherit (secrets.qbittorrent) password username; };
     };
 
     # ../modules/whisparr/default.nix
@@ -508,7 +484,6 @@ in {
       };
 
       storageClassName = "longhorn";
-      useProbes = false;
     };
 
     # ../modules/immich/default.nix
@@ -586,7 +561,8 @@ in {
     # ../modules/mariadb/default.nix
     mariadb = {
       auth = {
-        inherit (secrets.mariadb) database password replicationPassword rootPassword username;
+        inherit (secrets.mariadb)
+          database password replicationPassword rootPassword username;
       };
 
       enable = true;
@@ -756,7 +732,8 @@ in {
         localIngress = {
           enable = true;
           domain = "romm.local";
-          tls.enable = false; # Set to true if you have cert-manager configured for local domains
+          tls.enable =
+            false; # Set to true if you have cert-manager configured for local domains
         };
       };
 
