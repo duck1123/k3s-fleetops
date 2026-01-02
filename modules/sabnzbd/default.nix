@@ -86,6 +86,12 @@ mkArgoApp { inherit config lib; } rec {
       type = types.bool;
       default = false;
     };
+
+    replicas = mkOption {
+      description = mdDoc "Number of replicas";
+      type = types.int;
+      default = 1;
+    };
   };
 
   extraResources = cfg: {
@@ -98,6 +104,7 @@ mkArgoApp { inherit config lib; } rec {
         };
 
         spec = {
+          replicas = cfg.replicas;
           selector.matchLabels = {
             "app.kubernetes.io/instance" = name;
             "app.kubernetes.io/name" = name;

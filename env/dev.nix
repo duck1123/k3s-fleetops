@@ -317,6 +317,8 @@ in {
         path = "${nas-base}";
       };
 
+      replicas = 0;
+
       database = {
         enable = true;
         host = "postgresql.postgresql";
@@ -349,6 +351,8 @@ in {
         enable = true;
         password = secrets.postgresql.userPassword;
       };
+
+      replicas = 0;
     };
 
     # ../modules/sabnzbd/default.nix
@@ -366,6 +370,8 @@ in {
         server = nas-host;
         path = "${nas-base}";
       };
+
+      replicas = 0;
     };
 
     # ../modules/prowlarr/default.nix
@@ -391,6 +397,8 @@ in {
         username = "prowlarr";
         password = secrets.postgresql.userPassword;
       };
+
+      replicas = 0;
 
       storageClassName = "longhorn";
     };
@@ -424,6 +432,8 @@ in {
         username = "sonarr";
         password = secrets.postgresql.userPassword;
       };
+
+      replicas = 0;
 
       storageClassName = "longhorn";
     };
@@ -482,6 +492,8 @@ in {
         username = "whisparr";
         password = secrets.postgresql.userPassword;
       };
+
+      replicas = 0;
 
       storageClassName = "longhorn";
     };
