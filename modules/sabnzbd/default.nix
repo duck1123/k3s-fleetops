@@ -31,7 +31,8 @@ mkArgoApp { inherit config lib; } rec {
       };
 
       sharedGluetunService = mkOption {
-        description = mdDoc "Service name for shared gluetun (e.g., gluetun.gluetun)";
+        description =
+          mdDoc "Service name for shared gluetun (e.g., gluetun.gluetun)";
         type = types.str;
         default = "gluetun.gluetun";
       };
@@ -76,7 +77,8 @@ mkArgoApp { inherit config lib; } rec {
     };
 
     hostWhitelist = mkOption {
-      description = mdDoc "Comma-separated list of hostnames allowed to access SABnzbd. The service name and FQDN are automatically added.";
+      description = mdDoc
+        "Comma-separated list of hostnames allowed to access SABnzbd. The service name and FQDN are automatically added.";
       type = types.str;
       default = "";
     };
@@ -95,210 +97,206 @@ mkArgoApp { inherit config lib; } rec {
   };
 
   extraResources = cfg: {
-    deployments = {
-      ${name} = {
-        metadata.labels = {
-          "app.kubernetes.io/instance" = name;
-          "app.kubernetes.io/name" = name;
-          "app.kubernetes.io/version" = "latest";
-        };
+    # deployments.${name} = {
+    #   metadata.labels = {
+    #     "app.kubernetes.io/instance" = name;
+    #     "app.kubernetes.io/name" = name;
+    #     "app.kubernetes.io/version" = "latest";
+    #   };
 
-        spec = {
-          replicas = cfg.replicas;
-          selector.matchLabels = {
-            "app.kubernetes.io/instance" = name;
-            "app.kubernetes.io/name" = name;
-          };
+    #   spec = {
+    #     replicas = cfg.replicas;
+    #     selector.matchLabels = {
+    #       "app.kubernetes.io/instance" = name;
+    #       "app.kubernetes.io/name" = name;
+    #     };
 
-          template = {
-            metadata.labels = {
-              "app.kubernetes.io/instance" = name;
-              "app.kubernetes.io/name" = name;
-            };
+    #     template = {
+    #       metadata.labels = {
+    #         "app.kubernetes.io/instance" = name;
+    #         "app.kubernetes.io/name" = name;
+    #       };
 
-            spec = {
-              automountServiceAccountToken = true;
-              serviceAccountName = "default";
-              # Init container to set hostname whitelist in config
-              initContainers = let
-                hostnameList = lib.concatStringsSep "," (
-                  lib.filter (x: x != "") [
-                    cfg.hostWhitelist
-                    (if cfg.ingress.domain != "" then cfg.ingress.domain else "")
-                    "${name}.${cfg.namespace}"
-                    "${name}.${cfg.namespace}.svc.cluster.local"
-                  ]
-                );
-              in [{
-                name = "set-hostname-whitelist";
-                image = "busybox:latest";
-                command = [
-                  "sh"
-                  "-c"
-                  ''
-                    CONFIG_FILE="/config/sabnzbd.ini"
-                    ALL_HOSTNAMES="${hostnameList}"
+    #       spec = {
+    #         automountServiceAccountToken = true;
+    #         serviceAccountName = "default";
+    #         # Init container to set hostname whitelist in config
+    #         initContainers = let
+    #           hostnameList = lib.concatStringsSep "," (lib.filter (x: x != "") [
+    #             cfg.hostWhitelist
+    #             (if cfg.ingress.domain != "" then cfg.ingress.domain else "")
+    #             "${name}.${cfg.namespace}"
+    #             "${name}.${cfg.namespace}.svc.cluster.local"
+    #           ]);
+    #         in [{
+    #           name = "set-hostname-whitelist";
+    #           image = "busybox:latest";
+    #           command = [
+    #             "sh"
+    #             "-c"
+    #             ''
+    #               CONFIG_FILE="/config/sabnzbd.ini"
+    #               ALL_HOSTNAMES="${hostnameList}"
 
-                    # Clean up duplicates (split by comma, remove empty, sort, rejoin with comma)
-                    ALL_HOSTNAMES=$(echo "$ALL_HOSTNAMES" | tr ',' '\n' | grep -v '^$' | sort -u | tr '\n' ',' | sed 's/,$//')
+    #               # Clean up duplicates (split by comma, remove empty, sort, rejoin with comma)
+    #               ALL_HOSTNAMES=$(echo "$ALL_HOSTNAMES" | tr ',' '\n' | grep -v '^$' | sort -u | tr '\n' ',' | sed 's/,$//')
 
-                    # Wait for config volume to be available
-                    while [ ! -d /config ]; do
-                      sleep 1
-                    done
+    #               # Wait for config volume to be available
+    #               while [ ! -d /config ]; do
+    #                 sleep 1
+    #               done
 
-                    # Create config file if it doesn't exist
-                    if [ ! -f "$CONFIG_FILE" ]; then
-                      touch "$CONFIG_FILE"
-                    fi
+    #               # Create config file if it doesn't exist
+    #               if [ ! -f "$CONFIG_FILE" ]; then
+    #                 touch "$CONFIG_FILE"
+    #               fi
 
-                    # Ensure [misc] section exists
-                    if ! grep -q "^\[misc\]" "$CONFIG_FILE"; then
-                      echo "" >> "$CONFIG_FILE"
-                      echo "[misc]" >> "$CONFIG_FILE"
-                    fi
+    #               # Ensure [misc] section exists
+    #               if ! grep -q "^\[misc\]" "$CONFIG_FILE"; then
+    #                 echo "" >> "$CONFIG_FILE"
+    #                 echo "[misc]" >> "$CONFIG_FILE"
+    #               fi
 
-                    # Remove any existing host_whitelist entry
-                    sed -i '/^host_whitelist/d' "$CONFIG_FILE"
+    #               # Remove any existing host_whitelist entry
+    #               sed -i '/^host_whitelist/d' "$CONFIG_FILE"
 
-                    # Add host_whitelist to [misc] section
-                    if grep -q "^\[misc\]" "$CONFIG_FILE"; then
-                      sed -i "/^\[misc\]/a host_whitelist = $ALL_HOSTNAMES" "$CONFIG_FILE"
-                    else
-                      echo "host_whitelist = $ALL_HOSTNAMES" >> "$CONFIG_FILE"
-                    fi
-                    echo "Hostname whitelist set to: $ALL_HOSTNAMES"
+    #               # Add host_whitelist to [misc] section
+    #               if grep -q "^\[misc\]" "$CONFIG_FILE"; then
+    #                 sed -i "/^\[misc\]/a host_whitelist = $ALL_HOSTNAMES" "$CONFIG_FILE"
+    #               else
+    #                 echo "host_whitelist = $ALL_HOSTNAMES" >> "$CONFIG_FILE"
+    #               fi
+    #               echo "Hostname whitelist set to: $ALL_HOSTNAMES"
 
-                    ${lib.optionalString cfg.debugLogging ''
-                      # Enable debug logging if requested
-                      if ! grep -q "^\[logging\]" "$CONFIG_FILE"; then
-                        echo "" >> "$CONFIG_FILE"
-                        echo "[logging]" >> "$CONFIG_FILE"
-                      fi
+    #               ${lib.optionalString cfg.debugLogging ''
+    #                 # Enable debug logging if requested
+    #                 if ! grep -q "^\[logging\]" "$CONFIG_FILE"; then
+    #                   echo "" >> "$CONFIG_FILE"
+    #                   echo "[logging]" >> "$CONFIG_FILE"
+    #                 fi
 
-                      sed -i '/^log_level/d' "$CONFIG_FILE"
-                      sed -i '/^log_backups/d' "$CONFIG_FILE"
-                      sed -i '/^max_log_size/d' "$CONFIG_FILE"
-                      sed -i '/^log_access/d' "$CONFIG_FILE"
-                      if grep -q "^\[logging\]" "$CONFIG_FILE"; then
-                        sed -i "/^\[logging\]/a log_level = 2" "$CONFIG_FILE"
-                        sed -i "/^\[logging\]/a log_backups = 5" "$CONFIG_FILE"
-                        sed -i "/^\[logging\]/a max_log_size = 10M" "$CONFIG_FILE"
-                        sed -i "/^\[logging\]/a log_access = 1" "$CONFIG_FILE"
-                      else
-                        echo "log_level = 2" >> "$CONFIG_FILE"
-                        echo "log_backups = 5" >> "$CONFIG_FILE"
-                        echo "max_log_size = 10M" >> "$CONFIG_FILE"
-                        echo "log_access = 1" >> "$CONFIG_FILE"
-                      fi
-                      echo "Debug logging enabled (log_level = 2, log_access = 1)"
-                    ''}
-                  ''
-                ];
-                volumeMounts = [{
-                  mountPath = "/config";
-                  name = "config";
-                }];
-              }];
-              containers = [
-                {
-                  inherit name;
-                  image = cfg.image;
-                  imagePullPolicy = "IfNotPresent";
-                  env = [
-                    {
-                      name = "PGID";
-                      value = "${toString cfg.pgid}";
-                    }
-                    {
-                      name = "PUID";
-                      value = "${toString cfg.puid}";
-                    }
-                    {
-                      name = "TZ";
-                      value = cfg.tz;
-                    }
-                    {
-                      name = "PYTHONUNBUFFERED";
-                      value = "1";
-                    }
-                  ] ++ (lib.optionalAttrs cfg.vpn.enable [
-                    # Configure Sabnzbd to use shared gluetun's HTTP proxy
-                    {
-                      name = "HTTP_PROXY";
-                      value = "http://${cfg.vpn.sharedGluetunService}:8888";
-                    }
-                    {
-                      name = "HTTPS_PROXY";
-                      value = "http://${cfg.vpn.sharedGluetunService}:8888";
-                    }
-                    {
-                      name = "NO_PROXY";
-                      value = "localhost,127.0.0.1,.svc,.svc.cluster.local,${name}.${cfg.namespace},${name}.${cfg.namespace}.svc.cluster.local";
-                    }
-                  ]);
-                  ports = [{
-                    containerPort = cfg.service.port;
-                    name = "http";
-                    protocol = "TCP";
-                  }];
-                  # readinessProbe = {
-                  #   httpGet = {
-                  #     path = "/";
-                  #     port = cfg.service.port;
-                  #   };
-                  #   initialDelaySeconds = 10;
-                  #   periodSeconds = 10;
-                  #   timeoutSeconds = 5;
-                  #   successThreshold = 1;
-                  #   failureThreshold = 3;
-                  # };
-                  # livenessProbe = {
-                  #   httpGet = {
-                  #     path = "/";
-                  #     port = cfg.service.port;
-                  #   };
-                  #   initialDelaySeconds = 30;
-                  #   periodSeconds = 30;
-                  #   timeoutSeconds = 5;
-                  #   successThreshold = 1;
-                  #   failureThreshold = 3;
-                  # };
-                  volumeMounts = [
-                    {
-                      mountPath = "/config";
-                      name = "config";
-                    }
-                    {
-                      mountPath = "/config/Downloads";
-                      name = "downloads";
-                    }
-                    {
-                      mountPath = "/config/incomplete-downloads";
-                      name = "incomplete-downloads";
-                    }
-                  ];
-                }
-              ];
-              volumes = [
-                {
-                  name = "config";
-                  persistentVolumeClaim.claimName = "${name}-${name}-config";
-                }
-                {
-                  name = "downloads";
-                  persistentVolumeClaim.claimName = "${name}-${name}-downloads";
-                }
-                {
-                  name = "incomplete-downloads";
-                  persistentVolumeClaim.claimName = "${name}-${name}-incomplete-downloads";
-                }
-              ];
-            };
-          };
-        };
-      };
-    };
+    #                 sed -i '/^log_level/d' "$CONFIG_FILE"
+    #                 sed -i '/^log_backups/d' "$CONFIG_FILE"
+    #                 sed -i '/^max_log_size/d' "$CONFIG_FILE"
+    #                 sed -i '/^log_access/d' "$CONFIG_FILE"
+    #                 if grep -q "^\[logging\]" "$CONFIG_FILE"; then
+    #                   sed -i "/^\[logging\]/a log_level = 2" "$CONFIG_FILE"
+    #                   sed -i "/^\[logging\]/a log_backups = 5" "$CONFIG_FILE"
+    #                   sed -i "/^\[logging\]/a max_log_size = 10M" "$CONFIG_FILE"
+    #                   sed -i "/^\[logging\]/a log_access = 1" "$CONFIG_FILE"
+    #                 else
+    #                   echo "log_level = 2" >> "$CONFIG_FILE"
+    #                   echo "log_backups = 5" >> "$CONFIG_FILE"
+    #                   echo "max_log_size = 10M" >> "$CONFIG_FILE"
+    #                   echo "log_access = 1" >> "$CONFIG_FILE"
+    #                 fi
+    #                 echo "Debug logging enabled (log_level = 2, log_access = 1)"
+    #               ''}
+    #             ''
+    #           ];
+    #           volumeMounts = [{
+    #             mountPath = "/config";
+    #             name = "config";
+    #           }];
+    #         }];
+    #         containers = [{
+    #           inherit name;
+    #           image = cfg.image;
+    #           imagePullPolicy = "IfNotPresent";
+    #           env = [
+    #             {
+    #               name = "PGID";
+    #               value = "${toString cfg.pgid}";
+    #             }
+    #             {
+    #               name = "PUID";
+    #               value = "${toString cfg.puid}";
+    #             }
+    #             {
+    #               name = "TZ";
+    #               value = cfg.tz;
+    #             }
+    #             {
+    #               name = "PYTHONUNBUFFERED";
+    #               value = "1";
+    #             }
+    #           ] ++ (lib.optionalAttrs cfg.vpn.enable [
+    #             # Configure Sabnzbd to use shared gluetun's HTTP proxy
+    #             {
+    #               name = "HTTP_PROXY";
+    #               value = "http://${cfg.vpn.sharedGluetunService}:8888";
+    #             }
+    #             {
+    #               name = "HTTPS_PROXY";
+    #               value = "http://${cfg.vpn.sharedGluetunService}:8888";
+    #             }
+    #             {
+    #               name = "NO_PROXY";
+    #               value =
+    #                 "localhost,127.0.0.1,.svc,.svc.cluster.local,${name}.${cfg.namespace},${name}.${cfg.namespace}.svc.cluster.local";
+    #             }
+    #           ]);
+    #           ports = [{
+    #             containerPort = cfg.service.port;
+    #             name = "http";
+    #             protocol = "TCP";
+    #           }];
+    #           # readinessProbe = {
+    #           #   httpGet = {
+    #           #     path = "/";
+    #           #     port = cfg.service.port;
+    #           #   };
+    #           #   initialDelaySeconds = 10;
+    #           #   periodSeconds = 10;
+    #           #   timeoutSeconds = 5;
+    #           #   successThreshold = 1;
+    #           #   failureThreshold = 3;
+    #           # };
+    #           # livenessProbe = {
+    #           #   httpGet = {
+    #           #     path = "/";
+    #           #     port = cfg.service.port;
+    #           #   };
+    #           #   initialDelaySeconds = 30;
+    #           #   periodSeconds = 30;
+    #           #   timeoutSeconds = 5;
+    #           #   successThreshold = 1;
+    #           #   failureThreshold = 3;
+    #           # };
+    #           volumeMounts = [
+    #             {
+    #               mountPath = "/config";
+    #               name = "config";
+    #             }
+    #             {
+    #               mountPath = "/config/Downloads";
+    #               name = "downloads";
+    #             }
+    #             {
+    #               mountPath = "/config/incomplete-downloads";
+    #               name = "incomplete-downloads";
+    #             }
+    #           ];
+    #         }];
+    #         volumes = [
+    #           {
+    #             name = "config";
+    #             persistentVolumeClaim.claimName = "${name}-${name}-config";
+    #           }
+    #           {
+    #             name = "downloads";
+    #             persistentVolumeClaim.claimName = "${name}-${name}-downloads";
+    #           }
+    #           {
+    #             name = "incomplete-downloads";
+    #             persistentVolumeClaim.claimName =
+    #               "${name}-${name}-incomplete-downloads";
+    #           }
+    #         ];
+    #       };
+    #     };
+    #   };
+    # };
 
     ingresses.${name}.spec = with cfg.ingress; {
       inherit ingressClassName;
@@ -367,16 +365,10 @@ mkArgoApp { inherit config lib; } rec {
     # Create NFS PersistentVolumes for downloads when NFS is enabled
     persistentVolumes = lib.optionalAttrs (cfg.nfs.enable) {
       "${name}-${name}-downloads-nfs" = {
-        apiVersion = "v1";
-        kind = "PersistentVolume";
-        metadata = {
-          name = "${name}-${name}-downloads-nfs";
-        };
+        metadata.name = "${name}-${name}-downloads-nfs";
         spec = {
-          capacity = {
-            storage = "1Ti";
-          };
           accessModes = [ "ReadWriteMany" ];
+          capacity.storage = "1Ti";
           nfs = {
             server = cfg.nfs.server;
             path = "${cfg.nfs.path}/Downloads";
@@ -385,16 +377,10 @@ mkArgoApp { inherit config lib; } rec {
         };
       };
       "${name}-${name}-incomplete-downloads-nfs" = {
-        apiVersion = "v1";
-        kind = "PersistentVolume";
-        metadata = {
-          name = "${name}-${name}-incomplete-downloads-nfs";
-        };
+        metadata.name = "${name}-${name}-incomplete-downloads-nfs";
         spec = {
-          capacity = {
-            storage = "1Ti";
-          };
           accessModes = [ "ReadWriteMany" ];
+          capacity.storage = "1Ti";
           nfs = {
             server = cfg.nfs.server;
             path = "${cfg.nfs.path}/Downloads/incomplete";
@@ -403,6 +389,5 @@ mkArgoApp { inherit config lib; } rec {
         };
       };
     };
-
   };
 }
