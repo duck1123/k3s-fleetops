@@ -673,7 +673,7 @@ in {
         path = "${nas-base}";
       };
 
-      replicas = 1;
+      replicas = 0;
     };
 
     # ../modules/sealed-secrets/default.nix
