@@ -18,7 +18,7 @@ in with lib; {
     applications.demo = {
       inherit namespace;
       createNamespace = true;
-      finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
+      finalizer = "foreground";
 
       resources = {
         # Define config maps with config for nginx

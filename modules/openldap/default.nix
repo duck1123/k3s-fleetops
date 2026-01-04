@@ -70,7 +70,7 @@ in with lib; {
     applications.openldap = {
       inherit namespace;
       createNamespace = true;
-      finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
+      finalizer = "foreground";
       helm.releases.openldap = { inherit chart values; };
 
       resources = {

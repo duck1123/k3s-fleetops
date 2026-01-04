@@ -144,7 +144,7 @@ in with lib; {
     applications.opentelemetry-collector = {
       inherit namespace;
       createNamespace = true;
-      finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
+      finalizer = "foreground";
       helm.releases.opentelemetry-collector = { inherit chart values; };
       syncPolicy.finalSyncOpts = [ "CreateNamespace=true" ];
     };

@@ -36,7 +36,7 @@ in with lib; {
     applications.sqlpad = {
       inherit namespace;
       createNamespace = true;
-      finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
+      finalizer = "foreground";
       helm.releases.sqlpad = { inherit chart values; };
       syncPolicy.finalSyncOpts = [ "CreateNamespace=true" ];
     };

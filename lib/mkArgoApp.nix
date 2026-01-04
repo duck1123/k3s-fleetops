@@ -119,7 +119,7 @@ in {
         {
           inherit (cfg) namespace;
           createNamespace = true;
-          finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
+          finalizer = "foreground";
 
           # TODO: Should I be using some sort of overlay here?
           resources =

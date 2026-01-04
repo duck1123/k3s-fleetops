@@ -83,7 +83,7 @@ in with lib; {
     applications.${app-name} = {
       inherit (cfg) namespace;
       createNamespace = true;
-      finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
+      finalizer = "foreground";
       # helm.releases.${app-name} = { inherit chart values; };
 
       resources = {

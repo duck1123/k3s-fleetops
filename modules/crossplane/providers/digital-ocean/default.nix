@@ -10,7 +10,7 @@ in with lib; {
   config = mkIf cfg.enable {
     applications.crossplane-providers-digital-ocean = {
       inherit namespace;
-      finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
+      finalizer = "foreground";
       resources = {
         # droplets.test-droplet = {
         #   annotations."crossplane.io/external-name" = "crossplane-droplet";

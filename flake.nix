@@ -48,7 +48,7 @@
         nix-kube-generators.follows = "nix-kube-generators";
         nixpkgs.follows = "nixpkgs";
       };
-      url = "github:duck1123/nixidy?ref=feature/chmod";
+      url = "github:arnarg/nixidy";
     };
 
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";

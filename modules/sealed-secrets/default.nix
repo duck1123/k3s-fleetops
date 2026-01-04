@@ -38,7 +38,7 @@ in with lib; {
     applications.sealed-secrets = {
       inherit namespace;
       createNamespace = true;
-      finalizers = [ "resources-finalizer.argocd.argoproj.io" ];
+      finalizer = "foreground";
       helm.releases.sealed-secrets = { inherit chart values; };
       syncPolicy.finalSyncOpts = [ "CreateNamespace=true" ];
     };
