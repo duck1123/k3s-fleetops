@@ -5,6 +5,8 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
   name: amd-gpu-device-plugin
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
 spec:
   destination:
     namespace: kube-system
@@ -18,8 +20,6 @@ spec:
     automated:
       prune: true
       selfHeal: true
-  compareOptions:
-    ignoreExtraneous: true
   ignoreDifferences:
     - kind: Namespace
       name: kube-system

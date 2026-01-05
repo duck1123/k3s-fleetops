@@ -14,18 +14,24 @@ pkgs.writeShellScriptBin "post-process-manifests" ''
     echo "Removed CreateNamespace=true from Application syncOptions"
   fi
 
-  # Add compareOptions to ignore extraneous resources (like kube-system namespace)
+  # Add compare-options annotation to ignore extraneous resources (like kube-system namespace)
   # This prevents ArgoCD from tracking resources that exist in cluster but not in manifests
+  # Using annotation instead of spec.compareOptions as it's more reliable
   if [ -f "$APP_FILE" ]; then
-    # Check if compareOptions already exists
-    if ! grep -q "compareOptions:" "$APP_FILE"; then
-      # Use yq-go to add compareOptions
-      ${pkgs.yq-go}/bin/yq eval -i '.spec.compareOptions = {"ignoreExtraneous": true}' "$APP_FILE"
-      echo "Added compareOptions.ignoreExtraneous to Application"
-    elif ! grep -q "ignoreExtraneous" "$APP_FILE"; then
-      # Add ignoreExtraneous to existing compareOptions
-      ${pkgs.yq-go}/bin/yq eval -i '.spec.compareOptions.ignoreExtraneous = true' "$APP_FILE"
-      echo "Added ignoreExtraneous to existing compareOptions"
+    # Check if the annotation already exists
+    if ! grep -q "argocd.argoproj.io/compare-options" "$APP_FILE"; then
+      # Use yq-go to add the annotation
+      ${pkgs.yq-go}/bin/yq eval -i '.metadata.annotations."argocd.argoproj.io/compare-options" = "IgnoreExtraneous"' "$APP_FILE"
+      echo "Added compare-options annotation to Application"
+    elif ! grep -q "IgnoreExtraneous" "$APP_FILE"; then
+      # Update existing annotation to include IgnoreExtraneous
+      ${pkgs.yq-go}/bin/yq eval -i '.metadata.annotations."argocd.argoproj.io/compare-options" = "IgnoreExtraneous"' "$APP_FILE"
+      echo "Updated compare-options annotation to IgnoreExtraneous"
+    fi
+    # Remove compareOptions from spec if it exists (we're using annotation instead)
+    if ${pkgs.yq-go}/bin/yq eval '.spec.compareOptions' "$APP_FILE" 2>/dev/null | grep -q "."; then
+      ${pkgs.yq-go}/bin/yq eval -i 'del(.spec.compareOptions)' "$APP_FILE"
+      echo "Removed compareOptions from spec (using annotation instead)"
     fi
   fi
 
