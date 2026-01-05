@@ -149,7 +149,7 @@ in {
     cert-manager.enable = true;
 
     # ../modules/amd-gpu-device-plugin/default.nix
-    amd-gpu-device-plugin.enable = false;
+    amd-gpu-device-plugin.enable = true;
 
     # ../modules/cloudbeaver/default.nix
     cloudbeaver = {
