@@ -195,7 +195,6 @@ mkArgoApp { inherit config lib; } rec {
 
     ingresses.${name} = with cfg.ingress; {
       metadata.annotations = {
-        "cert-manager.io/cluster-issuer" = clusterIssuer;
         "ingress.kubernetes.io/force-ssl-redirect" = "true";
       };
 
@@ -218,7 +217,6 @@ mkArgoApp { inherit config lib; } rec {
 
         tls = [{
           hosts = [ domain ];
-          secretName = "${domain}-tls";
         }];
       };
     };

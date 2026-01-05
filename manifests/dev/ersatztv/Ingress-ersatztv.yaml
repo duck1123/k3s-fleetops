@@ -2,7 +2,6 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
-    cert-manager.io/cluster-issuer: tailscale
     ingress.kubernetes.io/force-ssl-redirect: "true"
   name: ersatztv
   namespace: ersatztv
@@ -22,4 +21,3 @@ spec:
   tls:
     - hosts:
         - ersatztv.bearded-snake.ts.net
-      secretName: ersatztv.bearded-snake.ts.net-tls
