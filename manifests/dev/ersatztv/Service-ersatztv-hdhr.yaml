@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ersatztv-hdhr
+  namespace: ersatztv
+spec:
+  ports:
+    - name: hdhr
+      port: 8409
+      protocol: TCP
+      targetPort: http
+  selector:
+    app.kubernetes.io/instance: ersatztv
+    app.kubernetes.io/name: ersatztv
+  type: NodePort

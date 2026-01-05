@@ -4,6 +4,7 @@
     ./airflow
     ./alice-bitcoin
     ./alice-lnd
+    ./amd-gpu-device-plugin
     ./argocd
     ./argo-events
     ./argo-workflows

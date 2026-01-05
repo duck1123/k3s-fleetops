@@ -148,6 +148,9 @@ in {
 
     cert-manager.enable = true;
 
+    # ../modules/amd-gpu-device-plugin/default.nix
+    amd-gpu-device-plugin.enable = true;
+
     # ../modules/cloudbeaver/default.nix
     cloudbeaver = {
       enable = true;
@@ -191,7 +194,7 @@ in {
 
     # ../modules/ersatztv/default.nix
     ersatztv = {
-      enable = false;
+      enable = true;
       logLevel = "Debug";
       ingress = {
         domain = "ersatztv.${tail-domain}";

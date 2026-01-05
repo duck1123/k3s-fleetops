@@ -80,6 +80,9 @@ mkArgoApp { inherit config lib; } rec {
             spec = {
               automountServiceAccountToken = true;
               serviceAccountName = "default";
+              nodeSelector = {
+                "kubernetes.io/hostname" = "powerspecnix";
+              };
               initContainers = [{
                 name = "db-init";
                 image = cfg.image;
@@ -145,6 +148,15 @@ mkArgoApp { inherit config lib; } rec {
                   name = "http";
                   protocol = "TCP";
                 }];
+
+                resources = {
+                  limits = {
+                    "amd.com/gpu" = 1;
+                  };
+                  requests = {
+                    "amd.com/gpu" = 1;
+                  };
+                };
 
                 volumeMounts = [
                   {
