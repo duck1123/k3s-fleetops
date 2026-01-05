@@ -18,6 +18,8 @@ spec:
     automated:
       prune: true
       selfHeal: true
+  compareOptions:
+    ignoreExtraneous: true
   ignoreDifferences:
     - kind: Namespace
       name: kube-system

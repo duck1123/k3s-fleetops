@@ -14,7 +14,22 @@ pkgs.writeShellScriptBin "post-process-manifests" ''
     echo "Removed CreateNamespace=true from Application syncOptions"
   fi
 
-  # Add ignoreDifferences for kube-system namespace to prevent ArgoCD from trying to prune it
+  # Add compareOptions to ignore extraneous resources (like kube-system namespace)
+  # This prevents ArgoCD from tracking resources that exist in cluster but not in manifests
+  if [ -f "$APP_FILE" ]; then
+    # Check if compareOptions already exists
+    if ! grep -q "compareOptions:" "$APP_FILE"; then
+      # Use yq-go to add compareOptions
+      ${pkgs.yq-go}/bin/yq eval -i '.spec.compareOptions = {"ignoreExtraneous": true}' "$APP_FILE"
+      echo "Added compareOptions.ignoreExtraneous to Application"
+    elif ! grep -q "ignoreExtraneous" "$APP_FILE"; then
+      # Add ignoreExtraneous to existing compareOptions
+      ${pkgs.yq-go}/bin/yq eval -i '.spec.compareOptions.ignoreExtraneous = true' "$APP_FILE"
+      echo "Added ignoreExtraneous to existing compareOptions"
+    fi
+  fi
+
+  # Add ignoreDifferences for kube-system namespace as a backup
   # This tells ArgoCD to ignore differences for the kube-system namespace
   if [ -f "$APP_FILE" ]; then
     # Check if ignoreDifferences already exists
@@ -30,7 +45,7 @@ pkgs.writeShellScriptBin "post-process-manifests" ''
   fi
 
   # Remove kube-system namespace manifest - it's a protected system namespace
-  # that shouldn't be managed by ArgoCD. The ignoreDifferences above handles this.
+  # that shouldn't be managed by ArgoCD. compareOptions.ignoreExtraneous handles this.
   NS_FILE="$MANIFESTS_DIR/Namespace-kube-system.yaml"
   if [ -f "$NS_FILE" ]; then
     rm -f "$NS_FILE"
