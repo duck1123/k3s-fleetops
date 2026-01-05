@@ -158,6 +158,13 @@ mkArgoApp { inherit config lib; } rec {
                   };
                 };
 
+                securityContext = {
+                  privileged = false;
+                  capabilities = {
+                    add = [ "SYS_ADMIN" ];
+                  };
+                };
+
                 volumeMounts = [
                   {
                     mountPath = "/config";
@@ -170,6 +177,10 @@ mkArgoApp { inherit config lib; } rec {
                   {
                     mountPath = "/app/data";
                     name = "data";
+                  }
+                  {
+                    mountPath = "/dev/dri";
+                    name = "dri";
                   }
                 ];
               }];
@@ -185,6 +196,13 @@ mkArgoApp { inherit config lib; } rec {
                 {
                   name = "media";
                   persistentVolumeClaim.claimName = "${name}-${name}-media";
+                }
+                {
+                  name = "dri";
+                  hostPath = {
+                    path = "/dev/dri";
+                    type = "Directory";
+                  };
                 }
               ];
             };

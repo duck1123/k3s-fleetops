@@ -43,6 +43,11 @@ spec:
               amd.com/gpu: 1
             requests:
               amd.com/gpu: 1
+          securityContext:
+            capabilities:
+              add:
+                - SYS_ADMIN
+            privileged: false
           volumeMounts:
             - mountPath: /config
               name: config
@@ -50,6 +55,8 @@ spec:
               name: media
             - mountPath: /app/data
               name: data
+            - mountPath: /dev/dri
+              name: dri
       initContainers:
         - args:
             - -c
@@ -75,3 +82,7 @@ spec:
         - name: media
           persistentVolumeClaim:
             claimName: ersatztv-ersatztv-media
+        - hostPath:
+            path: /dev/dri
+            type: Directory
+          name: dri
