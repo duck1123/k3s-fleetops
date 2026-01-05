@@ -106,8 +106,14 @@
        (println command)
        (shell command)))}
 
+  post-process-manifests
+  {:doc  "Post-process generated manifests to fix nixidy hardcoded behaviors"
+   :task (let [script-path (str/trim (:out (shell {:out :string} "nix-build --no-link --expr '(import <nixpkgs> {}).callPackage ./lib/postProcessManifests.nix {}'")))]
+           (shell (str script-path "/bin/post-process-manifests")))}
+
   switch-charts
-  {:doc  "Switch nixidy charts"
+  {:doc     "Switch nixidy charts"
+   :depends [post-process-manifests]
    :task (let [show-trace?    (= (System/getenv "SHOW_TRACE") "true")
                env            "dev"
                args           (concat ["nix"
@@ -124,7 +130,11 @@
                drv-path       (str/trim (:out (shell {:out :string} cmd)))
                activation-cmd (str drv-path "/activate")]
            #_(binding [*out* *err*] (println "path: " activation-cmd))
-           (shell activation-cmd))}
+           (shell activation-cmd)
+           ;; Run post-processing after nixidy generates manifests
+           (let [post-process-path (str/trim (:out (shell {:out :string} "nix-build --no-link --expr '(import <nixpkgs> {}).callPackage ./lib/postProcessManifests.nix {}'")))
+                 post-process-cmd  (str post-process-path "/bin/post-process-manifests")]
+             (shell post-process-cmd)))}
 
   update-charts
   {:doc  "Update Helm chart archives from OCI registries"

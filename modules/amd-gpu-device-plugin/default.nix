@@ -1,6 +1,11 @@
 { config, lib, ... }:
 with lib;
-mkArgoApp { inherit config lib; } rec {
+mkArgoApp {
+  inherit config lib;
+  # Application will be in argocd namespace (default)
+  # Resources will be deployed to kube-system (set via namespace parameter)
+  namespace = "kube-system";
+} rec {
   name = "amd-gpu-device-plugin";
   namespace = "kube-system";
 
@@ -37,7 +42,7 @@ mkArgoApp { inherit config lib; } rec {
             spec = {
               restartPolicy = "Always";
               priorityClassName = "system-node-critical";
-              
+
               nodeSelector = {
                 "kubernetes.io/arch" = "amd64";
               };
@@ -53,7 +58,7 @@ mkArgoApp { inherit config lib; } rec {
                 name = "amdgpu-dp-cntr";
                 image = cfg.image;
                 imagePullPolicy = "IfNotPresent";
-                
+
                 securityContext = {
                   privileged = true;
                   capabilities = {
