@@ -19,19 +19,12 @@ pkgs.writeShellScriptBin "post-process-manifests" ''
   if [ -f "$APP_FILE" ]; then
     # Check if ignoreDifferences already exists
     if ! grep -q "ignoreDifferences:" "$APP_FILE"; then
-      # Add ignoreDifferences section after spec.destination
-      ${pkgs.gnused}/bin/sed -i '/^[[:space:]]*destination:/a\
-  ignoreDifferences:\
-  - kind: Namespace\
-    name: kube-system\
-' "$APP_FILE"
+      # Use yq-go (Go version) to add ignoreDifferences after destination section
+      ${pkgs.yq-go}/bin/yq eval -i '.spec.ignoreDifferences = [{"kind": "Namespace", "name": "kube-system"}]' "$APP_FILE"
       echo "Added ignoreDifferences for kube-system namespace"
     elif ! grep -q "name: kube-system" "$APP_FILE"; then
-      # Add kube-system to existing ignoreDifferences
-      ${pkgs.gnused}/bin/sed -i '/^[[:space:]]*- kind: Namespace/a\
-  - kind: Namespace\
-    name: kube-system\
-' "$APP_FILE"
+      # Add kube-system to existing ignoreDifferences using yq-go
+      ${pkgs.yq-go}/bin/yq eval -i '.spec.ignoreDifferences += [{"kind": "Namespace", "name": "kube-system"}]' "$APP_FILE"
       echo "Added kube-system to existing ignoreDifferences"
     fi
   fi
