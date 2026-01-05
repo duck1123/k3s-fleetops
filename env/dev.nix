@@ -199,6 +199,7 @@ in {
       ingress = {
         domain = "ersatztv.${tail-domain}";
         ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
       };
 
       nfs = {

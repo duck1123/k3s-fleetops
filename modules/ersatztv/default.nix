@@ -193,24 +193,31 @@ mkArgoApp { inherit config lib; } rec {
       };
     };
 
-    ingresses.${name}.spec = with cfg.ingress; {
-      inherit ingressClassName;
+    ingresses.${name} = with cfg.ingress; {
+      metadata.annotations = {
+        "cert-manager.io/cluster-issuer" = clusterIssuer;
+        "ingress.kubernetes.io/force-ssl-redirect" = "true";
+      };
 
-      rules = [{
-        host = domain;
+      spec = {
+        inherit ingressClassName;
 
-        http.paths = [{
-          backend.service = {
-            inherit name;
-            port.name = "http";
-          };
+        rules = [{
+          host = domain;
 
-          path = "/";
-          pathType = "ImplementationSpecific";
+          http.paths = [{
+            backend.service = {
+              inherit name;
+              port.name = "http";
+            };
+
+            path = "/";
+            pathType = "ImplementationSpecific";
+          }];
         }];
-      }];
 
-      tls = [{ hosts = [ domain ]; }];
+        tls = [{ hosts = [ domain ]; }];
+      };
     };
 
     persistentVolumeClaims = {
