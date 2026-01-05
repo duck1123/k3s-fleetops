@@ -50,12 +50,31 @@ pkgs.writeShellScriptBin "post-process-manifests" ''
     fi
   fi
 
-  # Remove kube-system namespace manifest - it's a protected system namespace
-  # that shouldn't be managed by ArgoCD. compareOptions.ignoreExtraneous handles this.
+  # Create kube-system namespace manifest with annotations to prevent ArgoCD from managing it
+  # This tells ArgoCD the namespace exists but shouldn't be pruned or synced
   NS_FILE="$MANIFESTS_DIR/Namespace-kube-system.yaml"
-  if [ -f "$NS_FILE" ]; then
-    rm -f "$NS_FILE"
-    echo "Removed kube-system namespace manifest (protected system namespace)"
+  if [ ! -f "$NS_FILE" ]; then
+    # Create the namespace manifest with Prune=false annotation
+    cat > "$NS_FILE" <<EOF
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kube-system
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
+EOF
+    echo "Created kube-system namespace manifest with Prune=false annotation"
+  else
+    # Ensure the annotations are present
+    if ! grep -q "argocd.argoproj.io/sync-options" "$NS_FILE"; then
+      ${pkgs.yq-go}/bin/yq eval -i '.metadata.annotations."argocd.argoproj.io/sync-options" = "Prune=false"' "$NS_FILE"
+      echo "Added Prune=false annotation to existing namespace manifest"
+    fi
+    if ! grep -q "argocd.argoproj.io/compare-options" "$NS_FILE"; then
+      ${pkgs.yq-go}/bin/yq eval -i '.metadata.annotations."argocd.argoproj.io/compare-options" = "IgnoreExtraneous"' "$NS_FILE"
+      echo "Added compare-options annotation to existing namespace manifest"
+    fi
   fi
 ''
 
