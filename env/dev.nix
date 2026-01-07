@@ -68,6 +68,11 @@ in {
     # ../modules/argocd/default.nix
     argocd.enable = true;
 
+    # ../modules/argo-events/default.nix
+    argo-events = {
+      enable = true;
+    };
+
     # ../modules/argo-workflows/default.nix
     argo-workflows = {
       enable = false;
