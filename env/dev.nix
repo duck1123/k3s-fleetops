@@ -708,7 +708,7 @@ in {
         path = "${nas-base}";
       };
 
-      replicas = 0;
+      replicas = 1;
     };
 
     # ../modules/sops/default.nix
