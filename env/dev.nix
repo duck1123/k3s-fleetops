@@ -607,7 +607,7 @@ in {
         path = "${nas-base}";
       };
 
-      replicas = 0;
+      replicas = 1;
       storageClassName = "longhorn";
     };
 
