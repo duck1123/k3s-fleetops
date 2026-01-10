@@ -753,6 +753,25 @@ in {
 
     traefik.enable = true;
 
+    # ../modules/stashapp/default.nix
+    stashapp = {
+      enable = true;
+
+      ingress = {
+        domain = "stashapp.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+
+      nfs = {
+        enable = true;
+        server = nas-host;
+        path = "${nas-base}/Videos";
+      };
+
+      replicas = 1;
+    };
+
     # ../modules/whisparr/default.nix
     whisparr = {
       database = {

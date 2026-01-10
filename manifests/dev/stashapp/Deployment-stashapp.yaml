@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/instance: stashapp
+    app.kubernetes.io/name: stashapp
+    app.kubernetes.io/version: latest
+  name: stashapp
+  namespace: stashapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: stashapp
+      app.kubernetes.io/name: stashapp
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: stashapp
+        app.kubernetes.io/name: stashapp
+    spec:
+      automountServiceAccountToken: true
+      containers:
+        - env:
+            - name: PGID
+              value: "1000"
+            - name: PUID
+              value: "1000"
+            - name: TZ
+              value: Etc/UTC
+            - name: STASH_STASH_DIR
+              value: /data
+          image: stashapp/stash:latest
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 9999
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 5
+          name: stashapp
+          ports:
+            - containerPort: 9999
+              name: http
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 9999
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          volumeMounts:
+            - mountPath: /root/.stash
+              name: config
+            - mountPath: /data
+              name: data
+      serviceAccountName: default
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: stashapp-stashapp-config
+        - name: data
+          persistentVolumeClaim:
+            claimName: stashapp-stashapp-data

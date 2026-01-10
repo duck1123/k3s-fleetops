@@ -55,6 +55,7 @@
     ./sonarr
     ./sealed-secrets
     ./sops
+    ./stashapp
     ./spark
     ./specter
     ./sqlpad

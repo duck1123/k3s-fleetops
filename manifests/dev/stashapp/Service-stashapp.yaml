@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: stashapp
+  namespace: stashapp
+spec:
+  ports:
+    - name: http
+      port: 9999
+      protocol: TCP
+      targetPort: http
+  selector:
+    app.kubernetes.io/instance: stashapp
+    app.kubernetes.io/name: stashapp
+  type: ClusterIP

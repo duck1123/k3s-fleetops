@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: stashapp
+  namespace: stashapp
+spec:
+  ingressClassName: tailscale
+  rules:
+    - host: stashapp.bearded-snake.ts.net
+      http:
+        paths:
+          - backend:
+              service:
+                name: stashapp
+                port:
+                  name: http
+            path: /
+            pathType: ImplementationSpecific
+  tls:
+    - hosts:
+        - stashapp.bearded-snake.ts.net
