@@ -66,6 +66,18 @@ mkArgoApp { inherit config lib; } rec {
       type = types.int;
       default = 1;
     };
+
+    enableGPU = mkOption {
+      description = mdDoc "Enable GPU support for hardware encoding";
+      type = types.bool;
+      default = true;
+    };
+
+    nodeSelector = mkOption {
+      description = mdDoc "Node selector for GPU-enabled nodes";
+      type = types.nullOr types.str;
+      default = "powerspecnix";
+    };
   };
 
   extraResources = cfg: {
@@ -93,8 +105,13 @@ mkArgoApp { inherit config lib; } rec {
             spec = {
               automountServiceAccountToken = true;
               serviceAccountName = "default";
+            } // (lib.optionalAttrs (cfg.enableGPU && cfg.nodeSelector != null) {
+              nodeSelector = {
+                "kubernetes.io/hostname" = cfg.nodeSelector;
+              };
+            }) // {
               containers = [
-                {
+                ({
                   inherit name;
                   image = cfg.image;
                   imagePullPolicy = "IfNotPresent";
@@ -114,6 +131,14 @@ mkArgoApp { inherit config lib; } rec {
                     {
                       name = "STASH_STASH_DIR";
                       value = "/data";
+                    }
+                    {
+                      name = "FFMPEG_EXE";
+                      value = "/usr/bin/ffmpeg";
+                    }
+                    {
+                      name = "FFPROBE_EXE";
+                      value = "/usr/bin/ffprobe";
                     }
                   ];
                   ports = [{
@@ -152,8 +177,28 @@ mkArgoApp { inherit config lib; } rec {
                       mountPath = "/data";
                       name = "data";
                     }
-                  ];
-                }
+                  ] ++ (lib.optionalAttrs cfg.enableGPU [
+                    {
+                      mountPath = "/dev/dri";
+                      name = "dri";
+                    }
+                  ]);
+                } // (lib.optionalAttrs cfg.enableGPU {
+                  resources = {
+                    limits = {
+                      "amd.com/gpu" = 1;
+                    };
+                    requests = {
+                      "amd.com/gpu" = 1;
+                    };
+                  };
+                  securityContext = {
+                    privileged = false;
+                    capabilities = {
+                      add = [ "SYS_ADMIN" ];
+                    };
+                  };
+                }))
               ];
               volumes = [
                 {
@@ -164,7 +209,15 @@ mkArgoApp { inherit config lib; } rec {
                   name = "data";
                   persistentVolumeClaim.claimName = "${name}-${name}-data";
                 }
-              ];
+              ] ++ (lib.optionalAttrs cfg.enableGPU [
+                {
+                  name = "dri";
+                  hostPath = {
+                    path = "/dev/dri";
+                    type = "Directory";
+                  };
+                }
+              ]);
             };
           };
         };

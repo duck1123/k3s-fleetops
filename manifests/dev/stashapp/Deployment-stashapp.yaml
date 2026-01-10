@@ -30,6 +30,10 @@ spec:
               value: Etc/UTC
             - name: STASH_STASH_DIR
               value: /data
+            - name: FFMPEG_EXE
+              value: /usr/bin/ffmpeg
+            - name: FFPROBE_EXE
+              value: /usr/bin/ffprobe
           image: stashapp/stash:latest
           imagePullPolicy: IfNotPresent
           livenessProbe:
@@ -55,11 +59,25 @@ spec:
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 5
+          resources:
+            limits:
+              amd.com/gpu: 1
+            requests:
+              amd.com/gpu: 1
+          securityContext:
+            capabilities:
+              add:
+                - SYS_ADMIN
+            privileged: false
           volumeMounts:
             - mountPath: /root/.stash
               name: config
             - mountPath: /data
               name: data
+            - mountPath: /dev/dri
+              name: dri
+      nodeSelector:
+        kubernetes.io/hostname: powerspecnix
       serviceAccountName: default
       volumes:
         - name: config
@@ -68,3 +86,7 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: stashapp-stashapp-data
+        - hostPath:
+            path: /dev/dri
+            type: Directory
+          name: dri
