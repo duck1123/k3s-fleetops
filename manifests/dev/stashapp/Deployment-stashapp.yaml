@@ -59,11 +59,6 @@ spec:
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 5
-          resources:
-            limits:
-              amd.com/gpu: 1
-            requests:
-              amd.com/gpu: 1
           securityContext:
             capabilities:
               add:

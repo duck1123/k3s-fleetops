@@ -54,6 +54,18 @@ mkArgoApp { inherit config lib; } rec {
       type = types.str;
       default = "Information";
     };
+
+    enableGPU = mkOption {
+      description = mdDoc "Enable GPU support with exclusive resource allocation";
+      type = types.bool;
+      default = true;
+    };
+
+    sharedGPU = mkOption {
+      description = mdDoc "Enable shared GPU mode (mount /dev/dri without resource allocation for time-sharing)";
+      type = types.bool;
+      default = false;
+    };
   };
 
   extraResources = cfg: {
@@ -96,7 +108,7 @@ mkArgoApp { inherit config lib; } rec {
                   }
                 ];
               }];
-              containers = [{
+              containers = [({
                 inherit name;
                 image = cfg.image;
                 imagePullPolicy = "IfNotPresent";
@@ -149,15 +161,6 @@ mkArgoApp { inherit config lib; } rec {
                   protocol = "TCP";
                 }];
 
-                resources = {
-                  limits = {
-                    "amd.com/gpu" = 1;
-                  };
-                  requests = {
-                    "amd.com/gpu" = 1;
-                  };
-                };
-
                 securityContext = {
                   privileged = false;
                   capabilities = {
@@ -178,12 +181,22 @@ mkArgoApp { inherit config lib; } rec {
                     mountPath = "/app/data";
                     name = "data";
                   }
+                ] ++ (lib.optionalAttrs (cfg.enableGPU || cfg.sharedGPU) [
                   {
                     mountPath = "/dev/dri";
                     name = "dri";
                   }
-                ];
-              }];
+                ]);
+              } // (lib.optionalAttrs (cfg.enableGPU && !cfg.sharedGPU) {
+                resources = {
+                  limits = {
+                    "amd.com/gpu" = 1;
+                  };
+                  requests = {
+                    "amd.com/gpu" = 1;
+                  };
+                };
+              }))];
               volumes = [
                 {
                   name = "config";
@@ -197,6 +210,7 @@ mkArgoApp { inherit config lib; } rec {
                   name = "media";
                   persistentVolumeClaim.claimName = "${name}-${name}-media";
                 }
+              ] ++ (lib.optionalAttrs (cfg.enableGPU || cfg.sharedGPU) [
                 {
                   name = "dri";
                   hostPath = {
@@ -204,7 +218,7 @@ mkArgoApp { inherit config lib; } rec {
                     type = "Directory";
                   };
                 }
-              ];
+              ]);
             };
           };
         };

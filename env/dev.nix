@@ -207,6 +207,9 @@ in {
         server = nas-host;
         path = "${nas-base}/Videos";
       };
+
+      enableGPU = false; # Don't request exclusive GPU resource
+      sharedGPU = true; # Enable shared GPU mode (mount /dev/dri for time-sharing)
     };
 
     # ../modules/gluetun/default.nix
@@ -770,6 +773,8 @@ in {
       };
 
       replicas = 1;
+      enableGPU = false; # Don't request exclusive GPU resource
+      sharedGPU = true; # Enable shared GPU mode (mount /dev/dri for time-sharing)
     };
 
     # ../modules/whisparr/default.nix

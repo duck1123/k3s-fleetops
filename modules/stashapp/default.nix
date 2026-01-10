@@ -73,6 +73,12 @@ mkArgoApp { inherit config lib; } rec {
       default = true;
     };
 
+    sharedGPU = mkOption {
+      description = mdDoc "Enable shared GPU mode (mount /dev/dri without resource allocation for time-sharing)";
+      type = types.bool;
+      default = false;
+    };
+
     nodeSelector = mkOption {
       description = mdDoc "Node selector for GPU-enabled nodes";
       type = types.nullOr types.str;
@@ -105,7 +111,7 @@ mkArgoApp { inherit config lib; } rec {
             spec = {
               automountServiceAccountToken = true;
               serviceAccountName = "default";
-            } // (lib.optionalAttrs (cfg.enableGPU && cfg.nodeSelector != null) {
+            } // (lib.optionalAttrs ((cfg.enableGPU || cfg.sharedGPU) && cfg.nodeSelector != null) {
               nodeSelector = {
                 "kubernetes.io/hostname" = cfg.nodeSelector;
               };
@@ -177,13 +183,13 @@ mkArgoApp { inherit config lib; } rec {
                       mountPath = "/data";
                       name = "data";
                     }
-                  ] ++ (lib.optionalAttrs cfg.enableGPU [
+                  ] ++ (lib.optionalAttrs (cfg.enableGPU || cfg.sharedGPU) [
                     {
                       mountPath = "/dev/dri";
                       name = "dri";
                     }
                   ]);
-                } // (lib.optionalAttrs cfg.enableGPU {
+                } // (lib.optionalAttrs (cfg.enableGPU && !cfg.sharedGPU) {
                   resources = {
                     limits = {
                       "amd.com/gpu" = 1;
@@ -192,6 +198,7 @@ mkArgoApp { inherit config lib; } rec {
                       "amd.com/gpu" = 1;
                     };
                   };
+                }) // (lib.optionalAttrs (cfg.enableGPU || cfg.sharedGPU) {
                   securityContext = {
                     privileged = false;
                     capabilities = {
@@ -209,7 +216,7 @@ mkArgoApp { inherit config lib; } rec {
                   name = "data";
                   persistentVolumeClaim.claimName = "${name}-${name}-data";
                 }
-              ] ++ (lib.optionalAttrs cfg.enableGPU [
+              ] ++ (lib.optionalAttrs (cfg.enableGPU || cfg.sharedGPU) [
                 {
                   name = "dri";
                   hostPath = {

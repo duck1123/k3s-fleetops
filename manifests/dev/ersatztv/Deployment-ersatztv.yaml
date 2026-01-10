@@ -38,11 +38,6 @@ spec:
             - containerPort: 8409
               name: http
               protocol: TCP
-          resources:
-            limits:
-              amd.com/gpu: 1
-            requests:
-              amd.com/gpu: 1
           securityContext:
             capabilities:
               add:
