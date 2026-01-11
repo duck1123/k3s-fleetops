@@ -410,6 +410,12 @@ in mkArgoApp { inherit config lib; } rec {
             storage = "1Ti";
           };
           accessModes = [ "ReadWriteMany" ];
+          mountOptions = [
+            "uid=${toString cfg.puid}"
+            "gid=${toString cfg.pgid}"
+            "rw"
+            "sync"
+          ];
           nfs = {
             server = cfg.nfs.server;
             path = "${cfg.nfs.path}/Downloads";
@@ -428,6 +434,12 @@ in mkArgoApp { inherit config lib; } rec {
             storage = "1Ti";
           };
           accessModes = [ "ReadWriteMany" ];
+          mountOptions = [
+            "uid=${toString cfg.puid}"
+            "gid=${toString cfg.pgid}"
+            "rw"
+            "sync"
+          ];
           nfs = {
             server = cfg.nfs.server;
             path = "${cfg.nfs.path}/TV";
