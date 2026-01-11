@@ -369,12 +369,6 @@ mkArgoApp { inherit config lib; } rec {
         spec = {
           accessModes = [ "ReadWriteMany" ];
           capacity.storage = "1Ti";
-          mountOptions = [
-            "uid=${toString cfg.puid}"
-            "gid=${toString cfg.pgid}"
-            "rw"
-            "sync"
-          ];
           nfs = {
             server = cfg.nfs.server;
             path = "${cfg.nfs.path}/Downloads";
@@ -387,12 +381,6 @@ mkArgoApp { inherit config lib; } rec {
         spec = {
           accessModes = [ "ReadWriteMany" ];
           capacity.storage = "1Ti";
-          mountOptions = [
-            "uid=${toString cfg.puid}"
-            "gid=${toString cfg.pgid}"
-            "rw"
-            "sync"
-          ];
           nfs = {
             server = cfg.nfs.server;
             path = "${cfg.nfs.path}/Downloads/incomplete";
