@@ -20,11 +20,13 @@ spec:
                 -- Create database if it doesn't exist
                 SELECT format('CREATE DATABASE %I', 'prowlarr-main') WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'prowlarr-main')\gexec
 
-                -- Create user if it doesn't exist
+                -- Create user if it doesn't exist, then always update password
                 DO \$\$
                 BEGIN
                   IF NOT EXISTS (SELECT FROM pg_user WHERE usename = 'prowlarr') THEN
                     EXECUTE format('CREATE USER %I WITH PASSWORD %L', 'prowlarr', 'omE.6H):+]qedMo>ZG;m');
+                  ELSE
+                    EXECUTE format('ALTER USER %I WITH PASSWORD %L', 'prowlarr', 'omE.6H):+]qedMo>ZG;m');
                   END IF;
                 END
                 \$\$;
@@ -44,11 +46,13 @@ spec:
                 -- Create database if it doesn't exist
                 SELECT format('CREATE DATABASE %I', 'prowlarr-log') WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'prowlarr-log')\gexec
 
-                -- Create user if it doesn't exist
+                -- Create user if it doesn't exist, then always update password
                 DO \$\$
                 BEGIN
                   IF NOT EXISTS (SELECT FROM pg_user WHERE usename = 'prowlarr') THEN
                     EXECUTE format('CREATE USER %I WITH PASSWORD %L', 'prowlarr', 'omE.6H):+]qedMo>ZG;m');
+                  ELSE
+                    EXECUTE format('ALTER USER %I WITH PASSWORD %L', 'prowlarr', 'omE.6H):+]qedMo>ZG;m');
                   END IF;
                 END
                 \$\$;
@@ -68,11 +72,13 @@ spec:
                 -- Create database if it doesn't exist
                 SELECT format('CREATE DATABASE %I', 'sonarr') WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'sonarr')\gexec
 
-                -- Create user if it doesn't exist
+                -- Create user if it doesn't exist, then always update password
                 DO \$\$
                 BEGIN
                   IF NOT EXISTS (SELECT FROM pg_user WHERE usename = 'sonarr') THEN
                     EXECUTE format('CREATE USER %I WITH PASSWORD %L', 'sonarr', 'omE.6H):+]qedMo>ZG;m');
+                  ELSE
+                    EXECUTE format('ALTER USER %I WITH PASSWORD %L', 'sonarr', 'omE.6H):+]qedMo>ZG;m');
                   END IF;
                 END
                 \$\$;
@@ -92,11 +98,13 @@ spec:
                 -- Create database if it doesn't exist
                 SELECT format('CREATE DATABASE %I', 'sonarr-log') WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'sonarr-log')\gexec
 
-                -- Create user if it doesn't exist
+                -- Create user if it doesn't exist, then always update password
                 DO \$\$
                 BEGIN
                   IF NOT EXISTS (SELECT FROM pg_user WHERE usename = 'sonarr') THEN
                     EXECUTE format('CREATE USER %I WITH PASSWORD %L', 'sonarr', 'omE.6H):+]qedMo>ZG;m');
+                  ELSE
+                    EXECUTE format('ALTER USER %I WITH PASSWORD %L', 'sonarr', 'omE.6H):+]qedMo>ZG;m');
                   END IF;
                 END
                 \$\$;
@@ -116,11 +124,13 @@ spec:
                 -- Create database if it doesn't exist
                 SELECT format('CREATE DATABASE %I', 'radarr') WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'radarr')\gexec
 
-                -- Create user if it doesn't exist
+                -- Create user if it doesn't exist, then always update password
                 DO \$\$
                 BEGIN
                   IF NOT EXISTS (SELECT FROM pg_user WHERE usename = 'radarr') THEN
                     EXECUTE format('CREATE USER %I WITH PASSWORD %L', 'radarr', 'omE.6H):+]qedMo>ZG;m');
+                  ELSE
+                    EXECUTE format('ALTER USER %I WITH PASSWORD %L', 'radarr', 'omE.6H):+]qedMo>ZG;m');
                   END IF;
                 END
                 \$\$;
@@ -140,11 +150,13 @@ spec:
                 -- Create database if it doesn't exist
                 SELECT format('CREATE DATABASE %I', 'radarr-log') WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'radarr-log')\gexec
 
-                -- Create user if it doesn't exist
+                -- Create user if it doesn't exist, then always update password
                 DO \$\$
                 BEGIN
                   IF NOT EXISTS (SELECT FROM pg_user WHERE usename = 'radarr') THEN
                     EXECUTE format('CREATE USER %I WITH PASSWORD %L', 'radarr', 'omE.6H):+]qedMo>ZG;m');
+                  ELSE
+                    EXECUTE format('ALTER USER %I WITH PASSWORD %L', 'radarr', 'omE.6H):+]qedMo>ZG;m');
                   END IF;
                 END
                 \$\$;
@@ -164,11 +176,13 @@ spec:
                 -- Create database if it doesn't exist
                 SELECT format('CREATE DATABASE %I', 'lidarr') WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'lidarr')\gexec
 
-                -- Create user if it doesn't exist
+                -- Create user if it doesn't exist, then always update password
                 DO \$\$
                 BEGIN
                   IF NOT EXISTS (SELECT FROM pg_user WHERE usename = 'lidarr') THEN
                     EXECUTE format('CREATE USER %I WITH PASSWORD %L', 'lidarr', 'omE.6H):+]qedMo>ZG;m');
+                  ELSE
+                    EXECUTE format('ALTER USER %I WITH PASSWORD %L', 'lidarr', 'omE.6H):+]qedMo>ZG;m');
                   END IF;
                 END
                 \$\$;
@@ -188,11 +202,13 @@ spec:
                 -- Create database if it doesn't exist
                 SELECT format('CREATE DATABASE %I', 'lidarr-log') WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'lidarr-log')\gexec
 
-                -- Create user if it doesn't exist
+                -- Create user if it doesn't exist, then always update password
                 DO \$\$
                 BEGIN
                   IF NOT EXISTS (SELECT FROM pg_user WHERE usename = 'lidarr') THEN
                     EXECUTE format('CREATE USER %I WITH PASSWORD %L', 'lidarr', 'omE.6H):+]qedMo>ZG;m');
+                  ELSE
+                    EXECUTE format('ALTER USER %I WITH PASSWORD %L', 'lidarr', 'omE.6H):+]qedMo>ZG;m');
                   END IF;
                 END
                 \$\$;
@@ -212,11 +228,13 @@ spec:
                 -- Create database if it doesn't exist
                 SELECT format('CREATE DATABASE %I', 'whisparr') WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'whisparr')\gexec
 
-                -- Create user if it doesn't exist
+                -- Create user if it doesn't exist, then always update password
                 DO \$\$
                 BEGIN
                   IF NOT EXISTS (SELECT FROM pg_user WHERE usename = 'whisparr') THEN
                     EXECUTE format('CREATE USER %I WITH PASSWORD %L', 'whisparr', 'omE.6H):+]qedMo>ZG;m');
+                  ELSE
+                    EXECUTE format('ALTER USER %I WITH PASSWORD %L', 'whisparr', 'omE.6H):+]qedMo>ZG;m');
                   END IF;
                 END
                 \$\$;
@@ -236,11 +254,13 @@ spec:
                 -- Create database if it doesn't exist
                 SELECT format('CREATE DATABASE %I', 'whisparr-log') WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'whisparr-log')\gexec
 
-                -- Create user if it doesn't exist
+                -- Create user if it doesn't exist, then always update password
                 DO \$\$
                 BEGIN
                   IF NOT EXISTS (SELECT FROM pg_user WHERE usename = 'whisparr') THEN
                     EXECUTE format('CREATE USER %I WITH PASSWORD %L', 'whisparr', 'omE.6H):+]qedMo>ZG;m');
+                  ELSE
+                    EXECUTE format('ALTER USER %I WITH PASSWORD %L', 'whisparr', 'omE.6H):+]qedMo>ZG;m');
                   END IF;
                 END
                 \$\$;

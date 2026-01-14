@@ -164,11 +164,13 @@ in mkArgoApp { inherit config lib; } rec {
                           -- Create database if it doesn't exist
                           SELECT format('CREATE DATABASE %I', '${db.name}') WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '${db.name}')\gexec
 
-                          -- Create user if it doesn't exist
+                          -- Create user if it doesn't exist, then always update password
                           DO \$\$
                           BEGIN
                             IF NOT EXISTS (SELECT FROM pg_user WHERE usename = '${db.username}') THEN
                               EXECUTE format('CREATE USER %I WITH PASSWORD %L', '${db.username}', '${db.password}');
+                            ELSE
+                              EXECUTE format('ALTER USER %I WITH PASSWORD %L', '${db.username}', '${db.password}');
                             END IF;
                           END
                           \$\$;
