@@ -8,7 +8,7 @@ metadata:
   name: whisparr
   namespace: whisparr
 spec:
-  replicas: 0
+  replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/instance: whisparr

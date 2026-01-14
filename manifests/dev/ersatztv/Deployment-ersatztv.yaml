@@ -30,7 +30,7 @@ spec:
             - name: ASPNETCORE_URLS
               value: http://0.0.0.0:8409
             - name: Logging__LogLevel__Default
-              value: Debug
+              value: Information
           image: jasongdove/ersatztv:latest
           imagePullPolicy: IfNotPresent
           name: ersatztv

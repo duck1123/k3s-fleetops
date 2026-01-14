@@ -98,7 +98,7 @@ in {
 
     # ../modules/booklore/default.nix
     booklore = {
-      enable = true;
+      enable = false;
 
       database = {
         host = "mariadb.mariadb";
@@ -183,7 +183,7 @@ in {
 
     # ../modules/dozzle/default.nix
     dozzle = {
-      enable = true;
+      enable = false;
 
       ingress = {
         domain = "dozzle.${tail-domain}";
@@ -195,7 +195,7 @@ in {
     # ../modules/ersatztv/default.nix
     ersatztv = {
       enable = true;
-      logLevel = "Debug";
+      # logLevel = "Debug";
       ingress = {
         domain = "ersatztv.${tail-domain}";
         ingressClassName = "tailscale";
@@ -357,7 +357,7 @@ in {
 
     # ../modules/lidarr/default.nix
     lidarr = {
-      enable = true;
+      enable = false;
 
       ingress = {
         domain = "lidarr.${tail-domain}";
@@ -568,7 +568,7 @@ in {
 
     # ../modules/qbittorrent/default.nix
     qbittorrent = {
-      enable = true;
+      enable = false;
 
       ingress = {
         domain = "qbittorrent.${tail-domain}";
@@ -622,7 +622,7 @@ in {
 
     # ../modules/romm/default.nix
     romm = {
-      enable = true;
+      enable = false;
 
       admin = {
         username = secrets.romm.admin.username;
@@ -802,7 +802,7 @@ in {
         path = "${nas-base}";
       };
 
-      replicas = 0;
+      replicas = 1;
     };
   };
 }
