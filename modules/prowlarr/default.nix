@@ -163,7 +163,7 @@ in mkArgoApp { inherit config lib; } rec {
                       name = "TZ";
                       value = cfg.tz;
                     }
-                  ] ++ (lib.optionalAttrs cfg.database.enable [
+                  ] ++ (lib.optionals cfg.database.enable [
                     {
                       name = "PROWLARR__POSTGRES__HOST";
                       value = cfg.database.host;
@@ -201,7 +201,7 @@ in mkArgoApp { inherit config lib; } rec {
                         name = "PROWLARR__POSTGRES__PASSWORD";
                         value = "";
                       })
-                  ]) ++ (lib.optionalAttrs cfg.vpn.enable [
+                  ]) ++ (lib.optionals cfg.vpn.enable [
                     # Configure Prowlarr to use shared gluetun's HTTP proxy
                     {
                       name = "HTTP_PROXY";
@@ -256,11 +256,12 @@ in mkArgoApp { inherit config lib; } rec {
                   name = "config";
                   persistentVolumeClaim.claimName = "${name}-${name}-config";
                 }
-                (lib.optionalAttrs (cfg.database.enable && cfg.database.password != "") {
+              ] ++ (lib.optionals (cfg.database.enable && cfg.database.password != "") [
+                {
                   name = password-secret;
                   secret.secretName = password-secret;
-                })
-              ];
+                }
+              ]);
             };
           };
         };
