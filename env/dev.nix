@@ -689,7 +689,7 @@ in {
     # ../modules/sonarr/default.nix
     sonarr = {
       database = {
-        enable = false;
+        enable = true;
         host = "postgresql.postgresql";
         port = 5432;
         name = "sonarr";
