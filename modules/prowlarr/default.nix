@@ -256,6 +256,10 @@ in mkArgoApp { inherit config lib; } rec {
                   name = "config";
                   persistentVolumeClaim.claimName = "${name}-${name}-config";
                 }
+                (lib.optionalAttrs (cfg.database.enable && cfg.database.password != "") {
+                  name = password-secret;
+                  secret.secretName = password-secret;
+                })
               ];
             };
           };

@@ -108,3 +108,6 @@ spec:
         - name: config
           persistentVolumeClaim:
             claimName: prowlarr-prowlarr-config
+        - name: prowlarr-database-password
+          secret:
+            secretName: prowlarr-database-password
