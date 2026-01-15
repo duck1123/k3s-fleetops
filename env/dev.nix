@@ -588,7 +588,7 @@ in {
     # ../modules/radarr/default.nix
     radarr = {
       database = {
-        enable = true;
+        enable = false;
         host = "postgresql.postgresql";
         port = 5432;
         name = "radarr";

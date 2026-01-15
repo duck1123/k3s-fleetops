@@ -28,21 +28,6 @@ spec:
               value: "1000"
             - name: TZ
               value: Etc/UTC
-            - name: RADARR__POSTGRES__HOST
-              value: postgresql.postgresql
-            - name: RADARR__POSTGRES__PORT
-              value: "5432"
-            - name: RADARR__POSTGRES__MAINDB
-              value: radarr
-            - name: RADARR__POSTGRES__LOGDB
-              value: radarr-log
-            - name: RADARR__POSTGRES__USER
-              value: radarr
-            - name: RADARR__POSTGRES__PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: password
-                  name: radarr-database-password
             - name: HTTP_PROXY
               value: http://gluetun.gluetun:8888
             - name: HTTPS_PROXY
@@ -112,9 +97,6 @@ spec:
         - name: config
           persistentVolumeClaim:
             claimName: radarr-radarr-config
-        - name: radarr-database-password
-          secret:
-            secretName: radarr-database-password
         - name: downloads
           persistentVolumeClaim:
             claimName: radarr-radarr-downloads
