@@ -28,21 +28,6 @@ spec:
               value: "1000"
             - name: TZ
               value: Etc/UTC
-            - name: SONARR__POSTGRES__HOST
-              value: postgresql.postgresql
-            - name: SONARR__POSTGRES__PORT
-              value: "5432"
-            - name: SONARR__POSTGRES__MAINDB
-              value: sonarr
-            - name: SONARR__POSTGRES__LOGDB
-              value: sonarr-log
-            - name: SONARR__POSTGRES__USER
-              value: sonarr
-            - name: SONARR__POSTGRES__PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: password
-                  name: sonarr-database-password
             - name: HTTP_PROXY
               value: http://gluetun.gluetun:8888
             - name: HTTPS_PROXY
@@ -112,9 +97,6 @@ spec:
         - name: config
           persistentVolumeClaim:
             claimName: sonarr-sonarr-config
-        - name: sonarr-database-password
-          secret:
-            secretName: sonarr-database-password
         - name: downloads
           persistentVolumeClaim:
             claimName: sonarr-sonarr-downloads
