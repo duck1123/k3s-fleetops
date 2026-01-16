@@ -52,6 +52,45 @@ in mkArgoApp { inherit config lib; } rec {
       default = "local-path";
     };
 
+    persistenceSize = mkOption {
+      description = mdDoc "Size of the persistent volume";
+      type = types.str;
+      default = "20Gi";
+    };
+
+    persistenceEnabled = mkOption {
+      description = mdDoc "Enable persistent storage for PostgreSQL";
+      type = types.bool;
+      default = true;
+    };
+
+    backup = {
+      enable = mkOption {
+        description = mdDoc "Enable automated database backups";
+        type = types.bool;
+        default = true;
+      };
+
+      schedule = mkOption {
+        description =
+          mdDoc "Cron schedule for backups (default: daily at 2 AM)";
+        type = types.str;
+        default = "0 2 * * *";
+      };
+
+      retentionDays = mkOption {
+        description = mdDoc "Number of days to retain backups";
+        type = types.int;
+        default = 30;
+      };
+
+      storageSize = mkOption {
+        description = mdDoc "Storage size for backup PVC";
+        type = types.str;
+        default = "50Gi";
+      };
+    };
+
     extraDatabases = mkOption {
       description = mdDoc "Additional databases to create (list of {name, username, password})";
       type = types.listOf (types.submodule {
@@ -96,7 +135,18 @@ in mkArgoApp { inherit config lib; } rec {
         superuserPassword.secretKey = "adminPassword";
       };
 
-      storage.className = cfg.storageClass;
+      # Enable persistence with PVC
+      persistence = {
+        enabled = cfg.persistenceEnabled;
+        size = cfg.persistenceSize;
+        storageClass = cfg.storageClass;
+      };
+
+      # Also set storage.className for compatibility
+      storage = {
+        className = cfg.storageClass;
+        size = cfg.persistenceSize;
+      };
     };
 
   extraResources = cfg: {
@@ -191,6 +241,108 @@ in mkArgoApp { inherit config lib; } rec {
               ];
             };
           };
+        };
+      };
+    };
+
+    # CronJob for automated backups
+    cronJobs = lib.optionalAttrs cfg.backup.enable {
+      "${name}-backup" = {
+        metadata = {
+          name = "${name}-backup";
+          namespace = cfg.namespace;
+          labels = {
+            "app.kubernetes.io/name" = name;
+            "app.kubernetes.io/component" = "backup";
+          };
+        };
+        spec = {
+          schedule = cfg.backup.schedule;
+          successfulJobsHistoryLimit = 3;
+          failedJobsHistoryLimit = 3;
+          jobTemplate = {
+            spec = {
+              template = {
+                spec = {
+                  restartPolicy = "OnFailure";
+                  containers = [{
+                    name = "backup";
+                    image = cfg.image;
+                    command = [
+                      "sh"
+                      "-c"
+                      ''
+                        set -e
+                        BACKUP_DIR="/backups"
+                        TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+                        BACKUP_FILE="$BACKUP_DIR/postgresql-backup-$TIMESTAMP.sql.gz"
+
+                        echo "Starting backup at $(date)"
+
+                        # Create backup of all databases
+                        pg_dumpall \
+                          -h ${name}.${cfg.namespace} \
+                          -U postgres \
+                          -c \
+                          | gzip > "$BACKUP_FILE"
+
+                        echo "Backup completed: $BACKUP_FILE"
+                        echo "Backup size: $(du -h "$BACKUP_FILE" | cut -f1)"
+
+                        # Clean up old backups (keep last ${toString cfg.backup.retentionDays} days)
+                        find "$BACKUP_DIR" -name "postgresql-backup-*.sql.gz" -type f -mtime +${
+                          toString cfg.backup.retentionDays
+                        } -delete
+
+                        echo "Cleanup completed. Remaining backups:"
+                        ls -lh "$BACKUP_DIR"/*.sql.gz 2>/dev/null || echo "No backups found"
+
+                        echo "Backup job completed at $(date)"
+                      ''
+                    ];
+                    env = [{
+                      name = "PGPASSWORD";
+                      valueFrom = {
+                        secretKeyRef = {
+                          name = password-secret;
+                          key = "adminPassword";
+                        };
+                      };
+                    }];
+                    volumeMounts = [{
+                      mountPath = "/backups";
+                      name = "backup-storage";
+                    }];
+                  }];
+                  volumes = [{
+                    name = "backup-storage";
+                    persistentVolumeClaim = {
+                      claimName = "${name}-backups";
+                    };
+                  }];
+                };
+              };
+            };
+          };
+        };
+      };
+    };
+
+    # PVC for backup storage
+    persistentVolumeClaims = lib.optionalAttrs cfg.backup.enable {
+      "${name}-backups" = {
+        metadata = {
+          name = "${name}-backups";
+          namespace = cfg.namespace;
+        };
+        spec = {
+          accessModes = [ "ReadWriteOnce" ];
+          resources = {
+            requests = {
+              storage = cfg.backup.storageSize;
+            };
+          };
+          storageClassName = cfg.storageClass;
         };
       };
     };
