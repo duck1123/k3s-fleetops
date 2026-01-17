@@ -6,7 +6,8 @@ mkArgoApp { inherit config lib; } {
   extraAppConfig = cfg: {
     # Use Server-Side Apply to avoid annotation size limits on large CRDs
     # This prevents ArgoCD from storing large manifests in annotations
-    syncPolicy.finalSyncOpts = [ "ServerSideApply=true" "CreateNamespace=true" ];
+    # Also use Replace=true as fallback for CRDs that still fail
+    syncPolicy.finalSyncOpts = [ "ServerSideApply=true" "Replace=true" "CreateNamespace=true" ];
   };
 
   # https://artifacthub.io/packages/helm/prometheus-community/kube-prometheus-stack
