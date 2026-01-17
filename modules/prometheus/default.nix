@@ -3,6 +3,12 @@ with lib;
 mkArgoApp { inherit config lib; } {
   name = "prometheus";
 
+  extraAppConfig = cfg: {
+    # Use Server-Side Apply to avoid annotation size limits on large CRDs
+    # This prevents ArgoCD from storing large manifests in annotations
+    syncPolicy.finalSyncOpts = [ "ServerSideApply=true" "CreateNamespace=true" ];
+  };
+
   # https://artifacthub.io/packages/helm/prometheus-community/kube-prometheus-stack
   # Note: After first build, update chartHash with the actual hash from the build error
   chart = lib.helm.downloadHelmChart {
