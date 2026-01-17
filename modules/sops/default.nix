@@ -1,6 +1,6 @@
 { config, lib, ... }:
 with lib;
-mkArgoApp { inherit config lib; } {
+mkArgoApp { inherit config lib; } rec {
   name = "sops";
 
   # https://artifacthub.io/packages/helm/sops-secrets-operator/sops-secrets-operator
@@ -24,6 +24,49 @@ mkArgoApp { inherit config lib; } {
   };
 
   extraConfig = cfg: { nixidy.resourceImports = [ ./generated.nix ]; };
+
+  extraResources = cfg: {
+    deployments = {
+      "${name}-${name}-secrets-operator" = {
+        spec = {
+          template = {
+            spec = {
+              containers = [{
+                name = "${name}-secrets-operator";
+                # Less aggressive health checks for when system is under load
+                # Readiness: increased timeout from 1s to 5s, period from 10s to 20s, failures from 3 to 5
+                # Liveness: increased timeout from 1s to 10s, period from 20s to 30s, failures from 3 to 5
+                readinessProbe = lib.mkForce {
+                  httpGet = {
+                    path = "/readyz";
+                    port = 8081;
+                    scheme = "HTTP";
+                  };
+                  initialDelaySeconds = 10;
+                  periodSeconds = 20;
+                  timeoutSeconds = 5;
+                  successThreshold = 1;
+                  failureThreshold = 5;
+                };
+                livenessProbe = lib.mkForce {
+                  httpGet = {
+                    path = "/healthz";
+                    port = 8081;
+                    scheme = "HTTP";
+                  };
+                  initialDelaySeconds = 30;
+                  periodSeconds = 30;
+                  timeoutSeconds = 10;
+                  successThreshold = 1;
+                  failureThreshold = 5;
+                };
+              }];
+            };
+          };
+        };
+      };
+    };
+  };
 
   # extraResources = cfg: {
   #   sealedSecrets = {
