@@ -45,11 +45,11 @@ spec:
                 - sh
                 - -c
                 - pg_isready -h localhost
-            failureThreshold: 5
-            initialDelaySeconds: 60
-            periodSeconds: 30
+            failureThreshold: 10
+            initialDelaySeconds: 120
+            periodSeconds: 60
             successThreshold: 1
-            timeoutSeconds: 10
+            timeoutSeconds: 30
           name: postgres
           ports:
             - containerPort: 5432
@@ -61,11 +61,11 @@ spec:
                 - sh
                 - -c
                 - pg_isready -h localhost
-            failureThreshold: 3
+            failureThreshold: 5
             initialDelaySeconds: 10
-            periodSeconds: 10
+            periodSeconds: 30
             successThreshold: 1
-            timeoutSeconds: 5
+            timeoutSeconds: 15
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -86,7 +86,7 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 10
             successThreshold: 1
-            timeoutSeconds: 5
+            timeoutSeconds: 10
           volumeMounts:
             - mountPath: /var/run
               name: run

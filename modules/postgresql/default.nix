@@ -68,43 +68,43 @@ in mkArgoApp { inherit config lib; } rec {
       livenessPeriodSeconds = mkOption {
         description = mdDoc "How often to perform liveness probe (seconds)";
         type = types.int;
-        default = 30;
+        default = 60;
       };
 
       livenessTimeoutSeconds = mkOption {
         description = mdDoc "Timeout for liveness probe (seconds)";
         type = types.int;
-        default = 10;
+        default = 30;
       };
 
       livenessFailureThreshold = mkOption {
         description = mdDoc "Number of failures before restarting pod";
         type = types.int;
-        default = 5;
+        default = 10;
       };
 
       livenessInitialDelaySeconds = mkOption {
         description = mdDoc "Initial delay before starting liveness probe (seconds)";
         type = types.int;
-        default = 60;
+        default = 120;
       };
 
       readinessPeriodSeconds = mkOption {
         description = mdDoc "How often to perform readiness probe (seconds)";
         type = types.int;
-        default = 10;
+        default = 30;
       };
 
       readinessTimeoutSeconds = mkOption {
         description = mdDoc "Timeout for readiness probe (seconds)";
         type = types.int;
-        default = 5;
+        default = 15;
       };
 
       readinessFailureThreshold = mkOption {
         description = mdDoc "Number of failures before marking pod not ready";
         type = types.int;
-        default = 3;
+        default = 5;
       };
 
       startupPeriodSeconds = mkOption {
@@ -116,7 +116,7 @@ in mkArgoApp { inherit config lib; } rec {
       startupTimeoutSeconds = mkOption {
         description = mdDoc "Timeout for startup probe (seconds)";
         type = types.int;
-        default = 5;
+        default = 10;
       };
 
       startupFailureThreshold = mkOption {
