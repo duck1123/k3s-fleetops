@@ -372,6 +372,7 @@ mkArgoApp { inherit config lib; } rec {
         spec = {
           accessModes = [ "ReadWriteMany" ];
           capacity.storage = "1Ti";
+          mountOptions = [ "nolock" "soft" "timeo=30" ];
           nfs = {
             server = cfg.nfs.server;
             path = "${cfg.nfs.path}/Downloads";
@@ -384,6 +385,7 @@ mkArgoApp { inherit config lib; } rec {
         spec = {
           accessModes = [ "ReadWriteMany" ];
           capacity.storage = "1Ti";
+          mountOptions = [ "nolock" "soft" "timeo=30" ];
           nfs = {
             server = cfg.nfs.server;
             path = "${cfg.nfs.path}/Downloads/incomplete";
