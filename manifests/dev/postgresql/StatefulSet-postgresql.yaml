@@ -45,11 +45,11 @@ spec:
                 - sh
                 - -c
                 - pg_isready -h localhost
-            failureThreshold: 3
-            initialDelaySeconds: 10
-            periodSeconds: 10
+            failureThreshold: 5
+            initialDelaySeconds: 60
+            periodSeconds: 30
             successThreshold: 1
-            timeoutSeconds: 5
+            timeoutSeconds: 10
           name: postgres
           ports:
             - containerPort: 5432
@@ -82,7 +82,7 @@ spec:
                 - sh
                 - -c
                 - pg_isready -h localhost
-            failureThreshold: 30
+            failureThreshold: 60
             initialDelaySeconds: 10
             periodSeconds: 10
             successThreshold: 1

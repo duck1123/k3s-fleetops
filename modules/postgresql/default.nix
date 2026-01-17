@@ -64,6 +64,68 @@ in mkArgoApp { inherit config lib; } rec {
       default = true;
     };
 
+    healthCheck = {
+      livenessPeriodSeconds = mkOption {
+        description = mdDoc "How often to perform liveness probe (seconds)";
+        type = types.int;
+        default = 30;
+      };
+
+      livenessTimeoutSeconds = mkOption {
+        description = mdDoc "Timeout for liveness probe (seconds)";
+        type = types.int;
+        default = 10;
+      };
+
+      livenessFailureThreshold = mkOption {
+        description = mdDoc "Number of failures before restarting pod";
+        type = types.int;
+        default = 5;
+      };
+
+      livenessInitialDelaySeconds = mkOption {
+        description = mdDoc "Initial delay before starting liveness probe (seconds)";
+        type = types.int;
+        default = 60;
+      };
+
+      readinessPeriodSeconds = mkOption {
+        description = mdDoc "How often to perform readiness probe (seconds)";
+        type = types.int;
+        default = 10;
+      };
+
+      readinessTimeoutSeconds = mkOption {
+        description = mdDoc "Timeout for readiness probe (seconds)";
+        type = types.int;
+        default = 5;
+      };
+
+      readinessFailureThreshold = mkOption {
+        description = mdDoc "Number of failures before marking pod not ready";
+        type = types.int;
+        default = 3;
+      };
+
+      startupPeriodSeconds = mkOption {
+        description = mdDoc "How often to perform startup probe (seconds)";
+        type = types.int;
+        default = 10;
+      };
+
+      startupTimeoutSeconds = mkOption {
+        description = mdDoc "Timeout for startup probe (seconds)";
+        type = types.int;
+        default = 5;
+      };
+
+      startupFailureThreshold = mkOption {
+        description = mdDoc "Number of failures before giving up on startup";
+        type = types.int;
+        default = 60;
+      };
+    };
+
     backup = {
       enable = mkOption {
         description = mdDoc "Enable automated database backups";
@@ -152,6 +214,7 @@ in mkArgoApp { inherit config lib; } rec {
       nodeSelector = {
         "kubernetes.io/hostname" = "edgenix";
       };
+
     };
 
   extraResources = cfg: {
@@ -376,10 +439,45 @@ in mkArgoApp { inherit config lib; } rec {
               storageClassName = cfg.storageClass;
             };
           }];
-          # Override volumes list to remove postgres-data emptyDir
-          # Keep all other volumes: run, tmp, scripts, configs, initscripts
+          # Override volumes list and health checks
+          # Merge health check overrides with Helm-generated container by name
+          # Use mkForce on probe fields to override Helm chart defaults
           template = {
             spec = {
+              containers = [{
+                name = "postgres";
+                # Health checks with less aggressive settings (using mkForce to override Helm values)
+                livenessProbe = lib.mkForce {
+                  exec = {
+                    command = [ "sh" "-c" "pg_isready -h localhost" ];
+                  };
+                  initialDelaySeconds = cfg.healthCheck.livenessInitialDelaySeconds;
+                  periodSeconds = cfg.healthCheck.livenessPeriodSeconds;
+                  timeoutSeconds = cfg.healthCheck.livenessTimeoutSeconds;
+                  successThreshold = 1;
+                  failureThreshold = cfg.healthCheck.livenessFailureThreshold;
+                };
+                readinessProbe = lib.mkForce {
+                  exec = {
+                    command = [ "sh" "-c" "pg_isready -h localhost" ];
+                  };
+                  initialDelaySeconds = 10;
+                  periodSeconds = cfg.healthCheck.readinessPeriodSeconds;
+                  timeoutSeconds = cfg.healthCheck.readinessTimeoutSeconds;
+                  successThreshold = 1;
+                  failureThreshold = cfg.healthCheck.readinessFailureThreshold;
+                };
+                startupProbe = lib.mkForce {
+                  exec = {
+                    command = [ "sh" "-c" "pg_isready -h localhost" ];
+                  };
+                  initialDelaySeconds = 10;
+                  periodSeconds = cfg.healthCheck.startupPeriodSeconds;
+                  timeoutSeconds = cfg.healthCheck.startupTimeoutSeconds;
+                  successThreshold = 1;
+                  failureThreshold = cfg.healthCheck.startupFailureThreshold;
+                };
+              }];
               volumes = [
                 { name = "run"; emptyDir = {}; }
                 { name = "tmp"; emptyDir = {}; }
