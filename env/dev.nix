@@ -711,7 +711,7 @@ in {
         path = "${nas-base}";
       };
 
-      replicas = 0;  # Temporarily scaled down for database migration
+      replicas = 1;
     };
 
     # ../modules/sops/default.nix
