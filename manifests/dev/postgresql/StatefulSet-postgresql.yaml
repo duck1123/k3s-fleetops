@@ -121,6 +121,8 @@ spec:
               name: scripts
             - mountPath: /configs
               name: configs
+      nodeSelector:
+        kubernetes.io/hostname: edgenix
       securityContext:
         fsGroup: 999
         supplementalGroups:

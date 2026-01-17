@@ -120,6 +120,9 @@ mkArgoApp { inherit config lib; } rec {
           spec = {
             automountServiceAccountToken = true;
             serviceAccountName = "default";
+            nodeSelector = {
+              "kubernetes.io/hostname" = "edgenix";
+            };
             # Init container to set hostname whitelist in config
             initContainers = let
               hostnameList = lib.concatStringsSep "," (lib.filter (x: x != "") [

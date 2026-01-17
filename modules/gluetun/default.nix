@@ -95,6 +95,9 @@ mkArgoApp { inherit config lib; } rec {
             spec = {
               automountServiceAccountToken = true;
               serviceAccountName = "default";
+              nodeSelector = {
+                "kubernetes.io/hostname" = "edgenix";
+              };
               dnsPolicy = "None";
               dnsConfig = {
                 # Use gluetun's internal DNS server (listening on port 53)

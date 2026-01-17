@@ -147,6 +147,11 @@ in mkArgoApp { inherit config lib; } rec {
         className = cfg.storageClass;
         size = cfg.persistenceSize;
       };
+
+      # Run on edgenix node only
+      nodeSelector = {
+        "kubernetes.io/hostname" = "edgenix";
+      };
     };
 
   extraResources = cfg: {

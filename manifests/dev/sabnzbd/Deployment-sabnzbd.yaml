@@ -94,6 +94,8 @@ spec:
           volumeMounts:
             - mountPath: /config
               name: config
+      nodeSelector:
+        kubernetes.io/hostname: edgenix
       serviceAccountName: default
       volumes:
         - name: config

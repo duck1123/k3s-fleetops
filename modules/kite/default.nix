@@ -43,5 +43,10 @@ mkArgoApp { inherit config lib; } {
       }];
       tls = [{ hosts = [ domain ]; }];
     };
+
+    # Run on edgenix node only
+    nodeSelector = {
+      "kubernetes.io/hostname" = "edgenix";
+    };
   };
 }

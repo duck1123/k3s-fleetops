@@ -52,6 +52,8 @@ spec:
           volumeMounts:
             - mountPath: /data
               name: kite-storage
+      nodeSelector:
+        kubernetes.io/hostname: edgenix
       serviceAccountName: kite
       volumes:
         - emptyDir: {}

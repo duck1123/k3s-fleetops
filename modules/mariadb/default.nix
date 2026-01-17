@@ -121,6 +121,11 @@ in mkArgoApp { inherit config lib; } rec {
         '';
       })
       cfg.extraDatabases);
+
+    # Run on edgenix node only
+    nodeSelector = {
+      "kubernetes.io/hostname" = "edgenix";
+    };
   };
 
   extraResources = cfg: {

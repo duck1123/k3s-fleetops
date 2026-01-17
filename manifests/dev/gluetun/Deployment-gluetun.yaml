@@ -149,6 +149,8 @@ spec:
           volumeMounts:
             - mountPath: /gluetun
               name: gluetun
+      nodeSelector:
+        kubernetes.io/hostname: edgenix
       serviceAccountName: default
       volumes:
         - name: gluetun

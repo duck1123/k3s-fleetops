@@ -39,5 +39,10 @@ mkArgoApp { inherit config lib; } {
       inherit (cfg) storageClass;
       enabled = true;
     };
+
+    # Run on edgenix node only
+    nodeSelector = {
+      "kubernetes.io/hostname" = "edgenix";
+    };
   };
 }

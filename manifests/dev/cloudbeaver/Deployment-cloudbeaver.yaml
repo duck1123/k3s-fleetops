@@ -68,6 +68,8 @@ spec:
           volumeMounts:
             - mountPath: /opt/cloudbeaver/workspace
               name: data
+      nodeSelector:
+        kubernetes.io/hostname: edgenix
       securityContext:
         fsGroup: 8978
         fsGroupChangePolicy: Always
