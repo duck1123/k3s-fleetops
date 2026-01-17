@@ -242,7 +242,7 @@ in {
     grafana = {
       enable = true;
 
-      adminPassword = secrets.grafana.adminPassword or "";
+      adminPassword = secrets.grafana.password or "";
 
       ingress = {
         clusterIssuer = "tailscale";
