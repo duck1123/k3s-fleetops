@@ -487,6 +487,7 @@ in mkArgoApp { inherit config lib; } rec {
             storage = "1Ti";
           };
           accessModes = [ "ReadWriteMany" ];
+          mountOptions = [ "nolock" "soft" "timeo=30" ];
           nfs = {
             server = cfg.nfs.server;
             path = cfg.nfs.libraryPath;
@@ -505,6 +506,7 @@ in mkArgoApp { inherit config lib; } rec {
             storage = "1Ti";
           };
           accessModes = [ "ReadWriteMany" ];
+          mountOptions = [ "nolock" "soft" "timeo=30" ];
           nfs = {
             server = cfg.nfs.server;
             path = cfg.nfs.assetsPath;
@@ -523,6 +525,7 @@ in mkArgoApp { inherit config lib; } rec {
             storage = "1Ti";
           };
           accessModes = [ "ReadWriteMany" ];
+          mountOptions = [ "nolock" "soft" "timeo=30" ];
           nfs = {
             server = cfg.nfs.server;
             path = cfg.nfs.resourcesPath;

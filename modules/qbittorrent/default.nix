@@ -475,6 +475,7 @@ EOF
             storage = "1Ti";
           };
           accessModes = [ "ReadWriteMany" ];
+          mountOptions = [ "nolock" "soft" "timeo=30" ];
           nfs = {
             server = cfg.nfs.server;
             path = "${cfg.nfs.path}/Downloads";
