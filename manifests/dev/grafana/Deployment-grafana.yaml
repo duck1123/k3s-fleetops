@@ -1,0 +1,155 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/instance: grafana
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/version: 12.3.1
+    helm.sh/chart: grafana-10.4.3
+  name: grafana
+  namespace: grafana
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: grafana
+      app.kubernetes.io/name: grafana
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        checksum/config: 83728af511092f0cd84e27ffc8b3890e83fd4e793691ab47c3969440f6882906
+        checksum/sc-dashboard-provider-config: e70bf6a851099d385178a76de9757bb0bef8299da6d8443602590e44f05fdf24
+        checksum/secret: 6aef79f8244be2e0b145e2698ae4ac2fc985ef394226a1131adea28221a14ea2
+        kubectl.kubernetes.io/default-container: grafana
+      labels:
+        app.kubernetes.io/instance: grafana
+        app.kubernetes.io/name: grafana
+        app.kubernetes.io/version: 12.3.1
+        helm.sh/chart: grafana-10.4.3
+    spec:
+      automountServiceAccountToken: true
+      containers:
+        - env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: GF_SECURITY_ADMIN_USER
+              valueFrom:
+                secretKeyRef:
+                  key: admin-user
+                  name: grafana
+            - name: GF_SECURITY_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: admin-password
+                  name: grafana
+            - name: GF_PATHS_DATA
+              value: /var/lib/grafana/
+            - name: GF_PATHS_LOGS
+              value: /var/log/grafana
+            - name: GF_PATHS_PLUGINS
+              value: /var/lib/grafana/plugins
+            - name: GF_PATHS_PROVISIONING
+              value: /etc/grafana/provisioning
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  divisor: "1"
+                  resource: limits.memory
+          image: docker.io/grafana/grafana:12.3.1
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 10
+            httpGet:
+              path: /api/health
+              port: grafana
+            initialDelaySeconds: 60
+            timeoutSeconds: 30
+          name: grafana
+          ports:
+            - containerPort: 3000
+              name: grafana
+              protocol: TCP
+            - containerPort: 9094
+              name: gossip-tcp
+              protocol: TCP
+            - containerPort: 9094
+              name: gossip-udp
+              protocol: UDP
+            - containerPort: 6060
+              name: profiling
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: grafana
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+            - mountPath: /etc/grafana/grafana.ini
+              name: config
+              subPath: grafana.ini
+            - mountPath: /var/lib/grafana
+              name: storage
+            - mountPath: /etc/grafana/provisioning/datasources/datasources.yaml
+              name: config
+              subPath: datasources.yaml
+            - mountPath: /etc/grafana/provisioning/dashboards/dashboardproviders.yaml
+              name: config
+              subPath: dashboardproviders.yaml
+      enableServiceLinks: true
+      initContainers:
+        - command:
+            - chown
+            - -R
+            - 472:472
+            - /var/lib/grafana
+          image: docker.io/library/busybox:1.31.1
+          imagePullPolicy: IfNotPresent
+          name: init-chown-data
+          securityContext:
+            capabilities:
+              add:
+                - CHOWN
+              drop:
+                - ALL
+            readOnlyRootFilesystem: false
+            runAsNonRoot: false
+            runAsUser: 0
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+            - mountPath: /var/lib/grafana
+              name: storage
+      nodeSelector:
+        kubernetes.io/hostname: edgenix
+      securityContext:
+        fsGroup: 472
+        runAsGroup: 472
+        runAsNonRoot: true
+        runAsUser: 472
+      serviceAccountName: grafana
+      shareProcessNamespace: false
+      volumes:
+        - configMap:
+            name: grafana
+          name: config
+        - name: storage
+          persistentVolumeClaim:
+            claimName: grafana

@@ -240,12 +240,43 @@ in {
 
     # ../modules/grafana/default.nix
     grafana = {
-      enable = false;
+      enable = true;
+
+      adminPassword = secrets.grafana.adminPassword or "";
 
       ingress = {
         clusterIssuer = "tailscale";
         domain = "grafana.${tail-domain}";
         ingressClassName = "tailscale";
+      };
+    };
+
+    # ../modules/prometheus/default.nix
+    prometheus = {
+      enable = true;
+
+      # Additional scrape configs for monitoring other hosts
+      # Example format (uncomment and modify as needed):
+      # additionalScrapeConfigs = [
+      #   {
+      #     job_name = "node-exporter-remote";
+      #     static_configs = [
+      #       {
+      #         targets = [
+      #           "host1.${tail-domain}:9100"
+      #           "host2.${tail-domain}:9100"
+      #         ];
+      #         labels = {
+      #           instance = "remote-host";
+      #         };
+      #       }
+      #     ];
+      #   }
+      # ];
+      additionalScrapeConfigs = [ ];
+
+      alertmanager = {
+        enabled = true;
       };
     };
 

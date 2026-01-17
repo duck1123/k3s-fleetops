@@ -45,6 +45,7 @@
     ./opentelemetry-collector
     ./pihole
     ./postgresql
+    ./prometheus
     ./prowlarr
     ./qbittorrent
     ./radarr

@@ -91,7 +91,7 @@ let
           tls.insecure = true;
         };
         prometheusremotewrite = {
-          endpoint = "http://prometheus-server/api/v1/write";
+          endpoint = "http://prometheus-kube-prometheus-prometheus.prometheus:9090/api/v1/write";
           tls.insecure = true;
         };
       };
