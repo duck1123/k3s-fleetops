@@ -351,5 +351,53 @@ in mkArgoApp { inherit config lib; } rec {
         };
       };
     };
+
+    # Patch StatefulSet to add volumeClaimTemplates for persistence
+    # The Helm chart isn't respecting persistence.enabled, so we patch it directly
+    # We also need to remove the emptyDir volume for postgres-data from the pod template
+    statefulSets = lib.optionalAttrs cfg.persistenceEnabled {
+      ${name} = {
+        spec = {
+          volumeClaimTemplates = [{
+            metadata = {
+              name = "postgres-data";
+              labels = {
+                "app.kubernetes.io/instance" = name;
+                "app.kubernetes.io/name" = "postgres";
+              };
+            };
+            spec = {
+              accessModes = [ "ReadWriteOnce" ];
+              resources = {
+                requests = {
+                  storage = cfg.persistenceSize;
+                };
+              };
+              storageClassName = cfg.storageClass;
+            };
+          }];
+          # Override volumes list to remove postgres-data emptyDir
+          # Keep all other volumes: run, tmp, scripts, configs, initscripts
+          template = {
+            spec = {
+              volumes = [
+                { name = "run"; emptyDir = {}; }
+                { name = "tmp"; emptyDir = {}; }
+                { name = "scripts"; emptyDir = {}; }
+                { name = "configs"; emptyDir = {}; }
+                {
+                  name = "initscripts";
+                  configMap = {
+                    name = "${name}-scripts";
+                    defaultMode = 365;
+                  };
+                }
+                # postgres-data is provided by volumeClaimTemplates, so we don't include it here
+              ];
+            };
+          };
+        };
+      };
+    };
   };
 }
