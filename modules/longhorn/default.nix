@@ -32,5 +32,49 @@ mkArgoApp { inherit config lib; } {
     };
 
     preUpgradeChecker.jobEnabled = false;
+
+    # Ensure Longhorn runs on all nodes, including control-plane nodes
+    longhornManager = {
+      tolerations = [
+        {
+          key = "node-role.kubernetes.io/control-plane";
+          operator = "Exists";
+          effect = "NoSchedule";
+        }
+        {
+          key = "node-role.kubernetes.io/master";
+          operator = "Exists";
+          effect = "NoSchedule";
+        }
+        {
+          key = "CriticalAddonsOnly";
+          operator = "Exists";
+        }
+      ];
+    };
+
+    # Ensure CSI plugin runs on all nodes
+    csi = {
+      attacherReplicas = 3;
+      provisionerReplicas = 3;
+      resizerReplicas = 3;
+      snapshotterReplicas = 3;
+      tolerations = [
+        {
+          key = "node-role.kubernetes.io/control-plane";
+          operator = "Exists";
+          effect = "NoSchedule";
+        }
+        {
+          key = "node-role.kubernetes.io/master";
+          operator = "Exists";
+          effect = "NoSchedule";
+        }
+        {
+          key = "CriticalAddonsOnly";
+          operator = "Exists";
+        }
+      ];
+    };
   };
 }

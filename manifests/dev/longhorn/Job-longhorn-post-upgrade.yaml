@@ -40,3 +40,12 @@ spec:
       priorityClassName: longhorn-critical
       restartPolicy: OnFailure
       serviceAccountName: longhorn-service-account
+      tolerations:
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/control-plane
+          operator: Exists
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/master
+          operator: Exists
+        - key: CriticalAddonsOnly
+          operator: Exists
