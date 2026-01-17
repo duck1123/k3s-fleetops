@@ -92,6 +92,8 @@ spec:
             - sh
           image: curlimages/curl:latest
           name: wait-for-gluetun
+      nodeSelector:
+        kubernetes.io/hostname: edgenix
       serviceAccountName: default
       volumes:
         - name: config
