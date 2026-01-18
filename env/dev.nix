@@ -264,6 +264,39 @@ in
         domain = "grafana.${tail-domain}";
         ingressClassName = "tailscale";
       };
+
+      # Configure Prometheus datasource
+      additionalDatasources = [
+        {
+          name = "Prometheus";
+          type = "prometheus";
+          access = "proxy";
+          url = "http://prometheus-kube-prometheus-prometheus.prometheus:9090";
+          isDefault = true;
+          editable = true;
+          jsonData.httpMethod = "POST";
+        }
+      ];
+
+      # Configure dashboard provider
+      additionalDashboardProviders = [
+        {
+          name = "default";
+          orgId = 1;
+          folder = "";
+          type = "file";
+          disableDeletion = false;
+          editable = true;
+          options.path = "/var/lib/grafana/dashboards/default";
+        }
+      ];
+
+      # Provision system performance dashboard
+      additionalDashboards = {
+        default = {
+          "system-performance-nfs.json" = builtins.readFile ../modules/grafana/dashboards/system-performance.json;
+        };
+      };
     };
 
     # ../applications/prometheus/default.nix
