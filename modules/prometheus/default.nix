@@ -87,12 +87,12 @@ mkArgoApp { inherit config lib; } {
           node = true;
         };
 
-        # Add nodename label from node metadata for use in Grafana dashboards
+        # Replace instance label with node hostname instead of IP:port
         relabelings = [
           {
-            # Add nodename label from Kubernetes node metadata
+            # Replace instance label (IP:port) with node hostname
             sourceLabels = [ "__meta_kubernetes_pod_node_name" ];
-            targetLabel = "nodename";
+            targetLabel = "instance";
             replacement = "$$1";
           }
         ];
