@@ -1,6 +1,8 @@
 { ageRecipients, charts, config, lib, pkgs, ... }:
 with lib;
-let grafana-secret = "grafana-admin";
+let
+  grafana-secret = "grafana-admin";
+  dashboards = import ./dashboards/default.nix { };
 in mkArgoApp { inherit config lib; } {
   name = "grafana";
 
@@ -81,7 +83,10 @@ in mkArgoApp { inherit config lib; } {
 
     # Provision dashboards
     dashboards = lib.recursiveUpdate {
-      default.system-performance-nfs.json = builtins.readFile ./dashboards/system-performance.json;
+      default = {
+        "system-performance-nfs.json" = builtins.toJSON dashboards.systemPerformanceDashboard;
+        "kubernetes-cluster.json" = builtins.toJSON dashboards.kubernetesClusterDashboard;
+      };
     } (cfg.additionalDashboards or { });
 
     # Resource limits
