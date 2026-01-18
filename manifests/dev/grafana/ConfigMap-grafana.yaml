@@ -17,6 +17,8 @@ data:
     - access: proxy
       editable: true
       isDefault: true
+      jsonData:
+        httpMethod: POST
       name: Prometheus
       type: prometheus
       uid: prometheus

@@ -56,6 +56,9 @@ in mkArgoApp { inherit config lib; } {
             url = "http://prometheus-kube-prometheus-prometheus.prometheus:9090";
             isDefault = true;
             editable = true;
+            jsonData = {
+              httpMethod = "POST";
+            };
           }
         ];
       };
