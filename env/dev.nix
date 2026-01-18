@@ -246,6 +246,8 @@ in
         }
       ];
 
+      additionalDashboards.default."system-performance-nfs.json" = builtins.readFile ../modules/grafana/dashboards/system-performance.json;
+
       additionalDashboardProviders = [
         {
           name = "default";
