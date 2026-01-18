@@ -21,7 +21,7 @@ spec:
     metadata:
       annotations:
         checksum/config: 9b6ba09b5701bd819834eb9b5920c46f03c9673b18e7583d37493fa73262fdcc
-        checksum/dashboards-json-config: 929a996ff7d861b57f5f7f6d8d2bb4ae6020d585e53a6396032f85956dd57ad8
+        checksum/dashboards-json-config: 921d8b1fde2696513c4aebf1cc83a67e79b6a03b59d7a28aa15f8eb0c3e32159
         checksum/sc-dashboard-provider-config: e70bf6a851099d385178a76de9757bb0bef8299da6d8443602590e44f05fdf24
         kubectl.kubernetes.io/default-container: grafana
       labels:

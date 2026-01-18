@@ -590,7 +590,7 @@
               }
             ]
           },
-          "unit": "Bps"
+          "unit": "ops"
         },
         "overrides": []
       },
@@ -619,18 +619,18 @@
       "targets": [
         {
           "datasource": "Prometheus",
-          "expr": "rate(node_filesystem_read_bytes_total{mountpoint=~\".*volume1.*|.*nfs.*\",fstype=\"nfs\"}[5m])",
-          "legendFormat": "{{instance}} - {{mountpoint}} Read",
+          "expr": "rate(node_nfs_requests_total[5m])",
+          "legendFormat": "{{instance}} - Requests/sec",
           "refId": "A"
         },
         {
           "datasource": "Prometheus",
-          "expr": "rate(node_filesystem_write_bytes_total{mountpoint=~\".*volume1.*|.*nfs.*\",fstype=\"nfs\"}[5m])",
-          "legendFormat": "{{instance}} - {{mountpoint}} Write",
+          "expr": "rate(node_nfs_rpcs_total[5m])",
+          "legendFormat": "{{instance}} - RPCs/sec",
           "refId": "B"
         }
       ],
-      "title": "NFS Filesystem I/O (Read/Write)",
+      "title": "NFS Operations (Requests & RPCs per second)",
       "type": "timeseries"
     },
     {
@@ -770,7 +770,7 @@
               }
             ]
           },
-          "unit": "short"
+          "unit": "ops"
         },
         "overrides": []
       },
@@ -799,18 +799,18 @@
       "targets": [
         {
           "datasource": "Prometheus",
-          "expr": "rate(node_filesystem_reads_total{mountpoint=~\".*volume1.*|.*nfs.*\",fstype=\"nfs\"}[5m])",
-          "legendFormat": "{{instance}} - {{mountpoint}} Reads/sec",
+          "expr": "node_nfs_connections_total",
+          "legendFormat": "{{instance}} - Connections",
           "refId": "A"
         },
         {
           "datasource": "Prometheus",
-          "expr": "rate(node_filesystem_writes_total{mountpoint=~\".*volume1.*|.*nfs.*\",fstype=\"nfs\"}[5m])",
-          "legendFormat": "{{instance}} - {{mountpoint}} Writes/sec",
+          "expr": "rate(node_nfs_rpc_retransmissions_total[5m])",
+          "legendFormat": "{{instance}} - Retransmissions/sec",
           "refId": "B"
         }
       ],
-      "title": "NFS Operations Rate (Reads/Writes per second)",
+      "title": "NFS Connections & Retransmissions",
       "type": "timeseries"
     }
   ],
