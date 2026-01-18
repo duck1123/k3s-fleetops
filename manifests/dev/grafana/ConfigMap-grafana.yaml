@@ -21,7 +21,6 @@ data:
         httpMethod: POST
       name: Prometheus
       type: prometheus
-      uid: prometheus
       url: http://prometheus-kube-prometheus-prometheus.prometheus:9090
   download_dashboards.sh: |
     #!/usr/bin/env sh
