@@ -26,8 +26,10 @@ spec:
   ignoreDifferences:
     - kind: Role
       name: prometheus-kube-prometheus-admission
+      namespace: prometheus
     - kind: RoleBinding
       name: prometheus-kube-prometheus-admission
+      namespace: prometheus
     - kind: ClusterRole
       name: prometheus-kube-prometheus-admission
     - kind: ClusterRoleBinding
