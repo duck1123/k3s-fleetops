@@ -294,7 +294,7 @@ in
       # Provision system performance dashboard
       additionalDashboards = {
         default = {
-          "system-performance-nfs.json" = builtins.readFile ../modules/grafana/dashboards/system-performance.json;
+          # "system-performance-nfs.json" = builtins.readFile ../modules/grafana/dashboards/system-performance.json;
         };
       };
     };
