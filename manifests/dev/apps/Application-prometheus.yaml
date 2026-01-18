@@ -23,3 +23,12 @@ spec:
       - Replace=true
       - CreateNamespace=true
       - CreateNamespace=true
+  ignoreDifferences:
+    - kind: Role
+      name: prometheus-kube-prometheus-admission
+    - kind: RoleBinding
+      name: prometheus-kube-prometheus-admission
+    - kind: ClusterRole
+      name: prometheus-kube-prometheus-admission
+    - kind: ClusterRoleBinding
+      name: prometheus-kube-prometheus-admission
