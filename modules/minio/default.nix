@@ -26,6 +26,12 @@ in mkArgoApp { inherit config lib; } {
       type = types.str;
       default = "CHANGEME";
     };
+
+    storageClassName = mkOption {
+      description = mdDoc "Storage class name for MinIO persistence";
+      type = types.str;
+      default = "longhorn";
+    };
   };
 
   defaultValues = cfg: {
@@ -52,7 +58,7 @@ in mkArgoApp { inherit config lib; } {
       tls = tls.enable;
     };
 
-    persistence.storageClass = "longhorn";
+    persistence.storageClass = cfg.storageClassName;
   };
 
   extraResources = cfg: {

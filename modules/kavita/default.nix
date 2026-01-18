@@ -4,6 +4,14 @@ mkArgoApp { inherit config lib; } rec {
   name = "kavita";
   uses-ingress = true;
 
+  extraOptions = {
+    storageClassName = mkOption {
+      description = mdDoc "Storage class name for Kavita persistence";
+      type = types.str;
+      default = "longhorn";
+    };
+  };
+
   extraResources = cfg: {
     deployments.kavita = {
       metadata = {
@@ -114,12 +122,12 @@ mkArgoApp { inherit config lib; } rec {
       "${name}-${name}-books".spec = {
         accessModes = [ "ReadWriteOnce" ];
         resources.requests.storage = "5Gi";
-        storageClassName = "longhorn";
+        storageClassName = cfg.storageClassName;
       };
       "${name}-${name}-config".spec = {
         accessModes = [ "ReadWriteOnce" ];
         resources.requests.storage = "5Gi";
-        storageClassName = "longhorn";
+        storageClassName = cfg.storageClassName;
       };
     };
 

@@ -33,7 +33,7 @@ in mkArgoApp { inherit config lib; } {
 
     persistence = {
       enabled = true;
-      storageClassName = "longhorn";
+      storageClassName = cfg.storageClassName;
     };
 
     # Admin credentials - use existing SOPS secret instead of creating one
@@ -55,9 +55,7 @@ in mkArgoApp { inherit config lib; } {
             url = "http://prometheus-kube-prometheus-prometheus.prometheus:9090";
             isDefault = true;
             editable = true;
-            jsonData = {
-              httpMethod = "POST";
-            };
+            jsonData.httpMethod = "POST";
           }
         ];
       };
@@ -75,22 +73,14 @@ in mkArgoApp { inherit config lib; } {
             type = "file";
             disableDeletion = false;
             editable = true;
-            options = {
-              path = "/var/lib/grafana/dashboards/default";
-            };
+            options.path = "/var/lib/grafana/dashboards/default";
           }
         ];
       };
     };
 
     # Provision dashboards
-    dashboards = {
-      "default" = {
-        "system-performance-nfs" = {
-          json = builtins.readFile ./dashboards/system-performance.json;
-        };
-      };
-    };
+    dashboards.default.system-performance-nfs.json = builtins.readFile ./dashboards/system-performance.json;
 
     # Resource limits
     resources = {
@@ -140,6 +130,12 @@ in mkArgoApp { inherit config lib; } {
       description = mdDoc "Enable proxy authentication for Tailscale proxy-to-grafana. If enabled, authentication is handled via Tailscale identity headers. If disabled, use normal username/password login.";
       type = types.bool;
       default = false;
+    };
+
+    storageClassName = mkOption {
+      description = mdDoc "Storage class name for Grafana persistence";
+      type = types.str;
+      default = "longhorn";
     };
   };
 

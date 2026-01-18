@@ -13,6 +13,14 @@ mkArgoApp { inherit config lib; } {
 
   uses-ingress = true;
 
+  extraOptions = {
+    storageClassName = mkOption {
+      description = mdDoc "Storage class name for Calibre persistence";
+      type = types.str;
+      default = "longhorn";
+    };
+  };
+
   # https://github.com/k8s-at-home/library-charts/blob/main/charts/stable/common/values.yaml
   defaultValues = cfg: {
     ingress.main = with cfg.ingress; {
@@ -33,14 +41,14 @@ mkArgoApp { inherit config lib; } {
     persistence = {
       books = {
         enabled = true;
-        storageClass = "longhorn";
+        storageClass = cfg.storageClassName;
         accessMode = "ReadWriteOnce";
         size = "1Gi";
       };
 
       config = {
         enabled = true;
-        storageClass = "longhorn";
+        storageClass = cfg.storageClassName;
         accessMode = "ReadWriteOnce";
       };
     };

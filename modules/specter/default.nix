@@ -15,6 +15,11 @@ mkArgoApp { inherit config lib; } rec {
       type = types.str;
       default = "satoshi";
     };
+    storageClassName = mkOption {
+      description = mdDoc "Storage class name for Specter persistence";
+      type = types.str;
+      default = "longhorn";
+    };
   };
 
   defaultValues = cfg:
@@ -165,7 +170,7 @@ mkArgoApp { inherit config lib; } rec {
           spec = {
             accessModes = [ "ReadWriteOnce" ];
             resources.requests.storage = "1Gi";
-            storageClassName = "longhorn";
+            storageClassName = cfg.storageClassName;
           };
         };
       };

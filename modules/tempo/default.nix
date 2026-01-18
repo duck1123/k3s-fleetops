@@ -8,10 +8,18 @@ mkArgoApp { inherit config lib; } {
 
   uses-ingress = true;
 
+  extraOptions = {
+    storageClassName = mkOption {
+      description = mdDoc "Storage class name for Tempo persistence";
+      type = types.str;
+      default = "longhorn";
+    };
+  };
+
   defaultValues = cfg: {
     persistence = {
       enabled = true;
-      storageClassName = "longhorn";
+      storageClassName = cfg.storageClassName;
     };
 
     tempo.retention = "72h";

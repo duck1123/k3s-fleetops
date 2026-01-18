@@ -35,6 +35,12 @@ mkArgoApp { inherit config lib; } {
         default = "CHANGEME";
       };
     };
+
+    storageClassName = mkOption {
+      description = mdDoc "Storage class name for Homer persistence";
+      type = types.str;
+      default = "longhorn";
+    };
   };
 
   defaultValues = cfg: {
@@ -98,7 +104,7 @@ mkArgoApp { inherit config lib; } {
     persistence = {
       config = {
         enabled = true;
-        storageClass = "longhorn";
+        storageClass = cfg.storageClassName;
       };
     };
   };
