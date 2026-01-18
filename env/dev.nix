@@ -264,6 +264,35 @@ in
         domain = "grafana.${tail-domain}";
         ingressClassName = "tailscale";
       };
+
+      # Configure Prometheus datasource
+      additionalDatasources = [
+        {
+          name = "Prometheus";
+          type = "prometheus";
+          access = "proxy";
+          url = "http://prometheus-kube-prometheus-prometheus.prometheus:9090";
+          isDefault = true;
+          editable = true;
+          jsonData.httpMethod = "POST";
+        }
+      ];
+
+      # Configure dashboard provider
+      additionalDashboardProviders = [
+        {
+          name = "default";
+          orgId = 1;
+          folder = "";
+          type = "file";
+          disableDeletion = false;
+          editable = true;
+          options.path = "/var/lib/grafana/dashboards/default";
+        }
+      ];
+
+      # Additional dashboards can be added here if needed
+      # The default dashboards (system-performance and kubernetes-cluster) are defined in modules/grafana/default.nix
     };
 
     # ../applications/prometheus/default.nix
