@@ -102,7 +102,7 @@
         {
           "datasource": "Prometheus",
           "expr": "100 - (avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
-          "legendFormat": "{{instance}}",
+          "legendFormat": "{{nodename}}",
           "refId": "A"
         }
       ],
@@ -192,7 +192,7 @@
         {
           "datasource": "Prometheus",
           "expr": "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100",
-          "legendFormat": "{{instance}}",
+          "legendFormat": "{{nodename}}",
           "refId": "A"
         }
       ],
@@ -349,13 +349,13 @@
         {
           "datasource": "Prometheus",
           "expr": "rate(node_disk_read_bytes_total[5m])",
-          "legendFormat": "{{instance}} - {{device}} Read",
+          "legendFormat": "{{nodename}} - {{device}} Read",
           "refId": "A"
         },
         {
           "datasource": "Prometheus",
           "expr": "rate(node_disk_written_bytes_total[5m])",
-          "legendFormat": "{{instance}} - {{device}} Write",
+          "legendFormat": "{{nodename}} - {{device}} Write",
           "refId": "B"
         }
       ],
@@ -439,13 +439,13 @@
         {
           "datasource": "Prometheus",
           "expr": "rate(node_network_receive_bytes_total{device!~\"lo|veth.*|docker.*|flannel.*|calico.*|cilium.*\"}[5m])",
-          "legendFormat": "{{instance}} - {{device}} Receive",
+          "legendFormat": "{{nodename}} - {{device}} Receive",
           "refId": "A"
         },
         {
           "datasource": "Prometheus",
           "expr": "rate(node_network_transmit_bytes_total{device!~\"lo|veth.*|docker.*|flannel.*|calico.*|cilium.*\"}[5m])",
-          "legendFormat": "{{instance}} - {{device}} Transmit",
+          "legendFormat": "{{nodename}} - {{device}} Transmit",
           "refId": "B"
         }
       ],
@@ -530,13 +530,13 @@
         {
           "datasource": "Prometheus",
           "expr": "sum(rate(node_network_receive_bytes_total{device!~\"lo|veth.*|docker.*|flannel.*|calico.*|cilium.*\"}[5m])) by (instance)",
-          "legendFormat": "{{instance}} - Total Receive",
+          "legendFormat": "{{nodename}} - Total Receive",
           "refId": "A"
         },
         {
           "datasource": "Prometheus",
           "expr": "sum(rate(node_network_transmit_bytes_total{device!~\"lo|veth.*|docker.*|flannel.*|calico.*|cilium.*\"}[5m])) by (instance)",
-          "legendFormat": "{{instance}} - Total Transmit",
+          "legendFormat": "{{nodename}} - Total Transmit",
           "refId": "B"
         }
       ],
@@ -620,13 +620,13 @@
         {
           "datasource": "Prometheus",
           "expr": "rate(node_nfs_requests_total[5m])",
-          "legendFormat": "{{instance}} - Requests/sec",
+          "legendFormat": "{{nodename}} - Requests/sec",
           "refId": "A"
         },
         {
           "datasource": "Prometheus",
           "expr": "rate(node_nfs_rpcs_total[5m])",
-          "legendFormat": "{{instance}} - RPCs/sec",
+          "legendFormat": "{{nodename}} - RPCs/sec",
           "refId": "B"
         }
       ],
@@ -710,13 +710,13 @@
         {
           "datasource": "Prometheus",
           "expr": "node_filesystem_size_bytes{mountpoint=~\".*volume1.*|.*nfs.*\",fstype=\"nfs\"} - node_filesystem_avail_bytes{mountpoint=~\".*volume1.*|.*nfs.*\",fstype=\"nfs\"}",
-          "legendFormat": "{{instance}} - {{mountpoint}} Used",
+          "legendFormat": "{{nodename}} - {{mountpoint}} Used",
           "refId": "A"
         },
         {
           "datasource": "Prometheus",
           "expr": "node_filesystem_avail_bytes{mountpoint=~\".*volume1.*|.*nfs.*\",fstype=\"nfs\"}",
-          "legendFormat": "{{instance}} - {{mountpoint}} Available",
+          "legendFormat": "{{nodename}} - {{mountpoint}} Available",
           "refId": "B"
         }
       ],
@@ -800,13 +800,13 @@
         {
           "datasource": "Prometheus",
           "expr": "node_nfs_connections_total",
-          "legendFormat": "{{instance}} - Connections",
+          "legendFormat": "{{nodename}} - Connections",
           "refId": "A"
         },
         {
           "datasource": "Prometheus",
           "expr": "rate(node_nfs_rpc_retransmissions_total[5m])",
-          "legendFormat": "{{instance}} - Retransmissions/sec",
+          "legendFormat": "{{nodename}} - Retransmissions/sec",
           "refId": "B"
         }
       ],

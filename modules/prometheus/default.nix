@@ -79,6 +79,24 @@ mkArgoApp { inherit config lib; } {
     nodeExporter = {
       enabled = true;
       # Node exporter runs on all nodes, not just edgenix
+
+      # Enable node metadata attachment and add hostname label
+      serviceMonitor = {
+        # Attach node metadata to get node name
+        attachMetadata = {
+          node = true;
+        };
+
+        # Add nodename label from node metadata for use in Grafana dashboards
+        relabelings = [
+          {
+            # Add nodename label from Kubernetes node metadata
+            sourceLabels = [ "__meta_kubernetes_pod_node_name" ];
+            targetLabel = "nodename";
+            replacement = "$$1";
+          }
+        ];
+      };
     };
 
     # Alertmanager configuration
