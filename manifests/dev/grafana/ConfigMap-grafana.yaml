@@ -20,6 +20,10 @@ data:
       name: Prometheus
       type: prometheus
       url: http://prometheus-kube-prometheus-prometheus.prometheus:9090
+  download_dashboards.sh: |
+    #!/usr/bin/env sh
+    set -euf
+    mkdir -p /var/lib/grafana/dashboards/default
   grafana.ini: |
     [analytics]
     check_for_updates = true

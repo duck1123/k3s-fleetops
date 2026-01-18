@@ -80,6 +80,15 @@ in mkArgoApp { inherit config lib; } {
       };
     };
 
+    # Provision dashboards
+    dashboards = {
+      "default" = {
+        "system-performance-nfs" = {
+          json = builtins.readFile ./dashboards/system-performance.json;
+        };
+      };
+    };
+
     # Resource limits
     resources = {
       requests = {

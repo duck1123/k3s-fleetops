@@ -20,7 +20,8 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: 83728af511092f0cd84e27ffc8b3890e83fd4e793691ab47c3969440f6882906
+        checksum/config: bb025f5dafbf693192d8cf2f7b884cb1f758fe9bb3bf2b273d4358e9aa9b201e
+        checksum/dashboards-json-config: eda7243943a6e34dc28679fc7cc4c7790d59def231f200bb16d451fd42839e02
         checksum/sc-dashboard-provider-config: e70bf6a851099d385178a76de9757bb0bef8299da6d8443602590e44f05fdf24
         kubectl.kubernetes.io/default-container: grafana
       labels:
@@ -106,6 +107,9 @@ spec:
               subPath: grafana.ini
             - mountPath: /var/lib/grafana
               name: storage
+            - mountPath: /var/lib/grafana/dashboards/default/system-performance-nfs.json
+              name: dashboards-default
+              subPath: system-performance-nfs.json
             - mountPath: /etc/grafana/provisioning/datasources/datasources.yaml
               name: config
               subPath: datasources.yaml
@@ -136,6 +140,27 @@ spec:
           volumeMounts:
             - mountPath: /var/lib/grafana
               name: storage
+        - args:
+            - -c
+            - mkdir -p /var/lib/grafana/dashboards/default && /bin/sh -x /etc/grafana/download_dashboards.sh
+          command:
+            - /bin/sh
+          image: docker.io/curlimages/curl:8.9.1
+          imagePullPolicy: IfNotPresent
+          name: download-dashboards
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+            - mountPath: /etc/grafana/download_dashboards.sh
+              name: config
+              subPath: download_dashboards.sh
+            - mountPath: /var/lib/grafana
+              name: storage
       nodeSelector:
         kubernetes.io/hostname: edgenix
       securityContext:
@@ -149,6 +174,9 @@ spec:
         - configMap:
             name: grafana
           name: config
+        - configMap:
+            name: grafana-dashboards-default
+          name: dashboards-default
         - name: storage
           persistentVolumeClaim:
             claimName: grafana
