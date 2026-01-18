@@ -57,7 +57,7 @@ in mkArgoApp { inherit config lib; } {
             editable = true;
             jsonData.httpMethod = "POST";
           }
-        ];
+        ] ++ (cfg.additionalDatasources or [ ]);
       };
     };
 
@@ -75,12 +75,14 @@ in mkArgoApp { inherit config lib; } {
             editable = true;
             options.path = "/var/lib/grafana/dashboards/default";
           }
-        ];
+        ] ++ (cfg.additionalDashboardProviders or [ ]);
       };
     };
 
     # Provision dashboards
-    dashboards.default.system-performance-nfs.json = builtins.readFile ./dashboards/system-performance.json;
+    dashboards = lib.recursiveUpdate {
+      default.system-performance-nfs.json = builtins.readFile ./dashboards/system-performance.json;
+    } (cfg.additionalDashboards or { });
 
     # Resource limits
     resources = {
@@ -136,6 +138,51 @@ in mkArgoApp { inherit config lib; } {
       description = mdDoc "Storage class name for Grafana persistence";
       type = types.str;
       default = "longhorn";
+    };
+
+    additionalDatasources = mkOption {
+      description = mdDoc "Datasources to provision. List of datasource configuration objects.";
+      type = types.listOf types.attrs;
+      default = [ ];
+      example = [
+        {
+          name = "Prometheus";
+          type = "prometheus";
+          access = "proxy";
+          url = "http://prometheus:9090";
+          isDefault = true;
+          editable = true;
+          jsonData.httpMethod = "POST";
+        }
+      ];
+    };
+
+    additionalDashboardProviders = mkOption {
+      description = mdDoc "Dashboard providers to provision. List of dashboard provider configuration objects.";
+      type = types.listOf types.attrs;
+      default = [ ];
+      example = [
+        {
+          name = "default";
+          orgId = 1;
+          folder = "";
+          type = "file";
+          disableDeletion = false;
+          editable = true;
+          options.path = "/var/lib/grafana/dashboards/default";
+        }
+      ];
+    };
+
+    additionalDashboards = mkOption {
+      description = mdDoc "Dashboards to provision. Attribute set mapping folder names to dashboards (folder name -> dashboard file name -> dashboard JSON content)";
+      type = types.attrsOf (types.attrsOf types.str);
+      default = { };
+      example = {
+        default = {
+          "my-dashboard.json" = builtins.readFile ./path/to/dashboard.json;
+        };
+      };
     };
   };
 
