@@ -9,6 +9,7 @@
 with lib;
 let
   grafana-secret = "grafana-admin";
+  dashboards = import ./dashboards/default.nix { };
 in
 self.lib.mkArgoApp { inherit config lib; } {
   name = "grafana";
@@ -42,7 +43,10 @@ self.lib.mkArgoApp { inherit config lib; } {
     };
 
     dashboards = lib.recursiveUpdate {
-      default.system-performance-nfs.json = builtins.readFile ./dashboards/system-performance.json;
+      default = {
+        "system-performance-nfs.json" = builtins.toJSON dashboards.systemPerformanceDashboard;
+        "kubernetes-cluster.json" = builtins.toJSON dashboards.kubernetesClusterDashboard;
+      };
     } (cfg.additionalDashboards or { });
 
     datasources."datasources.yaml" = {
