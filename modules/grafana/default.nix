@@ -51,6 +51,7 @@ in mkArgoApp { inherit config lib; } {
           {
             name = "Prometheus";
             type = "prometheus";
+            uid = "prometheus";
             access = "proxy";
             url = "http://prometheus-kube-prometheus-prometheus.prometheus:9090";
             isDefault = true;
