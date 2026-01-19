@@ -6,7 +6,7 @@ gluetunService: [
   {
     name = "wait-for-gluetun";
     image = "curlimages/curl:latest";
-    command = ["sh"];
+    command = [ "sh" ];
     args = [
       "-c"
       ''

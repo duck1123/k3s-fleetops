@@ -2,7 +2,8 @@
 let
   inherit (inputs.nixidy.packages.${system}.generators) fromCRD;
   inherit (inputs.nixhelm.chartsDerivations.${system}.traefik) traefik;
-in fromCRD {
+in
+fromCRD {
   name = "traefik";
   src = traefik;
   crds = [

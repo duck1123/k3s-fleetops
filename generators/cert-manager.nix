@@ -1,6 +1,13 @@
-{ inputs, pkgs, system, ... }:
-let inherit (inputs.nixidy.packages.${system}.generators) fromCRD;
-in fromCRD {
+{
+  inputs,
+  pkgs,
+  system,
+  ...
+}:
+let
+  inherit (inputs.nixidy.packages.${system}.generators) fromCRD;
+in
+fromCRD {
   name = "cert-manager";
   src = pkgs.fetchFromGitHub {
     owner = "cert-manager";

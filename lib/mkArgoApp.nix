@@ -3,27 +3,37 @@
 # Takes the current config and lib and returns a function that creates a nixidy application with defaults
 { config, lib, ... }:
 {
-# The name of the application (string)
-name, namespace ? null,
-# The chart to deploy (path)
-chart ? null,
-# A function that takes the config and returns default helm chart values
-defaultValues ? (cfg: { }),
-# A list of secrets that need to be loaded when generating this application
-neededSecrets ? [ ],
-# A function that takes the config and returns extra config merged into the app release.
-extraAppConfig ? (cfg: { }),
-# A function that takes the config and returns extra config merged into final config
-extraConfig ? (cfg: { }),
-# Additional config options
-extraOptions ? { },
-# A function that takes the config and returns extra resources to deploy with the application
-extraResources ? (cfg: { }),
-# Does this chart expose an ingress
-uses-ingress ? false }:
+  # The name of the application (string)
+  name,
+  namespace ? null,
+  # The chart to deploy (path)
+  chart ? null,
+  # A function that takes the config and returns default helm chart values
+  defaultValues ? (cfg: { }),
+  # A list of secrets that need to be loaded when generating this application
+  neededSecrets ? [ ],
+  # A function that takes the config and returns extra config merged into the app release.
+  extraAppConfig ? (cfg: { }),
+  # A function that takes the config and returns extra config merged into final config
+  extraConfig ? (cfg: { }),
+  # Additional config options
+  extraOptions ? { },
+  # A function that takes the config and returns extra resources to deploy with the application
+  extraResources ? (cfg: { }),
+  # Does this chart expose an ingress
+  uses-ingress ? false,
+}:
 with lib;
 let
-  inherit (types) attrs listOf nullOr path str submodule unspecified;
+  inherit (types)
+    attrs
+    listOf
+    nullOr
+    path
+    str
+    submodule
+    unspecified
+    ;
   cfg = config.services.${name};
   values = attrsets.recursiveUpdate (defaultValues cfg) cfg.values;
   tls-options = {
@@ -78,16 +88,25 @@ let
     };
 
     ingress = mkOption {
-      apply = val: assert uses-ingress || val == { }; val;
+      apply =
+        val:
+        assert uses-ingress || val == { };
+        val;
       default = { };
       description = "Ingress Options";
-      type = if uses-ingress then
-        submodule (let
-          extra-ingress = extraOptions.ingress or { };
-          options = recursiveUpdate ingress-options extra-ingress;
-        in { inherit options; })
-      else
-        unspecified;
+      type =
+        if uses-ingress then
+          submodule (
+            let
+              extra-ingress = extraOptions.ingress or { };
+              options = recursiveUpdate ingress-options extra-ingress;
+            in
+            {
+              inherit options;
+            }
+          )
+        else
+          unspecified;
     };
 
     namespace = mkOption {
@@ -108,9 +127,12 @@ let
       default = { };
     };
   };
-in {
-  options.services.${name} =
-    lib.foldl' lib.recursiveUpdate { } [ basic-options extraOptions ];
+in
+{
+  options.services.${name} = lib.foldl' lib.recursiveUpdate { } [
+    basic-options
+    extraOptions
+  ];
 
   config = mkIf cfg.enable (mkMerge [
     {
@@ -122,8 +144,7 @@ in {
           finalizer = "foreground";
 
           # TODO: Should I be using some sort of overlay here?
-          resources =
-            lib.recursiveUpdate (extraResources cfg) cfg.extraResources;
+          resources = lib.recursiveUpdate (extraResources cfg) cfg.extraResources;
           syncPolicy.finalSyncOpts = [ "CreateNamespace=true" ];
         }
         (mkIf (cfg.chart != null) {

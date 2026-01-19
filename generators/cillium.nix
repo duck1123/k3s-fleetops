@@ -1,4 +1,10 @@
-{ nixidy, pkgs, system, ... }: {
+{
+  nixidy,
+  pkgs,
+  system,
+  ...
+}:
+{
   packages.generators.cilium = nixidy.packages.${system}.generators.fromCRD {
     name = "cilium";
     src = pkgs.fetchFromGitHub {

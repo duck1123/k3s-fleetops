@@ -8,23 +8,24 @@ let
 
   # Helper function to generate database entries for *arr applications
   # Takes a list of app configs and generates main + log databases
-  arrDatabases = apps:
-    builtins.concatLists (map (app: [
-      {
-        name = if app.name == "prowlarr" then "${app.name}-main" else app.name;
-        username = app.name;
-        password = secrets.postgresql.userPassword;
-      }
-      {
-        name = if app.name == "prowlarr" then
-          "${app.name}-log"
-        else
-          "${app.name}-log";
-        username = app.name;
-        password = secrets.postgresql.userPassword;
-      }
-    ]) apps);
-in {
+  arrDatabases =
+    apps:
+    builtins.concatLists (
+      map (app: [
+        {
+          name = if app.name == "prowlarr" then "${app.name}-main" else app.name;
+          username = app.name;
+          password = secrets.postgresql.userPassword;
+        }
+        {
+          name = if app.name == "prowlarr" then "${app.name}-log" else "${app.name}-log";
+          username = app.name;
+          password = secrets.postgresql.userPassword;
+        }
+      ]) apps
+    );
+in
+{
   nixidy = {
     defaults.syncPolicy.autoSync = {
       enabled = true;
@@ -57,13 +58,16 @@ in {
     alice-bitcoin.enable = false;
 
     # ../modules/alice-lnd/default.nix
-    alice-lnd = let user-env = "alice";
-    in {
-      inherit user-env;
-      enable = false;
-      imageVersion = "v1.10.3";
-      ingress.domain = "lnd-${user-env}.dinsro.com";
-    };
+    alice-lnd =
+      let
+        user-env = "alice";
+      in
+      {
+        inherit user-env;
+        enable = false;
+        imageVersion = "v1.10.3";
+        ingress.domain = "lnd-${user-env}.dinsro.com";
+      };
 
     # ../modules/argocd/default.nix
     argocd.enable = true;
@@ -91,7 +95,10 @@ in {
 
       postgresql = {
         inherit (secrets.authentik.postgresql)
-          password postgres-password replicationPassword;
+          password
+          postgres-password
+          replicationPassword
+          ;
         host = "postgreql.postgreql";
       };
     };
@@ -118,8 +125,7 @@ in {
         localIngress = {
           enable = true;
           domain = "booklore.local";
-          tls.enable =
-            false; # Set to true if you have cert-manager configured for local domains
+          tls.enable = false; # Set to true if you have cert-manager configured for local domains
         };
       };
 
@@ -232,7 +238,11 @@ in {
 
       postgresql = {
         inherit (secrets.forgejo.postgresql)
-          adminPassword adminUsername replicationPassword userPassword;
+          adminPassword
+          adminUsername
+          replicationPassword
+          userPassword
+          ;
       };
 
       storageClass = "longhorn";
@@ -337,7 +347,11 @@ in {
     jupyterhub = {
       enable = false;
       inherit (secrets.jupyterhub)
-        cookieSecret cryptkeeperKeys password proxyToken;
+        cookieSecret
+        cryptkeeperKeys
+        password
+        proxyToken
+        ;
 
       ingress = {
         domain = "jupyterhub.${tail-domain}";
@@ -438,7 +452,12 @@ in {
     mariadb = {
       auth = {
         inherit (secrets.mariadb)
-          database password replicationPassword rootPassword username;
+          database
+          password
+          replicationPassword
+          rootPassword
+          username
+          ;
       };
 
       enable = true;
@@ -534,11 +553,21 @@ in {
       databases = {
         minio = {
           inherit (secrets.nocodb.minio)
-            bucketName endpoint region rootPassword rootUser;
+            bucketName
+            endpoint
+            region
+            rootPassword
+            rootUser
+            ;
         };
         postgresql = {
           inherit (secrets.nocodb.postgresql)
-            database password postgresPassword replicationPassword username;
+            database
+            password
+            postgresPassword
+            replicationPassword
+            username
+            ;
         };
         redis = { inherit (secrets.nocodb.redis) password; };
       };
@@ -560,7 +589,11 @@ in {
     postgresql = {
       auth = {
         inherit (secrets.postgresql)
-          adminPassword adminUsername replicationPassword userPassword;
+          adminPassword
+          adminUsername
+          replicationPassword
+          userPassword
+          ;
       };
 
       enable = true;
@@ -678,8 +711,7 @@ in {
         localIngress = {
           enable = true;
           domain = "romm.local";
-          tls.enable =
-            false; # Set to true if you have cert-manager configured for local domains
+          tls.enable = false; # Set to true if you have cert-manager configured for local domains
         };
       };
 

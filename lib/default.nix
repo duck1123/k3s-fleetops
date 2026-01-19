@@ -7,7 +7,16 @@ let
   mkArgoApp = import ./mkArgoApp.nix;
   toYAML = import ./toYAML.nix;
   waitForGluetun = import ./waitForGluetun.nix;
-in {
-  inherit encryptString createSecret helmChart fromYAML loadSecrets mkArgoApp
-    toYAML waitForGluetun;
+in
+{
+  inherit
+    encryptString
+    createSecret
+    helmChart
+    fromYAML
+    loadSecrets
+    mkArgoApp
+    toYAML
+    waitForGluetun
+    ;
 }

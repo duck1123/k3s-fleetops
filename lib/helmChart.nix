@@ -1,4 +1,8 @@
-{ pkgs, chartTgz, chartName }:
+{
+  pkgs,
+  chartTgz,
+  chartName,
+}:
 
 pkgs.runCommand chartName { inherit chartTgz; } ''
   mkdir -p $out
