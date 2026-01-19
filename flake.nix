@@ -72,67 +72,93 @@
     systems.url = "github:nix-systems/default";
   };
 
-  outputs = { flake-parts, make-shell, nixhelm, nixidy, nixpkgs, ... }@inputs:
+  outputs =
+    {
+      flake-parts,
+      make-shell,
+      nixhelm,
+      nixidy,
+      ...
+    }@inputs:
     let
       # FIXME: naughty config
-      ageRecipients =
-        "age1n372e8dgautnjhecllf7uvvldw9g6vyx3kggj0kyduz5jr2upvysue242c";
-      system = "x86_64-linux";
-      pkgs = nixpkgs.legacyPackages.${system};
+      ageRecipients = "age1n372e8dgautnjhecllf7uvvldw9g6vyx3kggj0kyduz5jr2upvysue242c";
       lib = (import ./lib) // {
         inherit ageRecipients;
         sopsConfig = ./.sops.yaml;
       };
-      secrets = lib.loadSecrets {
-        inherit (lib) fromYAML;
-        inherit pkgs;
-      };
-      dev = import ./env/dev.nix { inherit lib nixidy secrets; };
-      charts = nixhelm.chartsDerivations.${system};
-      defaultEnv = nixidy.lib.mkEnvs {
-        inherit charts pkgs;
-        extraSpecialArgs = { inherit ageRecipients; };
-        envs.dev.modules = [ dev ];
-        libOverlay = final: prev: lib;
-        modules = [ ./modules ];
-      };
-    in flake-parts.lib.mkFlake { inherit inputs; } (_: {
-      imports = [ make-shell.flakeModules.default ];
-      systems = [ system ];
-      perSystem = { pkgs, system, ... }:
-        let generators = import ./generators { inherit inputs system pkgs; };
-        in {
-          imports = [ generators ];
-          apps = { inherit (generators.apps) generate; };
+    in
+    flake-parts.lib.mkFlake { inherit inputs; } (
+      { config, withSystem, ... }:
+      {
+        imports = [
+          make-shell.flakeModules.default
+        ];
+        systems = [ "x86_64-linux" ];
+        perSystem =
+          { pkgs, system, ... }:
+          let
+            generators = import ./generators { inherit inputs system pkgs; };
+          in
+          {
+            imports = [ generators ];
+            apps = { inherit (generators.apps) generate; };
 
-          make-shells.default = { pkgs, ... }: {
-            packages = with pkgs; [
-              nixidy.packages.${system}.default
-              age
-              argo-workflows
-              argocd
-              babashka
-              clojure
-              docker
-              gum
-              jet
-              keepassxc
-              kubectl
-              kubernetes-helm
-              kubeseal
-              openssl
-              sops
-              ssh-to-age
-              ssh-to-pgp
-              yq
-            ];
+            make-shells.default =
+              { pkgs, ... }:
+              {
+                packages = with pkgs; [
+                  nixidy.packages.${system}.default
+                  age
+                  argo-workflows
+                  argocd
+                  babashka
+                  clojure
+                  docker
+                  gum
+                  jet
+                  keepassxc
+                  kubectl
+                  kubernetes-helm
+                  kubeseal
+                  openssl
+                  sops
+                  ssh-to-age
+                  ssh-to-pgp
+                  yq
+                ];
+              };
+
+            packages.nixidy = nixidy.packages.${system}.default;
           };
-
-          packages.nixidy = nixidy.packages.${system}.default;
+        flake = {
+          inherit lib;
+          # Compute nixidyEnvs per system using withSystem
+          nixidyEnvs = builtins.listToAttrs (
+            map (system: {
+              name = system;
+              value = withSystem system (
+                { pkgs, ... }:
+                let
+                  secrets = lib.loadSecrets {
+                    inherit (lib) fromYAML;
+                    inherit pkgs;
+                  };
+                  dev = import ./env/dev.nix { inherit lib nixidy secrets; };
+                  charts = nixhelm.chartsDerivations.${system};
+                  defaultEnv = nixidy.lib.mkEnvs {
+                    inherit charts pkgs;
+                    extraSpecialArgs = { inherit ageRecipients; };
+                    envs.dev.modules = [ dev ];
+                    libOverlay = final: prev: lib;
+                    modules = [ ./modules ];
+                  };
+                in
+                defaultEnv
+              );
+            }) config.systems
+          );
         };
-    }) // {
-      inherit lib;
-      # TODO: Make a flake-parts module for this
-      nixidyEnvs.${system} = defaultEnv;
-    };
+      }
+    );
 }
