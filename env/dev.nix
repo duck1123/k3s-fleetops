@@ -872,6 +872,7 @@ in
       };
 
       replicas = 1;
+      useProbes = false;
     };
 
     sealed-secrets.enable = true;

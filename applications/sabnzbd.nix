@@ -100,6 +100,12 @@
           type = types.int;
           default = 1;
         };
+
+        useProbes = mkOption {
+          description = mdDoc "Enable readiness and liveness probes";
+          type = types.bool;
+          default = true;
+        };
       };
 
       extraResources = cfg: {
@@ -259,28 +265,29 @@
                         protocol = "TCP";
                       }
                     ];
-                    # readinessProbe = {
-                    #   httpGet = {
-                    #     path = "/";
-                    #     port = cfg.service.port;
-                    #   };
-                    #   initialDelaySeconds = 10;
-                    #   periodSeconds = 10;
-                    #   timeoutSeconds = 5;
-                    #   successThreshold = 1;
-                    #   failureThreshold = 3;
-                    # };
-                    # livenessProbe = {
-                    #   httpGet = {
-                    #     path = "/";
-                    #     port = cfg.service.port;
-                    #   };
-                    #   initialDelaySeconds = 30;
-                    #   periodSeconds = 30;
-                    #   timeoutSeconds = 5;
-                    #   successThreshold = 1;
-                    #   failureThreshold = 3;
-                    # };
+                    readinessProbe = lib.mkIf cfg.useProbes {
+                      httpGet = {
+                        path = "/api?mode=version";
+                        port = cfg.service.port;
+                      };
+                      initialDelaySeconds = 120;
+                      periodSeconds = 15;
+                      timeoutSeconds = 10;
+                      successThreshold = 1;
+                      failureThreshold = 30;
+                    };
+                    livenessProbe = lib.mkIf cfg.useProbes {
+                      httpGet = {
+                        path = "/api?mode=version";
+                        port = cfg.service.port;
+                      };
+                      initialDelaySeconds = 180;
+                      periodSeconds = 30;
+                      timeoutSeconds = 10;
+                      successThreshold = 1;
+                      failureThreshold = 20;
+                    };
+
                     volumeMounts = [
                       {
                         mountPath = "/config";
