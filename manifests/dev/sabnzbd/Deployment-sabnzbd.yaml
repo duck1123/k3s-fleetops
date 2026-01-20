@@ -38,11 +38,29 @@ spec:
               value: localhost,127.0.0.1,.svc,.svc.cluster.local,sabnzbd.sabnzbd,sabnzbd.sabnzbd.svc.cluster.local
           image: linuxserver/sabnzbd:latest
           imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 20
+            httpGet:
+              path: /api?mode=version
+              port: 8080
+            initialDelaySeconds: 180
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 10
           name: sabnzbd
           ports:
             - containerPort: 8080
               name: http
               protocol: TCP
+          readinessProbe:
+            failureThreshold: 30
+            httpGet:
+              path: /api?mode=version
+              port: 8080
+            initialDelaySeconds: 120
+            periodSeconds: 15
+            successThreshold: 1
+            timeoutSeconds: 10
           volumeMounts:
             - mountPath: /config
               name: config
