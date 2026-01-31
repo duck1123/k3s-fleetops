@@ -5,7 +5,7 @@ metadata:
     app.kubernetes.io/instance: grafana
     app.kubernetes.io/name: grafana
     app.kubernetes.io/version: 12.3.1
-    helm.sh/chart: grafana-10.4.3
+    helm.sh/chart: grafana-10.5.15
   name: grafana
   namespace: grafana
 spec:
@@ -20,15 +20,15 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: 9b6ba09b5701bd819834eb9b5920c46f03c9673b18e7583d37493fa73262fdcc
-        checksum/dashboards-json-config: 921d8b1fde2696513c4aebf1cc83a67e79b6a03b59d7a28aa15f8eb0c3e32159
+        checksum/config: e1d1f48d0011fd429766eab3d6152ce8af1805798f412dc305b1177670d4e54b
+        checksum/dashboards-json-config: 44b9f03c0970634aa93ba2c120ea54a00db587882c8f1c70b3d8621ddf68920b
         checksum/sc-dashboard-provider-config: e70bf6a851099d385178a76de9757bb0bef8299da6d8443602590e44f05fdf24
         kubectl.kubernetes.io/default-container: grafana
       labels:
         app.kubernetes.io/instance: grafana
         app.kubernetes.io/name: grafana
         app.kubernetes.io/version: 12.3.1
-        helm.sh/chart: grafana-10.4.3
+        helm.sh/chart: grafana-10.5.15
     spec:
       automountServiceAccountToken: true
       containers:
@@ -55,6 +55,8 @@ spec:
               value: /var/lib/grafana/plugins
             - name: GF_PATHS_PROVISIONING
               value: /etc/grafana/provisioning
+            - name: GF_UNIFIED_STORAGE_INDEX_PATH
+              value: /var/lib/grafana-search/bleve
             - name: GOMEMLIMIT
               valueFrom:
                 resourceFieldRef:
@@ -99,6 +101,7 @@ spec:
             capabilities:
               drop:
                 - ALL
+            privileged: false
             seccompProfile:
               type: RuntimeDefault
           volumeMounts:
@@ -107,6 +110,8 @@ spec:
               subPath: grafana.ini
             - mountPath: /var/lib/grafana
               name: storage
+            - mountPath: /var/lib/grafana-search
+              name: search
             - mountPath: /var/lib/grafana/dashboards/default/system-performance-nfs.json
               name: dashboards-default
               subPath: system-performance-nfs.json
@@ -180,3 +185,5 @@ spec:
         - name: storage
           persistentVolumeClaim:
             claimName: grafana
+        - emptyDir: {}
+          name: search

@@ -1149,7 +1149,7 @@ let
         };
         "fallbackValue" = mkOption {
           description = "The fallback value that should be returned by the transform if now pattern\nmatches.";
-          type = (types.nullOr types.attrs);
+          type = (types.nullOr types.unspecified);
         };
         "patterns" = mkOption {
           description = "The patterns that should be tested against the input string.\nPatterns are tested in order. The value of the first match is used as\nresult of this transform.";
@@ -1183,7 +1183,7 @@ let
         };
         "result" = mkOption {
           description = "The value that is used as result of the transform if the pattern matches.";
-          type = types.attrs;
+          type = types.unspecified;
         };
         "type" = mkOption {
           description = "Type specifies how the pattern matches the input.\n\n* `literal` - the pattern value has to exactly match (case sensitive) the\ninput string. This is the default.\n\n* `regexp` - the pattern treated as a regular expression against\nwhich the input string is tested. Crossplane will throw an error if the\nkey is not a valid regexp.";
@@ -1725,7 +1725,7 @@ let
         };
         "fallbackValue" = mkOption {
           description = "The fallback value that should be returned by the transform if now pattern\nmatches.";
-          type = (types.nullOr types.attrs);
+          type = (types.nullOr types.unspecified);
         };
         "patterns" = mkOption {
           description = "The patterns that should be tested against the input string.\nPatterns are tested in order. The value of the first match is used as\nresult of this transform.";
@@ -1759,7 +1759,7 @@ let
         };
         "result" = mkOption {
           description = "The value that is used as result of the transform if the pattern matches.";
-          type = types.attrs;
+          type = types.unspecified;
         };
         "type" = mkOption {
           description = "Type specifies how the pattern matches the input.\n\n* `literal` - the pattern value has to exactly match (case sensitive) the\ninput string. This is the default.\n\n* `regexp` - the pattern treated as a regular expression against\nwhich the input string is tested. Crossplane will throw an error if the\nkey is not a valid regexp.";
@@ -2311,7 +2311,7 @@ let
         };
         "fallbackValue" = mkOption {
           description = "The fallback value that should be returned by the transform if now pattern\nmatches.";
-          type = (types.nullOr types.attrs);
+          type = (types.nullOr types.unspecified);
         };
         "patterns" = mkOption {
           description = "The patterns that should be tested against the input string.\nPatterns are tested in order. The value of the first match is used as\nresult of this transform.";
@@ -2345,7 +2345,7 @@ let
         };
         "result" = mkOption {
           description = "The value that is used as result of the transform if the pattern matches.";
-          type = types.attrs;
+          type = types.unspecified;
         };
         "type" = mkOption {
           description = "Type specifies how the pattern matches the input.\n\n* `literal` - the pattern value has to exactly match (case sensitive) the\ninput string. This is the default.\n\n* `regexp` - the pattern treated as a regular expression against\nwhich the input string is tested. Crossplane will throw an error if the\nkey is not a valid regexp.";
@@ -2880,7 +2880,7 @@ let
         };
         "fallbackValue" = mkOption {
           description = "The fallback value that should be returned by the transform if now pattern\nmatches.";
-          type = (types.nullOr types.attrs);
+          type = (types.nullOr types.unspecified);
         };
         "patterns" = mkOption {
           description = "The patterns that should be tested against the input string.\nPatterns are tested in order. The value of the first match is used as\nresult of this transform.";
@@ -2914,7 +2914,7 @@ let
         };
         "result" = mkOption {
           description = "The value that is used as result of the transform if the pattern matches.";
-          type = types.attrs;
+          type = types.unspecified;
         };
         "type" = mkOption {
           description = "Type specifies how the pattern matches the input.\n\n* `literal` - the pattern value has to exactly match (case sensitive) the\ninput string. This is the default.\n\n* `regexp` - the pattern treated as a regular expression against\nwhich the input string is tested. Crossplane will throw an error if the\nkey is not a valid regexp.";
@@ -3730,7 +3730,7 @@ let
         };
         "fallbackValue" = mkOption {
           description = "The fallback value that should be returned by the transform if now pattern\nmatches.";
-          type = (types.nullOr types.attrs);
+          type = (types.nullOr types.unspecified);
         };
         "patterns" = mkOption {
           description = "The patterns that should be tested against the input string.\nPatterns are tested in order. The value of the first match is used as\nresult of this transform.";
@@ -3765,7 +3765,7 @@ let
           };
           "result" = mkOption {
             description = "The value that is used as result of the transform if the pattern matches.";
-            type = types.attrs;
+            type = types.unspecified;
           };
           "type" = mkOption {
             description = "Type specifies how the pattern matches the input.\n\n* `literal` - the pattern value has to exactly match (case sensitive) the\ninput string. This is the default.\n\n* `regexp` - the pattern treated as a regular expression against\nwhich the input string is tested. Crossplane will throw an error if the\nkey is not a valid regexp.";
@@ -4313,7 +4313,7 @@ let
         };
         "fallbackValue" = mkOption {
           description = "The fallback value that should be returned by the transform if now pattern\nmatches.";
-          type = (types.nullOr types.attrs);
+          type = (types.nullOr types.unspecified);
         };
         "patterns" = mkOption {
           description = "The patterns that should be tested against the input string.\nPatterns are tested in order. The value of the first match is used as\nresult of this transform.";
@@ -4348,7 +4348,7 @@ let
           };
           "result" = mkOption {
             description = "The value that is used as result of the transform if the pattern matches.";
-            type = types.attrs;
+            type = types.unspecified;
           };
           "type" = mkOption {
             description = "Type specifies how the pattern matches the input.\n\n* `literal` - the pattern value has to exactly match (case sensitive) the\ninput string. This is the default.\n\n* `regexp` - the pattern treated as a regular expression against\nwhich the input string is tested. Crossplane will throw an error if the\nkey is not a valid regexp.";
