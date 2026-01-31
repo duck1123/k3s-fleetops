@@ -69,6 +69,12 @@ mkArgoApp { inherit config lib; } rec {
         default = "";
       };
     };
+
+    openvpnAdditionalArgs = mkOption {
+      description = mdDoc "Additional OpenVPN arguments (e.g., '--tls-timeout 120' to increase TLS handshake timeout)";
+      type = types.listOf types.str;
+      default = [ "--tls-timeout" "120" ];
+    };
   };
 
   extraResources = cfg: {
@@ -253,6 +259,10 @@ mkArgoApp { inherit config lib; } rec {
                       name = "${name}-control-server";
                       key = "password";
                     };
+                  } else null)
+                  (if cfg.openvpnAdditionalArgs != [] then {
+                    name = "OPENVPN_ADDITIONAL_ARGS";
+                    value = lib.concatStringsSep " " cfg.openvpnAdditionalArgs;
                   } else null)
                 ];
                 ports = [

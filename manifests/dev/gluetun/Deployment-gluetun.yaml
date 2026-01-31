@@ -81,6 +81,8 @@ spec:
                 secretKeyRef:
                   key: password
                   name: gluetun-control-server
+            - name: OPENVPN_ADDITIONAL_ARGS
+              value: --tls-timeout 120
           image: qmcgaw/gluetun:latest
           imagePullPolicy: IfNotPresent
           livenessProbe:
