@@ -662,6 +662,10 @@ in
 
       enable = true;
 
+      # Use a specific stable version to avoid v6.0.4.10291 DryIoc bug
+      # Version 5.22.4.9896-ls272 is a known stable release
+      image = "linuxserver/radarr:5.22.4.9896-ls272";
+
       ingress = {
         domain = "radarr.${tail-domain}";
         ingressClassName = "tailscale";

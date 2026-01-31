@@ -34,7 +34,7 @@ spec:
               value: http://gluetun.gluetun:8888
             - name: NO_PROXY
               value: localhost,127.0.0.1,.svc,.svc.cluster.local,sabnzbd.sabnzbd,sabnzbd.sabnzbd.svc.cluster.local
-          image: linuxserver/radarr:latest
+          image: linuxserver/radarr:5.22.4.9896-ls272
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3
