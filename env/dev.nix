@@ -619,7 +619,7 @@ in
         password = secrets.postgresql.userPassword;
       };
 
-      enable = true;
+      enable = false;
 
       ingress = {
         domain = "prowlarr.${tail-domain}";
@@ -851,7 +851,7 @@ in
         password = secrets.postgresql.userPassword;
       };
 
-      enable = true;
+      enable = false;
 
       ingress = {
         domain = "whisparr.${tail-domain}";

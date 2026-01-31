@@ -37,7 +37,6 @@
         flake-utils.follows = "flake-utils";
         nix-kube-generators.follows = "nix-kube-generators";
         nixpkgs.follows = "nixpkgs";
-        poetry2nix.follows = "poetry2nix";
       };
       url = "github:farcaller/nixhelm";
     };
@@ -54,15 +53,6 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
     nixpkgs-lib.url = "github:nix-community/nixpkgs.lib";
-
-    poetry2nix = {
-      inputs = {
-        flake-utils.follows = "flake-utils";
-        nixpkgs.follows = "nixpkgs";
-        systems.follows = "systems";
-      };
-      url = "github:nix-community/poetry2nix";
-    };
 
     sops-nix = {
       inputs.nixpkgs.follows = "nixpkgs";
