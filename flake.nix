@@ -70,11 +70,11 @@
       make-shell,
       nixhelm,
       nixidy,
+      self,
       ...
     }@inputs:
     let
-      # FIXME: naughty config
-      ageRecipients = "age1n372e8dgautnjhecllf7uvvldw9g6vyx3kggj0kyduz5jr2upvysue242c";
+      ageRecipients = (self.modules.common.ageRecipients {}).ageRecipients;
       lib = (import ./lib) // {
         inherit ageRecipients;
         sopsConfig = ./.sops.yaml;
