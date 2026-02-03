@@ -89,13 +89,8 @@
         ];
         systems = [ "x86_64-linux" ];
         perSystem =
-          { pkgs, system, ... }:
-          let
-            generators = import ./generators { inherit inputs system pkgs; };
-          in
+          { system, ... }:
           {
-            imports = [ generators ];
-            apps = { inherit (generators.apps) generate; };
             packages.nixidy = nixidy.packages.${system}.default;
           };
         flake = {
