@@ -123,6 +123,21 @@
         "type": "github"
       }
     },
+    "import-tree": {
+      "locked": {
+        "lastModified": 1763762820,
+        "narHash": "sha256-ZvYKbFib3AEwiNMLsejb/CWs/OL/srFQ8AogkebEPF0=",
+        "owner": "vic",
+        "repo": "import-tree",
+        "rev": "3c23749d8013ec6daa1d7255057590e9ca726646",
+        "type": "github"
+      },
+      "original": {
+        "owner": "vic",
+        "repo": "import-tree",
+        "type": "github"
+      }
+    },
     "make-shell": {
       "inputs": {
         "flake-compat": "flake-compat"
@@ -321,6 +336,7 @@
         "clj-nix": "clj-nix",
         "flake-parts": "flake-parts",
         "flake-utils": "flake-utils",
+        "import-tree": "import-tree",
         "make-shell": "make-shell",
         "nix-fetcher-data": "nix-fetcher-data",
         "nix-kube-generators": "nix-kube-generators",

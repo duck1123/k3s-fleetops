@@ -20,6 +20,8 @@
       url = "github:numtide/flake-utils";
     };
 
+    import-tree.url = "github:vic/import-tree";
+
     make-shell.url = "github:nicknovitski/make-shell";
 
     nix-fetcher-data = {
@@ -83,6 +85,7 @@
       {
         imports = [
           make-shell.flakeModules.default
+          (inputs.import-tree ./modules)
         ];
         systems = [ "x86_64-linux" ];
         perSystem =
