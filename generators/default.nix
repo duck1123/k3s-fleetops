@@ -21,32 +21,32 @@ in
         set -eo pipefail
 
         echo "generate cert-manager"
-        mkdir -p modules/cert-manager
-        cat ${generators.cert-manager} > modules/cert-manager/generated.nix
+        mkdir -p applications/cert-manager
+        cat ${generators.cert-manager} > applications/cert-manager/generated.nix
 
         echo "generate cilium"
-        mkdir -p modules/cilium
-        cat ${generators.cilium} > modules/cilium/generated.nix
+        mkdir -p applications/cilium
+        cat ${generators.cilium} > applications/cilium/generated.nix
 
         echo "generate crossplane"
-        mkdir -p modules/crossplane
-        cat ${generators.crossplane} > modules/crossplane/generated.nix
+        mkdir -p applications/crossplane
+        cat ${generators.crossplane} > applications/crossplane/generated.nix
 
         echo "generate sealed-secrets"
-        mkdir -p modules/sealed-secrets
-        cat ${generators.sealed-secrets} > modules/sealed-secrets/generated.nix
+        mkdir -p applications/sealed-secrets
+        cat ${generators.sealed-secrets} > applications/sealed-secrets/generated.nix
 
         echo "generate sops"
-        mkdir -p modules/sops
-        cat ${generators.sops} > modules/sops/generated.nix
+        mkdir -p applications/sops
+        cat ${generators.sops} > applications/sops/generated.nix
 
         echo "generate tailscale"
-        mkdir -p modules/tailscale
-        cat ${generators.tailscale} > modules/tailscale/generated.nix
+        mkdir -p applications/tailscale
+        cat ${generators.tailscale} > applications/tailscale/generated.nix
 
         echo "generate traefik"
-        mkdir -p modules/traefik
-        cat ${generators.traefik} > modules/traefik/generated.nix
+        mkdir -p applications/traefik
+        cat ${generators.traefik} > applications/traefik/generated.nix
       '').outPath;
   };
 }

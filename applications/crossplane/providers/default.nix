@@ -1,6 +1,6 @@
 { lib, ... }:
 let
-  # providersDir = ./modules/crossplane/providers;
+  # providersDir = ./applications/crossplane/providers;
   providersDir = ./.;
 
   # Get all directories inside `providers/`

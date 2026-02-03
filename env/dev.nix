@@ -41,10 +41,10 @@ in
   };
 
   services = {
-    # ../modules/adventureworks/default.nix
+    # ../applications/adventureworks/default.nix
     adventureworks.enable = false;
 
-    # ../modules/airflow/default.nix
+    # ../applications/airflow/default.nix
     airflow = {
       enable = false;
 
@@ -54,10 +54,10 @@ in
       };
     };
 
-    # ../modules/alice-bitcoin/default.nix
+    # ../applications/alice-bitcoin/default.nix
     alice-bitcoin.enable = false;
 
-    # ../modules/alice-lnd/default.nix
+    # ../applications/alice-lnd/default.nix
     alice-lnd =
       let
         user-env = "alice";
@@ -69,10 +69,10 @@ in
         ingress.domain = "lnd-${user-env}.dinsro.com";
       };
 
-    # ../modules/argocd/default.nix
+    # ../applications/argocd/default.nix
     argocd.enable = true;
 
-    # ../modules/argo-workflows/default.nix
+    # ../applications/argo-workflows/default.nix
     argo-workflows = {
       enable = false;
 
@@ -82,7 +82,7 @@ in
       };
     };
 
-    # ../modules/authentik/default.nix
+    # ../applications/authentik/default.nix
     authentik = {
       inherit (secrets.authentik) secret-key;
       enable = false;
@@ -103,7 +103,7 @@ in
       };
     };
 
-    # ../modules/booklore/default.nix
+    # ../applications/booklore/default.nix
     booklore = {
       enable = false;
 
@@ -139,7 +139,7 @@ in
       uid = "0";
     };
 
-    # ../modules/calibre/default.nix
+    # ../applications/calibre/default.nix
     calibre = {
       enable = false;
 
@@ -154,10 +154,10 @@ in
 
     cert-manager.enable = true;
 
-    # ../modules/amd-gpu-device-plugin/default.nix
+    # ../applications/amd-gpu-device-plugin/default.nix
     amd-gpu-device-plugin.enable = true;
 
-    # ../modules/cloudbeaver/default.nix
+    # ../applications/cloudbeaver/default.nix
     cloudbeaver = {
       enable = true;
 
@@ -170,13 +170,13 @@ in
       storageClass = "longhorn";
     };
 
-    # ../modules/crossplane/default.nix
+    # ../applications/crossplane/default.nix
     crossplane = {
       enable = false;
       providers.digital-ocean.enable = false;
     };
 
-    # ../modules/dinsro/default.nix
+    # ../applications/dinsro/default.nix
     dinsro = {
       enable = false;
 
@@ -187,7 +187,7 @@ in
       };
     };
 
-    # ../modules/dozzle/default.nix
+    # ../applications/dozzle/default.nix
     dozzle = {
       enable = false;
 
@@ -198,7 +198,7 @@ in
       };
     };
 
-    # ../modules/ersatztv/default.nix
+    # ../applications/ersatztv/default.nix
     ersatztv = {
       enable = true;
       # logLevel = "Debug";
@@ -218,7 +218,7 @@ in
       sharedGPU = true; # Enable shared GPU mode (mount /dev/dri for time-sharing)
     };
 
-    # ../modules/gluetun/default.nix
+    # ../applications/gluetun/default.nix
     gluetun = {
       controlServer = { inherit (secrets.gluetun) password username; };
       enable = true;
@@ -226,7 +226,7 @@ in
       storageClassName = "longhorn";
     };
 
-    # ../modules/forgejo/default.nix
+    # ../applications/forgejo/default.nix
     forgejo = {
       admin = { inherit (secrets.forgejo.admin) password username; };
       enable = false;
@@ -248,7 +248,7 @@ in
       storageClass = "longhorn";
     };
 
-    # ../modules/grafana/default.nix
+    # ../applications/grafana/default.nix
     grafana = {
       enable = true;
 
@@ -261,7 +261,7 @@ in
       };
     };
 
-    # ../modules/prometheus/default.nix
+    # ../applications/prometheus/default.nix
     prometheus = {
       enable = true;
 
@@ -295,7 +295,7 @@ in
       enable = false;
     };
 
-    # ../modules/homer/default.nix
+    # ../applications/homer/default.nix
     homer = {
       codeserver.ingress = {
         domain = "codeserver.${tail-domain}";
@@ -310,7 +310,7 @@ in
       };
     };
 
-    # ../modules/immich/default.nix
+    # ../applications/immich/default.nix
     immich = {
       enable = false;
 
@@ -343,7 +343,7 @@ in
       storageClassName = "longhorn";
     };
 
-    # ../modules/jupyterhub/default.nix
+    # ../applications/jupyterhub/default.nix
     jupyterhub = {
       enable = false;
       inherit (secrets.jupyterhub)
@@ -363,7 +363,7 @@ in
       postgresql = { inherit (secrets.jupyterhub.postgresql) adminPassword; };
     };
 
-    # ../modules/kavita/default.nix
+    # ../applications/kavita/default.nix
     kavita = {
       enable = false;
 
@@ -384,7 +384,7 @@ in
       };
     };
 
-    # ../modules/kite/default.nix
+    # ../applications/kite/default.nix
     kite = {
       enable = true;
       inherit (secrets.kite) encryptKey jwtSecret;
@@ -397,10 +397,10 @@ in
       };
     };
 
-    # ../modules/kyverno/default.nix
+    # ../applications/kyverno/default.nix
     kyverno.enable = false;
 
-    # ../modules/lidarr/default.nix
+    # ../applications/lidarr/default.nix
     lidarr = {
       enable = false;
 
@@ -434,10 +434,10 @@ in
       storageClassName = "longhorn";
     };
 
-    # ../modules/lldap/default.nix
+    # ../applications/lldap/default.nix
     lldap.enable = false;
 
-    # ../modules/longhorn/default.nix
+    # ../applications/longhorn/default.nix
     longhorn = {
       enable = true;
 
@@ -448,7 +448,7 @@ in
       };
     };
 
-    # ../modules/mariadb/default.nix
+    # ../applications/mariadb/default.nix
     mariadb = {
       auth = {
         inherit (secrets.mariadb)
@@ -483,7 +483,7 @@ in
       enable = false;
     };
 
-    # ../modules/memos/default.nix
+    # ../applications/memos/default.nix
     memos = {
       enable = false;
 
@@ -493,7 +493,7 @@ in
       };
     };
 
-    # ../modules/metabase/default.nix
+    # ../applications/metabase/default.nix
     metabase = {
       enable = false;
 
@@ -503,7 +503,7 @@ in
       };
     };
 
-    # ../modules/mindsdb/default.nix
+    # ../applications/mindsdb/default.nix
     mindsdb = {
       enable = false;
 
@@ -513,7 +513,7 @@ in
       };
     };
 
-    # ../modules/minio/default.nix
+    # ../applications/minio/default.nix
     minio = {
       enable = false;
 
@@ -528,10 +528,10 @@ in
       values.defaultBuckets = "my-default-bucket";
     };
 
-    # ../modules/mssql/default.nix
+    # ../applications/mssql/default.nix
     mssql.enable = false;
 
-    # ../modules/n8n/default.nix
+    # ../applications/n8n/default.nix
     n8n = {
       enable = false;
 
@@ -541,7 +541,7 @@ in
       };
     };
 
-    # ../modules/nocodb/default.nix
+    # ../applications/nocodb/default.nix
     nocodb = {
       enable = false;
 
@@ -573,7 +573,7 @@ in
       };
     };
 
-    # ../modules/pihole/default.nix
+    # ../applications/pihole/default.nix
     pihole = {
       enable = false;
 
@@ -585,7 +585,7 @@ in
       };
     };
 
-    # ../modules/postgresql/default.nix
+    # ../applications/postgresql/default.nix
     postgresql = {
       auth = {
         inherit (secrets.postgresql)
@@ -608,7 +608,7 @@ in
       ];
     };
 
-    # ../modules/prowlarr/default.nix
+    # ../applications/prowlarr/default.nix
     prowlarr = {
       database = {
         enable = true;
@@ -630,7 +630,7 @@ in
       replicas = 0;
     };
 
-    # ../modules/qbittorrent/default.nix
+    # ../applications/qbittorrent/default.nix
     qbittorrent = {
       enable = false;
 
@@ -649,7 +649,7 @@ in
       webui = { inherit (secrets.qbittorrent) password username; };
     };
 
-    # ../modules/radarr/default.nix
+    # ../applications/radarr/default.nix
     radarr = {
       database = {
         enable = false;
@@ -682,13 +682,13 @@ in
       storageClassName = "longhorn";
     };
 
-    # ../modules/redis/default.nix
+    # ../applications/redis/default.nix
     redis = {
       enable = true;
       password = secrets.redis.password;
     };
 
-    # ../modules/romm/default.nix
+    # ../applications/romm/default.nix
     romm = {
       enable = false;
 
@@ -728,10 +728,10 @@ in
       };
     };
 
-    # ../modules/satisfactory/default.nix
+    # ../applications/satisfactory/default.nix
     satisfactory.enable = false;
 
-    # ../modules/sabnzbd/default.nix
+    # ../applications/sabnzbd/default.nix
     sabnzbd = {
       enable = true;
 
@@ -750,10 +750,10 @@ in
       replicas = 1;
     };
 
-    # ../modules/sealed-secrets/default.nix
+    # ../applications/sealed-secrets/default.nix
     sealed-secrets.enable = true;
 
-    # ../modules/sonarr/default.nix
+    # ../applications/sonarr/default.nix
     sonarr = {
       database = {
         enable = true;
@@ -781,10 +781,10 @@ in
       replicas = 1;
     };
 
-    # ../modules/sops/default.nix
+    # ../applications/sops/default.nix
     sops.enable = true;
 
-    # ../modules/spark/default.nix
+    # ../applications/spark/default.nix
     spark = {
       enable = false;
 
@@ -795,7 +795,7 @@ in
       };
     };
 
-    # ../modules/specter/default.nix
+    # ../applications/specter/default.nix
     specter = {
       enable = false;
 
@@ -823,7 +823,7 @@ in
 
     traefik.enable = true;
 
-    # ../modules/stashapp/default.nix
+    # ../applications/stashapp/default.nix
     stashapp = {
       enable = true;
 
@@ -844,7 +844,7 @@ in
       sharedGPU = true; # Enable shared GPU mode (mount /dev/dri for time-sharing)
     };
 
-    # ../modules/whisparr/default.nix
+    # ../applications/whisparr/default.nix
     whisparr = {
       database = {
         enable = true;

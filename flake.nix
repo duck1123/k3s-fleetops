@@ -141,7 +141,7 @@
                     extraSpecialArgs = { inherit ageRecipients; };
                     envs.dev.modules = [ dev ];
                     libOverlay = final: prev: lib;
-                    modules = [ ./modules ];
+                    modules = [ ./applications ];
                   };
                 in
                 defaultEnv
