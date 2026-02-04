@@ -660,7 +660,7 @@ in
         password = secrets.postgresql.userPassword;
       };
 
-      enable = true;
+      enable = false;
 
       # Use a specific stable version to avoid v6.0.4.10291 DryIoc bug
       # Version 5.22.4.9896-ls272 is a known stable release
