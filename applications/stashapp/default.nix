@@ -68,21 +68,9 @@ mkArgoApp { inherit config lib; } rec {
     };
 
     enableGPU = mkOption {
-      description = mdDoc "Enable GPU support for hardware encoding";
-      type = types.bool;
-      default = true;
-    };
-
-    sharedGPU = mkOption {
-      description = mdDoc "Enable shared GPU mode (mount /dev/dri without resource allocation for time-sharing)";
+      description = mdDoc "Enable shared GPU for hardware encoding (mounts /dev/dri)";
       type = types.bool;
       default = false;
-    };
-
-    nodeSelector = mkOption {
-      description = mdDoc "Node selector for GPU-enabled nodes";
-      type = types.nullOr types.str;
-      default = "edgenix";
     };
   };
 
@@ -111,11 +99,7 @@ mkArgoApp { inherit config lib; } rec {
             spec = {
               automountServiceAccountToken = true;
               serviceAccountName = "default";
-            } // (lib.optionalAttrs ((cfg.enableGPU || cfg.sharedGPU) && cfg.nodeSelector != null) {
-              nodeSelector = {
-                "kubernetes.io/hostname" = cfg.nodeSelector;
-              };
-            }) // {
+            } // {
               containers = [
                 ({
                   inherit name;
@@ -183,22 +167,13 @@ mkArgoApp { inherit config lib; } rec {
                       mountPath = "/data";
                       name = "data";
                     }
-                  ] ++ (lib.optionalAttrs (cfg.enableGPU || cfg.sharedGPU) [
+                  ] ++ (lib.optionalAttrs cfg.enableGPU [
                     {
                       mountPath = "/dev/dri";
                       name = "dri";
                     }
                   ]);
-                } // (lib.optionalAttrs (cfg.enableGPU && !cfg.sharedGPU) {
-                  resources = {
-                    limits = {
-                      "amd.com/gpu" = 1;
-                    };
-                    requests = {
-                      "amd.com/gpu" = 1;
-                    };
-                  };
-                }) // (lib.optionalAttrs (cfg.enableGPU || cfg.sharedGPU) {
+                } // (lib.optionalAttrs cfg.enableGPU {
                   securityContext = {
                     privileged = false;
                     capabilities = {
@@ -216,7 +191,7 @@ mkArgoApp { inherit config lib; } rec {
                   name = "data";
                   persistentVolumeClaim.claimName = "${name}-${name}-data";
                 }
-              ] ++ (lib.optionalAttrs (cfg.enableGPU || cfg.sharedGPU) [
+              ] ++ (lib.optionalAttrs cfg.enableGPU [
                 {
                   name = "dri";
                   hostPath = {

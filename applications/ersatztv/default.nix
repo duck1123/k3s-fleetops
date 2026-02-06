@@ -56,13 +56,7 @@ mkArgoApp { inherit config lib; } rec {
     };
 
     enableGPU = mkOption {
-      description = mdDoc "Enable GPU support with exclusive resource allocation";
-      type = types.bool;
-      default = true;
-    };
-
-    sharedGPU = mkOption {
-      description = mdDoc "Enable shared GPU mode (mount /dev/dri without resource allocation for time-sharing)";
+      description = mdDoc "Enable shared GPU for hardware encoding (mounts /dev/dri)";
       type = types.bool;
       default = false;
     };
@@ -108,95 +102,90 @@ mkArgoApp { inherit config lib; } rec {
                   }
                 ];
               }];
-              containers = [({
-                inherit name;
-                image = cfg.image;
-                imagePullPolicy = "IfNotPresent";
-                env = [
-                  {
-                    name = "TZ";
-                    value = cfg.tz;
-                  }
-                  {
-                    name = "ERSATZTV_PORT";
-                    value = "${toString cfg.service.port}";
-                  }
-                  {
-                    name = "ASPNETCORE_ENVIRONMENT";
-                    value = "Production";
-                  }
-                  {
-                    name = "ASPNETCORE_URLS";
-                    value = "http://0.0.0.0:${toString cfg.service.port}";
-                  }
-                  {
-                    name = "Logging__LogLevel__Default";
-                    value = cfg.logLevel;
-                  }
-                ];
 
-                # livenessProbe = {
-                #   failureThreshold = 3;
-                #   initialDelaySeconds = 120;
-                #   periodSeconds = 30;
-                #   httpGet = {
-                #     path = "/";
-                #     port = cfg.service.port;
-                #   };
-                # };
+              containers = [
+                {
+                  inherit name;
+                  image = cfg.image;
+                  imagePullPolicy = "IfNotPresent";
+                  env = [
+                    {
+                      name = "TZ";
+                      value = cfg.tz;
+                    }
+                    {
+                      name = "ERSATZTV_PORT";
+                      value = "${toString cfg.service.port}";
+                    }
+                    {
+                      name = "ASPNETCORE_ENVIRONMENT";
+                      value = "Production";
+                    }
+                    {
+                      name = "ASPNETCORE_URLS";
+                      value = "http://0.0.0.0:${toString cfg.service.port}";
+                    }
+                    {
+                      name = "Logging__LogLevel__Default";
+                      value = cfg.logLevel;
+                    }
+                  ];
 
-                # readinessProbe = {
-                #   failureThreshold = 30;
-                #   initialDelaySeconds = 60;
-                #   periodSeconds = 10;
-                #   httpGet = {
-                #     path = "/";
-                #     port = cfg.service.port;
-                #   };
-                # };
+                  # livenessProbe = {
+                  #   failureThreshold = 3;
+                  #   initialDelaySeconds = 120;
+                  #   periodSeconds = 30;
+                  #   httpGet = {
+                  #     path = "/";
+                  #     port = cfg.service.port;
+                  #   };
+                  # };
 
-                ports = [{
-                  containerPort = cfg.service.port;
-                  name = "http";
-                  protocol = "TCP";
-                }];
+                  # readinessProbe = {
+                  #   failureThreshold = 30;
+                  #   initialDelaySeconds = 60;
+                  #   periodSeconds = 10;
+                  #   httpGet = {
+                  #     path = "/";
+                  #     port = cfg.service.port;
+                  #   };
+                  # };
 
-                securityContext = {
-                  privileged = false;
-                  capabilities = {
-                    add = [ "SYS_ADMIN" ];
-                  };
-                };
+                  ports = [{
+                    containerPort = cfg.service.port;
+                    name = "http";
+                    protocol = "TCP";
+                  }];
 
-                volumeMounts = [
-                  {
-                    mountPath = "/config";
-                    name = "config";
-                  }
-                  {
-                    mountPath = "/media";
-                    name = "media";
-                  }
-                  {
-                    mountPath = "/app/data";
-                    name = "data";
-                  }
-                ] ++ (lib.optionalAttrs (cfg.enableGPU || cfg.sharedGPU) [
-                  {
-                    mountPath = "/dev/dri";
-                    name = "dri";
-                  }
-                ]);
-              } // (lib.optionalAttrs (cfg.enableGPU && !cfg.sharedGPU) {
-                resources = {
-                  limits = {
-                    "amd.com/gpu" = 1;
-                  };
-                  requests = {
-                    "amd.com/gpu" = 1;
-                  };
-                };
-              }))];
+                  securityContext = {
+                    privileged = false;
+                  } // (lib.optionalAttrs cfg.enableGPU {
+                    capabilities = {
+                      add = [ "SYS_ADMIN" ];
+                    };
+                  });
+
+                  volumeMounts = [
+                    {
+                      mountPath = "/config";
+                      name = "config";
+                    }
+                    {
+                      mountPath = "/media";
+                      name = "media";
+                    }
+                    {
+                      mountPath = "/app/data";
+                      name = "data";
+                    }
+                  ] ++ (lib.optionalAttrs cfg.enableGPU [
+                    {
+                      mountPath = "/dev/dri";
+                      name = "dri";
+                    }
+                  ]);
+                }
+              ];
               volumes = [
                 {
                   name = "config";
@@ -210,7 +199,7 @@ mkArgoApp { inherit config lib; } rec {
                   name = "media";
                   persistentVolumeClaim.claimName = "${name}-${name}-media";
                 }
-              ] ++ (lib.optionalAttrs (cfg.enableGPU || cfg.sharedGPU) [
+              ] ++ (lib.optionalAttrs cfg.enableGPU [
                 {
                   name = "dri";
                   hostPath = {

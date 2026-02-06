@@ -154,9 +154,6 @@ in
 
     cert-manager.enable = true;
 
-    # ../applications/amd-gpu-device-plugin/default.nix
-    amd-gpu-device-plugin.enable = true;
-
     # ../applications/cloudbeaver/default.nix
     cloudbeaver = {
       enable = true;
@@ -214,8 +211,7 @@ in
         path = "${nas-base}/Videos";
       };
 
-      enableGPU = false; # Don't request exclusive GPU resource
-      sharedGPU = true; # Enable shared GPU mode (mount /dev/dri for time-sharing)
+      enableGPU = true;
     };
 
     # ../applications/gluetun/default.nix
@@ -840,8 +836,7 @@ in
       };
 
       replicas = 1;
-      enableGPU = false; # Don't request exclusive GPU resource
-      sharedGPU = true; # Enable shared GPU mode (mount /dev/dri for time-sharing)
+      enableGPU = true;
     };
 
     # ../applications/whisparr/default.nix
