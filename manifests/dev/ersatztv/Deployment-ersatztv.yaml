@@ -65,7 +65,7 @@ spec:
             - mountPath: /app/data
               name: data
       nodeSelector:
-        kubernetes.io/hostname: powerspecnix
+        kubernetes.io/hostname: edgenix
       serviceAccountName: default
       volumes:
         - name: config

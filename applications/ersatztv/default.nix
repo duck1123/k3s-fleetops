@@ -93,7 +93,7 @@ mkArgoApp { inherit config lib; } rec {
               automountServiceAccountToken = true;
               serviceAccountName = "default";
               nodeSelector = {
-                "kubernetes.io/hostname" = "powerspecnix";
+                "kubernetes.io/hostname" = "edgenix";
               };
               initContainers = [{
                 name = "db-init";

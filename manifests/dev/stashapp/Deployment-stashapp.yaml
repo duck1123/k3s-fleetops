@@ -72,7 +72,7 @@ spec:
             - mountPath: /dev/dri
               name: dri
       nodeSelector:
-        kubernetes.io/hostname: powerspecnix
+        kubernetes.io/hostname: edgenix
       serviceAccountName: default
       volumes:
         - name: config

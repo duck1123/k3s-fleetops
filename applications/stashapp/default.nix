@@ -82,7 +82,7 @@ mkArgoApp { inherit config lib; } rec {
     nodeSelector = mkOption {
       description = mdDoc "Node selector for GPU-enabled nodes";
       type = types.nullOr types.str;
-      default = "powerspecnix";
+      default = "edgenix";
     };
   };
 
@@ -309,4 +309,3 @@ mkArgoApp { inherit config lib; } rec {
     };
   };
 }
-
