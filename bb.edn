@@ -67,7 +67,7 @@
 
   format
   {:doc  "format code"
-   :task (shell "sh -c \"nixfmt **/*.nix\"")}
+   :task (shell "find . -name '*.nix' -exec nixfmt {} +")}
 
   forward-argocd
   {:doc  "Forward the argocd port"
