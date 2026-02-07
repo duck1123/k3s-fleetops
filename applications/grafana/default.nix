@@ -41,8 +41,9 @@ self.lib.mkArgoApp { inherit config lib; } {
       ++ (cfg.additionalDashboardProviders or [ ]);
     };
 
+    # Provision dashboards
     dashboards = lib.recursiveUpdate {
-      default.system-performance-nfs.json = builtins.readFile ./dashboards/system-performance.json;
+      # default.system-performance-nfs.json = builtins.readFile ./dashboards/system-performance.json;
     } (cfg.additionalDashboards or { });
 
     datasources."datasources.yaml" = {
@@ -86,6 +87,30 @@ self.lib.mkArgoApp { inherit config lib; } {
       storageClassName = cfg.storageClassName;
     };
 
+    # Admin credentials - use existing SOPS secret instead of creating one
+    admin = {
+      existingSecret = grafana-secret;
+      userKey = "admin-user";
+      passwordKey = "admin-password";
+    };
+
+    # Configure datasources via provisioning
+    datasources = {
+      "datasources.yaml" = {
+        apiVersion = 1;
+        datasources = cfg.additionalDatasources or [ ];
+      };
+    };
+
+    # Configure dashboards
+    dashboardProviders = {
+      "dashboardproviders.yaml" = {
+        apiVersion = 1;
+        providers = cfg.additionalDashboardProviders or [ ];
+      };
+    };
+
+    # Resource limits
     resources = {
       requests = {
         cpu = "100m";
@@ -97,6 +122,8 @@ self.lib.mkArgoApp { inherit config lib; } {
       };
     };
 
+    # Security settings for Tailscale proxy
+    # Grafana Helm chart expects ini file sections as nested maps
     grafana.ini =
       lib.recursiveUpdate
         {
