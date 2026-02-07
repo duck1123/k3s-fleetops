@@ -32,8 +32,8 @@ mkArgoApp { inherit config lib; } {
     host = ingress.domain;
 
     ingress = with cfg.ingress; {
-      enabled = enable;
       className = ingressClassName;
+      enabled = enable;
       hosts = [{
         host = domain;
         paths = [{
@@ -44,9 +44,6 @@ mkArgoApp { inherit config lib; } {
       tls = [{ hosts = [ domain ]; }];
     };
 
-    # Run on edgenix node only
-    nodeSelector = {
-      "kubernetes.io/hostname" = "edgenix";
-    };
+    nodeSelector."kubernetes.io/hostname" = cfg.hostAffinity;
   };
 }

@@ -157,6 +157,7 @@ in
     # ../applications/cloudbeaver/default.nix
     cloudbeaver = {
       enable = true;
+      hostAffinity = "edgenix";
 
       ingress = {
         domain = "cloudbeaver.${tail-domain}";
@@ -199,6 +200,8 @@ in
     ersatztv = {
       enable = true;
       # logLevel = "Debug";
+      hostAffinity = "edgenix";
+
       ingress = {
         domain = "ersatztv.${tail-domain}";
         ingressClassName = "tailscale";
@@ -218,6 +221,7 @@ in
     gluetun = {
       controlServer = { inherit (secrets.gluetun) password username; };
       enable = true;
+      hostAffinity = "edgenix";
       mullvadAccountNumber = secrets.mullvad.id;
       storageClassName = "longhorn";
     };
@@ -246,9 +250,9 @@ in
 
     # ../applications/grafana/default.nix
     grafana = {
-      enable = true;
-
       adminPassword = secrets.grafana.password or "";
+      enable = true;
+      hostAffinity = "edgenix";
 
       ingress = {
         clusterIssuer = "tailscale";
@@ -260,6 +264,7 @@ in
     # ../applications/prometheus/default.nix
     prometheus = {
       enable = true;
+      hostAffinity = "edgenix";
 
       # Additional scrape configs for monitoring other hosts
       # Example format (uncomment and modify as needed):
@@ -382,8 +387,9 @@ in
 
     # ../applications/kite/default.nix
     kite = {
-      enable = true;
       inherit (secrets.kite) encryptKey jwtSecret;
+      enable = true;
+      hostAffinity = "edgenix";
 
       ingress = {
         domain = "kite.${tail-domain}";
@@ -457,6 +463,7 @@ in
       };
 
       enable = true;
+      hostAffinity = "edgenix";
       storageClass = "longhorn";
 
       extraDatabases = [
@@ -482,6 +489,7 @@ in
     # ../applications/memos/default.nix
     memos = {
       enable = false;
+      hostAffinity = "edgenix";
 
       ingress = {
         domain = "memos.${tail-domain}";
@@ -593,6 +601,7 @@ in
       };
 
       enable = true;
+      hostAffinity = "edgenix";
       storageClass = "longhorn";
 
       extraDatabases = arrDatabases [
@@ -616,6 +625,7 @@ in
       };
 
       enable = false;
+      hostAffinity = "edgenix";
 
       ingress = {
         domain = "prowlarr.${tail-domain}";
@@ -730,6 +740,7 @@ in
     # ../applications/sabnzbd/default.nix
     sabnzbd = {
       enable = true;
+      hostAffinity = "edgenix";
 
       ingress = {
         domain = "sabnzbd.${tail-domain}";
@@ -761,6 +772,7 @@ in
       };
 
       enable = true;
+      hostAffinity = "edgenix";
 
       ingress = {
         domain = "sonarr.${tail-domain}";

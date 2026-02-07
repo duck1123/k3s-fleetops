@@ -107,8 +107,6 @@ in mkArgoApp { inherit config lib; } rec {
       database = cfg.auth.database;
     };
 
-    primary.persistence.storageClass = cfg.storageClass;
-
     # Add initdb scripts for extra databases
     initdbScripts = lib.listToAttrs (map
       (db: {
@@ -122,10 +120,8 @@ in mkArgoApp { inherit config lib; } rec {
       })
       cfg.extraDatabases);
 
-    # Run on edgenix node only
-    nodeSelector = {
-      "kubernetes.io/hostname" = "edgenix";
-    };
+    nodeSelector."kubernetes.io/hostname" = cfg.hostAffinity;
+    primary.persistence.storageClass = cfg.storageClass;
   };
 
   extraResources = cfg: {

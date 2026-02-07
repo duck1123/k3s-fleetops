@@ -10,60 +10,13 @@ in mkArgoApp { inherit config lib; } {
   uses-ingress = true;
 
   defaultValues = cfg: {
-    # Run Grafana on edgenix node
-    nodeSelector = {
-      "kubernetes.io/hostname" = "edgenix";
-    };
-
-    ingress = with cfg.ingress; {
-      inherit ingressClassName;
-
-      enabled = true;
-      hosts = [ domain ];
-
-      annotations = lib.optionalAttrs (clusterIssuer != "") {
-        "cert-manager.io/cluster-issuer" = clusterIssuer;
-      };
-
-      tls = [{
-        secretName = "grafana-tls";
-        hosts = [ domain ];
-      }];
-    };
-
-    persistence = {
-      enabled = true;
-      storageClassName = cfg.storageClassName;
-    };
-
-    # Admin credentials - use existing SOPS secret instead of creating one
     admin = {
       existingSecret = grafana-secret;
       userKey = "admin-user";
       passwordKey = "admin-password";
     };
 
-    # Configure datasources via provisioning
-    datasources = {
-      "datasources.yaml" = {
-        apiVersion = 1;
-        datasources = [
-          {
-            name = "Prometheus";
-            type = "prometheus";
-            access = "proxy";
-            url = "http://prometheus-kube-prometheus-prometheus.prometheus:9090";
-            isDefault = true;
-            editable = true;
-            jsonData.httpMethod = "POST";
-          }
-        ] ++ (cfg.additionalDatasources or [ ]);
-      };
-    };
-
-    # Configure dashboards
-    dashboardProviders = {
-      "dashboardproviders.yaml" = {
+    dashboardProviders."dashboardproviders.yaml" = {
         apiVersion = 1;
         providers = [
           {
@@ -77,14 +30,49 @@ in mkArgoApp { inherit config lib; } {
           }
         ] ++ (cfg.additionalDashboardProviders or [ ]);
       };
-    };
 
-    # Provision dashboards
-    dashboards = lib.recursiveUpdate {
+        dashboards = lib.recursiveUpdate {
       default.system-performance-nfs.json = builtins.readFile ./dashboards/system-performance.json;
     } (cfg.additionalDashboards or { });
 
-    # Resource limits
+    datasources."datasources.yaml" = {
+        apiVersion = 1;
+        datasources = [
+          {
+            name = "Prometheus";
+            type = "prometheus";
+            access = "proxy";
+            url = "http://prometheus-kube-prometheus-prometheus.prometheus:9090";
+            isDefault = true;
+            editable = true;
+            jsonData.httpMethod = "POST";
+          }
+        ] ++ (cfg.additionalDatasources or [ ]);
+      };
+
+    ingress = with cfg.ingress; {
+      inherit ingressClassName;
+
+      annotations = lib.optionalAttrs (clusterIssuer != "") {
+        "cert-manager.io/cluster-issuer" = clusterIssuer;
+      };
+
+      enabled = true;
+      hosts = [ domain ];
+
+      tls = [{
+        secretName = "grafana-tls";
+        hosts = [ domain ];
+      }];
+    };
+
+    nodeSelector."kubernetes.io/hostname" = cfg.hostAffinity;
+
+    persistence = {
+      enabled = true;
+      storageClassName = cfg.storageClassName;
+    };
+
     resources = {
       requests = {
         cpu = "100m";
@@ -96,15 +84,12 @@ in mkArgoApp { inherit config lib; } {
       };
     };
 
-    # Security settings for Tailscale proxy
     grafana.ini = lib.recursiveUpdate {
       server = {
         domain = cfg.ingress.domain;
         root_url = "https://${cfg.ingress.domain}";
       };
     } (lib.optionalAttrs (cfg.enableProxyAuth or false) {
-      # Enable proxy auth if using Tailscale proxy-to-grafana
-      # This allows authentication via Tailscale identity headers
       "auth.proxy" = {
         enabled = "true";
         header_name = "X-WebAuth-User";
@@ -176,13 +161,9 @@ in mkArgoApp { inherit config lib; } {
 
     additionalDashboards = mkOption {
       description = mdDoc "Dashboards to provision. Attribute set mapping folder names to dashboards (folder name -> dashboard file name -> dashboard JSON content)";
+      example.default."my-dashboard.json" = builtins.readFile ./path/to/dashboard.json;
       type = types.attrsOf (types.attrsOf types.str);
       default = { };
-      example = {
-        default = {
-          "my-dashboard.json" = builtins.readFile ./path/to/dashboard.json;
-        };
-      };
     };
   };
 

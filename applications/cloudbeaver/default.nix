@@ -35,14 +35,11 @@ mkArgoApp { inherit config lib; } {
       tls = true;
     };
 
+    nodeSelector."kubernetes.io/hostname" = cfg.hostAffinity;
+
     persistence = {
       inherit (cfg) storageClass;
       enabled = true;
-    };
-
-    # Run on edgenix node only
-    nodeSelector = {
-      "kubernetes.io/hostname" = "edgenix";
     };
   };
 }

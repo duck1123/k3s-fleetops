@@ -1,17 +1,12 @@
-{ charts, config, lib, ... }:
+{ config, lib, ... }:
 with lib;
 mkArgoApp { inherit config lib; } {
   name = "prometheus";
 
   extraAppConfig = cfg: {
-    # Use Server-Side Apply to avoid annotation size limits on large CRDs
-    # This prevents ArgoCD from storing large manifests in annotations
-    # Also use Replace=true as fallback for CRDs that still fail
     syncPolicy.finalSyncOpts = [ "ServerSideApply=true" "Replace=true" "CreateNamespace=true" ];
   };
 
-  # https://artifacthub.io/packages/helm/prometheus-community/kube-prometheus-stack
-  # Note: After first build, update chartHash with the actual hash from the build error
   chart = lib.helm.downloadHelmChart {
     repo = "https://prometheus-community.github.io/helm-charts";
     chart = "kube-prometheus-stack";
@@ -20,140 +15,81 @@ mkArgoApp { inherit config lib; } {
   };
 
   defaultValues = cfg: {
-    # Disable Grafana since we have a separate Grafana module
-    grafana.enabled = false;
+    alertmanager.alertmanagerSpec = {
+      nodeSelector."kubernetes.io/hostname" = cfg.hostAffinity;
 
-    # Prometheus configuration
-    prometheus = {
-      enabled = true;
-      prometheusSpec = {
-        # Run Prometheus on edgenix node
-        nodeSelector = {
-          "kubernetes.io/hostname" = "edgenix";
+      resources = {
+        limits = {
+          cpu = "500m";
+          memory = "512Mi";
         };
-
-        # Storage configuration
-        storageSpec = {
-          volumeClaimTemplate = {
-            spec = {
-              storageClassName = cfg.storageClassName;
-              accessModes = [ "ReadWriteOnce" ];
-              resources = {
-                requests = {
-                  storage = "50Gi";
-                };
-              };
-            };
-          };
+        requests = {
+          cpu = "100m";
+          memory = "128Mi";
         };
+      };
 
-        # Retention period
-        retention = "30d";
-
-        # Service monitor selector - scrape all ServiceMonitors
-        serviceMonitorSelector = { };
-        serviceMonitorSelectorNilUsesHelmValues = false;
-
-        # Pod monitor selector - scrape all PodMonitors
-        podMonitorSelector = { };
-        podMonitorSelectorNilUsesHelmValues = false;
-
-        # Additional scrape configs for node exporters on other hosts
-        additionalScrapeConfigs = cfg.additionalScrapeConfigs or [];
-
-        # Resource limits
-        resources = {
-          requests = {
-            cpu = "500m";
-            memory = "2Gi";
-          };
-          limits = {
-            cpu = "2000m";
-            memory = "4Gi";
-          };
-        };
+      storage.volumeClaimTemplate.spec = {
+        accessModes = [ "ReadWriteOnce" ];
+        resources.requests.storage = "10Gi";
+        storageClassName = cfg.storageClassName;
       };
     };
 
-    # Node Exporter - runs as DaemonSet on all nodes
+    defaultRules.create = true;
+    enabled = cfg.alertmanager.enabled or true;
+    grafana.enabled = false;
+    kubeStateMetrics.enabled = true;
+
     nodeExporter = {
       enabled = true;
-      # Node exporter runs on all nodes, not just edgenix
 
-      # Enable node metadata attachment and add hostname label
       serviceMonitor = {
-        # Attach node metadata to get node name
-        attachMetadata = {
-          node = true;
-        };
+        attachMetadata.node = true;
 
-        # Replace instance label with node hostname instead of IP:port
         relabelings = [
           {
-            # Replace instance label (IP:port) with node hostname
+            replacement = "$$1";
             sourceLabels = [ "__meta_kubernetes_pod_node_name" ];
             targetLabel = "instance";
-            replacement = "$$1";
           }
         ];
       };
     };
 
-    # Alertmanager configuration
-    alertmanager = {
-      enabled = cfg.alertmanager.enabled or true;
-      alertmanagerSpec = {
-        # Run Alertmanager on edgenix node
-        nodeSelector = {
-          "kubernetes.io/hostname" = "edgenix";
+    prometheus = {
+      enabled = true;
+      prometheusSpec = {
+        additionalScrapeConfigs = cfg.additionalScrapeConfigs or [];
+        nodeSelector."kubernetes.io/hostname" = cfg.hostAffinity;
+        podMonitorSelector = { };
+        podMonitorSelectorNilUsesHelmValues = false;
+        retention = "30d";
+        serviceMonitorSelector = { };
+        serviceMonitorSelectorNilUsesHelmValues = false;
+
+        storageSpec.volumeClaimTemplate.spec = {
+          accessModes = [ "ReadWriteOnce" ];
+          resources.requests.storage = "50Gi";
+          storageClassName = cfg.storageClassName;
         };
 
-        # Storage configuration
-        storage = {
-          volumeClaimTemplate = {
-            spec = {
-              storageClassName = cfg.storageClassName;
-              accessModes = [ "ReadWriteOnce" ];
-              resources = {
-                requests = {
-                  storage = "10Gi";
-                };
-              };
-            };
-          };
-        };
-
-        # Resource limits
         resources = {
-          requests = {
-            cpu = "100m";
-            memory = "128Mi";
-          };
           limits = {
+            cpu = "2000m";
+            memory = "4Gi";
+          };
+          requests = {
             cpu = "500m";
-            memory = "512Mi";
+            memory = "2Gi";
           };
         };
       };
     };
 
-    # Prometheus Operator
     prometheusOperator = {
       enabled = true;
-      # Run operator on edgenix node
-      nodeSelector = {
-        "kubernetes.io/hostname" = "edgenix";
-      };
-    };
-
-    # Kube-state-metrics
-    kubeStateMetrics = {
-      enabled = true;
-    };
-
-    # Default rules
-    defaultRules = {
-      create = true;
+      nodeSelector."kubernetes.io/hostname" = cfg.hostAffinity;
     };
   };
 

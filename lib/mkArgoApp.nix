@@ -87,6 +87,12 @@ let
       type = attrs;
     };
 
+    hostAffinity = mkOption {
+      description = mdDoc "The host to assign the node to";
+      type = nullOr types.str;
+      default = null;
+    };
+
     ingress = mkOption {
       apply =
         val:

@@ -191,30 +191,23 @@ in mkArgoApp { inherit config lib; } rec {
       tag = if lib.length tagParts > 1 then lib.last tagParts else "latest";
     in {
       image = { inherit registry repository tag; };
+      nodeSelector."kubernetes.io/hostname" = cfg.hostAffinity;
 
-      settings = {
-        existingSecret = password-secret;
-        superuserPassword.secretKey = "adminPassword";
-      };
-
-      # Enable persistence with PVC
       persistence = {
         enabled = cfg.persistenceEnabled;
         size = cfg.persistenceSize;
         storageClass = cfg.storageClass;
       };
 
-      # Also set storage.className for compatibility
+      settings = {
+        existingSecret = password-secret;
+        superuserPassword.secretKey = "adminPassword";
+      };
+
       storage = {
         className = cfg.storageClass;
         size = cfg.persistenceSize;
       };
-
-      # Run on edgenix node only
-      nodeSelector = {
-        "kubernetes.io/hostname" = "edgenix";
-      };
-
     };
 
   extraResources = cfg: {

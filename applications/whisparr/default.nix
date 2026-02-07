@@ -162,10 +162,9 @@ in mkArgoApp { inherit config lib; } rec {
 
             spec = {
               automountServiceAccountToken = true;
+              nodeSelector."kubernetes.io/hostname" = cfg.hostAffinity;
               serviceAccountName = "default";
-              nodeSelector = {
-                "kubernetes.io/hostname" = "edgenix";
-              };
+
               initContainers = (lib.optionalAttrs cfg.vpn.enable
                 (lib.waitForGluetun { inherit lib; } cfg.vpn.sharedGluetunService)) ++ [
                 {
@@ -446,4 +445,3 @@ in mkArgoApp { inherit config lib; } rec {
 
   };
 }
-

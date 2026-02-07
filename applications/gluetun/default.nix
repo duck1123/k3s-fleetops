@@ -100,41 +100,7 @@ mkArgoApp { inherit config lib; } rec {
 
             spec = {
               automountServiceAccountToken = true;
-              serviceAccountName = "default";
-              nodeSelector = {
-                "kubernetes.io/hostname" = "edgenix";
-              };
-              dnsPolicy = "None";
-              dnsConfig = {
-                # Use gluetun's internal DNS server (listening on port 53)
-                # This ensures DNS queries go through the VPN and aren't blocked by firewall
-                nameservers = [ "127.0.0.1" ];
-                searches = [ ];
-                options = [
-                  {
-                    name = "ndots";
-                    value = "2";
-                  }
-                  {
-                    name = "edns0";
-                  }
-                ];
-              };
-              # Init container to clear cached server data if IPv6 is disabled
-              # This prevents IPv6 addresses from being used even if cached
-              initContainers = lib.optionals (!cfg.enableIPv6) [
-                {
-                  name = "clear-ipv6-cache";
-                  image = "busybox:latest";
-                  command = [ "sh" "-c" "if [ -f /gluetun/servers.json ]; then echo 'Clearing cached server data to ensure IPv4-only selection...'; rm -f /gluetun/servers.json; fi" ];
-                  volumeMounts = [
-                    {
-                      mountPath = "/gluetun";
-                      name = "gluetun";
-                    }
-                  ];
-                }
-              ];
+
               containers = [{
                 inherit name;
                 image = "qmcgaw/gluetun:latest";
@@ -321,6 +287,44 @@ mkArgoApp { inherit config lib; } rec {
                   }
                 ];
               }];
+
+              dnsConfig = {
+                # Use gluetun's internal DNS server (listening on port 53)
+                # This ensures DNS queries go through the VPN and aren't blocked by firewall
+                nameservers = [ "127.0.0.1" ];
+                searches = [ ];
+                options = [
+                  {
+                    name = "ndots";
+                    value = "2";
+                  }
+                  {
+                    name = "edns0";
+                  }
+                ];
+              };
+
+              dnsPolicy = "None";
+
+              # Init container to clear cached server data if IPv6 is disabled
+              # This prevents IPv6 addresses from being used even if cached
+              initContainers = lib.optionals (!cfg.enableIPv6) [
+                {
+                  name = "clear-ipv6-cache";
+                  image = "busybox:latest";
+                  command = [ "sh" "-c" "if [ -f /gluetun/servers.json ]; then echo 'Clearing cached server data to ensure IPv4-only selection...'; rm -f /gluetun/servers.json; fi" ];
+                  volumeMounts = [
+                    {
+                      mountPath = "/gluetun";
+                      name = "gluetun";
+                    }
+                  ];
+                }
+              ];
+
+              nodeSelector."kubernetes.io/hostname" = cfg.hostAffinity;
+              serviceAccountName = "default";
+
               volumes = [
                 {
                   name = "gluetun";
@@ -403,4 +407,3 @@ mkArgoApp { inherit config lib; } rec {
     };
   };
 }
-
