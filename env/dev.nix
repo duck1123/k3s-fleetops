@@ -775,6 +775,7 @@ in
       };
 
       replicas = 1;
+      vpn.enable = false;
     };
 
     # ../applications/sops/default.nix

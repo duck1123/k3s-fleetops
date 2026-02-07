@@ -43,12 +43,6 @@ spec:
                 secretKeyRef:
                   key: password
                   name: sonarr-database-password
-            - name: HTTP_PROXY
-              value: http://gluetun.gluetun:8888
-            - name: HTTPS_PROXY
-              value: http://gluetun.gluetun:8888
-            - name: NO_PROXY
-              value: localhost,127.0.0.1,.svc,.svc.cluster.local,sabnzbd.sabnzbd,sabnzbd.sabnzbd.svc.cluster.local
           image: linuxserver/sonarr:latest
           imagePullPolicy: IfNotPresent
           livenessProbe:
@@ -81,32 +75,7 @@ spec:
               name: downloads
             - mountPath: /tv
               name: tv
-      initContainers:
-        - args:
-            - -c
-            - |
-              echo "Waiting for gluetun VPN connection..."
-              until curl -sf http://gluetun.gluetun:8000/v1/openvpn/status | grep -q '"status":"running"'; do
-                sleep 5
-              done
-              echo "VPN connection established"
-              # Wait for proxy to initialize
-              sleep 10
-              # Simple proxy connectivity test
-              if curl -sf --connect-timeout 5 --max-time 10 \
-                 --proxy http://gluetun.gluetun:8888 \
-                 --proxy-connect-timeout 5 \
-                 "http://1.1.1.1" > /dev/null 2>&1; then
-                echo "Proxy ready"
-                exit 0
-              fi
-              # If test fails, continue anyway - applications will retry
-              echo "Proxy test failed, continuing anyway"
-              exit 0
-          command:
-            - sh
-          image: curlimages/curl:latest
-          name: wait-for-gluetun
+      initContainers: []
       nodeSelector:
         kubernetes.io/hostname: edgenix
       serviceAccountName: default
