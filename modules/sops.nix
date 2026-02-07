@@ -1,6 +1,6 @@
 { ... }:
 {
-  flake.modules.common.ageRecipients =
+  flake.modules.generic.ageRecipients =
     { ... }:
     {
       # FIXME: naughty config

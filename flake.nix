@@ -70,18 +70,24 @@
       make-shell,
       nixhelm,
       nixidy,
-      self,
       ...
     }@inputs:
-    let
-      ageRecipients = (self.modules.common.ageRecipients { }).ageRecipients;
-      lib = (import ./lib) // {
-        inherit ageRecipients;
-        sopsConfig = ./.sops.yaml;
-      };
-    in
     flake-parts.lib.mkFlake { inherit inputs; } (
-      { config, withSystem, ... }:
+      {
+        config,
+        self,
+        withSystem,
+        ...
+      }:
+      let
+        ageRecipients =
+          ((builtins.elemAt (builtins.elemAt self.modules.generic.ageRecipients.imports 0).imports 0) { })
+          .ageRecipients;
+        lib = (import ./lib) // {
+          inherit ageRecipients;
+          sopsConfig = ./.sops.yaml;
+        };
+      in
       {
         imports = [
           make-shell.flakeModules.default
