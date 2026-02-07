@@ -22,20 +22,24 @@ mkArgoApp { inherit config lib; } rec {
     };
   };
 
-  defaultValues = cfg:
-    with cfg; {
+  defaultValues =
+    cfg: with cfg; {
       image.tag = imageVersion;
 
       ingress = with ingress; {
         enabled = true;
-        hosts = [{
-          host = domain;
-          paths = [{ path = "/"; }];
-        }];
-        tls = [{
-          secretName = "specter-prod-tls";
-          hosts = [ domain ];
-        }];
+        hosts = [
+          {
+            host = domain;
+            paths = [ { path = "/"; } ];
+          }
+        ];
+        tls = [
+          {
+            secretName = "specter-prod-tls";
+            hosts = [ domain ];
+          }
+        ];
       };
 
       persistence.storageClassName = "local-path";
@@ -56,9 +60,12 @@ mkArgoApp { inherit config lib; } rec {
       };
     };
 
-  extraResources = cfg:
-    let instance-name = name;
-    in {
+  extraResources =
+    cfg:
+    let
+      instance-name = name;
+    in
+    {
       deployments = {
         specter = {
           metadata.labels = {
@@ -83,48 +90,56 @@ mkArgoApp { inherit config lib; } rec {
               };
 
               spec = {
-                containers = [{
-                  args = [ "--host=0.0.0.0" ];
-                  image = "lncm/specter-desktop:${cfg.imageVersion}";
-                  imagePullPolicy = "IfNotPresent";
-                  livenessProbe = {
-                    httpGet = {
-                      path = "/";
-                      port = "http";
+                containers = [
+                  {
+                    args = [ "--host=0.0.0.0" ];
+                    image = "lncm/specter-desktop:${cfg.imageVersion}";
+                    imagePullPolicy = "IfNotPresent";
+                    livenessProbe = {
+                      httpGet = {
+                        path = "/";
+                        port = "http";
+                      };
                     };
-                  };
 
-                  name = "specter-desktop";
+                    name = "specter-desktop";
 
-                  ports = [{
-                    containerPort = 25441;
-                    name = "http";
-                    protocol = "TCP";
-                  }];
+                    ports = [
+                      {
+                        containerPort = 25441;
+                        name = "http";
+                        protocol = "TCP";
+                      }
+                    ];
 
-                  readinessProbe = {
-                    httpGet = {
-                      path = "/";
-                      port = "http";
+                    readinessProbe = {
+                      httpGet = {
+                        path = "/";
+                        port = "http";
+                      };
                     };
-                  };
 
-                  securityContext.runAsUser = 1000;
+                    securityContext.runAsUser = 1000;
 
-                  volumeMounts = [{
-                    mountPath = "/data";
-                    name = "specter-data";
-                  }];
-                }];
+                    volumeMounts = [
+                      {
+                        mountPath = "/data";
+                        name = "specter-data";
+                      }
+                    ];
+                  }
+                ];
 
                 securityContext.fsGroup = 1000;
 
                 serviceAccountName = "specter";
 
-                volumes = [{
-                  name = "specter-data";
-                  persistentVolumeClaim.claimName = "specter-data";
-                }];
+                volumes = [
+                  {
+                    name = "specter-data";
+                    persistentVolumeClaim.claimName = "specter-data";
+                  }
+                ];
               };
             };
           };
@@ -141,21 +156,27 @@ mkArgoApp { inherit config lib; } rec {
           spec = {
             inherit ingressClassName;
 
-            rules = [{
-              host = domain;
-              http.paths = [{
-                backend.service = {
-                  name = "specter";
-                  port.name = "http";
-                };
-                path = "/";
-                pathType = "ImplementationSpecific";
-              }];
-            }];
-            tls = [{
-              hosts = [ domain ];
-              secretName = "${name}-tls";
-            }];
+            rules = [
+              {
+                host = domain;
+                http.paths = [
+                  {
+                    backend.service = {
+                      name = "specter";
+                      port.name = "http";
+                    };
+                    path = "/";
+                    pathType = "ImplementationSpecific";
+                  }
+                ];
+              }
+            ];
+            tls = [
+              {
+                hosts = [ domain ];
+                secretName = "${name}-tls";
+              }
+            ];
           };
         };
       };
@@ -192,12 +213,14 @@ mkArgoApp { inherit config lib; } rec {
           };
 
           spec = {
-            ports = [{
-              name = "http";
-              port = 25441;
-              protocol = "TCP";
-              targetPort = "http";
-            }];
+            ports = [
+              {
+                name = "http";
+                port = 25441;
+                protocol = "TCP";
+                targetPort = "http";
+              }
+            ];
 
             selector = {
               "app.kubernetes.io/instance" = instance-name;

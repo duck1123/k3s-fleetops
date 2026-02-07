@@ -41,49 +41,53 @@ mkArgoApp { inherit config lib; } rec {
           spec = {
             automountServiceAccountToken = true;
             serviceAccountName = "default";
-            containers = [{
-              inherit name;
-              image = "linuxserver/kavita:0.8.7";
-              imagePullPolicy = "IfNotPresent";
-              env = [
-                {
-                  name = "PGID";
-                  value = "1000";
-                }
-                {
-                  name = "PUID";
-                  value = "1000";
-                }
-                {
-                  name = "TZ";
-                  value = "Etc/UTC";
-                }
-              ];
+            containers = [
+              {
+                inherit name;
+                image = "linuxserver/kavita:0.8.7";
+                imagePullPolicy = "IfNotPresent";
+                env = [
+                  {
+                    name = "PGID";
+                    value = "1000";
+                  }
+                  {
+                    name = "PUID";
+                    value = "1000";
+                  }
+                  {
+                    name = "TZ";
+                    value = "Etc/UTC";
+                  }
+                ];
 
-              livenessProbe = {
-                failureThreshold = 3;
-                initialDelaySeconds = 0;
-                periodSeconds = 10;
-                tcpSocket.port = 5000;
-              };
+                livenessProbe = {
+                  failureThreshold = 3;
+                  initialDelaySeconds = 0;
+                  periodSeconds = 10;
+                  tcpSocket.port = 5000;
+                };
 
-              ports = [{
-                containerPort = 5000;
-                name = "http";
-                protocol = "TCP";
-              }];
+                ports = [
+                  {
+                    containerPort = 5000;
+                    name = "http";
+                    protocol = "TCP";
+                  }
+                ];
 
-              volumeMounts = [
-                {
-                  mountPath = "/books";
-                  name = "books";
-                }
-                {
-                  mountPath = "/config";
-                  name = "config";
-                }
-              ];
-            }];
+                volumeMounts = [
+                  {
+                    mountPath = "/books";
+                    name = "books";
+                  }
+                  {
+                    mountPath = "/config";
+                    name = "config";
+                  }
+                ];
+              }
+            ];
             volumes = [
               {
                 name = "books";
@@ -103,18 +107,22 @@ mkArgoApp { inherit config lib; } rec {
       spec = {
         inherit ingressClassName;
 
-        rules = [{
-          host = domain;
-          http.paths = [{
-            backend.service = {
-              inherit name;
-              port.name = "http";
-            };
-            path = "/";
-            pathType = "ImplementationSpecific";
-          }];
-        }];
-        tls = [{ hosts = [ domain ]; }];
+        rules = [
+          {
+            host = domain;
+            http.paths = [
+              {
+                backend.service = {
+                  inherit name;
+                  port.name = "http";
+                };
+                path = "/";
+                pathType = "ImplementationSpecific";
+              }
+            ];
+          }
+        ];
+        tls = [ { hosts = [ domain ]; } ];
       };
     };
 
@@ -132,12 +140,14 @@ mkArgoApp { inherit config lib; } rec {
     };
 
     services.${name}.spec = {
-      ports = [{
-        name = "http";
-        port = 5000;
-        protocol = "TCP";
-        targetPort = "http";
-      }];
+      ports = [
+        {
+          name = "http";
+          port = 5000;
+          protocol = "TCP";
+          targetPort = "http";
+        }
+      ];
 
       selector = {
         "app.kubernetes.io/instance" = name;

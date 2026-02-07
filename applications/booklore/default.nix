@@ -1,4 +1,10 @@
-{ ageRecipients, config, lib, pkgs, ... }:
+{
+  ageRecipients,
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 with lib;
 mkArgoApp { inherit config lib; } rec {
   name = "booklore";
@@ -140,78 +146,80 @@ mkArgoApp { inherit config lib; } rec {
             spec = {
               automountServiceAccountToken = true;
               serviceAccountName = "default";
-              containers = [{
-                inherit name;
-                image = cfg.image;
-                imagePullPolicy = "IfNotPresent";
-                env = [
-                  {
-                    name = "USER_ID";
-                    value = cfg.uid;
-                  }
-                  {
-                    name = "GROUP_ID";
-                    value = cfg.gid;
-                  }
-                  {
-                    name = "TZ";
-                    value = cfg.tz;
-                  }
-                  {
-                    name = "DATABASE_URL";
-                    value = "jdbc:mariadb://${cfg.database.host}:${
-                        toString cfg.database.port
-                      }/${cfg.database.name}";
-                  }
-                  {
-                    name = "DATABASE_USERNAME";
-                    value = cfg.database.username;
-                  }
-                  {
-                    name = "DATABASE_PASSWORD";
-                    valueFrom.secretKeyRef = {
-                      name = "booklore-database-password";
-                      key = "password";
-                    };
-                  }
-                  {
-                    name = "BOOKLORE_PORT";
-                    value = "${toString cfg.service.port}";
-                  }
-                  {
-                    name = "SWAGGER_ENABLED";
-                    value = "false";
-                  }
-                ];
+              containers = [
+                {
+                  inherit name;
+                  image = cfg.image;
+                  imagePullPolicy = "IfNotPresent";
+                  env = [
+                    {
+                      name = "USER_ID";
+                      value = cfg.uid;
+                    }
+                    {
+                      name = "GROUP_ID";
+                      value = cfg.gid;
+                    }
+                    {
+                      name = "TZ";
+                      value = cfg.tz;
+                    }
+                    {
+                      name = "DATABASE_URL";
+                      value = "jdbc:mariadb://${cfg.database.host}:${toString cfg.database.port}/${cfg.database.name}";
+                    }
+                    {
+                      name = "DATABASE_USERNAME";
+                      value = cfg.database.username;
+                    }
+                    {
+                      name = "DATABASE_PASSWORD";
+                      valueFrom.secretKeyRef = {
+                        name = "booklore-database-password";
+                        key = "password";
+                      };
+                    }
+                    {
+                      name = "BOOKLORE_PORT";
+                      value = "${toString cfg.service.port}";
+                    }
+                    {
+                      name = "SWAGGER_ENABLED";
+                      value = "false";
+                    }
+                  ];
 
-                livenessProbe = {
-                  failureThreshold = 3;
-                  initialDelaySeconds = 0;
-                  periodSeconds = 10;
-                  tcpSocket.port = 6060;
-                };
+                  livenessProbe = {
+                    failureThreshold = 3;
+                    initialDelaySeconds = 0;
+                    periodSeconds = 10;
+                    tcpSocket.port = 6060;
+                  };
 
-                ports = [{
-                  containerPort = 6060;
-                  name = "http";
-                  protocol = "TCP";
-                }];
+                  ports = [
+                    {
+                      containerPort = 6060;
+                      name = "http";
+                      protocol = "TCP";
+                    }
+                  ];
 
-                volumeMounts = [
-                  {
-                    mountPath = "/bookdrop";
-                    name = "bookdrop";
-                  }
-                  {
-                    mountPath = "/books";
-                    name = "books";
-                  }
-                  {
-                    mountPath = "/app/data";
-                    name = "data";
-                  }
-                ];
-              }];
+                  volumeMounts = [
+                    {
+                      mountPath = "/bookdrop";
+                      name = "bookdrop";
+                    }
+                    {
+                      mountPath = "/books";
+                      name = "books";
+                    }
+                    {
+                      mountPath = "/app/data";
+                      name = "data";
+                    }
+                  ];
+                }
+              ];
               volumes = [
                 {
                   name = "bookdrop";
@@ -237,41 +245,50 @@ mkArgoApp { inherit config lib; } rec {
         spec = with cfg.ingress; {
           inherit ingressClassName;
 
-          rules = [{
-            host = domain;
+          rules = [
+            {
+              host = domain;
 
-            http.paths = [{
-              backend.service = {
-                inherit name;
-                port.name = "http";
-              };
+              http.paths = [
+                {
+                  backend.service = {
+                    inherit name;
+                    port.name = "http";
+                  };
 
-              path = "/";
-              pathType = "ImplementationSpecific";
-            }];
-          }];
+                  path = "/";
+                  pathType = "ImplementationSpecific";
+                }
+              ];
+            }
+          ];
 
-          tls = [{ hosts = [ domain ]; }];
+          tls = [ { hosts = [ domain ]; } ];
         };
       };
-    } // lib.optionalAttrs (cfg.ingress.localIngress.enable) {
+    }
+    // lib.optionalAttrs (cfg.ingress.localIngress.enable) {
       # Optional local-only ingress using Traefik
       "${name}-local" = {
         spec = with cfg.ingress.localIngress; {
           ingressClassName = "traefik";
 
-          rules = [{
-            host = domain;
-            http.paths = [{
-              backend.service = {
-                inherit name;
-                port.name = "http";
-              };
-              path = "/";
-              pathType = "ImplementationSpecific";
-            }];
-          }];
-          tls = lib.optional tls.enable [{ hosts = [ domain ]; }];
+          rules = [
+            {
+              host = domain;
+              http.paths = [
+                {
+                  backend.service = {
+                    inherit name;
+                    port.name = "http";
+                  };
+                  path = "/";
+                  pathType = "ImplementationSpecific";
+                }
+              ];
+            }
+          ];
+          tls = lib.optional tls.enable [ { hosts = [ domain ]; } ];
         };
       };
     };
@@ -282,16 +299,20 @@ mkArgoApp { inherit config lib; } rec {
         accessModes = [ "ReadWriteOnce" ];
         resources.requests.storage = "5Gi";
       };
-      "${name}-${name}-books".spec = if cfg.nfs.enable then {
-        accessModes = [ "ReadWriteMany" ];
-        resources.requests.storage = "1Gi";
-        storageClassName = "";
-        volumeName = "${name}-${name}-books-nfs";
-      } else {
-        inherit (cfg) storageClassName;
-        accessModes = [ "ReadWriteOnce" ];
-        resources.requests.storage = "5Gi";
-      };
+      "${name}-${name}-books".spec =
+        if cfg.nfs.enable then
+          {
+            accessModes = [ "ReadWriteMany" ];
+            resources.requests.storage = "1Gi";
+            storageClassName = "";
+            volumeName = "${name}-${name}-books-nfs";
+          }
+        else
+          {
+            inherit (cfg) storageClassName;
+            accessModes = [ "ReadWriteOnce" ];
+            resources.requests.storage = "5Gi";
+          };
       "${name}-${name}-data".spec = {
         inherit (cfg) storageClassName;
         accessModes = [ "ReadWriteOnce" ];
@@ -301,12 +322,14 @@ mkArgoApp { inherit config lib; } rec {
 
     services = {
       ${name}.spec = {
-        ports = [{
-          name = "http";
-          port = 6060;
-          protocol = "TCP";
-          targetPort = "http";
-        }];
+        ports = [
+          {
+            name = "http";
+            port = 6060;
+            protocol = "TCP";
+            targetPort = "http";
+          }
+        ];
 
         selector = {
           "app.kubernetes.io/instance" = name;
@@ -330,7 +353,11 @@ mkArgoApp { inherit config lib; } rec {
             storage = "1Ti";
           };
           accessModes = [ "ReadWriteMany" ];
-          mountOptions = [ "nolock" "soft" "timeo=30" ];
+          mountOptions = [
+            "nolock"
+            "soft"
+            "timeo=30"
+          ];
           nfs = {
             server = cfg.nfs.server;
             path = cfg.nfs.path;

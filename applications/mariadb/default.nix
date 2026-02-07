@@ -1,7 +1,15 @@
-{ ageRecipients, config, lib, pkgs, ... }:
+{
+  ageRecipients,
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 with lib;
-let password-secret = "mariadb-password";
-in mkArgoApp { inherit config lib; } rec {
+let
+  password-secret = "mariadb-password";
+in
+mkArgoApp { inherit config lib; } rec {
   name = "mariadb";
 
   # https://artifacthub.io/packages/helm/bitnami/mariadb
@@ -47,22 +55,24 @@ in mkArgoApp { inherit config lib; } rec {
 
     extraDatabases = mkOption {
       description = mdDoc "Additional databases to create (list of {name, username, password})";
-      type = types.listOf (types.submodule {
-        options = {
-          name = mkOption {
-            type = types.str;
-            description = mdDoc "Database name";
+      type = types.listOf (
+        types.submodule {
+          options = {
+            name = mkOption {
+              type = types.str;
+              description = mdDoc "Database name";
+            };
+            username = mkOption {
+              type = types.str;
+              description = mdDoc "Database username";
+            };
+            password = mkOption {
+              type = types.str;
+              description = mdDoc "Database password";
+            };
           };
-          username = mkOption {
-            type = types.str;
-            description = mdDoc "Database username";
-          };
-          password = mkOption {
-            type = types.str;
-            description = mdDoc "Database password";
-          };
-        };
-      });
+        }
+      );
       default = [ ];
     };
 
@@ -80,8 +90,7 @@ in mkArgoApp { inherit config lib; } rec {
       };
 
       schedule = mkOption {
-        description =
-          mdDoc "Cron schedule for backups (default: daily at 2 AM)";
+        description = mdDoc "Cron schedule for backups (default: daily at 2 AM)";
         type = types.str;
         default = "0 2 * * *";
       };
@@ -108,8 +117,8 @@ in mkArgoApp { inherit config lib; } rec {
     };
 
     # Add initdb scripts for extra databases
-    initdbScripts = lib.listToAttrs (map
-      (db: {
+    initdbScripts = lib.listToAttrs (
+      map (db: {
         name = "init-${db.name}.sql";
         value = ''
           CREATE DATABASE IF NOT EXISTS `${db.name}`;
@@ -117,8 +126,8 @@ in mkArgoApp { inherit config lib; } rec {
           GRANT ALL PRIVILEGES ON `${db.name}`.* TO '${db.username}'@'%';
           FLUSH PRIVILEGES;
         '';
-      })
-      cfg.extraDatabases);
+      }) cfg.extraDatabases
+    );
 
     nodeSelector."kubernetes.io/hostname" = cfg.hostAffinity;
     primary.persistence.storageClass = cfg.storageClass;
@@ -165,65 +174,71 @@ in mkArgoApp { inherit config lib; } rec {
               template = {
                 spec = {
                   restartPolicy = "OnFailure";
-                  containers = [{
-                    name = "backup";
-                    image = "bitnami/mariadb:latest";
-                    command = [
-                      "/bin/bash"
-                      "-c"
-                      ''
-                        set -e
-                        BACKUP_DIR="/backups"
-                        TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-                        BACKUP_FILE="$BACKUP_DIR/mariadb-backup-$TIMESTAMP.sql.gz"
+                  containers = [
+                    {
+                      name = "backup";
+                      image = "bitnami/mariadb:latest";
+                      command = [
+                        "/bin/bash"
+                        "-c"
+                        ''
+                          set -e
+                          BACKUP_DIR="/backups"
+                          TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+                          BACKUP_FILE="$BACKUP_DIR/mariadb-backup-$TIMESTAMP.sql.gz"
 
-                        echo "Starting backup at $(date)"
+                          echo "Starting backup at $(date)"
 
-                        # Create backup
-                        mysqldump \
-                          -h mariadb.mariadb \
-                          -u root \
-                          -p"$MARIADB_ROOT_PASSWORD" \
-                          --all-databases \
-                          --single-transaction \
-                          --quick \
-                          --lock-tables=false \
-                          | gzip > "$BACKUP_FILE"
+                          # Create backup
+                          mysqldump \
+                            -h mariadb.mariadb \
+                            -u root \
+                            -p"$MARIADB_ROOT_PASSWORD" \
+                            --all-databases \
+                            --single-transaction \
+                            --quick \
+                            --lock-tables=false \
+                            | gzip > "$BACKUP_FILE"
 
-                        echo "Backup completed: $BACKUP_FILE"
-                        echo "Backup size: $(du -h "$BACKUP_FILE" | cut -f1)"
+                          echo "Backup completed: $BACKUP_FILE"
+                          echo "Backup size: $(du -h "$BACKUP_FILE" | cut -f1)"
 
-                        # Clean up old backups (keep last ${
-                          toString cfg.backup.retentionDays
-                        } days)
-                        find "$BACKUP_DIR" -name "mariadb-backup-*.sql.gz" -type f -mtime +${
-                          toString cfg.backup.retentionDays
-                        } -delete
+                          # Clean up old backups (keep last ${toString cfg.backup.retentionDays} days)
+                          find "$BACKUP_DIR" -name "mariadb-backup-*.sql.gz" -type f -mtime +${toString cfg.backup.retentionDays} -delete
 
-                        echo "Cleanup completed. Remaining backups:"
-                        ls -lh "$BACKUP_DIR"/*.sql.gz 2>/dev/null || echo "No backups found"
+                          echo "Cleanup completed. Remaining backups:"
+                          ls -lh "$BACKUP_DIR"/*.sql.gz 2>/dev/null || echo "No backups found"
 
-                        echo "Backup job completed at $(date)"
-                      ''
-                    ];
-                    env = [{
-                      name = "MARIADB_ROOT_PASSWORD";
-                      valueFrom = {
-                        secretKeyRef = {
-                          name = password-secret;
-                          key = "mariadb-root-password";
-                        };
-                      };
-                    }];
-                    volumeMounts = [{
+                          echo "Backup job completed at $(date)"
+                        ''
+                      ];
+                      env = [
+                        {
+                          name = "MARIADB_ROOT_PASSWORD";
+                          valueFrom = {
+                            secretKeyRef = {
+                              name = password-secret;
+                              key = "mariadb-root-password";
+                            };
+                          };
+                        }
+                      ];
+                      volumeMounts = [
+                        {
+                          name = "backup-storage";
+                          mountPath = "/backups";
+                        }
+                      ];
+                    }
+                  ];
+                  volumes = [
+                    {
                       name = "backup-storage";
-                      mountPath = "/backups";
-                    }];
-                  }];
-                  volumes = [{
-                    name = "backup-storage";
-                    persistentVolumeClaim = { claimName = "mariadb-backups"; };
-                  }];
+                      persistentVolumeClaim = {
+                        claimName = "mariadb-backups";
+                      };
+                    }
+                  ];
                 };
               };
             };

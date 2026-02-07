@@ -1,7 +1,15 @@
-{ ageRecipients, config, lib, pkgs, ... }:
+{
+  ageRecipients,
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 with lib;
-let password-secret = "sonarr-database-password";
-in mkArgoApp { inherit config lib; } rec {
+let
+  password-secret = "sonarr-database-password";
+in
+mkArgoApp { inherit config lib; } rec {
   name = "sonarr";
   uses-ingress = true;
 
@@ -181,7 +189,8 @@ in mkArgoApp { inherit config lib; } rec {
                       name = "TZ";
                       value = cfg.tz;
                     }
-                  ] ++ (lib.optionals cfg.database.enable [
+                  ]
+                  ++ (lib.optionals cfg.database.enable [
                     {
                       name = "SONARR__POSTGRES__HOST";
                       value = cfg.database.host;
@@ -196,30 +205,35 @@ in mkArgoApp { inherit config lib; } rec {
                     }
                     {
                       name = "SONARR__POSTGRES__LOGDB";
-                      value = if lib.hasSuffix "-main" cfg.database.name
-                        then lib.removeSuffix "-main" cfg.database.name + "-log"
-                        else "${cfg.database.name}-log";
+                      value =
+                        if lib.hasSuffix "-main" cfg.database.name then
+                          lib.removeSuffix "-main" cfg.database.name + "-log"
+                        else
+                          "${cfg.database.name}-log";
                     }
                     {
                       name = "SONARR__POSTGRES__USER";
                       value = cfg.database.username;
                     }
-                    (if cfg.database.password != "" then
-                      {
-                        name = "SONARR__POSTGRES__PASSWORD";
-                        valueFrom = {
-                          secretKeyRef = {
-                            name = password-secret;
-                            key = "password";
+                    (
+                      if cfg.database.password != "" then
+                        {
+                          name = "SONARR__POSTGRES__PASSWORD";
+                          valueFrom = {
+                            secretKeyRef = {
+                              name = password-secret;
+                              key = "password";
+                            };
                           };
-                        };
-                      }
-                    else
-                      {
-                        name = "SONARR__POSTGRES__PASSWORD";
-                        value = "";
-                      })
-                  ]) ++ (lib.optionals cfg.vpn.enable [
+                        }
+                      else
+                        {
+                          name = "SONARR__POSTGRES__PASSWORD";
+                          value = "";
+                        }
+                    )
+                  ])
+                  ++ (lib.optionals cfg.vpn.enable [
                     # Configure Sonarr to use shared gluetun's HTTP proxy
                     {
                       name = "HTTP_PROXY";
@@ -234,11 +248,13 @@ in mkArgoApp { inherit config lib; } rec {
                       value = "localhost,127.0.0.1,.svc,.svc.cluster.local,sabnzbd.sabnzbd,sabnzbd.sabnzbd.svc.cluster.local";
                     }
                   ]);
-                  ports = [{
-                    containerPort = cfg.service.port;
-                    name = "http";
-                    protocol = "TCP";
-                  }];
+                  ports = [
+                    {
+                      containerPort = cfg.service.port;
+                      name = "http";
+                      protocol = "TCP";
+                    }
+                  ];
                   readinessProbe = lib.mkIf cfg.useProbes {
                     httpGet = {
                       path = "/ping";
@@ -278,8 +294,9 @@ in mkArgoApp { inherit config lib; } rec {
                 }
               ];
 
-              initContainers = lib.optionalAttrs cfg.vpn.enable
-                (lib.waitForGluetun { inherit lib; } cfg.vpn.sharedGluetunService);
+              initContainers = lib.optionalAttrs cfg.vpn.enable (
+                lib.waitForGluetun { inherit lib; } cfg.vpn.sharedGluetunService
+              );
               nodeSelector."kubernetes.io/hostname" = cfg.hostAffinity;
               serviceAccountName = "default";
 
@@ -288,12 +305,14 @@ in mkArgoApp { inherit config lib; } rec {
                   name = "config";
                   persistentVolumeClaim.claimName = "${name}-${name}-config";
                 }
-              ] ++ (lib.optionals (cfg.database.enable && cfg.database.password != "") [
+              ]
+              ++ (lib.optionals (cfg.database.enable && cfg.database.password != "") [
                 {
                   name = password-secret;
                   secret.secretName = password-secret;
                 }
-              ]) ++ [
+              ])
+              ++ [
                 {
                   name = "downloads";
                   persistentVolumeClaim.claimName = "${name}-${name}-downloads";
@@ -312,21 +331,25 @@ in mkArgoApp { inherit config lib; } rec {
     ingresses.${name}.spec = with cfg.ingress; {
       inherit ingressClassName;
 
-      rules = [{
-        host = domain;
+      rules = [
+        {
+          host = domain;
 
-        http.paths = [{
-          backend.service = {
-            inherit name;
-            port.name = "http";
-          };
+          http.paths = [
+            {
+              backend.service = {
+                inherit name;
+                port.name = "http";
+              };
 
-          path = "/";
-          pathType = "ImplementationSpecific";
-        }];
-      }];
+              path = "/";
+              pathType = "ImplementationSpecific";
+            }
+          ];
+        }
+      ];
 
-      tls = [{ hosts = [ domain ]; }];
+      tls = [ { hosts = [ domain ]; } ];
     };
 
     persistentVolumeClaims = {
@@ -335,35 +358,45 @@ in mkArgoApp { inherit config lib; } rec {
         accessModes = [ "ReadWriteOnce" ];
         resources.requests.storage = "5Gi";
       };
-      "${name}-${name}-downloads".spec = if cfg.nfs.enable then {
-        accessModes = [ "ReadWriteMany" ];
-        resources.requests.storage = "1Gi";
-        storageClassName = "";
-        volumeName = "${name}-${name}-downloads-nfs";
-      } else {
-        inherit (cfg) storageClassName;
-        accessModes = [ "ReadWriteOnce" ];
-        resources.requests.storage = "50Gi";
-      };
-      "${name}-${name}-tv".spec = if cfg.nfs.enable then {
-        accessModes = [ "ReadWriteMany" ];
-        resources.requests.storage = "1Gi";
-        storageClassName = "";
-        volumeName = "${name}-${name}-tv-nfs";
-      } else {
-        inherit (cfg) storageClassName;
-        accessModes = [ "ReadWriteOnce" ];
-        resources.requests.storage = "100Gi";
-      };
+      "${name}-${name}-downloads".spec =
+        if cfg.nfs.enable then
+          {
+            accessModes = [ "ReadWriteMany" ];
+            resources.requests.storage = "1Gi";
+            storageClassName = "";
+            volumeName = "${name}-${name}-downloads-nfs";
+          }
+        else
+          {
+            inherit (cfg) storageClassName;
+            accessModes = [ "ReadWriteOnce" ];
+            resources.requests.storage = "50Gi";
+          };
+      "${name}-${name}-tv".spec =
+        if cfg.nfs.enable then
+          {
+            accessModes = [ "ReadWriteMany" ];
+            resources.requests.storage = "1Gi";
+            storageClassName = "";
+            volumeName = "${name}-${name}-tv-nfs";
+          }
+        else
+          {
+            inherit (cfg) storageClassName;
+            accessModes = [ "ReadWriteOnce" ];
+            resources.requests.storage = "100Gi";
+          };
     };
 
     services.${name}.spec = {
-      ports = [{
-        name = "http";
-        port = cfg.service.port;
-        protocol = "TCP";
-        targetPort = "http";
-      }];
+      ports = [
+        {
+          name = "http";
+          port = cfg.service.port;
+          protocol = "TCP";
+          targetPort = "http";
+        }
+      ];
 
       selector = {
         "app.kubernetes.io/instance" = name;
@@ -386,7 +419,11 @@ in mkArgoApp { inherit config lib; } rec {
             storage = "1Ti";
           };
           accessModes = [ "ReadWriteMany" ];
-          mountOptions = [ "nolock" "soft" "timeo=30" ];
+          mountOptions = [
+            "nolock"
+            "soft"
+            "timeo=30"
+          ];
           nfs = {
             server = cfg.nfs.server;
             path = "${cfg.nfs.path}/Downloads";
@@ -405,7 +442,11 @@ in mkArgoApp { inherit config lib; } rec {
             storage = "1Ti";
           };
           accessModes = [ "ReadWriteMany" ];
-          mountOptions = [ "nolock" "soft" "timeo=30" ];
+          mountOptions = [
+            "nolock"
+            "soft"
+            "timeo=30"
+          ];
           nfs = {
             server = cfg.nfs.server;
             path = "${cfg.nfs.path}/TV";

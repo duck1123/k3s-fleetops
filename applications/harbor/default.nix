@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
   app-name = "harbor-nix";
   cfg = config.services.${app-name};
@@ -50,7 +55,9 @@ let
 
     nginx.proxyBodySize = "10g";
   } cfg.values;
-in with lib; {
+in
+with lib;
+{
   options.services.${app-name} = {
     clusterIssuer = mkOption {
       description = mdDoc "The issuer";
@@ -98,22 +105,28 @@ in with lib; {
           };
 
           spec = {
-            tls = [{
-              hosts = [ registry-domain ];
-              secretName = "harbor-registry-tls";
-            }];
-            rules = [{
-              host = registry-domain;
-              http.paths = [{
-                path = "/";
-                # pathType = "Prefix";
-                pathType = "ImplementationSpecific";
-                backend.service = {
-                  name = "harbor-core";
-                  port.number = 80;
-                };
-              }];
-            }];
+            tls = [
+              {
+                hosts = [ registry-domain ];
+                secretName = "harbor-registry-tls";
+              }
+            ];
+            rules = [
+              {
+                host = registry-domain;
+                http.paths = [
+                  {
+                    path = "/";
+                    # pathType = "Prefix";
+                    pathType = "ImplementationSpecific";
+                    backend.service = {
+                      name = "harbor-core";
+                      port.number = 80;
+                    };
+                  }
+                ];
+              }
+            ];
           };
         };
 

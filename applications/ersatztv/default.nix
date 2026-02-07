@@ -1,4 +1,10 @@
-{ ageRecipients, config, lib, pkgs, ... }:
+{
+  ageRecipients,
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 with lib;
 mkArgoApp { inherit config lib; } rec {
   name = "ersatztv";
@@ -88,19 +94,24 @@ mkArgoApp { inherit config lib; } rec {
               serviceAccountName = "default";
               nodeSelector."kubernetes.io/hostname" = cfg.hostAffinity;
 
-              initContainers = [{
-                name = "db-init";
-                image = cfg.image;
-                imagePullPolicy = "IfNotPresent";
-                command = ["sh"];
-                args = ["-c" "chmod -R 755 /app/data"];
-                volumeMounts = [
-                  {
-                    mountPath = "/app/data";
-                    name = "data";
-                  }
-                ];
-              }];
+              initContainers = [
+                {
+                  name = "db-init";
+                  image = cfg.image;
+                  imagePullPolicy = "IfNotPresent";
+                  command = [ "sh" ];
+                  args = [
+                    "-c"
+                    "chmod -R 755 /app/data"
+                  ];
+                  volumeMounts = [
+                    {
+                      mountPath = "/app/data";
+                      name = "data";
+                    }
+                  ];
+                }
+              ];
 
               containers = [
                 {
@@ -150,15 +161,18 @@ mkArgoApp { inherit config lib; } rec {
                   #   };
                   # };
 
-                  ports = [{
-                    containerPort = cfg.service.port;
-                    name = "http";
-                    protocol = "TCP";
-                  }];
+                  ports = [
+                    {
+                      containerPort = cfg.service.port;
+                      name = "http";
+                      protocol = "TCP";
+                    }
+                  ];
 
                   securityContext = {
                     privileged = false;
-                  } // (lib.optionalAttrs cfg.enableGPU {
+                  }
+                  // (lib.optionalAttrs cfg.enableGPU {
                     capabilities = {
                       add = [ "SYS_ADMIN" ];
                     };
@@ -177,7 +191,8 @@ mkArgoApp { inherit config lib; } rec {
                       mountPath = "/app/data";
                       name = "data";
                     }
-                  ] ++ (lib.optionalAttrs cfg.enableGPU [
+                  ]
+                  ++ (lib.optionalAttrs cfg.enableGPU [
                     {
                       mountPath = "/dev/dri";
                       name = "dri";
@@ -198,7 +213,8 @@ mkArgoApp { inherit config lib; } rec {
                   name = "media";
                   persistentVolumeClaim.claimName = "${name}-${name}-media";
                 }
-              ] ++ (lib.optionalAttrs cfg.enableGPU [
+              ]
+              ++ (lib.optionalAttrs cfg.enableGPU [
                 {
                   name = "dri";
                   hostPath = {
@@ -221,23 +237,29 @@ mkArgoApp { inherit config lib; } rec {
       spec = {
         inherit ingressClassName;
 
-        rules = [{
-          host = domain;
+        rules = [
+          {
+            host = domain;
 
-          http.paths = [{
-            backend.service = {
-              inherit name;
-              port.name = "http";
-            };
+            http.paths = [
+              {
+                backend.service = {
+                  inherit name;
+                  port.name = "http";
+                };
 
-            path = "/";
-            pathType = "ImplementationSpecific";
-          }];
-        }];
+                path = "/";
+                pathType = "ImplementationSpecific";
+              }
+            ];
+          }
+        ];
 
-        tls = [{
-          hosts = [ domain ];
-        }];
+        tls = [
+          {
+            hosts = [ domain ];
+          }
+        ];
       };
     };
 
@@ -252,26 +274,32 @@ mkArgoApp { inherit config lib; } rec {
         accessModes = [ "ReadWriteOnce" ];
         resources.requests.storage = "5Gi";
       };
-      "${name}-${name}-media".spec = if cfg.nfs.enable then {
-        accessModes = [ "ReadWriteMany" ];
-        resources.requests.storage = "1Gi";
-        storageClassName = "";
-        volumeName = "${name}-${name}-media-nfs";
-      } else {
-        inherit (cfg) storageClassName;
-        accessModes = [ "ReadWriteOnce" ];
-        resources.requests.storage = "10Gi";
-      };
+      "${name}-${name}-media".spec =
+        if cfg.nfs.enable then
+          {
+            accessModes = [ "ReadWriteMany" ];
+            resources.requests.storage = "1Gi";
+            storageClassName = "";
+            volumeName = "${name}-${name}-media-nfs";
+          }
+        else
+          {
+            inherit (cfg) storageClassName;
+            accessModes = [ "ReadWriteOnce" ];
+            resources.requests.storage = "10Gi";
+          };
     };
 
     services = {
       ${name}.spec = {
-        ports = [{
-          name = "http";
-          port = cfg.service.port;
-          protocol = "TCP";
-          targetPort = "http";
-        }];
+        ports = [
+          {
+            name = "http";
+            port = cfg.service.port;
+            protocol = "TCP";
+            targetPort = "http";
+          }
+        ];
 
         selector = {
           "app.kubernetes.io/instance" = name;
@@ -282,12 +310,14 @@ mkArgoApp { inherit config lib; } rec {
       };
 
       "${name}-hdhr".spec = {
-        ports = [{
-          name = "hdhr";
-          port = cfg.service.port;
-          protocol = "TCP";
-          targetPort = "http";
-        }];
+        ports = [
+          {
+            name = "hdhr";
+            port = cfg.service.port;
+            protocol = "TCP";
+            targetPort = "http";
+          }
+        ];
 
         selector = {
           "app.kubernetes.io/instance" = name;
@@ -311,7 +341,11 @@ mkArgoApp { inherit config lib; } rec {
             storage = "1Ti";
           };
           accessModes = [ "ReadWriteMany" ];
-          mountOptions = [ "nolock" "soft" "timeo=30" ];
+          mountOptions = [
+            "nolock"
+            "soft"
+            "timeo=30"
+          ];
           nfs = {
             server = cfg.nfs.server;
             path = cfg.nfs.path;

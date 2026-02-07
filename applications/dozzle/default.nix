@@ -60,18 +60,32 @@ mkArgoApp { inherit config lib; } rec {
         rules = [
           {
             apiGroups = [ "" ];
-            resources = [ "pods" "pods/log" "nodes" ];
-            verbs = [ "get" "list" "watch" ];
+            resources = [
+              "pods"
+              "pods/log"
+              "nodes"
+            ];
+            verbs = [
+              "get"
+              "list"
+              "watch"
+            ];
           }
           {
             apiGroups = [ "" ];
             resources = [ "namespaces" ];
-            verbs = [ "get" "list" ];
+            verbs = [
+              "get"
+              "list"
+            ];
           }
           {
             apiGroups = [ "metrics.k8s.io" ];
             resources = [ "pods" ];
-            verbs = [ "get" "list" ];
+            verbs = [
+              "get"
+              "list"
+            ];
           }
         ];
       };
@@ -135,22 +149,26 @@ mkArgoApp { inherit config lib; } rec {
                       name = "DOZZLE_MODE";
                       value = "k8s";
                     }
-                  ] ++ lib.optionals (cfg.filter != "") [
+                  ]
+                  ++ lib.optionals (cfg.filter != "") [
                     {
                       name = "DOZZLE_FILTER";
                       value = cfg.filter;
                     }
-                  ] ++ lib.optionals (cfg.level != "all") [
+                  ]
+                  ++ lib.optionals (cfg.level != "all") [
                     {
                       name = "DOZZLE_LEVEL";
                       value = cfg.level;
                     }
                   ];
-                  ports = [{
-                    containerPort = cfg.service.port;
-                    name = "http";
-                    protocol = "TCP";
-                  }];
+                  ports = [
+                    {
+                      containerPort = cfg.service.port;
+                      name = "http";
+                      protocol = "TCP";
+                    }
+                  ];
                   volumeMounts = lib.optionals cfg.mountContainerdSocket [
                     {
                       mountPath = "/var/run/docker.sock";
@@ -188,30 +206,36 @@ mkArgoApp { inherit config lib; } rec {
     ingresses.${name}.spec = with cfg.ingress; {
       inherit ingressClassName;
 
-      rules = [{
-        host = domain;
+      rules = [
+        {
+          host = domain;
 
-        http.paths = [{
-          backend.service = {
-            inherit name;
-            port.name = "http";
-          };
+          http.paths = [
+            {
+              backend.service = {
+                inherit name;
+                port.name = "http";
+              };
 
-          path = "/";
-          pathType = "ImplementationSpecific";
-        }];
-      }];
+              path = "/";
+              pathType = "ImplementationSpecific";
+            }
+          ];
+        }
+      ];
 
-      tls = [{ hosts = [ domain ]; }];
+      tls = [ { hosts = [ domain ]; } ];
     };
 
     services.${name}.spec = {
-      ports = [{
-        name = "http";
-        port = cfg.service.port;
-        protocol = "TCP";
-        targetPort = "http";
-      }];
+      ports = [
+        {
+          name = "http";
+          port = cfg.service.port;
+          protocol = "TCP";
+          targetPort = "http";
+        }
+      ];
 
       selector = {
         "app.kubernetes.io/instance" = name;
@@ -222,4 +246,3 @@ mkArgoApp { inherit config lib; } rec {
     };
   };
 }
-

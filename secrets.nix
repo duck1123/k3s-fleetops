@@ -40,88 +40,108 @@
     }
   ];
 
-  harbor = [{
-    ns = "harbor";
-    secret-name = "harbor-admin-password";
-    fields = {
-      "HARBOR_ADMIN_PASSWORD".path = "/Kubernetes/Harbor";
-      "HARBOR_ADMIN_USERNAME" = {
-        path = "/Kubernetes/Harbor";
-        field = "Username";
+  harbor = [
+    {
+      ns = "harbor";
+      secret-name = "harbor-admin-password";
+      fields = {
+        "HARBOR_ADMIN_PASSWORD".path = "/Kubernetes/Harbor";
+        "HARBOR_ADMIN_USERNAME" = {
+          path = "/Kubernetes/Harbor";
+          field = "Username";
+        };
       };
-    };
-  }];
+    }
+  ];
 
-  jupyterhub = [{
-    ns = "jupyterhub";
-    secret-name = "jupyterhub-postgresql";
-    fields = {
-      "username".literal = "postgres";
-      "password".path = "/Kubernetes/Postgres-admin";
-      "postgres-password".path = "/Kubernetes/Postgres-admin";
-    };
-  }];
-
-  keycloak = [{
-    ns = "keycloak";
-    secret-name = "keycloak-admin-password";
-    fields."password".path = "/Kubernetes/Keycloak";
-  }];
-
-  minio = [{
-    ns = "minio";
-    secret-name = "minio-password";
-    fields = {
-      "password".path = "/Kubernetes/minio";
-      "root-password".path = "/Kubernetes/minio";
-      "user" = {
-        path = "/Kubernetes/minio";
-        field = "Username";
+  jupyterhub = [
+    {
+      ns = "jupyterhub";
+      secret-name = "jupyterhub-postgresql";
+      fields = {
+        "username".literal = "postgres";
+        "password".path = "/Kubernetes/Postgres-admin";
+        "postgres-password".path = "/Kubernetes/Postgres-admin";
       };
-    };
-  }];
+    }
+  ];
 
-  openldap = [{
-    ns = "openldap";
-    secret-name = "openldap-passwords";
-    fields = {
-      "LDAP_ADMIN_PASSWORD".path = "/Kubernetes/openldap-admin";
-      "LDAP_CONFIG_PASSWORD".path = "/Kubernetes/openldap-config";
-    };
-  }];
+  keycloak = [
+    {
+      ns = "keycloak";
+      secret-name = "keycloak-admin-password";
+      fields."password".path = "/Kubernetes/Keycloak";
+    }
+  ];
 
-  postgresql = [{
-    ns = "postgresql";
-    secret-name = "postgresql-password";
-    fields = {
-      "adminPassword".path = "/Kubernetes/Postgres-admin";
-      "adminUsername".literal = "postgres";
-      "replicationPassword".path = "/Kubernetes/Postgres-replication";
-      "userPassword".path = "/Kubernetes/Postgres-user";
-    };
-  }];
-
-  redis = [{
-    ns = "redis";
-    secret-name = "redis-password";
-    fields."password".path = "/Kubernetes/redis";
-  }];
-
-  sops = [{
-    ns = "sops";
-    secret-name = "sops-age-key";
-    fields."age.key".path = "/Kubernetes/Age-key";
-  }];
-
-  tailscale = [{
-    ns = "tailscale";
-    secret-name = "tailscale-oauth";
-    fields = [{
-      "clientId" = {
-        path = "/Kubernetes/Tailscale-oauth";
-        field = "Username";
+  minio = [
+    {
+      ns = "minio";
+      secret-name = "minio-password";
+      fields = {
+        "password".path = "/Kubernetes/minio";
+        "root-password".path = "/Kubernetes/minio";
+        "user" = {
+          path = "/Kubernetes/minio";
+          field = "Username";
+        };
       };
-      "clientSecret".path = "/Kubernetes/Tailscale-oauth";
-    }];
-  }];
+    }
+  ];
+
+  openldap = [
+    {
+      ns = "openldap";
+      secret-name = "openldap-passwords";
+      fields = {
+        "LDAP_ADMIN_PASSWORD".path = "/Kubernetes/openldap-admin";
+        "LDAP_CONFIG_PASSWORD".path = "/Kubernetes/openldap-config";
+      };
+    }
+  ];
+
+  postgresql = [
+    {
+      ns = "postgresql";
+      secret-name = "postgresql-password";
+      fields = {
+        "adminPassword".path = "/Kubernetes/Postgres-admin";
+        "adminUsername".literal = "postgres";
+        "replicationPassword".path = "/Kubernetes/Postgres-replication";
+        "userPassword".path = "/Kubernetes/Postgres-user";
+      };
+    }
+  ];
+
+  redis = [
+    {
+      ns = "redis";
+      secret-name = "redis-password";
+      fields."password".path = "/Kubernetes/redis";
+    }
+  ];
+
+  sops = [
+    {
+      ns = "sops";
+      secret-name = "sops-age-key";
+      fields."age.key".path = "/Kubernetes/Age-key";
+    }
+  ];
+
+  tailscale = [
+    {
+      ns = "tailscale";
+      secret-name = "tailscale-oauth";
+      fields = [
+        {
+          "clientId" = {
+            path = "/Kubernetes/Tailscale-oauth";
+            field = "Username";
+          };
+          "clientSecret".path = "/Kubernetes/Tailscale-oauth";
+        }
+      ];
+    }
+  ];
 }

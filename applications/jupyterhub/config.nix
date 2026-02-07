@@ -1,4 +1,8 @@
-{ password ? "foo", ...}: {
+{
+  password ? "foo",
+  ...
+}:
+{
   Chart = {
     Name = "jupyterhub";
     Version = "8.1.5";
@@ -31,8 +35,7 @@
 
     db = {
       type = "postgres";
-      url =
-        "postgresql://bn_jupyterhub@jupyterhub-postgresql:5432/bitnami_jupyterhub";
+      url = "postgresql://bn_jupyterhub@jupyterhub-postgresql:5432/bitnami_jupyterhub";
     };
 
     namedServerLimitPerUser = null;
@@ -135,16 +138,20 @@
         "helm.sh/chart" = "jupyterhub-8.1.5";
       };
 
-      extraVolumes = [{
-        name = "empty-dir";
-        emptyDir = { };
-      }];
+      extraVolumes = [
+        {
+          name = "empty-dir";
+          emptyDir = { };
+        }
+      ];
 
-      extraVolumeMounts = [{
-        name = "empty-dir";
-        mountPath = "/tmp";
-        subPath = "tmp-dir";
-      }];
+      extraVolumeMounts = [
+        {
+          name = "empty-dir";
+          mountPath = "/tmp";
+          subPath = "tmp-dir";
+        }
+      ];
 
       homeMountPath = "/opt/bitnami/jupyterhub-singleuser";
       type = "dynamic";

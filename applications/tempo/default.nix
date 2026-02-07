@@ -1,4 +1,9 @@
-{ charts, config, lib, ... }:
+{
+  charts,
+  config,
+  lib,
+  ...
+}:
 with lib;
 mkArgoApp { inherit config lib; } {
   name = "tempo";
@@ -40,10 +45,12 @@ mkArgoApp { inherit config lib; } {
         #     "authentik-middlewares-authenkik@kubernetescrd";
         # };
         hosts = [ domain ];
-        tls = [{
-          secretName = "tempo-tls";
-          hosts = [ domain ];
-        }];
+        tls = [
+          {
+            secretName = "tempo-tls";
+            hosts = [ domain ];
+          }
+        ];
       };
     };
   };

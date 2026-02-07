@@ -16,14 +16,18 @@ mkArgoApp { inherit config lib; } rec {
   defaultValues = cfg: {
     ingress.main = with cfg.ingress; {
       enabled = false;
-      hosts = [{
-        host = domain;
-        paths = [{ path = "/"; }];
-      }];
-      tls = [{
-        secretName = "memo-tls";
-        hosts = [ domain ];
-      }];
+      hosts = [
+        {
+          host = domain;
+          paths = [ { path = "/"; } ];
+        }
+      ];
+      tls = [
+        {
+          secretName = "memo-tls";
+          hosts = [ domain ];
+        }
+      ];
     };
     persistence.data.enabled = false;
     postgresql = {
@@ -32,28 +36,34 @@ mkArgoApp { inherit config lib; } rec {
     };
   };
 
-  extraResources = cfg:
-    with cfg; {
+  extraResources =
+    cfg: with cfg; {
       ingresses = with cfg.ingress; {
         memos.spec = {
           inherit (cfg.ingress) ingressClassName;
-          rules = [{
-            host = domain;
-            http = {
-              paths = [{
-                path = "/";
-                pathType = "ImplementationSpecific";
-                backend.service = {
-                  inherit name;
-                  port.name = "http";
-                };
-              }];
-            };
-          }];
-          tls = [{
-            hosts = [ domain ];
-            secretName = tls.secretName;
-          }];
+          rules = [
+            {
+              host = domain;
+              http = {
+                paths = [
+                  {
+                    path = "/";
+                    pathType = "ImplementationSpecific";
+                    backend.service = {
+                      inherit name;
+                      port.name = "http";
+                    };
+                  }
+                ];
+              };
+            }
+          ];
+          tls = [
+            {
+              hosts = [ domain ];
+              secretName = tls.secretName;
+            }
+          ];
         };
       };
     };

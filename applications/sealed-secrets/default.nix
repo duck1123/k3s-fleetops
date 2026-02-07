@@ -16,7 +16,9 @@ let
 
   values = lib.attrsets.recursiveUpdate defaultValues cfg.values;
   namespace = cfg.namespace;
-in with lib; {
+in
+with lib;
+{
   options.services.sealed-secrets = {
     enable = mkEnableOption "Enable application";
     namespace = mkOption {

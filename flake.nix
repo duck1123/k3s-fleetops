@@ -74,7 +74,7 @@
       ...
     }@inputs:
     let
-      ageRecipients = (self.modules.common.ageRecipients {}).ageRecipients;
+      ageRecipients = (self.modules.common.ageRecipients { }).ageRecipients;
       lib = (import ./lib) // {
         inherit ageRecipients;
         sopsConfig = ./.sops.yaml;

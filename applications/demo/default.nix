@@ -2,9 +2,13 @@
 let
   cfg = config.services.demo;
   defaultNamespace = "demo";
-  labels = { "app.kubernetes.io/name" = "nginx"; };
+  labels = {
+    "app.kubernetes.io/name" = "nginx";
+  };
   namespace = cfg.namespace;
-in with lib; {
+in
+with lib;
+{
   options.services.demo = {
     enable = mkEnableOption "Enable application";
     namespace = mkOption {

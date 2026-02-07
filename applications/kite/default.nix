@@ -27,23 +27,28 @@ mkArgoApp { inherit config lib; } {
     };
   };
 
-  defaultValues = cfg: with cfg; {
-    inherit encryptKey jwtSecret;
-    host = ingress.domain;
+  defaultValues =
+    cfg: with cfg; {
+      inherit encryptKey jwtSecret;
+      host = ingress.domain;
 
-    ingress = with cfg.ingress; {
-      className = ingressClassName;
-      enabled = enable;
-      hosts = [{
-        host = domain;
-        paths = [{
-          path = "/";
-          pathType = "ImplementationSpecific";
-        }];
-      }];
-      tls = [{ hosts = [ domain ]; }];
+      ingress = with cfg.ingress; {
+        className = ingressClassName;
+        enabled = enable;
+        hosts = [
+          {
+            host = domain;
+            paths = [
+              {
+                path = "/";
+                pathType = "ImplementationSpecific";
+              }
+            ];
+          }
+        ];
+        tls = [ { hosts = [ domain ]; } ];
+      };
+
+      nodeSelector."kubernetes.io/hostname" = cfg.hostAffinity;
     };
-
-    nodeSelector."kubernetes.io/hostname" = cfg.hostAffinity;
-  };
 }

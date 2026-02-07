@@ -1,7 +1,14 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 with lib;
-let password-secret = "admin-password";
-in mkArgoApp { inherit config lib; } {
+let
+  password-secret = "admin-password";
+in
+mkArgoApp { inherit config lib; } {
   name = "pihole";
 
   # https://artifacthub.io/packages/helm/mojo2600/pihole
@@ -42,8 +49,8 @@ in mkArgoApp { inherit config lib; } {
     };
   };
 
-  defaultValues = cfg:
-    with cfg; {
+  defaultValues =
+    cfg: with cfg; {
       admin = {
         enabled = true;
         existingSecret = password-secret;
@@ -54,10 +61,12 @@ in mkArgoApp { inherit config lib; } {
 
         enabled = enable;
         hosts = [ domain ];
-        tls = [{
-          secretName = "pihole-tls";
-          hosts = [ domain ];
-        }];
+        tls = [
+          {
+            secretName = "pihole-tls";
+            hosts = [ domain ];
+          }
+        ];
       };
 
       persistence = { inherit (cfg) storageClass; };
@@ -70,7 +79,9 @@ in mkArgoApp { inherit config lib; } {
       inherit ageRecipients lib pkgs;
       inherit (cfg) namespace;
       secretName = password-secret;
-      values = with cfg; { inherit (auth) password; };
+      values = with cfg; {
+        inherit (auth) password;
+      };
     };
   };
 }

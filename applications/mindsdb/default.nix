@@ -17,17 +17,23 @@ mkArgoApp { inherit config lib; } {
     ingress = with cfg.ingress; {
       className = ingressClassName;
       enabled = true;
-      hosts = [{
-        host = domain;
-        paths = [{
-          path = "/";
-          pathType = "ImplementationSpecific";
-        }];
-      }];
-      tls = mkIf tls.enable [{
-        secretName = tls.secretName;
-        hosts = [ domain ];
-      }];
+      hosts = [
+        {
+          host = domain;
+          paths = [
+            {
+              path = "/";
+              pathType = "ImplementationSpecific";
+            }
+          ];
+        }
+      ];
+      tls = mkIf tls.enable [
+        {
+          secretName = tls.secretName;
+          hosts = [ domain ];
+        }
+      ];
     };
   };
 }

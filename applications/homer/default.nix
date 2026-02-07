@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 with lib;
 mkArgoApp { inherit config lib; } {
   name = "homer";
@@ -55,14 +60,18 @@ mkArgoApp { inherit config lib; } {
               title = "App Dashboard";
               columns = 4;
 
-              defaults = { colorTheme = "dark"; };
+              defaults = {
+                colorTheme = "dark";
+              };
 
-              links = [{
-                name = "Nostrudel";
-                icon = "fab fa-github";
-                url = "https://nostrudel.ninja/";
-                target = "_blank";
-              }];
+              links = [
+                {
+                  name = "Nostrudel";
+                  icon = "fab fa-github";
+                  url = "https://nostrudel.ninja/";
+                  target = "_blank";
+                }
+              ];
             };
           };
         };
@@ -72,14 +81,18 @@ mkArgoApp { inherit config lib; } {
     ingress = with cfg.ingress; {
       main = {
         enabled = false;
-        hosts = [{
-          host = domain;
-          paths = [{ path = "/"; }];
-        }];
-        tls = [{
-          secretName = tls.secretName;
-          hosts = [ domain ];
-        }];
+        hosts = [
+          {
+            host = domain;
+            paths = [ { path = "/"; } ];
+          }
+        ];
+        tls = [
+          {
+            secretName = tls.secretName;
+            hosts = [ domain ];
+          }
+        ];
       };
 
       addons.codeserver = with cfg.codeserver.ingress; {
@@ -88,14 +101,18 @@ mkArgoApp { inherit config lib; } {
         ingress = {
           enabled = false;
 
-          hosts = [{
-            host = domain;
-            paths = [{ path = "/"; }];
-          }];
-          tls = [{
-            secretName = "codeserver-tls";
-            hosts = [ domain ];
-          }];
+          hosts = [
+            {
+              host = domain;
+              paths = [ { path = "/"; } ];
+            }
+          ];
+          tls = [
+            {
+              secretName = "codeserver-tls";
+              hosts = [ domain ];
+            }
+          ];
         };
       };
 
@@ -113,23 +130,29 @@ mkArgoApp { inherit config lib; } {
     ingresses = with cfg.ingress; {
       homer.spec = {
         inherit ingressClassName;
-        rules = [{
-          host = domain;
-          http = {
-            paths = [{
-              path = "/";
-              pathType = "ImplementationSpecific";
-              backend.service = {
-                name = "homer";
-                port.name = "http";
-              };
-            }];
-          };
-        }];
-        tls = [{
-          hosts = [ domain ];
-          secretName = "homer-tls";
-        }];
+        rules = [
+          {
+            host = domain;
+            http = {
+              paths = [
+                {
+                  path = "/";
+                  pathType = "ImplementationSpecific";
+                  backend.service = {
+                    name = "homer";
+                    port.name = "http";
+                  };
+                }
+              ];
+            };
+          }
+        ];
+        tls = [
+          {
+            hosts = [ domain ];
+            secretName = "homer-tls";
+          }
+        ];
       };
     };
   };

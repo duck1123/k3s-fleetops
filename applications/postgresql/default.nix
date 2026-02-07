@@ -1,7 +1,15 @@
-{ ageRecipients, config, lib, pkgs, ... }:
+{
+  ageRecipients,
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 with lib;
-let password-secret = "postgresql-password";
-in mkArgoApp { inherit config lib; } rec {
+let
+  password-secret = "postgresql-password";
+in
+mkArgoApp { inherit config lib; } rec {
   name = "postgresql";
 
   # https://artifacthub.io/packages/helm/bitnami/redis
@@ -40,8 +48,7 @@ in mkArgoApp { inherit config lib; } rec {
     };
 
     image = mkOption {
-      description =
-        mdDoc "The PostgreSQL image (should include pgvector for Immich)";
+      description = mdDoc "The PostgreSQL image (should include pgvector for Immich)";
       type = types.str;
       default = "pgvector/pgvector:pg17";
     };
@@ -134,8 +141,7 @@ in mkArgoApp { inherit config lib; } rec {
       };
 
       schedule = mkOption {
-        description =
-          mdDoc "Cron schedule for backups (default: daily at 2 AM)";
+        description = mdDoc "Cron schedule for backups (default: daily at 2 AM)";
         type = types.str;
         default = "0 2 * * *";
       };
@@ -155,41 +161,46 @@ in mkArgoApp { inherit config lib; } rec {
 
     extraDatabases = mkOption {
       description = mdDoc "Additional databases to create (list of {name, username, password})";
-      type = types.listOf (types.submodule {
-        options = {
-          name = mkOption {
-            type = types.str;
-            description = mdDoc "Database name";
+      type = types.listOf (
+        types.submodule {
+          options = {
+            name = mkOption {
+              type = types.str;
+              description = mdDoc "Database name";
+            };
+            username = mkOption {
+              type = types.str;
+              description = mdDoc "Database username";
+            };
+            password = mkOption {
+              type = types.str;
+              description = mdDoc "Database password";
+            };
           };
-          username = mkOption {
-            type = types.str;
-            description = mdDoc "Database username";
-          };
-          password = mkOption {
-            type = types.str;
-            description = mdDoc "Database password";
-          };
-        };
-      });
+        }
+      );
       default = [ ];
     };
   };
 
-  defaultValues = cfg:
+  defaultValues =
+    cfg:
     let
       imageStr = cfg.image;
       parts = lib.splitString "/" imageStr;
-      hasExplicitRegistry = lib.length parts > 2
-        || (lib.length parts == 2 && lib.hasInfix "." (lib.head parts));
+      hasExplicitRegistry =
+        lib.length parts > 2 || (lib.length parts == 2 && lib.hasInfix "." (lib.head parts));
       registry = if hasExplicitRegistry then lib.head parts else "docker.io";
-      repoAndTag = if hasExplicitRegistry then
-        lib.concatStringsSep "/" (lib.tail parts)
-      else
-        lib.concatStringsSep "/" parts;
+      repoAndTag =
+        if hasExplicitRegistry then
+          lib.concatStringsSep "/" (lib.tail parts)
+        else
+          lib.concatStringsSep "/" parts;
       tagParts = lib.splitString ":" repoAndTag;
       repository = lib.head tagParts;
       tag = if lib.length tagParts > 1 then lib.last tagParts else "latest";
-    in {
+    in
+    {
       image = { inherit registry repository tag; };
       nodeSelector."kubernetes.io/hostname" = cfg.hostAffinity;
 
@@ -217,12 +228,16 @@ in mkArgoApp { inherit config lib; } rec {
       secretName = password-secret;
       values = with cfg; {
         inherit (auth)
-          adminPassword adminUsername replicationPassword userPassword;
+          adminPassword
+          adminUsername
+          replicationPassword
+          userPassword
+          ;
       };
     };
 
     # Create a Job to initialize extra databases after PostgreSQL is ready
-    jobs = lib.optionalAttrs (cfg.extraDatabases != []) {
+    jobs = lib.optionalAttrs (cfg.extraDatabases != [ ]) {
       "${name}-init-databases" = {
         metadata = {
           name = "${name}-init-databases";
@@ -326,61 +341,67 @@ in mkArgoApp { inherit config lib; } rec {
               template = {
                 spec = {
                   restartPolicy = "OnFailure";
-                  containers = [{
-                    name = "backup";
-                    image = cfg.image;
-                    command = [
-                      "sh"
-                      "-c"
-                      ''
-                        set -e
-                        BACKUP_DIR="/backups"
-                        TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-                        BACKUP_FILE="$BACKUP_DIR/postgresql-backup-$TIMESTAMP.sql.gz"
+                  containers = [
+                    {
+                      name = "backup";
+                      image = cfg.image;
+                      command = [
+                        "sh"
+                        "-c"
+                        ''
+                          set -e
+                          BACKUP_DIR="/backups"
+                          TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+                          BACKUP_FILE="$BACKUP_DIR/postgresql-backup-$TIMESTAMP.sql.gz"
 
-                        echo "Starting backup at $(date)"
+                          echo "Starting backup at $(date)"
 
-                        # Create backup of all databases
-                        pg_dumpall \
-                          -h ${name}.${cfg.namespace} \
-                          -U postgres \
-                          -c \
-                          | gzip > "$BACKUP_FILE"
+                          # Create backup of all databases
+                          pg_dumpall \
+                            -h ${name}.${cfg.namespace} \
+                            -U postgres \
+                            -c \
+                            | gzip > "$BACKUP_FILE"
 
-                        echo "Backup completed: $BACKUP_FILE"
-                        echo "Backup size: $(du -h "$BACKUP_FILE" | cut -f1)"
+                          echo "Backup completed: $BACKUP_FILE"
+                          echo "Backup size: $(du -h "$BACKUP_FILE" | cut -f1)"
 
-                        # Clean up old backups (keep last ${toString cfg.backup.retentionDays} days)
-                        find "$BACKUP_DIR" -name "postgresql-backup-*.sql.gz" -type f -mtime +${
-                          toString cfg.backup.retentionDays
-                        } -delete
+                          # Clean up old backups (keep last ${toString cfg.backup.retentionDays} days)
+                          find "$BACKUP_DIR" -name "postgresql-backup-*.sql.gz" -type f -mtime +${toString cfg.backup.retentionDays} -delete
 
-                        echo "Cleanup completed. Remaining backups:"
-                        ls -lh "$BACKUP_DIR"/*.sql.gz 2>/dev/null || echo "No backups found"
+                          echo "Cleanup completed. Remaining backups:"
+                          ls -lh "$BACKUP_DIR"/*.sql.gz 2>/dev/null || echo "No backups found"
 
-                        echo "Backup job completed at $(date)"
-                      ''
-                    ];
-                    env = [{
-                      name = "PGPASSWORD";
-                      valueFrom = {
-                        secretKeyRef = {
-                          name = password-secret;
-                          key = "adminPassword";
-                        };
-                      };
-                    }];
-                    volumeMounts = [{
-                      mountPath = "/backups";
+                          echo "Backup job completed at $(date)"
+                        ''
+                      ];
+                      env = [
+                        {
+                          name = "PGPASSWORD";
+                          valueFrom = {
+                            secretKeyRef = {
+                              name = password-secret;
+                              key = "adminPassword";
+                            };
+                          };
+                        }
+                      ];
+                      volumeMounts = [
+                        {
+                          mountPath = "/backups";
+                          name = "backup-storage";
+                        }
+                      ];
+                    }
+                  ];
+                  volumes = [
+                    {
                       name = "backup-storage";
-                    }];
-                  }];
-                  volumes = [{
-                    name = "backup-storage";
-                    persistentVolumeClaim = {
-                      claimName = "${name}-backups";
-                    };
-                  }];
+                      persistentVolumeClaim = {
+                        claimName = "${name}-backups";
+                      };
+                    }
+                  ];
                 };
               };
             };
@@ -414,68 +435,96 @@ in mkArgoApp { inherit config lib; } rec {
     statefulSets = lib.optionalAttrs cfg.persistenceEnabled {
       ${name} = {
         spec = {
-          volumeClaimTemplates = [{
-            metadata = {
-              name = "postgres-data";
-              labels = {
-                "app.kubernetes.io/instance" = name;
-                "app.kubernetes.io/name" = "postgres";
-              };
-            };
-            spec = {
-              accessModes = [ "ReadWriteOnce" ];
-              resources = {
-                requests = {
-                  storage = cfg.persistenceSize;
+          volumeClaimTemplates = [
+            {
+              metadata = {
+                name = "postgres-data";
+                labels = {
+                  "app.kubernetes.io/instance" = name;
+                  "app.kubernetes.io/name" = "postgres";
                 };
               };
-              storageClassName = cfg.storageClass;
-            };
-          }];
+              spec = {
+                accessModes = [ "ReadWriteOnce" ];
+                resources = {
+                  requests = {
+                    storage = cfg.persistenceSize;
+                  };
+                };
+                storageClassName = cfg.storageClass;
+              };
+            }
+          ];
           # Override volumes list and health checks
           # Merge health check overrides with Helm-generated container by name
           # Use mkForce on probe fields to override Helm chart defaults
           template = {
             spec = {
-              containers = [{
-                name = "postgres";
-                # Health checks with less aggressive settings (using mkForce to override Helm values)
-                livenessProbe = lib.mkForce {
-                  exec = {
-                    command = [ "sh" "-c" "pg_isready -h localhost" ];
+              containers = [
+                {
+                  name = "postgres";
+                  # Health checks with less aggressive settings (using mkForce to override Helm values)
+                  livenessProbe = lib.mkForce {
+                    exec = {
+                      command = [
+                        "sh"
+                        "-c"
+                        "pg_isready -h localhost"
+                      ];
+                    };
+                    initialDelaySeconds = cfg.healthCheck.livenessInitialDelaySeconds;
+                    periodSeconds = cfg.healthCheck.livenessPeriodSeconds;
+                    timeoutSeconds = cfg.healthCheck.livenessTimeoutSeconds;
+                    successThreshold = 1;
+                    failureThreshold = cfg.healthCheck.livenessFailureThreshold;
                   };
-                  initialDelaySeconds = cfg.healthCheck.livenessInitialDelaySeconds;
-                  periodSeconds = cfg.healthCheck.livenessPeriodSeconds;
-                  timeoutSeconds = cfg.healthCheck.livenessTimeoutSeconds;
-                  successThreshold = 1;
-                  failureThreshold = cfg.healthCheck.livenessFailureThreshold;
-                };
-                readinessProbe = lib.mkForce {
-                  exec = {
-                    command = [ "sh" "-c" "pg_isready -h localhost" ];
+                  readinessProbe = lib.mkForce {
+                    exec = {
+                      command = [
+                        "sh"
+                        "-c"
+                        "pg_isready -h localhost"
+                      ];
+                    };
+                    initialDelaySeconds = 10;
+                    periodSeconds = cfg.healthCheck.readinessPeriodSeconds;
+                    timeoutSeconds = cfg.healthCheck.readinessTimeoutSeconds;
+                    successThreshold = 1;
+                    failureThreshold = cfg.healthCheck.readinessFailureThreshold;
                   };
-                  initialDelaySeconds = 10;
-                  periodSeconds = cfg.healthCheck.readinessPeriodSeconds;
-                  timeoutSeconds = cfg.healthCheck.readinessTimeoutSeconds;
-                  successThreshold = 1;
-                  failureThreshold = cfg.healthCheck.readinessFailureThreshold;
-                };
-                startupProbe = lib.mkForce {
-                  exec = {
-                    command = [ "sh" "-c" "pg_isready -h localhost" ];
+                  startupProbe = lib.mkForce {
+                    exec = {
+                      command = [
+                        "sh"
+                        "-c"
+                        "pg_isready -h localhost"
+                      ];
+                    };
+                    initialDelaySeconds = 10;
+                    periodSeconds = cfg.healthCheck.startupPeriodSeconds;
+                    timeoutSeconds = cfg.healthCheck.startupTimeoutSeconds;
+                    successThreshold = 1;
+                    failureThreshold = cfg.healthCheck.startupFailureThreshold;
                   };
-                  initialDelaySeconds = 10;
-                  periodSeconds = cfg.healthCheck.startupPeriodSeconds;
-                  timeoutSeconds = cfg.healthCheck.startupTimeoutSeconds;
-                  successThreshold = 1;
-                  failureThreshold = cfg.healthCheck.startupFailureThreshold;
-                };
-              }];
+                }
+              ];
               volumes = [
-                { name = "run"; emptyDir = {}; }
-                { name = "tmp"; emptyDir = {}; }
-                { name = "scripts"; emptyDir = {}; }
-                { name = "configs"; emptyDir = {}; }
+                {
+                  name = "run";
+                  emptyDir = { };
+                }
+                {
+                  name = "tmp";
+                  emptyDir = { };
+                }
+                {
+                  name = "scripts";
+                  emptyDir = { };
+                }
+                {
+                  name = "configs";
+                  emptyDir = { };
+                }
                 {
                   name = "initscripts";
                   configMap = {

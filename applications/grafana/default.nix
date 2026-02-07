@@ -1,7 +1,16 @@
-{ ageRecipients, charts, config, lib, pkgs, ... }:
+{
+  ageRecipients,
+  charts,
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 with lib;
-let grafana-secret = "grafana-admin";
-in mkArgoApp { inherit config lib; } {
+let
+  grafana-secret = "grafana-admin";
+in
+mkArgoApp { inherit config lib; } {
   name = "grafana";
 
   # https://artifacthub.io/packages/helm/grafana/grafana
@@ -17,38 +26,40 @@ in mkArgoApp { inherit config lib; } {
     };
 
     dashboardProviders."dashboardproviders.yaml" = {
-        apiVersion = 1;
-        providers = [
-          {
-            name = "default";
-            orgId = 1;
-            folder = "";
-            type = "file";
-            disableDeletion = false;
-            editable = true;
-            options.path = "/var/lib/grafana/dashboards/default";
-          }
-        ] ++ (cfg.additionalDashboardProviders or [ ]);
-      };
+      apiVersion = 1;
+      providers = [
+        {
+          name = "default";
+          orgId = 1;
+          folder = "";
+          type = "file";
+          disableDeletion = false;
+          editable = true;
+          options.path = "/var/lib/grafana/dashboards/default";
+        }
+      ]
+      ++ (cfg.additionalDashboardProviders or [ ]);
+    };
 
-        dashboards = lib.recursiveUpdate {
+    dashboards = lib.recursiveUpdate {
       default.system-performance-nfs.json = builtins.readFile ./dashboards/system-performance.json;
     } (cfg.additionalDashboards or { });
 
     datasources."datasources.yaml" = {
-        apiVersion = 1;
-        datasources = [
-          {
-            name = "Prometheus";
-            type = "prometheus";
-            access = "proxy";
-            url = "http://prometheus-kube-prometheus-prometheus.prometheus:9090";
-            isDefault = true;
-            editable = true;
-            jsonData.httpMethod = "POST";
-          }
-        ] ++ (cfg.additionalDatasources or [ ]);
-      };
+      apiVersion = 1;
+      datasources = [
+        {
+          name = "Prometheus";
+          type = "prometheus";
+          access = "proxy";
+          url = "http://prometheus-kube-prometheus-prometheus.prometheus:9090";
+          isDefault = true;
+          editable = true;
+          jsonData.httpMethod = "POST";
+        }
+      ]
+      ++ (cfg.additionalDatasources or [ ]);
+    };
 
     ingress = with cfg.ingress; {
       inherit ingressClassName;
@@ -60,10 +71,12 @@ in mkArgoApp { inherit config lib; } {
       enabled = true;
       hosts = [ domain ];
 
-      tls = [{
-        secretName = "grafana-tls";
-        hosts = [ domain ];
-      }];
+      tls = [
+        {
+          secretName = "grafana-tls";
+          hosts = [ domain ];
+        }
+      ];
     };
 
     nodeSelector."kubernetes.io/hostname" = cfg.hostAffinity;
@@ -84,20 +97,25 @@ in mkArgoApp { inherit config lib; } {
       };
     };
 
-    grafana.ini = lib.recursiveUpdate {
-      server = {
-        domain = cfg.ingress.domain;
-        root_url = "https://${cfg.ingress.domain}";
-      };
-    } (lib.optionalAttrs (cfg.enableProxyAuth or false) {
-      "auth.proxy" = {
-        enabled = "true";
-        header_name = "X-WebAuth-User";
-        header_property = "username";
-        auto_sign_up = "true";
-        enable_login_token = "true";
-      };
-    });
+    grafana.ini =
+      lib.recursiveUpdate
+        {
+          server = {
+            domain = cfg.ingress.domain;
+            root_url = "https://${cfg.ingress.domain}";
+          };
+        }
+        (
+          lib.optionalAttrs (cfg.enableProxyAuth or false) {
+            "auth.proxy" = {
+              enabled = "true";
+              header_name = "X-WebAuth-User";
+              header_property = "username";
+              auto_sign_up = "true";
+              enable_login_token = "true";
+            };
+          }
+        );
   };
 
   extraOptions = {

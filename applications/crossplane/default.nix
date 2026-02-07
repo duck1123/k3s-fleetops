@@ -14,6 +14,7 @@ mkArgoApp { inherit config lib; } {
   defaultValues = cfg: { image.pullPolicy = "Always"; };
 
   extraConfig = cfg: { nixidy.resourceImports = [ ./generated.nix ]; };
-} // {
+}
+// {
   imports = [ ./providers ];
 }

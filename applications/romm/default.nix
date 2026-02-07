@@ -1,8 +1,16 @@
-{ ageRecipients, config, lib, pkgs, ... }:
+{
+  ageRecipients,
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 with lib;
-let password-secret = "romm-database-password";
-    admin-secret = "romm-admin-password";
-in mkArgoApp { inherit config lib; } rec {
+let
+  password-secret = "romm-database-password";
+  admin-secret = "romm-admin-password";
+in
+mkArgoApp { inherit config lib; } rec {
   name = "romm";
   uses-ingress = true;
 
@@ -156,164 +164,166 @@ in mkArgoApp { inherit config lib; } rec {
           spec = {
             automountServiceAccountToken = true;
             serviceAccountName = "default";
-            containers = [{
-              inherit name;
-              image = cfg.image;
-              imagePullPolicy = "IfNotPresent";
-              env = [
-                # Try DB_* format (without DATABASE_ prefix)
-                {
-                  name = "DB_HOST";
-                  value = cfg.database.host;
-                }
-                {
-                  name = "DB_PORT";
-                  value = "${toString cfg.database.port}";
-                }
-                {
-                  name = "DB_NAME";
-                  value = cfg.database.name;
-                }
-                {
-                  name = "DB_USER";
-                  value = cfg.database.username;
-                }
-                {
-                  name = "DB_PASSWD";
-                  valueFrom.secretKeyRef = {
-                    name = password-secret;
-                    key = "password";
-                  };
-                }
-                # Also provide DATABASE_* format as fallback
-                {
-                  name = "DATABASE_HOST";
-                  value = cfg.database.host;
-                }
-                {
-                  name = "DATABASE_PORT";
-                  value = "${toString cfg.database.port}";
-                }
-                {
-                  name = "DATABASE_NAME";
-                  value = cfg.database.name;
-                }
-                {
-                  name = "DATABASE_USER";
-                  value = cfg.database.username;
-                }
-                {
-                  name = "DATABASE_PASSWORD";
-                  valueFrom.secretKeyRef = {
-                    name = password-secret;
-                    key = "password";
-                  };
-                }
-                {
-                  name = "ROMM_AUTH_SECRET_KEY";
-                  valueFrom.secretKeyRef = {
-                    name = admin-secret;
-                    key = "authSecretKey";
-                  };
-                }
-                {
-                  name = "ROMM_ADMIN_USERNAME";
-                  valueFrom.secretKeyRef = {
-                    name = admin-secret;
-                    key = "username";
-                  };
-                }
-                {
-                  name = "ROMM_ADMIN_PASSWORD";
-                  valueFrom.secretKeyRef = {
-                    name = admin-secret;
-                    key = "password";
-                  };
-                }
-                {
-                  name = "ROMM_CONFIG_PATH";
-                  value = "/romm/config/config.yml";
-                }
-                # Nginx bind configuration
-                # Nginx should listen on 8080, gunicorn runs on 5000
-                # Based on Dockerfile: EXPOSE 8080 6379/tcp
-                # The nginx template likely uses PORT for the listen directive
-                {
-                  name = "HOST";
-                  value = "0.0.0.0";
-                }
-                {
-                  name = "PORT";
-                  value = "8080";
-                }
-                {
-                  name = "ROMM_HOST";
-                  value = "0.0.0.0";
-                }
-                {
-                  name = "ROMM_PORT";
-                  value = "8080";
-                }
-                {
-                  name = "NGINX_PORT";
-                  value = "8080";
-                }
-                {
-                  name = "GUNICORN_PORT";
-                  value = "${toString cfg.service.port}";
-                }
-                {
-                  name = "GUNICORN_HOST";
-                  value = "127.0.0.1";
-                }
-                # Valkey/Redis configuration - romm uses internal valkey by default
-                # If you want to use external Redis, uncomment and configure:
-                # {
-                #   name = "REDIS_HOST";
-                #   value = "redis.redis";
-                # }
-                # {
-                #   name = "REDIS_PORT";
-                #   value = "6379";
-                # }
-              ];
+            containers = [
+              {
+                inherit name;
+                image = cfg.image;
+                imagePullPolicy = "IfNotPresent";
+                env = [
+                  # Try DB_* format (without DATABASE_ prefix)
+                  {
+                    name = "DB_HOST";
+                    value = cfg.database.host;
+                  }
+                  {
+                    name = "DB_PORT";
+                    value = "${toString cfg.database.port}";
+                  }
+                  {
+                    name = "DB_NAME";
+                    value = cfg.database.name;
+                  }
+                  {
+                    name = "DB_USER";
+                    value = cfg.database.username;
+                  }
+                  {
+                    name = "DB_PASSWD";
+                    valueFrom.secretKeyRef = {
+                      name = password-secret;
+                      key = "password";
+                    };
+                  }
+                  # Also provide DATABASE_* format as fallback
+                  {
+                    name = "DATABASE_HOST";
+                    value = cfg.database.host;
+                  }
+                  {
+                    name = "DATABASE_PORT";
+                    value = "${toString cfg.database.port}";
+                  }
+                  {
+                    name = "DATABASE_NAME";
+                    value = cfg.database.name;
+                  }
+                  {
+                    name = "DATABASE_USER";
+                    value = cfg.database.username;
+                  }
+                  {
+                    name = "DATABASE_PASSWORD";
+                    valueFrom.secretKeyRef = {
+                      name = password-secret;
+                      key = "password";
+                    };
+                  }
+                  {
+                    name = "ROMM_AUTH_SECRET_KEY";
+                    valueFrom.secretKeyRef = {
+                      name = admin-secret;
+                      key = "authSecretKey";
+                    };
+                  }
+                  {
+                    name = "ROMM_ADMIN_USERNAME";
+                    valueFrom.secretKeyRef = {
+                      name = admin-secret;
+                      key = "username";
+                    };
+                  }
+                  {
+                    name = "ROMM_ADMIN_PASSWORD";
+                    valueFrom.secretKeyRef = {
+                      name = admin-secret;
+                      key = "password";
+                    };
+                  }
+                  {
+                    name = "ROMM_CONFIG_PATH";
+                    value = "/romm/config/config.yml";
+                  }
+                  # Nginx bind configuration
+                  # Nginx should listen on 8080, gunicorn runs on 5000
+                  # Based on Dockerfile: EXPOSE 8080 6379/tcp
+                  # The nginx template likely uses PORT for the listen directive
+                  {
+                    name = "HOST";
+                    value = "0.0.0.0";
+                  }
+                  {
+                    name = "PORT";
+                    value = "8080";
+                  }
+                  {
+                    name = "ROMM_HOST";
+                    value = "0.0.0.0";
+                  }
+                  {
+                    name = "ROMM_PORT";
+                    value = "8080";
+                  }
+                  {
+                    name = "NGINX_PORT";
+                    value = "8080";
+                  }
+                  {
+                    name = "GUNICORN_PORT";
+                    value = "${toString cfg.service.port}";
+                  }
+                  {
+                    name = "GUNICORN_HOST";
+                    value = "127.0.0.1";
+                  }
+                  # Valkey/Redis configuration - romm uses internal valkey by default
+                  # If you want to use external Redis, uncomment and configure:
+                  # {
+                  #   name = "REDIS_HOST";
+                  #   value = "redis.redis";
+                  # }
+                  # {
+                  #   name = "REDIS_PORT";
+                  #   value = "6379";
+                  # }
+                ];
 
-              ports = [
-                {
-                  containerPort = 8080;
-                  name = "http";
-                  protocol = "TCP";
-                }
-                {
-                  containerPort = 6379;
-                  name = "redis";
-                  protocol = "TCP";
-                }
-              ];
+                ports = [
+                  {
+                    containerPort = 8080;
+                    name = "http";
+                    protocol = "TCP";
+                  }
+                  {
+                    containerPort = 6379;
+                    name = "redis";
+                    protocol = "TCP";
+                  }
+                ];
 
-              volumeMounts = [
-                {
-                  mountPath = "/romm/data";
-                  name = "data";
-                }
-                {
-                  mountPath = "/romm/config";
-                  name = "config";
-                }
-                {
-                  mountPath = "/romm/library";
-                  name = "library";
-                }
-                {
-                  mountPath = "/romm/assets";
-                  name = "assets";
-                }
-                {
-                  mountPath = "/romm/resources";
-                  name = "resources";
-                }
-              ];
-            }];
+                volumeMounts = [
+                  {
+                    mountPath = "/romm/data";
+                    name = "data";
+                  }
+                  {
+                    mountPath = "/romm/config";
+                    name = "config";
+                  }
+                  {
+                    mountPath = "/romm/library";
+                    name = "library";
+                  }
+                  {
+                    mountPath = "/romm/assets";
+                    name = "assets";
+                  }
+                  {
+                    mountPath = "/romm/resources";
+                    name = "resources";
+                  }
+                ];
+              }
+            ];
             volumes = [
               {
                 name = "data";
@@ -395,38 +405,47 @@ in mkArgoApp { inherit config lib; } rec {
         spec = {
           inherit ingressClassName;
 
-          rules = [{
-            host = domain;
-            http.paths = [{
-              backend.service = {
-                inherit name;
-                port.name = "http";
-              };
-              path = "/";
-              pathType = "ImplementationSpecific";
-            }];
-          }];
-          tls = [{ hosts = [ domain ]; }];
+          rules = [
+            {
+              host = domain;
+              http.paths = [
+                {
+                  backend.service = {
+                    inherit name;
+                    port.name = "http";
+                  };
+                  path = "/";
+                  pathType = "ImplementationSpecific";
+                }
+              ];
+            }
+          ];
+          tls = [ { hosts = [ domain ]; } ];
         };
       };
-    } // lib.optionalAttrs (cfg.ingress.localIngress.enable) {
+    }
+    // lib.optionalAttrs (cfg.ingress.localIngress.enable) {
       # Optional local-only ingress using Traefik
       "${name}-local" = {
         spec = with cfg.ingress.localIngress; {
           ingressClassName = "traefik";
 
-          rules = [{
-            host = domain;
-            http.paths = [{
-              backend.service = {
-                inherit name;
-                port.name = "http";
-              };
-              path = "/";
-              pathType = "ImplementationSpecific";
-            }];
-          }];
-          tls = lib.optional tls.enable [{ hosts = [ domain ]; }];
+          rules = [
+            {
+              host = domain;
+              http.paths = [
+                {
+                  backend.service = {
+                    inherit name;
+                    port.name = "http";
+                  };
+                  path = "/";
+                  pathType = "ImplementationSpecific";
+                }
+              ];
+            }
+          ];
+          tls = lib.optional tls.enable [ { hosts = [ domain ]; } ];
         };
       };
     };
@@ -442,36 +461,48 @@ in mkArgoApp { inherit config lib; } rec {
         resources.requests.storage = "1Gi";
         storageClassName = cfg.storageClassName;
       };
-      "${name}-library".spec = if cfg.nfs.enable then {
-        accessModes = [ "ReadWriteMany" ];
-        resources.requests.storage = "1Gi";
-        storageClassName = "";
-        volumeName = "${name}-${name}-library-nfs";
-      } else {
-        accessModes = [ "ReadWriteOnce" ];
-        resources.requests.storage = "5Gi";
-        storageClassName = cfg.storageClassName;
-      };
-      "${name}-assets".spec = if cfg.nfs.enable then {
-        accessModes = [ "ReadWriteMany" ];
-        resources.requests.storage = "1Gi";
-        storageClassName = "";
-        volumeName = "${name}-${name}-assets-nfs";
-      } else {
-        accessModes = [ "ReadWriteOnce" ];
-        resources.requests.storage = "5Gi";
-        storageClassName = cfg.storageClassName;
-      };
-      "${name}-resources".spec = if cfg.nfs.enable then {
-        accessModes = [ "ReadWriteMany" ];
-        resources.requests.storage = "1Gi";
-        storageClassName = "";
-        volumeName = "${name}-${name}-resources-nfs";
-      } else {
-        accessModes = [ "ReadWriteOnce" ];
-        resources.requests.storage = "5Gi";
-        storageClassName = cfg.storageClassName;
-      };
+      "${name}-library".spec =
+        if cfg.nfs.enable then
+          {
+            accessModes = [ "ReadWriteMany" ];
+            resources.requests.storage = "1Gi";
+            storageClassName = "";
+            volumeName = "${name}-${name}-library-nfs";
+          }
+        else
+          {
+            accessModes = [ "ReadWriteOnce" ];
+            resources.requests.storage = "5Gi";
+            storageClassName = cfg.storageClassName;
+          };
+      "${name}-assets".spec =
+        if cfg.nfs.enable then
+          {
+            accessModes = [ "ReadWriteMany" ];
+            resources.requests.storage = "1Gi";
+            storageClassName = "";
+            volumeName = "${name}-${name}-assets-nfs";
+          }
+        else
+          {
+            accessModes = [ "ReadWriteOnce" ];
+            resources.requests.storage = "5Gi";
+            storageClassName = cfg.storageClassName;
+          };
+      "${name}-resources".spec =
+        if cfg.nfs.enable then
+          {
+            accessModes = [ "ReadWriteMany" ];
+            resources.requests.storage = "1Gi";
+            storageClassName = "";
+            volumeName = "${name}-${name}-resources-nfs";
+          }
+        else
+          {
+            accessModes = [ "ReadWriteOnce" ];
+            resources.requests.storage = "5Gi";
+            storageClassName = cfg.storageClassName;
+          };
     };
 
     # Create NFS PersistentVolumes for roms when NFS is enabled
@@ -487,7 +518,11 @@ in mkArgoApp { inherit config lib; } rec {
             storage = "1Ti";
           };
           accessModes = [ "ReadWriteMany" ];
-          mountOptions = [ "nolock" "soft" "timeo=30" ];
+          mountOptions = [
+            "nolock"
+            "soft"
+            "timeo=30"
+          ];
           nfs = {
             server = cfg.nfs.server;
             path = cfg.nfs.libraryPath;
@@ -506,7 +541,11 @@ in mkArgoApp { inherit config lib; } rec {
             storage = "1Ti";
           };
           accessModes = [ "ReadWriteMany" ];
-          mountOptions = [ "nolock" "soft" "timeo=30" ];
+          mountOptions = [
+            "nolock"
+            "soft"
+            "timeo=30"
+          ];
           nfs = {
             server = cfg.nfs.server;
             path = cfg.nfs.assetsPath;
@@ -525,7 +564,11 @@ in mkArgoApp { inherit config lib; } rec {
             storage = "1Ti";
           };
           accessModes = [ "ReadWriteMany" ];
-          mountOptions = [ "nolock" "soft" "timeo=30" ];
+          mountOptions = [
+            "nolock"
+            "soft"
+            "timeo=30"
+          ];
           nfs = {
             server = cfg.nfs.server;
             path = cfg.nfs.resourcesPath;

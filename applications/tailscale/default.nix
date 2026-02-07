@@ -1,4 +1,10 @@
-{ ageRecipients, config, lib, pkgs, ... }:
+{
+  ageRecipients,
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 with lib;
 mkArgoApp { inherit config lib; } {
   name = "tailscale";

@@ -18,18 +18,24 @@ mkArgoApp { inherit config lib; } rec {
       enabled = true;
       className = ingressClassName;
 
-      hosts = [{
-        host = domain;
-        paths = [{
-          path = "/";
-          pathType = "Prefix";
-        }];
-      }];
+      hosts = [
+        {
+          host = domain;
+          paths = [
+            {
+              path = "/";
+              pathType = "Prefix";
+            }
+          ];
+        }
+      ];
 
-      tls = [{
-        secretName = "n8n-tls";
-        hosts = [ domain ];
-      }];
+      tls = [
+        {
+          secretName = "n8n-tls";
+          hosts = [ domain ];
+        }
+      ];
     };
   };
 }

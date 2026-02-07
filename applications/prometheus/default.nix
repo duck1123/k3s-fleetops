@@ -4,7 +4,11 @@ mkArgoApp { inherit config lib; } {
   name = "prometheus";
 
   extraAppConfig = cfg: {
-    syncPolicy.finalSyncOpts = [ "ServerSideApply=true" "Replace=true" "CreateNamespace=true" ];
+    syncPolicy.finalSyncOpts = [
+      "ServerSideApply=true"
+      "Replace=true"
+      "CreateNamespace=true"
+    ];
   };
 
   chart = lib.helm.downloadHelmChart {
@@ -60,7 +64,7 @@ mkArgoApp { inherit config lib; } {
     prometheus = {
       enabled = true;
       prometheusSpec = {
-        additionalScrapeConfigs = cfg.additionalScrapeConfigs or [];
+        additionalScrapeConfigs = cfg.additionalScrapeConfigs or [ ];
         nodeSelector."kubernetes.io/hostname" = cfg.hostAffinity;
         podMonitorSelector = { };
         podMonitorSelectorNilUsesHelmValues = false;

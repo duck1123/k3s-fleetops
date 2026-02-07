@@ -14,11 +14,13 @@ mkArgoApp { inherit config lib; } {
 
   defaultValues = cfg: {
     controller = {
-      extraEnvVars = [{
-        # https://argo-workflows.readthedocs.io/en/latest/executor_plugins/
-        name = "ARGO_EXECUTOR_PLUGINS";
-        value = "true";
-      }];
+      extraEnvVars = [
+        {
+          # https://argo-workflows.readthedocs.io/en/latest/executor_plugins/
+          name = "ARGO_EXECUTOR_PLUGINS";
+          value = "true";
+        }
+      ];
 
       persistence.archive.enabled = true;
 

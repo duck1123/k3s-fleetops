@@ -1,9 +1,16 @@
-{ ageRecipients, config, lib, pkgs, ... }:
+{
+  ageRecipients,
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 with lib;
 let
   hub-secret = "jupyterhub-hub2";
   postgresql-secret = "jupyterhub-postgresql";
-in mkArgoApp { inherit config lib; } {
+in
+mkArgoApp { inherit config lib; } {
   name = "jupyterhub";
 
   # https://artifacthub.io/packages/helm/bitnami/jupyterhub
@@ -86,7 +93,8 @@ in mkArgoApp { inherit config lib; } {
     };
   };
 
-  extraResources = cfg:
+  extraResources =
+    cfg:
     let
       hub-values = lib.toYAML {
         inherit pkgs;
@@ -100,15 +108,17 @@ in mkArgoApp { inherit config lib; } {
           name = hub-secret;
           inherit (cfg) namespace;
         };
-        spec.secretTemplates = [{
-          name = hub-secret;
-          stringData = {
-            "hub.config.CryptKeeper.keys" = cfg.cryptkeeperKeys;
-            "hub.config.JupyterHub.cookie_secret" = cfg.cookieSecret;
-            "proxy-token" = cfg.proxyToken;
-            "values.yaml" = hub-values;
-          };
-        }];
+        spec.secretTemplates = [
+          {
+            name = hub-secret;
+            stringData = {
+              "hub.config.CryptKeeper.keys" = cfg.cryptkeeperKeys;
+              "hub.config.JupyterHub.cookie_secret" = cfg.cookieSecret;
+              "proxy-token" = cfg.proxyToken;
+              "values.yaml" = hub-values;
+            };
+          }
+        ];
       };
 
       hub-secret-config-yaml = lib.toYAML {
@@ -122,9 +132,9 @@ in mkArgoApp { inherit config lib; } {
         value = hub-secret-config-yaml;
       };
 
-      encrypted-secret-config-object =
-        builtins.fromJSON encrypted-secret-config;
-    in {
+      encrypted-secret-config-object = builtins.fromJSON encrypted-secret-config;
+    in
+    {
       sopsSecrets = {
         ${hub-secret} = {
           inherit (encrypted-secret-config-object) sops spec;

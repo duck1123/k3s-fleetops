@@ -1,8 +1,16 @@
-{ ageRecipients, config, lib, pkgs, ... }:
+{
+  ageRecipients,
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 with lib;
-let password-secret = "immich-database-password";
-    redis-secret = "immich-redis-password";
-in mkArgoApp { inherit config lib; } rec {
+let
+  password-secret = "immich-database-password";
+  redis-secret = "immich-redis-password";
+in
+mkArgoApp { inherit config lib; } rec {
   name = "immich";
   uses-ingress = true;
 
@@ -161,14 +169,18 @@ in mkArgoApp { inherit config lib; } rec {
 
       # Persistence configuration
       persistence = {
-        library = if cfg.nfs.enable then {
-          existingClaim = "${name}-${name}-library";
-        } else {
-          enabled = true;
-          storageClass = cfg.storageClassName;
-          accessMode = "ReadWriteOnce";
-          size = "100Gi";
-        };
+        library =
+          if cfg.nfs.enable then
+            {
+              existingClaim = "${name}-${name}-library";
+            }
+          else
+            {
+              enabled = true;
+              storageClass = cfg.storageClassName;
+              accessMode = "ReadWriteOnce";
+              size = "100Gi";
+            };
         upload = {
           enabled = true;
           storageClass = cfg.storageClassName;
@@ -206,21 +218,25 @@ in mkArgoApp { inherit config lib; } rec {
       spec = with cfg.ingress; {
         inherit ingressClassName;
 
-        rules = [{
-          host = domain;
+        rules = [
+          {
+            host = domain;
 
-          http.paths = [{
-            backend.service = {
-              name = "${name}-server";
-              port.name = "http";
-            };
+            http.paths = [
+              {
+                backend.service = {
+                  name = "${name}-server";
+                  port.name = "http";
+                };
 
-            path = "/";
-            pathType = "ImplementationSpecific";
-          }];
-        }];
+                path = "/";
+                pathType = "ImplementationSpecific";
+              }
+            ];
+          }
+        ];
 
-        tls = [{ hosts = [ domain ]; }];
+        tls = [ { hosts = [ domain ]; } ];
       };
     };
 
@@ -237,7 +253,11 @@ in mkArgoApp { inherit config lib; } rec {
             storage = "1Ti";
           };
           accessModes = [ "ReadWriteMany" ];
-          mountOptions = [ "nolock" "soft" "timeo=30" ];
+          mountOptions = [
+            "nolock"
+            "soft"
+            "timeo=30"
+          ];
           nfs = {
             server = cfg.nfs.server;
             path = cfg.nfs.path;
@@ -290,30 +310,37 @@ in mkArgoApp { inherit config lib; } rec {
           template = {
             spec = {
               restartPolicy = "OnFailure";
-              containers = [{
-                name = "enable-vector-extension";
-                image = "docker.io/postgres:17.6";
-                imagePullPolicy = "IfNotPresent";
-                command = [ "psql" ];
-                args = [
-                  "-h" cfg.database.host
-                  "-p" "${toString cfg.database.port}"
-                  "-U" cfg.database.username
-                  "-d" cfg.database.name
-                  "-c" "CREATE EXTENSION IF NOT EXISTS vector;"
-                ];
-                env = [
-                  {
-                    name = "PGPASSWORD";
-                    valueFrom = {
-                      secretKeyRef = {
-                        name = password-secret;
-                        key = "password";
+              containers = [
+                {
+                  name = "enable-vector-extension";
+                  image = "docker.io/postgres:17.6";
+                  imagePullPolicy = "IfNotPresent";
+                  command = [ "psql" ];
+                  args = [
+                    "-h"
+                    cfg.database.host
+                    "-p"
+                    "${toString cfg.database.port}"
+                    "-U"
+                    cfg.database.username
+                    "-d"
+                    cfg.database.name
+                    "-c"
+                    "CREATE EXTENSION IF NOT EXISTS vector;"
+                  ];
+                  env = [
+                    {
+                      name = "PGPASSWORD";
+                      valueFrom = {
+                        secretKeyRef = {
+                          name = password-secret;
+                          key = "password";
+                        };
                       };
-                    };
-                  }
-                ];
-              }];
+                    }
+                  ];
+                }
+              ];
             };
           };
         };

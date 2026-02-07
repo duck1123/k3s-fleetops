@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 with lib;
 mkArgoApp { inherit config lib; } {
   name = "forgejo";
@@ -62,13 +67,15 @@ mkArgoApp { inherit config lib; } {
 
   defaultValues = cfg: {
     gitea = {
-      additionalConfigFromEnvs = [{
-        name = "FORGEJO__DATABASE__PASSWD";
-        valueFrom.secretKeyRef = {
-          key = "adminPassword";
-          name = "postgresql-password";
-        };
-      }];
+      additionalConfigFromEnvs = [
+        {
+          name = "FORGEJO__DATABASE__PASSWD";
+          valueFrom.secretKeyRef = {
+            key = "adminPassword";
+            name = "postgresql-password";
+          };
+        }
+      ];
 
       admin.existingSecret = "forgejo-admin-password";
 
@@ -90,17 +97,23 @@ mkArgoApp { inherit config lib; } {
       };
       className = ingressClassName;
       enabled = true;
-      hosts = [{
-        host = domain;
-        paths = [{
-          path = "/";
-          pathType = "ImplementationSpecific";
-        }];
-      }];
-      tls = [{
-        hosts = [ domain ];
-        secretName = "forgejo-tls";
-      }];
+      hosts = [
+        {
+          host = domain;
+          paths = [
+            {
+              path = "/";
+              pathType = "ImplementationSpecific";
+            }
+          ];
+        }
+      ];
+      tls = [
+        {
+          hosts = [ domain ];
+          secretName = "forgejo-tls";
+        }
+      ];
     };
 
     persistence = { inherit (cfg) storageClass; };
@@ -125,7 +138,11 @@ mkArgoApp { inherit config lib; } {
         secretName = "postgresql-password";
         values = {
           inherit (cfg.postgresql)
-            adminPassword adminUsername replicationPassword userPassword;
+            adminPassword
+            adminUsername
+            replicationPassword
+            userPassword
+            ;
         };
       };
     };

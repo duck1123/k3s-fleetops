@@ -22,10 +22,12 @@ mkArgoApp { inherit config lib; } {
       className = ingressClassName;
       enabled = true;
       hosts = [ domain ];
-      tls = [{
-        secretName = "metabase-tls";
-        hosts = [ domain ];
-      }];
+      tls = [
+        {
+          secretName = "metabase-tls";
+          hosts = [ domain ];
+        }
+      ];
     };
 
     monitoring.enabled = true;

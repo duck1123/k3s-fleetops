@@ -93,21 +93,31 @@ mkArgoApp { inherit config lib; } {
     ingress = with cfg.ingress; {
       enabled = true;
       className = ingressClassName;
-      hosts = [{
-        host = domain;
-        paths = [{
-          path = "/";
-          pathType = "ImplementationSpecific";
-        }];
-      }];
-      tls = [{
-        secretName = tls.secretName;
-        hosts = [ domain ];
-      }];
+      hosts = [
+        {
+          host = domain;
+          paths = [
+            {
+              path = "/";
+              pathType = "ImplementationSpecific";
+            }
+          ];
+        }
+      ];
+      tls = [
+        {
+          secretName = tls.secretName;
+          hosts = [ domain ];
+        }
+      ];
     };
 
-    minio = { enabled = true; };
+    minio = {
+      enabled = true;
+    };
 
-    postgresql = { enabled = true; };
+    postgresql = {
+      enabled = true;
+    };
   };
 }

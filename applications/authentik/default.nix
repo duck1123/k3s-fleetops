@@ -1,9 +1,17 @@
-{ ageRecipients, charts, config, lib, pkgs, ... }:
+{
+  ageRecipients,
+  charts,
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 with lib;
 let
   postgresql-secret = "authentik-postgres-auth";
   secret-secret = "authentik-secret-key";
-in mkArgoApp { inherit config lib; } {
+in
+mkArgoApp { inherit config lib; } {
   name = "authentik";
 
   # https://artifacthub.io/packages/helm/goauthentik/authentik
@@ -62,29 +70,37 @@ in mkArgoApp { inherit config lib; } {
     };
   };
 
-  defaultValues = cfg:
-    with cfg; {
+  defaultValues =
+    cfg: with cfg; {
       authentik = {
         error_reporting.enabled = true;
-        postgresql = { inherit (cfg.postgresql) host name password user; };
+        postgresql = {
+          inherit (cfg.postgresql)
+            host
+            name
+            password
+            user
+            ;
+        };
         secret_key = "this is a secret";
       };
 
-      global.env = [{
-        name = "AUTHENTIK_SECRET_KEY";
-        valueFrom.secretKeyRef = {
-          name = secret-secret;
-          key = "authentik-secret-key";
-        };
-      }
-      # {
-      #   name = "AUTHENTIK_POSTGRESQL__PASSWORD";
-      #   valueFrom.secretKeyRef = {
-      #     name = postgresql-secret;
-      #     key = "password";
-      #   };
-      # }
-        ];
+      global.env = [
+        {
+          name = "AUTHENTIK_SECRET_KEY";
+          valueFrom.secretKeyRef = {
+            name = secret-secret;
+            key = "authentik-secret-key";
+          };
+        }
+        # {
+        #   name = "AUTHENTIK_POSTGRESQL__PASSWORD";
+        #   valueFrom.secretKeyRef = {
+        #     name = postgresql-secret;
+        #     key = "password";
+        #   };
+        # }
+      ];
 
       postgresql = with cfg.postgresql; {
         inherit host;
@@ -104,10 +120,12 @@ in mkArgoApp { inherit config lib; } {
           "ingress.kubernetes.io/ssl-redirect" = "true";
         };
         hosts = [ domain ];
-        tls = [{
-          secretName = "authentik-tls";
-          hosts = [ domain ];
-        }];
+        tls = [
+          {
+            secretName = "authentik-tls";
+            hosts = [ domain ];
+          }
+        ];
         https = false;
       };
     };
@@ -169,7 +187,10 @@ in mkArgoApp { inherit config lib; } {
         secretName = postgresql-secret;
         values = {
           inherit (cfg.postgresql)
-            password postgres-password replicationPassword;
+            password
+            postgres-password
+            replicationPassword
+            ;
         };
       };
       ${secret-secret} = lib.createSecret {

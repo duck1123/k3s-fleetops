@@ -19,15 +19,19 @@ mkArgoApp { inherit config lib; } {
     };
 
     ingress.web = with cfg.ingress; {
-      annotations = { "cert-manager.io/cluster-issuer" = clusterIssuer; };
+      annotations = {
+        "cert-manager.io/cluster-issuer" = clusterIssuer;
+      };
       enabled = true;
-      hosts = [{
-        name = domain;
-        tls = with tls; {
-          inherit secretName;
-          enabled = enable;
-        };
-      }];
+      hosts = [
+        {
+          name = domain;
+          tls = with tls; {
+            inherit secretName;
+            enabled = enable;
+          };
+        }
+      ];
     };
 
     migrateDatabaseJob = {

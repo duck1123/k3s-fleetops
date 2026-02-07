@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 with lib;
 mkArgoApp { inherit config lib; } {
   name = "spark";
@@ -12,8 +17,8 @@ mkArgoApp { inherit config lib; } {
 
   uses-ingress = true;
 
-  defaultValues = cfg:
-    with cfg.ingress; {
+  defaultValues =
+    cfg: with cfg.ingress; {
       ingress = {
         inherit ingressClassName;
         annotations = {

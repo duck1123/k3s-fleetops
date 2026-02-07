@@ -1,4 +1,9 @@
-{ charts, config, lib, ... }:
+{
+  charts,
+  config,
+  lib,
+  ...
+}:
 with lib;
 mkArgoApp { inherit config lib; } {
   name = "argocd";

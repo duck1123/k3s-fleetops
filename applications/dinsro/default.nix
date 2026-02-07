@@ -23,14 +23,18 @@ mkArgoApp { inherit config lib; } {
       enabled = false;
       ingress = {
         enabled = true;
-        hosts = [{
-          host = "devcards.dinsro.com";
-          paths = [{ path = "/"; }];
-        }];
-        tls = [{
-          hosts = [ "devcards.dinsro.com" ];
-          secretName = "dinsro-com-devcards-tls";
-        }];
+        hosts = [
+          {
+            host = "devcards.dinsro.com";
+            paths = [ { path = "/"; } ];
+          }
+        ];
+        tls = [
+          {
+            hosts = [ "devcards.dinsro.com" ];
+            secretName = "dinsro-com-devcards-tls";
+          }
+        ];
       };
 
       devtools = {
@@ -43,14 +47,18 @@ mkArgoApp { inherit config lib; } {
       enabled = true;
       ingress = {
         enabled = true;
-        hosts = [{
-          host = "devtools.dinsro.com";
-          paths = [{ path = "/"; }];
-        }];
-        tls = [{
-          hosts = [ "devtools.dinsro.com" ];
-          secretName = "dinsro-com-devtools-tls";
-        }];
+        hosts = [
+          {
+            host = "devtools.dinsro.com";
+            paths = [ { path = "/"; } ];
+          }
+        ];
+        tls = [
+          {
+            hosts = [ "devtools.dinsro.com" ];
+            secretName = "dinsro-com-devtools-tls";
+          }
+        ];
       };
     };
 
@@ -58,14 +66,18 @@ mkArgoApp { inherit config lib; } {
       enabled = true;
       ingress = {
         enabled = true;
-        hosts = [{
-          host = "docs.dinsro.com";
-          paths = [{ path = "/"; }];
-        }];
-        tls = [{
-          hosts = [ "docs.dinsro.com" ];
-          secretName = "dinsro-com-docs-tls";
-        }];
+        hosts = [
+          {
+            host = "docs.dinsro.com";
+            paths = [ { path = "/"; } ];
+          }
+        ];
+        tls = [
+          {
+            hosts = [ "docs.dinsro.com" ];
+            secretName = "dinsro-com-docs-tls";
+          }
+        ];
       };
     };
 
@@ -75,14 +87,18 @@ mkArgoApp { inherit config lib; } {
       enabled = true;
       ingress = {
         enabled = true;
-        hosts = [{
-          host = "notebooks.dinsro.com";
-          paths = [{ path = "/"; }];
-        }];
-        tls = [{
-          hosts = [ "notebooks.dinsro.com" ];
-          secretName = "dinsro-com-notebooks-tls";
-        }];
+        hosts = [
+          {
+            host = "notebooks.dinsro.com";
+            paths = [ { path = "/"; } ];
+          }
+        ];
+        tls = [
+          {
+            hosts = [ "notebooks.dinsro.com" ];
+            secretName = "dinsro-com-notebooks-tls";
+          }
+        ];
       };
     };
 
@@ -93,28 +109,36 @@ mkArgoApp { inherit config lib; } {
 
     ingress = with cfg.ingress; {
       enabled = true;
-      hosts = [{
-        host = domain;
-        paths = [{ path = "/"; }];
-      }];
-      tls = [{
-        hosts = [ domain ];
-        secretName = "dinsro-com-tls";
-      }];
+      hosts = [
+        {
+          host = domain;
+          paths = [ { path = "/"; } ];
+        }
+      ];
+      tls = [
+        {
+          hosts = [ domain ];
+          secretName = "dinsro-com-tls";
+        }
+      ];
     };
 
     workspaces = {
       enabled = true;
       ingress = {
         enabled = true;
-        hosts = [{
-          host = "workspaces.dinsro.com";
-          paths = [{ path = "/"; }];
-        }];
-        tls = [{
-          hosts = [ "workspaces.dinsro.com" ];
-          secretName = "dinsro-com-workspaces-tls";
-        }];
+        hosts = [
+          {
+            host = "workspaces.dinsro.com";
+            paths = [ { path = "/"; } ];
+          }
+        ];
+        tls = [
+          {
+            hosts = [ "workspaces.dinsro.com" ];
+            secretName = "dinsro-com-workspaces-tls";
+          }
+        ];
       };
     };
   };

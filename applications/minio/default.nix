@@ -1,7 +1,15 @@
-{ ageRecipients, config, lib, pkgs, ... }:
+{
+  ageRecipients,
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 with lib;
-let password-secret = "minio-password";
-in mkArgoApp { inherit config lib; } {
+let
+  password-secret = "minio-password";
+in
+mkArgoApp { inherit config lib; } {
   name = "minio";
 
   # https://artifacthub.io/packages/helm/bitnami/minio
@@ -66,7 +74,9 @@ in mkArgoApp { inherit config lib; } {
       inherit ageRecipients lib pkgs;
       inherit (cfg) namespace;
       secretName = password-secret;
-      values = with cfg; { inherit password; };
+      values = with cfg; {
+        inherit password;
+      };
     };
   };
 }

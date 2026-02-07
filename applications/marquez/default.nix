@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
   app-name = "marquez";
   cfg = config.services.${app-name};
@@ -25,7 +30,9 @@ let
       enabled = true;
     };
   } cfg.values;
-in with lib; {
+in
+with lib;
+{
   options.services.${app-name} = {
     domain = mkOption {
       description = mdDoc "The domain";
@@ -58,24 +65,30 @@ in with lib; {
       resources = {
         ingresses.imum-marquez-ingress.spec = {
           ingressClassName = "traefik";
-          rules = [{
-            host = cfg.domain;
-            http = {
-              paths = [{
-                path = "/api/";
-                pathType = "Prefix";
-                backend.service = {
-                  name = "imum-marquez-web";
-                  port.name = "http";
-                };
-              }];
-            };
-          }];
+          rules = [
+            {
+              host = cfg.domain;
+              http = {
+                paths = [
+                  {
+                    path = "/api/";
+                    pathType = "Prefix";
+                    backend.service = {
+                      name = "imum-marquez-web";
+                      port.name = "http";
+                    };
+                  }
+                ];
+              };
+            }
+          ];
 
-          tls = [{
-            hosts = [ cfg.domain ];
-            secretName = "marquez-tls";
-          }];
+          tls = [
+            {
+              hosts = [ cfg.domain ];
+              secretName = "marquez-tls";
+            }
+          ];
         };
       };
 

@@ -1,4 +1,9 @@
-{ charts, config, lib, ... }:
+{
+  charts,
+  config,
+  lib,
+  ...
+}:
 let
   cfg = config.services.opentelemetry-collector;
 
@@ -32,7 +37,7 @@ let
         spanmetrics = {
           namespace = "traces.spanmetrics";
           metrics_flush_interval = "15s";
-          dimensions = [{ name = "http.response.status_code"; }];
+          dimensions = [ { name = "http.response.status_code"; } ];
           exemplars.enabled = true;
           histogram = {
             unit = "s";
@@ -103,19 +108,43 @@ let
         pipelines = {
           logs = {
             receivers = [ "otlp" ];
-            processors = [ "memory_limiter" "batch" ];
-            exporters = [ "debug" "otlphttp/loki" ];
+            processors = [
+              "memory_limiter"
+              "batch"
+            ];
+            exporters = [
+              "debug"
+              "otlphttp/loki"
+            ];
           };
           traces = {
             receivers = [ "otlp" ];
-            processors = [ "memory_limiter" "batch" ];
-            exporters = [ "debug" "otlp/tempo" "spanmetrics" "servicegraph" ];
+            processors = [
+              "memory_limiter"
+              "batch"
+            ];
+            exporters = [
+              "debug"
+              "otlp/tempo"
+              "spanmetrics"
+              "servicegraph"
+            ];
 
           };
           metrics = {
-            receivers = [ "otlp" "spanmetrics" "servicegraph" ];
-            processors = [ "memory_limiter" "batch" ];
-            exporters = [ "debug" "prometheusremotewrite" ];
+            receivers = [
+              "otlp"
+              "spanmetrics"
+              "servicegraph"
+            ];
+            processors = [
+              "memory_limiter"
+              "batch"
+            ];
+            exporters = [
+              "debug"
+              "prometheusremotewrite"
+            ];
           };
         };
       };
@@ -124,7 +153,9 @@ let
 
   values = lib.attrsets.recursiveUpdate defaultValues cfg.values;
   namespace = cfg.namespace;
-in with lib; {
+in
+with lib;
+{
   options.services.opentelemetry-collector = {
     enable = mkEnableOption "Enable application";
     namespace = mkOption {

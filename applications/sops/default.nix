@@ -12,15 +12,19 @@ mkArgoApp { inherit config lib; } rec {
   };
 
   defaultValues = cfg: {
-    extraEnv = [{
-      name = "SOPS_AGE_KEY_FILE";
-      value = "/etc/sops-age-key-file/key";
-    }];
-    secretsAsFiles = [{
-      mountPath = "/etc/sops-age-key-file";
-      name = "sops-age-key-file";
-      secretName = "sops-age-key-file";
-    }];
+    extraEnv = [
+      {
+        name = "SOPS_AGE_KEY_FILE";
+        value = "/etc/sops-age-key-file/key";
+      }
+    ];
+    secretsAsFiles = [
+      {
+        mountPath = "/etc/sops-age-key-file";
+        name = "sops-age-key-file";
+        secretName = "sops-age-key-file";
+      }
+    ];
   };
 
   extraConfig = cfg: { nixidy.resourceImports = [ ./generated.nix ]; };
@@ -31,36 +35,38 @@ mkArgoApp { inherit config lib; } rec {
         spec = {
           template = {
             spec = {
-              containers = [{
-                name = "${name}-secrets-operator";
-                # Less aggressive health checks for when system is under load
-                # Readiness: increased timeout from 1s to 5s, period from 10s to 20s, failures from 3 to 5
-                # Liveness: increased timeout from 1s to 10s, period from 20s to 30s, failures from 3 to 5
-                readinessProbe = lib.mkForce {
-                  httpGet = {
-                    path = "/readyz";
-                    port = 8081;
-                    scheme = "HTTP";
+              containers = [
+                {
+                  name = "${name}-secrets-operator";
+                  # Less aggressive health checks for when system is under load
+                  # Readiness: increased timeout from 1s to 5s, period from 10s to 20s, failures from 3 to 5
+                  # Liveness: increased timeout from 1s to 10s, period from 20s to 30s, failures from 3 to 5
+                  readinessProbe = lib.mkForce {
+                    httpGet = {
+                      path = "/readyz";
+                      port = 8081;
+                      scheme = "HTTP";
+                    };
+                    initialDelaySeconds = 10;
+                    periodSeconds = 20;
+                    timeoutSeconds = 5;
+                    successThreshold = 1;
+                    failureThreshold = 5;
                   };
-                  initialDelaySeconds = 10;
-                  periodSeconds = 20;
-                  timeoutSeconds = 5;
-                  successThreshold = 1;
-                  failureThreshold = 5;
-                };
-                livenessProbe = lib.mkForce {
-                  httpGet = {
-                    path = "/healthz";
-                    port = 8081;
-                    scheme = "HTTP";
+                  livenessProbe = lib.mkForce {
+                    httpGet = {
+                      path = "/healthz";
+                      port = 8081;
+                      scheme = "HTTP";
+                    };
+                    initialDelaySeconds = 30;
+                    periodSeconds = 30;
+                    timeoutSeconds = 10;
+                    successThreshold = 1;
+                    failureThreshold = 5;
                   };
-                  initialDelaySeconds = 30;
-                  periodSeconds = 30;
-                  timeoutSeconds = 10;
-                  successThreshold = 1;
-                  failureThreshold = 5;
-                };
-              }];
+                }
+              ];
             };
           };
         };

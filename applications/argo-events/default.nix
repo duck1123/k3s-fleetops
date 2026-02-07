@@ -1,4 +1,9 @@
-{ charts, config, lib, ... }:
+{
+  charts,
+  config,
+  lib,
+  ...
+}:
 let
   cfg = config.services.argo-events;
 
@@ -12,11 +17,15 @@ let
 
   defaultNamespace = "argo-events";
 
-  defaultValues = { metrics.enabled = true; };
+  defaultValues = {
+    metrics.enabled = true;
+  };
 
   values = lib.attrsets.recursiveUpdate defaultValues cfg.values;
   namespace = cfg.namespace;
-in with lib; {
+in
+with lib;
+{
   options.services.argo-events = {
     enable = mkEnableOption "Enable application";
     namespace = mkOption {
