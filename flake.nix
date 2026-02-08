@@ -105,7 +105,6 @@
             packages.nixidy = nixidy.packages.${system}.default;
           };
         flake = {
-          inherit lib;
           # Compute nixidyEnvs per system using withSystem
           nixidyEnvs = builtins.listToAttrs (
             map (system: {
