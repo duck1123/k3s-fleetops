@@ -117,6 +117,9 @@
    :task (let [show-trace?    (= (System/getenv "SHOW_TRACE") "true")
                env            "dev"
                args           (concat ["nix"
+                                       "run"
+                                       "nixpkgs#nix-output-monitor"
+                                       "--"
                                        "build"
                                        (str ".#nixidyEnvs.x86_64-linux." env ".activationPackage")
                                        ;; Read environment
