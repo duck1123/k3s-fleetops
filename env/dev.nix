@@ -644,7 +644,7 @@ in
 
     # ../applications/qbittorrent/default.nix
     qbittorrent = {
-      enable = false;
+      enable = true;
 
       ingress = {
         domain = "qbittorrent.${tail-domain}";
