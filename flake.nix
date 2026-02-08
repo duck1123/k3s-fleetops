@@ -89,31 +89,25 @@
         ];
         systems = [ "x86_64-linux" ];
 
-        flake = {
-          # Compute nixidyEnvs per system using withSystem
-          nixidyEnvs = builtins.listToAttrs (
-            map (system: {
-              name = system;
-              value = withSystem system (
-                { pkgs, ... }:
-                let
-                  defaultEnv = nixidy.lib.mkEnvs {
-                    inherit pkgs;
-                    charts = nixhelm.chartsDerivations.${system};
-                    envs.dev.modules = [ ./env/dev.nix ];
-                    extraSpecialArgs = { inherit self; };
-                    libOverlay = final: prev: lib;
-                    modules = [
-                      ./applications
-                      self.modules.generic.ageRecipients
-                    ];
-                  };
-                in
-                defaultEnv
-              );
-            }) config.systems
-          );
-        };
+        flake.nixidyEnvs = builtins.listToAttrs (
+          map (system: {
+            name = system;
+            value = withSystem system (
+              { pkgs, ... }:
+              nixidy.lib.mkEnvs {
+                inherit pkgs;
+                charts = nixhelm.chartsDerivations.${system};
+                envs.dev.modules = [ ./env/dev.nix ];
+                extraSpecialArgs = { inherit self; };
+                libOverlay = final: prev: lib;
+                modules = [
+                  ./applications
+                  self.modules.generic.ageRecipients
+                ];
+              }
+            );
+          }) config.systems
+        );
       }
     );
 }
