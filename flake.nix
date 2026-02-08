@@ -80,9 +80,7 @@
         ...
       }:
       let
-        lib = (import ./lib) // {
-          sopsConfig = ./.sops.yaml;
-        };
+        lib = (import ./lib);
       in
       {
         imports = [
