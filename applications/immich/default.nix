@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  self,
   ...
 }:
 with lib;
@@ -16,7 +17,7 @@ mkArgoApp { inherit config lib; } rec {
   # https://github.com/immich-app/immich-charts
   # Chart is pulled via OCI and stored in chart-archives/
   # Run: helm pull oci://ghcr.io/immich-app/immich-charts/immich --version 0.10.3
-  chart = lib.helmChart {
+  chart = self.lib.helmChart {
     inherit pkgs;
     chartTgz = ../../chart-archives/immich-0.10.3.tgz;
     chartName = "immich";

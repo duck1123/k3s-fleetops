@@ -2,13 +2,14 @@
   config,
   lib,
   pkgs,
+  self,
   ...
 }:
 with lib;
 mkArgoApp { inherit config lib; } {
   name = "keycloak";
 
-  chart = lib.helmChart {
+  chart = self.lib.helmChart {
     inherit pkgs;
     chartTgz = ../../chart-archives/keycloak-24.1.0.tgz;
     chartName = "keycloak";

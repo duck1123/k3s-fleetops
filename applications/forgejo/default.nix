@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  self,
   ...
 }:
 with lib;
@@ -9,7 +10,7 @@ mkArgoApp { inherit config lib; } {
   name = "forgejo";
 
   # https://artifacthub.io/packages/helm/forgejo-helm/forgejo
-  chart = lib.helmChart {
+  chart = self.lib.helmChart {
     inherit pkgs;
     chartTgz = ../../chart-archives/forgejo-12.5.2.tgz;
     chartName = "forgejo";

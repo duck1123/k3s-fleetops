@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  self,
   ...
 }:
 let
@@ -9,7 +10,7 @@ let
   cfg = config.services.${app-name};
 
   # https://artifacthub.io/packages/helm/bitnami/harbor
-  # chart = lib.helmChart {
+  # chart = self.lib.helmChart {
   #   inherit pkgs;
   #   chartTgz = ../../chart-archives/harbor-24.6.0.tgz;
   #   chartName = "harbor";
