@@ -693,6 +693,7 @@ in
 
       replicas = 1;
       storageClassName = "longhorn";
+      vpn.enable = false;
     };
 
     # ../applications/redis/default.nix
