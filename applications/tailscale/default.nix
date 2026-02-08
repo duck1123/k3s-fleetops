@@ -1,5 +1,4 @@
 {
-  ageRecipients,
   config,
   lib,
   pkgs,
@@ -43,14 +42,16 @@ mkArgoApp { inherit config lib; } {
   extraResources = cfg: {
     sopsSecrets = {
       tailscale-auth = createSecret {
-        inherit ageRecipients lib pkgs;
+        inherit lib pkgs;
+        inherit (config) ageRecipients;
         inherit (cfg) namespace;
         secretName = "tailscale-auth";
         values.TS_AUTHKEY = cfg.oauth.authKey;
       };
 
       operator-oauth = lib.createSecret {
-        inherit ageRecipients lib pkgs;
+        inherit lib pkgs;
+        inherit (config) ageRecipients;
         inherit (cfg) namespace;
         secretName = "operator-oauth";
         values = with cfg.oauth; {

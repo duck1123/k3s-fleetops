@@ -1,5 +1,4 @@
 {
-  ageRecipients,
   config,
   lib,
   pkgs,
@@ -127,7 +126,8 @@ mkArgoApp { inherit config lib; } {
       };
 
       encrypted-secret-config = lib.encryptString {
-        inherit ageRecipients pkgs;
+        inherit pkgs;
+        inherit (config) ageRecipients;
         secretName = hub-secret;
         value = hub-secret-config-yaml;
       };
@@ -141,7 +141,8 @@ mkArgoApp { inherit config lib; } {
         };
 
         ${postgresql-secret} = lib.createSecret {
-          inherit ageRecipients lib pkgs;
+          inherit lib pkgs;
+          inherit (config) ageRecipients;
           inherit (cfg) namespace;
           secretName = postgresql-secret;
           values = {

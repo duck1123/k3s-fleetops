@@ -1,5 +1,4 @@
 {
-  ageRecipients,
   config,
   lib,
   pkgs,
@@ -580,7 +579,8 @@ mkArgoApp { inherit config lib; } rec {
 
     # Create secret for database password
     sopsSecrets.${password-secret} = lib.createSecret {
-      inherit ageRecipients lib pkgs;
+      inherit lib pkgs;
+      inherit (config) ageRecipients;
       inherit (cfg) namespace;
       secretName = password-secret;
       values.password = cfg.database.password;
@@ -588,7 +588,8 @@ mkArgoApp { inherit config lib; } rec {
 
     # Create secret for admin credentials and auth secret key
     sopsSecrets.${admin-secret} = lib.createSecret {
-      inherit ageRecipients lib pkgs;
+      inherit lib pkgs;
+      inherit (config) ageRecipients;
       inherit (cfg) namespace;
       secretName = admin-secret;
       values = {

@@ -80,11 +80,7 @@
         ...
       }:
       let
-        ageRecipients =
-          ((builtins.elemAt (builtins.elemAt self.modules.generic.ageRecipients.imports 0).imports 0) { })
-          .ageRecipients;
         lib = (import ./lib) // {
-          inherit ageRecipients;
           sopsConfig = ./.sops.yaml;
         };
       in
@@ -120,10 +116,16 @@
                   charts = nixhelm.chartsDerivations.${system};
                   defaultEnv = nixidy.lib.mkEnvs {
                     inherit charts pkgs;
-                    extraSpecialArgs = { inherit ageRecipients; };
                     envs.dev.modules = [ dev ];
                     libOverlay = final: prev: lib;
-                    modules = [ ./applications ];
+                    modules = [
+                      ./applications
+                      {
+                        # FIXME: naughty config
+                        ageRecipients = "age1n372e8dgautnjhecllf7uvvldw9g6vyx3kggj0kyduz5jr2upvysue242c";
+                      }
+                      self.modules.generic.ageRecipients
+                    ];
                   };
                 in
                 defaultEnv

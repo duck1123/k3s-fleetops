@@ -1,5 +1,4 @@
 {
-  ageRecipients,
   charts,
   config,
   lib,
@@ -150,39 +149,9 @@ mkArgoApp { inherit config lib; } {
     };
 
     sopsSecrets = {
-      # authentik = lib.createSecret {
-      #   inherit ageRecipients lib pkgs;
-      #   inherit (cfg) namespace;
-      #   secretName = "authentik";
-      #   values = {
-      #     AUTHENTIK_EMAIL_PORT = "587";
-      #     AUTHENTIK_EMAIL_TIMEOUT = "30";
-      #     AUTHENTIK_EMAIL_USE_SSL = "false";
-      #     AUTHENTIK_EMAIL_USE_TLS = "false";
-      #     AUTHENTIK_ENABLED = "true";
-      #     AUTHENTIK_ERROR_REPORTING_ENABLED = "true";
-      #     AUTHENTIK_ERROR_REPORTING_ENVIRONMENT = "k8s";
-      #     AUTHENTIK_ERROR_REPORTING_SEND_PII = "false";
-      #     AUTHENTIK_EVENTS__CONTEXT_PROCESSORS__ASN =
-      #       "/geoip/GeoLite2-ASN.mmdb";
-      #     AUTHENTIK_EVENTS__CONTEXT_PROCESSORS__GEOIP =
-      #       "/geoip/GeoLite2-City.mmdb";
-      #     AUTHENTIK_LOG_LEVEL = "info";
-      #     AUTHENTIK_OUTPOSTS__CONTAINER_IMAGE_BASE =
-      #       "ghcr.io/goauthentik/%(type)s:%(version)s";
-      #     AUTHENTIK_POSTGRESQL__HOST = "postgreql.postgreql";
-      #     AUTHENTIK_POSTGRESQL__NAME = "authentik";
-      #     AUTHENTIK_POSTGRESQL__PASSWORD = "hunter2";
-      #     AUTHENTIK_POSTGRESQL__PORT = "5432";
-      #     AUTHENTIK_POSTGRESQL__USER = "postgresql";
-      #     AUTHENTIK_REDIS__HOST = "authentik-redis-master";
-      #     AUTHENTIK_SECRET_KEY = "this is a secret";
-      #     AUTHENTIK_WEB__PATH = "/";
-      #   };
-      # };
-
       ${postgresql-secret} = lib.createSecret {
-        inherit ageRecipients lib pkgs;
+        inherit lib pkgs;
+        inherit (config) ageRecipients;
         inherit (cfg) namespace;
         secretName = postgresql-secret;
         values = {
@@ -194,7 +163,8 @@ mkArgoApp { inherit config lib; } {
         };
       };
       ${secret-secret} = lib.createSecret {
-        inherit ageRecipients lib pkgs;
+        inherit lib pkgs;
+        inherit (config) ageRecipients;
         inherit (cfg) namespace;
         secretName = secret-secret;
         values.authentik-secret-key = cfg.secret-key;

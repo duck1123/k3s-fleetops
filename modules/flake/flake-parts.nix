@@ -5,7 +5,7 @@
 
   options.flake.lib = lib.mkOption {
     type = lib.types.lazyAttrsOf lib.types.unspecified;
-    default = {};
+    default = { };
     description = "Merged library functions for this flake.";
   };
 }

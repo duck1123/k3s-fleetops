@@ -1,8 +1,6 @@
 {
-  ageRecipients,
   config,
   lib,
-  pkgs,
   ...
 }:
 with lib;

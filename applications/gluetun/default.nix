@@ -1,5 +1,4 @@
 {
-  ageRecipients,
   config,
   lib,
   pkgs,
@@ -442,7 +441,8 @@ mkArgoApp { inherit config lib; } rec {
     # Create SOPS secrets
     sopsSecrets = {
       "${name}-mullvad-account" = lib.createSecret {
-        inherit ageRecipients lib pkgs;
+        inherit lib pkgs;
+        inherit (config) ageRecipients;
         namespace = cfg.namespace;
         secretName = "${name}-mullvad-account";
         values.accountNumber = cfg.mullvadAccountNumber;
@@ -450,7 +450,8 @@ mkArgoApp { inherit config lib; } rec {
     }
     // lib.optionalAttrs (cfg.controlServer.username != "" || cfg.controlServer.password != "") {
       "${name}-control-server" = lib.createSecret {
-        inherit ageRecipients lib pkgs;
+        inherit lib pkgs;
+        inherit (config) ageRecipients;
         namespace = cfg.namespace;
         secretName = "${name}-control-server";
         values =

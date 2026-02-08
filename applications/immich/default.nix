@@ -1,5 +1,4 @@
 {
-  ageRecipients,
   config,
   lib,
   pkgs,
@@ -279,7 +278,8 @@ mkArgoApp { inherit config lib; } rec {
 
     # Create secrets for database and Redis
     sopsSecrets.${password-secret} = lib.createSecret {
-      inherit ageRecipients lib pkgs;
+      inherit lib pkgs;
+      inherit (config) ageRecipients;
       inherit (cfg) namespace;
       secretName = password-secret;
       values = {
@@ -289,7 +289,8 @@ mkArgoApp { inherit config lib; } rec {
     };
 
     sopsSecrets.${redis-secret} = lib.createSecret {
-      inherit ageRecipients lib pkgs;
+      inherit lib pkgs;
+      inherit (config) ageRecipients;
       inherit (cfg) namespace;
       secretName = redis-secret;
       values.password = cfg.redis.password;

@@ -1,5 +1,4 @@
 {
-  ageRecipients,
   charts,
   config,
   lib,
@@ -187,7 +186,8 @@ mkArgoApp { inherit config lib; } {
 
   extraResources = cfg: {
     sopsSecrets.${grafana-secret} = lib.createSecret {
-      inherit ageRecipients lib pkgs;
+      inherit lib pkgs;
+      inherit (config) ageRecipients;
       inherit (cfg) namespace;
       secretName = grafana-secret;
       values = {

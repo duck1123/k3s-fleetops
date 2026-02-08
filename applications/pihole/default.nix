@@ -76,7 +76,8 @@ mkArgoApp { inherit config lib; } {
 
   extraResources = cfg: {
     sopsSecrets.${password-secret} = lib.createSecret {
-      inherit ageRecipients lib pkgs;
+      inherit lib pkgs;
+      inherit (config) ageRecipients;
       inherit (cfg) namespace;
       secretName = password-secret;
       values = with cfg; {

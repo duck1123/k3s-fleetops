@@ -126,14 +126,16 @@ mkArgoApp { inherit config lib; } {
   extraResources = cfg: {
     sopsSecrets = {
       forgejo-admin-password = lib.createSecret {
-        inherit ageRecipients lib pkgs;
+        inherit lib pkgs;
+        inherit (config) ageRecipients;
         inherit (cfg) namespace;
         secretName = "forgejo-admin-password";
         values = { inherit (cfg.admin) password username; };
       };
 
       postgresql-password = lib.createSecret {
-        inherit ageRecipients lib pkgs;
+        inherit lib pkgs;
+        inherit (config) ageRecipients;
         inherit (cfg) namespace;
         secretName = "postgresql-password";
         values = {
