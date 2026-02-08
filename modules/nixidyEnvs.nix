@@ -1,0 +1,6 @@
+{ ... }:
+{
+  transposition.nixidyEnvs = {
+    adHoc = true;
+  };
+}

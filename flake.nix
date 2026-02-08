@@ -67,37 +67,27 @@
   outputs =
     inputs:
     inputs.flake-parts.lib.mkFlake { inherit inputs; } (
-      {
-        config,
-        self,
-        withSystem,
-        ...
-      }:
+      { self, ... }:
       {
         imports = [
           inputs.make-shell.flakeModules.default
           (inputs.import-tree ./modules)
         ];
         systems = [ "x86_64-linux" ];
-
-        flake.nixidyEnvs = builtins.listToAttrs (
-          map (system: {
-            name = system;
-            value = withSystem system (
-              { pkgs, ... }:
-              inputs.nixidy.lib.mkEnvs {
-                inherit pkgs;
-                charts = inputs.nixhelm.chartsDerivations.${system};
-                envs.dev.modules = [ ./env/dev.nix ];
-                extraSpecialArgs = { inherit self; };
-                modules = [
-                  ./applications
-                  self.modules.generic.ageRecipients
-                ];
-              }
-            );
-          }) config.systems
-        );
+        perSystem =
+          { pkgs, system, ... }:
+          {
+            nixidyEnvs = inputs.nixidy.lib.mkEnvs {
+              inherit pkgs;
+              charts = inputs.nixhelm.chartsDerivations.${system};
+              envs.dev.modules = [ ./env/dev.nix ];
+              extraSpecialArgs = { inherit self; };
+              modules = [
+                ./applications
+                self.modules.generic.ageRecipients
+              ];
+            };
+          };
       }
     );
 }
