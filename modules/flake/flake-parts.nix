@@ -1,5 +1,11 @@
 # Import flake-parts modules module
-{ inputs, ... }:
+{ inputs, lib, ... }:
 {
-  imports = [ inputs.flake-parts.flakeModules.modules ];
+  imports = [ inputs.flake-parts.flakeModules.flakeModules ];
+
+  options.flake.lib = lib.mkOption {
+    type = lib.types.lazyAttrsOf lib.types.unspecified;
+    default = {};
+    description = "Merged library functions for this flake.";
+  };
 }
