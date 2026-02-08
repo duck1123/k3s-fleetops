@@ -1,4 +1,9 @@
-{ config, lib, self, ... }:
+{
+  config,
+  lib,
+  self,
+  ...
+}:
 self.lib.mkArgoApp { inherit config lib; } {
   name = "satisfactory";
 
