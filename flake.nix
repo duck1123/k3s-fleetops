@@ -79,9 +79,6 @@
         withSystem,
         ...
       }:
-      let
-        lib = (import ./lib);
-      in
       {
         imports = [
           make-shell.flakeModules.default
@@ -99,7 +96,6 @@
                 charts = nixhelm.chartsDerivations.${system};
                 envs.dev.modules = [ ./env/dev.nix ];
                 extraSpecialArgs = { inherit self; };
-                libOverlay = final: prev: lib;
                 modules = [
                   ./applications
                   self.modules.generic.ageRecipients
