@@ -79,6 +79,7 @@ mkArgoApp { inherit config lib; } {
       inherit lib pkgs;
       inherit (config) ageRecipients;
       inherit (cfg) namespace;
+      inherit (self.lib) toYAML;
       secretName = password-secret;
       values = with cfg; {
         inherit (auth) password;

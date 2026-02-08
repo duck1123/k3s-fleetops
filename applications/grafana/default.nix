@@ -3,6 +3,7 @@
   config,
   lib,
   pkgs,
+  self,
   ...
 }:
 with lib;
@@ -189,6 +190,7 @@ mkArgoApp { inherit config lib; } {
       inherit lib pkgs;
       inherit (config) ageRecipients;
       inherit (cfg) namespace;
+      inherit (self.lib) toYAML;
       secretName = grafana-secret;
       values = {
         "admin-user" = cfg.adminUser or "admin";

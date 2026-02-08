@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  self,
   ...
 }:
 with lib;
@@ -443,6 +444,7 @@ mkArgoApp { inherit config lib; } rec {
       "${name}-mullvad-account" = lib.createSecret {
         inherit lib pkgs;
         inherit (config) ageRecipients;
+        inherit (self.lib) toYAML;
         namespace = cfg.namespace;
         secretName = "${name}-mullvad-account";
         values.accountNumber = cfg.mullvadAccountNumber;
@@ -452,6 +454,7 @@ mkArgoApp { inherit config lib; } rec {
       "${name}-control-server" = lib.createSecret {
         inherit lib pkgs;
         inherit (config) ageRecipients;
+        inherit (self.lib) toYAML;
         namespace = cfg.namespace;
         secretName = "${name}-control-server";
         values =

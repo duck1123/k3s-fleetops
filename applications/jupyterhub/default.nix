@@ -95,7 +95,7 @@ mkArgoApp { inherit config lib; } {
   extraResources =
     cfg:
     let
-      hub-values = lib.toYAML {
+      hub-values = self.lib.toYAML {
         inherit pkgs;
         value = import ./config.nix { inherit (cfg) password; };
       };
@@ -120,7 +120,7 @@ mkArgoApp { inherit config lib; } {
         ];
       };
 
-      hub-secret-config-yaml = lib.toYAML {
+      hub-secret-config-yaml = self.lib.toYAML {
         inherit pkgs;
         value = hub-secret-config;
       };
@@ -144,6 +144,7 @@ mkArgoApp { inherit config lib; } {
           inherit lib pkgs;
           inherit (config) ageRecipients;
           inherit (cfg) namespace;
+          inherit (self.lib) toYAML;
           secretName = postgresql-secret;
           values = {
             password = cfg.postgresql.adminPassword;

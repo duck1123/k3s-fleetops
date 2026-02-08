@@ -54,7 +54,7 @@ mkArgoApp { inherit config lib; } {
         enable = true;
 
         data = {
-          "config.yml" = lib.toYAML {
+          "config.yml" = self.lib.toYAML {
             inherit pkgs;
             value = {
               title = "App Dashboard";

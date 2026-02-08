@@ -5,6 +5,7 @@
   namespace ? "default",
   pkgs,
   secretName ? "some-secret",
+  toYAML,
   values ? { },
   ...
 }:
@@ -23,7 +24,7 @@ let
       }
     ];
   };
-  value = lib.toYAML {
+  value = toYAML {
     inherit pkgs;
     value = secret-spec;
   };

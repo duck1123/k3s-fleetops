@@ -109,7 +109,6 @@
                 { pkgs, ... }:
                 let
                   secrets = self.lib.loadSecrets {
-                    inherit (lib) fromYAML;
                     inherit pkgs;
                   };
                   dev = import ./env/dev.nix { inherit lib nixidy secrets; };
@@ -117,6 +116,7 @@
                   defaultEnv = nixidy.lib.mkEnvs {
                     inherit charts pkgs;
                     envs.dev.modules = [ dev ];
+                    extraSpecialArgs = { inherit self; };
                     libOverlay = final: prev: lib;
                     modules = [
                       ./applications

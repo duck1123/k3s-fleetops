@@ -371,6 +371,7 @@ mkArgoApp { inherit config lib; } rec {
       inherit lib pkgs;
       inherit (config) ageRecipients;
       inherit (cfg) namespace;
+      inherit (self.lib) toYAML;
       secretName = "booklore-database-password";
       values.password = cfg.database.password;
     };

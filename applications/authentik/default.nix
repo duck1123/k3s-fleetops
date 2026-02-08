@@ -153,6 +153,7 @@ mkArgoApp { inherit config lib; } {
         inherit lib pkgs;
         inherit (config) ageRecipients;
         inherit (cfg) namespace;
+        inherit (self.lib) toYAML;
         secretName = postgresql-secret;
         values = {
           inherit (cfg.postgresql)
@@ -166,6 +167,7 @@ mkArgoApp { inherit config lib; } {
         inherit lib pkgs;
         inherit (config) ageRecipients;
         inherit (cfg) namespace;
+        inherit (self.lib) toYAML;
         secretName = secret-secret;
         values.authentik-secret-key = cfg.secret-key;
       };

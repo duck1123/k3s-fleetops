@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  self,
   ...
 }:
 with lib;
@@ -137,6 +138,7 @@ mkArgoApp { inherit config lib; } rec {
       inherit lib pkgs;
       inherit (config) ageRecipients;
       inherit (cfg) namespace;
+      inherit (self.lib) toYAML;
       secretName = password-secret;
       values = {
         "mariadb-root-password" = cfg.auth.rootPassword;
