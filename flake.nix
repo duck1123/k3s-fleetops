@@ -67,24 +67,10 @@
   outputs =
     inputs:
     inputs.flake-parts.lib.mkFlake { inherit inputs; } (
-      { self, ... }:
+      { ... }:
       {
         imports = [ (inputs.import-tree ./modules) ];
         systems = [ "x86_64-linux" ];
-        perSystem =
-          { pkgs, system, ... }:
-          {
-            nixidyEnvs = inputs.nixidy.lib.mkEnvs {
-              inherit pkgs;
-              charts = inputs.nixhelm.chartsDerivations.${system};
-              envs.dev.modules = [ ./env/dev.nix ];
-              extraSpecialArgs = { inherit self; };
-              modules = [
-                ./applications
-                self.modules.generic.ageRecipients
-              ];
-            };
-          };
       }
     );
 }
