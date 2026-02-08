@@ -112,7 +112,7 @@
               value = withSystem system (
                 { pkgs, ... }:
                 let
-                  secrets = lib.loadSecrets {
+                  secrets = self.lib.loadSecrets {
                     inherit (lib) fromYAML;
                     inherit pkgs;
                   };
