@@ -176,7 +176,7 @@ self.lib.mkArgoApp { inherit config lib; } rec {
 
               initContainers =
                 (lib.optionalAttrs cfg.vpn.enable (
-                  lib.waitForGluetun { inherit lib; } cfg.vpn.sharedGluetunService
+                  self.lib.waitForGluetun { inherit lib; } cfg.vpn.sharedGluetunService
                 ))
                 ++ [
                   {

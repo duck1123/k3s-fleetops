@@ -408,7 +408,7 @@ in
 
     # ../applications/lidarr/default.nix
     lidarr = {
-      enable = false;
+      enable = true;
 
       ingress = {
         domain = "lidarr.${tail-domain}";
@@ -417,7 +417,7 @@ in
       };
 
       vpn = {
-        enable = true;
+        enable = false;
         sharedGluetunService = "gluetun.gluetun";
       };
 
@@ -435,6 +435,8 @@ in
         username = "lidarr";
         password = secrets.postgresql.userPassword;
       };
+
+      hostAffinity = "edgenix";
 
       replicas = 0;
       storageClassName = "longhorn";
@@ -662,7 +664,7 @@ in
     # ../applications/radarr/default.nix
     radarr = {
       database = {
-        enable = false;
+        enable = true;
         host = "postgresql.postgresql";
         port = 5432;
         name = "radarr";
@@ -670,7 +672,8 @@ in
         password = secrets.postgresql.userPassword;
       };
 
-      enable = false;
+      enable = true;
+      hostAffinity = "edgenix";
 
       # Use a specific stable version to avoid v6.0.4.10291 DryIoc bug
       # Version 5.22.4.9896-ls272 is a known stable release

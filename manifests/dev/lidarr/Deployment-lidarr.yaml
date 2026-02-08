@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/instance: lidarr
+    app.kubernetes.io/name: lidarr
+    app.kubernetes.io/version: latest
+  name: lidarr
+  namespace: lidarr
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: lidarr
+      app.kubernetes.io/name: lidarr
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: lidarr
+        app.kubernetes.io/name: lidarr
+    spec:
+      automountServiceAccountToken: true
+      containers:
+        - env:
+            - name: PGID
+              value: "1000"
+            - name: PUID
+              value: "1000"
+            - name: TZ
+              value: Etc/UTC
+            - name: LIDARR__POSTGRES__HOST
+              value: postgresql.postgresql
+            - name: LIDARR__POSTGRES__PORT
+              value: "5432"
+            - name: LIDARR__POSTGRES__MAINDB
+              value: lidarr
+            - name: LIDARR__POSTGRES__LOGDB
+              value: lidarr-log
+            - name: LIDARR__POSTGRES__USER
+              value: lidarr
+            - name: LIDARR__POSTGRES__PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: lidarr-database-password
+          image: linuxserver/lidarr:latest
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - wget -q -O- --timeout=2 http://127.0.0.1:8686/ || wget -q -O- --timeout=2 http://[::1]:8686/ || exit 1
+            failureThreshold: 3
+            initialDelaySeconds: 90
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 5
+          name: lidarr
+          ports:
+            - containerPort: 8686
+              name: http
+              protocol: TCP
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - wget -q -O- --timeout=2 http://127.0.0.1:8686/ || wget -q -O- --timeout=2 http://[::1]:8686/ || exit 1
+            failureThreshold: 5
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          volumeMounts:
+            - mountPath: /config
+              name: config
+            - mountPath: /downloads
+              name: downloads
+            - mountPath: /music
+              name: music
+      initContainers: []
+      serviceAccountName: default
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: lidarr-lidarr-config
+        - name: lidarr-database-password
+          secret:
+            secretName: lidarr-database-password
+        - name: downloads
+          persistentVolumeClaim:
+            claimName: lidarr-lidarr-downloads
+        - name: music
+          persistentVolumeClaim:
+            claimName: lidarr-lidarr-music

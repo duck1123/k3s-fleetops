@@ -173,7 +173,7 @@ self.lib.mkArgoApp { inherit config lib; } rec {
               automountServiceAccountToken = true;
               serviceAccountName = "default";
               initContainers = lib.optionalAttrs cfg.vpn.enable (
-                lib.waitForGluetun { inherit lib; } cfg.vpn.sharedGluetunService
+                self.lib.waitForGluetun { inherit lib; } cfg.vpn.sharedGluetunService
               );
               containers = [
                 {
