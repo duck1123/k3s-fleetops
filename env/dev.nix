@@ -1,5 +1,6 @@
-{ secrets, ... }:
+{ pkgs, self, ... }:
 let
+  secrets = self.lib.loadSecrets { inherit pkgs; };
   base-domain = "dev.kronkltd.net";
   tail-domain = "bearded-snake.ts.net";
   clusterIssuer = "letsencrypt-prod";

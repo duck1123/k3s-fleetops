@@ -106,14 +106,10 @@
               value = withSystem system (
                 { pkgs, ... }:
                 let
-                  secrets = self.lib.loadSecrets {
-                    inherit pkgs;
-                  };
-                  dev = import ./env/dev.nix { inherit lib nixidy secrets; };
-                  charts = nixhelm.chartsDerivations.${system};
                   defaultEnv = nixidy.lib.mkEnvs {
-                    inherit charts pkgs;
-                    envs.dev.modules = [ dev ];
+                    inherit pkgs;
+                    charts = nixhelm.chartsDerivations.${system};
+                    envs.dev.modules = [ ./env/dev.nix ];
                     extraSpecialArgs = { inherit self; };
                     libOverlay = final: prev: lib;
                     modules = [
