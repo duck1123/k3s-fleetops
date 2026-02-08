@@ -69,10 +69,7 @@
     inputs.flake-parts.lib.mkFlake { inherit inputs; } (
       { self, ... }:
       {
-        imports = [
-          inputs.make-shell.flakeModules.default
-          (inputs.import-tree ./modules)
-        ];
+        imports = [ (inputs.import-tree ./modules) ];
         systems = [ "x86_64-linux" ];
         perSystem =
           { pkgs, system, ... }:
