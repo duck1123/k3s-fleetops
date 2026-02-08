@@ -438,7 +438,7 @@ in
 
       hostAffinity = "edgenix";
 
-      replicas = 0;
+      replicas = 1;
       storageClassName = "longhorn";
     };
 
