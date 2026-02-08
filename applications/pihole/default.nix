@@ -2,13 +2,14 @@
   config,
   lib,
   pkgs,
+  self,
   ...
 }:
 with lib;
 let
   password-secret = "admin-password";
 in
-mkArgoApp { inherit config lib; } {
+self.lib.mkArgoApp { inherit config lib; } {
   name = "pihole";
 
   # https://artifacthub.io/packages/helm/mojo2600/pihole

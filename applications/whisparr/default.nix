@@ -2,13 +2,14 @@
   config,
   lib,
   pkgs,
+  self,
   ...
 }:
 with lib;
 let
   password-secret = "whisparr-database-password";
 in
-mkArgoApp { inherit config lib; } rec {
+self.lib.mkArgoApp { inherit config lib; } rec {
   name = "whisparr";
   uses-ingress = true;
 

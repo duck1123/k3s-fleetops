@@ -1,6 +1,5 @@
-{ config, lib, ... }:
-with lib;
-mkArgoApp { inherit config lib; } rec {
+{ config, lib, self, ... }:
+self.lib.mkArgoApp { inherit config lib; } rec {
   name = "sops";
 
   # https://artifacthub.io/packages/helm/sops-secrets-operator/sops-secrets-operator

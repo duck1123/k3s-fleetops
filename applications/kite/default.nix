@@ -1,6 +1,6 @@
-{ config, lib, ... }:
+{ config, lib, self, ... }:
 with lib;
-mkArgoApp { inherit config lib; } {
+self.lib.mkArgoApp { inherit config lib; } {
   name = "kite";
 
   # https://github.com/zxh326/kite

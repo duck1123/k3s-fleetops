@@ -2,13 +2,14 @@
   config,
   lib,
   pkgs,
+  self,
   ...
 }:
 with lib;
 let
   password-secret = "radarr-database-password";
 in
-mkArgoApp { inherit config lib; } rec {
+self.lib.mkArgoApp { inherit config lib; } rec {
   name = "radarr";
   uses-ingress = true;
 

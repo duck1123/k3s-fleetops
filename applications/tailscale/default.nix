@@ -6,7 +6,7 @@
   ...
 }:
 with lib;
-mkArgoApp { inherit config lib; } {
+self.lib.mkArgoApp { inherit config lib; } {
   name = "tailscale";
 
   # https://tailscale.com/kb/1236/kubernetes-operator

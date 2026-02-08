@@ -9,7 +9,7 @@ with lib;
 let
   password-secret = "mariadb-password";
 in
-mkArgoApp { inherit config lib; } rec {
+self.lib.mkArgoApp { inherit config lib; } rec {
   name = "mariadb";
 
   # https://artifacthub.io/packages/helm/bitnami/mariadb

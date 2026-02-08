@@ -2,10 +2,11 @@
   config,
   lib,
   pkgs,
+  self,
   ...
 }:
 with lib;
-mkArgoApp { inherit config lib; } {
+self.lib.mkArgoApp { inherit config lib; } {
   name = "homer";
 
   # https://artifacthub.io/packages/helm/gabe565/homer

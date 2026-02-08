@@ -9,7 +9,7 @@ with lib;
 let
   password-secret = "postgresql-password";
 in
-mkArgoApp { inherit config lib; } rec {
+self.lib.mkArgoApp { inherit config lib; } rec {
   name = "postgresql";
 
   # https://artifacthub.io/packages/helm/bitnami/redis

@@ -1,6 +1,6 @@
-{ config, lib, ... }:
+{ config, lib, self, ... }:
 with lib;
-mkArgoApp { inherit config lib; } {
+self.lib.mkArgoApp { inherit config lib; } {
   name = "calibre";
 
   # https://artifacthub.io/packages/helm/geek-cookbook/calibre

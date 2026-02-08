@@ -6,7 +6,7 @@
   ...
 }:
 with lib;
-mkArgoApp { inherit config lib; } {
+self.lib.mkArgoApp { inherit config lib; } {
   name = "keycloak";
 
   chart = self.lib.helmChart {

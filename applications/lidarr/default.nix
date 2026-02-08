@@ -9,7 +9,7 @@ with lib;
 let
   password-secret = "lidarr-database-password";
 in
-mkArgoApp { inherit config lib; } rec {
+self.lib.mkArgoApp { inherit config lib; } rec {
   name = "lidarr";
   uses-ingress = true;
 

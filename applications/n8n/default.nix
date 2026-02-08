@@ -1,6 +1,6 @@
-{ config, lib, ... }:
+{ config, lib, self, ... }:
 with lib;
-mkArgoApp { inherit config lib; } rec {
+self.lib.mkArgoApp { inherit config lib; } {
   name = "n8n";
 
   # https://artifacthub.io/packages/helm/community-charts/n8n

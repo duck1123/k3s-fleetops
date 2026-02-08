@@ -2,13 +2,14 @@
   config,
   lib,
   pkgs,
+  self,
   ...
 }:
 with lib;
 let
   password-secret = "qbittorrent-webui-credentials";
 in
-mkArgoApp { inherit config lib; } rec {
+self.lib.mkArgoApp { inherit config lib; } rec {
   name = "qbittorrent";
   uses-ingress = true;
 

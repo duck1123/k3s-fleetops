@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  self,
   ...
 }:
 with lib;
@@ -9,7 +10,7 @@ let
   password-secret = "romm-database-password";
   admin-secret = "romm-admin-password";
 in
-mkArgoApp { inherit config lib; } rec {
+self.lib.mkArgoApp { inherit config lib; } rec {
   name = "romm";
   uses-ingress = true;
 

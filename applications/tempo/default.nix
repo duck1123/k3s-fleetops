@@ -2,10 +2,11 @@
   charts,
   config,
   lib,
+  self,
   ...
 }:
 with lib;
-mkArgoApp { inherit config lib; } {
+self.lib.mkArgoApp { inherit config lib; } {
   name = "tempo";
 
   # https://artifacthub.io/packages/helm/grafana/tempo

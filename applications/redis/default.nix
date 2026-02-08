@@ -9,7 +9,7 @@ with lib;
 let
   password-secret = "redis-password";
 in
-mkArgoApp { inherit config lib; } rec {
+self.lib.mkArgoApp { inherit config lib; } rec {
   name = "redis";
 
   extraOptions = {

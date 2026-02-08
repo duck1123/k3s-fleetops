@@ -10,7 +10,7 @@ let
   hub-secret = "jupyterhub-hub2";
   postgresql-secret = "jupyterhub-postgresql";
 in
-mkArgoApp { inherit config lib; } {
+self.lib.mkArgoApp { inherit config lib; } {
   name = "jupyterhub";
 
   # https://artifacthub.io/packages/helm/bitnami/jupyterhub

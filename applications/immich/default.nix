@@ -10,7 +10,7 @@ let
   password-secret = "immich-database-password";
   redis-secret = "immich-redis-password";
 in
-mkArgoApp { inherit config lib; } rec {
+self.lib.mkArgoApp { inherit config lib; } rec {
   name = "immich";
   uses-ingress = true;
 

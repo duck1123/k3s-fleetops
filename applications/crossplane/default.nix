@@ -1,6 +1,5 @@
-{ config, lib, ... }:
-with lib;
-mkArgoApp { inherit config lib; } {
+{ config, lib, self, ... }:
+self.lib.mkArgoApp { inherit config lib; } {
   name = "crossplane";
 
   # https://artifacthub.io/packages/helm/crossplane/crossplane

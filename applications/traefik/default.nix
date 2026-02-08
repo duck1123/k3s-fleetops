@@ -2,10 +2,10 @@
   charts,
   config,
   lib,
+  self,
   ...
 }:
-with lib;
-mkArgoApp { inherit config lib; } {
+self.lib.mkArgoApp { inherit config lib; } {
   name = "traefik";
 
   # https://artifacthub.io/packages/helm/traefik/traefik

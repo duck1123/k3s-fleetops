@@ -1,11 +1,11 @@
 {
-  charts,
   config,
   lib,
+  self,
   ...
 }:
 with lib;
-mkArgoApp { inherit config lib; } {
+self.lib.mkArgoApp { inherit config lib; } {
   name = "alice-lnd";
 
   chart = lib.helm.downloadHelmChart {

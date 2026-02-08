@@ -1,6 +1,5 @@
-{ config, lib, ... }:
-with lib;
-mkArgoApp { inherit config lib; } {
+{ config, lib, self, ... }:
+self.lib.mkArgoApp { inherit config lib; } {
   name = "lldap";
 
   chart = lib.helm.downloadHelmChart {

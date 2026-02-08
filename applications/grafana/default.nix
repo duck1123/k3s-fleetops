@@ -10,7 +10,7 @@ with lib;
 let
   grafana-secret = "grafana-admin";
 in
-mkArgoApp { inherit config lib; } {
+self.lib.mkArgoApp { inherit config lib; } {
   name = "grafana";
 
   # https://artifacthub.io/packages/helm/grafana/grafana

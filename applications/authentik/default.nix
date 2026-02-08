@@ -1,8 +1,8 @@
 {
-  charts,
   config,
   lib,
   pkgs,
+  self,
   ...
 }:
 with lib;
@@ -10,7 +10,7 @@ let
   postgresql-secret = "authentik-postgres-auth";
   secret-secret = "authentik-secret-key";
 in
-mkArgoApp { inherit config lib; } {
+self.lib.mkArgoApp { inherit config lib; } {
   name = "authentik";
 
   # https://artifacthub.io/packages/helm/goauthentik/authentik

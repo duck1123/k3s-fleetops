@@ -1,6 +1,5 @@
-{ config, lib, ... }:
-with lib;
-mkArgoApp { inherit config lib; } {
+{ config, lib, self, ... }:
+self.lib.mkArgoApp { inherit config lib; } {
   name = "kyverno";
 
   # https://artifacthub.io/packages/helm/kyverno/kyverno
