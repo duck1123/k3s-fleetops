@@ -88,11 +88,7 @@
           (inputs.import-tree ./modules)
         ];
         systems = [ "x86_64-linux" ];
-        perSystem =
-          { system, ... }:
-          {
-            packages.nixidy = nixidy.packages.${system}.default;
-          };
+
         flake = {
           # Compute nixidyEnvs per system using withSystem
           nixidyEnvs = builtins.listToAttrs (
