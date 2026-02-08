@@ -46,7 +46,7 @@ mkArgoApp { inherit config lib; } {
         inherit lib pkgs;
         inherit (config) ageRecipients;
         inherit (cfg) namespace;
-        inherit (self.lib) toYAML;
+        inherit (self.lib) encryptString toYAML;
         secretName = "tailscale-auth";
         values.TS_AUTHKEY = cfg.oauth.authKey;
       };
@@ -55,7 +55,7 @@ mkArgoApp { inherit config lib; } {
         inherit lib pkgs;
         inherit (config) ageRecipients;
         inherit (cfg) namespace;
-        inherit (self.lib) toYAML;
+        inherit (self.lib) encryptString toYAML;
         secretName = "operator-oauth";
         values = with cfg.oauth; {
           client_id = clientId;

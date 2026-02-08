@@ -1,7 +1,7 @@
 # Takes unencrypted values and returns the config for a sopssecret containing encrypted values
 {
   ageRecipients,
-  lib,
+  encryptString,
   namespace ? "default",
   pkgs,
   secretName ? "some-secret",
@@ -28,7 +28,7 @@ let
     inherit pkgs;
     value = secret-spec;
   };
-  encrypted-string = lib.encryptString {
+  encrypted-string = encryptString {
     inherit
       ageRecipients
       pkgs

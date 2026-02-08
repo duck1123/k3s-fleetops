@@ -129,7 +129,7 @@ mkArgoApp { inherit config lib; } {
         inherit lib pkgs;
         inherit (config) ageRecipients;
         inherit (cfg) namespace;
-        inherit (self.lib) toYAML;
+        inherit (self.lib) encryptString toYAML;
         secretName = "forgejo-admin-password";
         values = { inherit (cfg.admin) password username; };
       };
@@ -138,7 +138,7 @@ mkArgoApp { inherit config lib; } {
         inherit lib pkgs;
         inherit (config) ageRecipients;
         inherit (cfg) namespace;
-        inherit (self.lib) toYAML;
+        inherit (self.lib) encryptString toYAML;
         secretName = "postgresql-password";
         values = {
           inherit (cfg.postgresql)

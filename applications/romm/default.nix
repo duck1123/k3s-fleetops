@@ -582,7 +582,7 @@ mkArgoApp { inherit config lib; } rec {
       inherit lib pkgs;
       inherit (config) ageRecipients;
       inherit (cfg) namespace;
-      inherit (self.lib) toYAML;
+      inherit (self.lib) encryptString toYAML;
       secretName = password-secret;
       values.password = cfg.database.password;
     };
@@ -592,7 +592,7 @@ mkArgoApp { inherit config lib; } rec {
       inherit lib pkgs;
       inherit (config) ageRecipients;
       inherit (cfg) namespace;
-      inherit (self.lib) toYAML;
+      inherit (self.lib) encryptString toYAML;
       secretName = admin-secret;
       values = {
         username = cfg.admin.username;
