@@ -186,11 +186,10 @@ mkArgoApp { inherit config lib; } {
   };
 
   extraResources = cfg: {
-    sopsSecrets.${grafana-secret} = lib.createSecret {
+    sopsSecrets.${grafana-secret} = self.lib.createSecret {
       inherit lib pkgs;
       inherit (config) ageRecipients;
       inherit (cfg) namespace;
-      inherit (self.lib) encryptString toYAML;
       secretName = grafana-secret;
       values = {
         "admin-user" = cfg.adminUser or "admin";

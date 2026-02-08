@@ -367,11 +367,10 @@ mkArgoApp { inherit config lib; } rec {
     };
 
     # Create a secret in booklore namespace that references MariaDB secret
-    sopsSecrets.booklore-database-password = lib.createSecret {
+    sopsSecrets.booklore-database-password = self.lib.createSecret {
       inherit lib pkgs;
       inherit (config) ageRecipients;
       inherit (cfg) namespace;
-      inherit (self.lib) encryptString toYAML;
       secretName = "booklore-database-password";
       values.password = cfg.database.password;
     };

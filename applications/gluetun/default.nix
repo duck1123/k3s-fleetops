@@ -441,20 +441,18 @@ mkArgoApp { inherit config lib; } rec {
 
     # Create SOPS secrets
     sopsSecrets = {
-      "${name}-mullvad-account" = lib.createSecret {
+      "${name}-mullvad-account" = self.lib.createSecret {
         inherit lib pkgs;
         inherit (config) ageRecipients;
-        inherit (self.lib) encryptString toYAML;
         namespace = cfg.namespace;
         secretName = "${name}-mullvad-account";
         values.accountNumber = cfg.mullvadAccountNumber;
       };
     }
     // lib.optionalAttrs (cfg.controlServer.username != "" || cfg.controlServer.password != "") {
-      "${name}-control-server" = lib.createSecret {
+      "${name}-control-server" = self.lib.createSecret {
         inherit lib pkgs;
         inherit (config) ageRecipients;
-        inherit (self.lib) encryptString toYAML;
         namespace = cfg.namespace;
         secretName = "${name}-control-server";
         values =

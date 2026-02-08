@@ -116,11 +116,10 @@ mkArgoApp { inherit config lib; } rec {
 
   extraResources = cfg: {
     sopsSecrets = lib.optionalAttrs (cfg.database.enable && cfg.database.password != "") {
-      ${password-secret} = lib.createSecret {
+      ${password-secret} = self.lib.createSecret {
         inherit lib pkgs;
         inherit (config) ageRecipients;
         inherit (cfg) namespace;
-        inherit (self.lib) encryptString toYAML;
         secretName = password-secret;
         values = {
           password = cfg.database.password;

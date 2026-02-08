@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  self,
   ...
 }:
 with lib;
@@ -125,7 +126,7 @@ mkArgoApp { inherit config lib; } {
         value = hub-secret-config;
       };
 
-      encrypted-secret-config = lib.encryptString {
+      encrypted-secret-config = self.lib.encryptString {
         inherit pkgs;
         inherit (config) ageRecipients;
         secretName = hub-secret;
@@ -140,11 +141,10 @@ mkArgoApp { inherit config lib; } {
           inherit (encrypted-secret-config-object) sops spec;
         };
 
-        ${postgresql-secret} = lib.createSecret {
+        ${postgresql-secret} = self.lib.createSecret {
           inherit lib pkgs;
           inherit (config) ageRecipients;
           inherit (cfg) namespace;
-          inherit (self.lib) encryptString toYAML;
           secretName = postgresql-secret;
           values = {
             password = cfg.postgresql.adminPassword;

@@ -125,20 +125,18 @@ mkArgoApp { inherit config lib; } {
 
   extraResources = cfg: {
     sopsSecrets = {
-      forgejo-admin-password = lib.createSecret {
+      forgejo-admin-password = self.lib.createSecret {
         inherit lib pkgs;
         inherit (config) ageRecipients;
         inherit (cfg) namespace;
-        inherit (self.lib) encryptString toYAML;
         secretName = "forgejo-admin-password";
         values = { inherit (cfg.admin) password username; };
       };
 
-      postgresql-password = lib.createSecret {
+      postgresql-password = self.lib.createSecret {
         inherit lib pkgs;
         inherit (config) ageRecipients;
         inherit (cfg) namespace;
-        inherit (self.lib) encryptString toYAML;
         secretName = "postgresql-password";
         values = {
           inherit (cfg.postgresql)

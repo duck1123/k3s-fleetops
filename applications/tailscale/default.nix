@@ -42,20 +42,18 @@ mkArgoApp { inherit config lib; } {
 
   extraResources = cfg: {
     sopsSecrets = {
-      tailscale-auth = createSecret {
+      tailscale-auth = self.lib.createSecret {
         inherit lib pkgs;
         inherit (config) ageRecipients;
         inherit (cfg) namespace;
-        inherit (self.lib) encryptString toYAML;
         secretName = "tailscale-auth";
         values.TS_AUTHKEY = cfg.oauth.authKey;
       };
 
-      operator-oauth = lib.createSecret {
+      operator-oauth = self.lib.createSecret {
         inherit lib pkgs;
         inherit (config) ageRecipients;
         inherit (cfg) namespace;
-        inherit (self.lib) encryptString toYAML;
         secretName = "operator-oauth";
         values = with cfg.oauth; {
           client_id = clientId;

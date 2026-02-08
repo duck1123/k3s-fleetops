@@ -578,21 +578,19 @@ mkArgoApp { inherit config lib; } rec {
     };
 
     # Create secret for database password
-    sopsSecrets.${password-secret} = lib.createSecret {
+    sopsSecrets.${password-secret} = self.lib.createSecret {
       inherit lib pkgs;
       inherit (config) ageRecipients;
       inherit (cfg) namespace;
-      inherit (self.lib) encryptString toYAML;
       secretName = password-secret;
       values.password = cfg.database.password;
     };
 
     # Create secret for admin credentials and auth secret key
-    sopsSecrets.${admin-secret} = lib.createSecret {
+    sopsSecrets.${admin-secret} = self.lib.createSecret {
       inherit lib pkgs;
       inherit (config) ageRecipients;
       inherit (cfg) namespace;
-      inherit (self.lib) encryptString toYAML;
       secretName = admin-secret;
       values = {
         username = cfg.admin.username;

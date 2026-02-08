@@ -106,11 +106,10 @@ mkArgoApp { inherit config lib; } rec {
 
   extraResources = cfg: {
     sopsSecrets = lib.optionalAttrs (cfg.webui.username != "" && cfg.webui.password != "") {
-      ${password-secret} = lib.createSecret {
+      ${password-secret} = self.lib.createSecret {
         inherit lib pkgs;
         inherit (config) ageRecipients;
         inherit (cfg) namespace;
-        inherit (self.lib) encryptString toYAML;
         secretName = password-secret;
         values = {
           username = cfg.webui.username;

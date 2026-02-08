@@ -277,11 +277,10 @@ mkArgoApp { inherit config lib; } rec {
     };
 
     # Create secrets for database and Redis
-    sopsSecrets.${password-secret} = lib.createSecret {
+    sopsSecrets.${password-secret} = self.lib.createSecret {
       inherit lib pkgs;
       inherit (config) ageRecipients;
       inherit (cfg) namespace;
-      inherit (self.lib) encryptString toYAML;
       secretName = password-secret;
       values = {
         password = cfg.database.password;
@@ -289,11 +288,10 @@ mkArgoApp { inherit config lib; } rec {
       };
     };
 
-    sopsSecrets.${redis-secret} = lib.createSecret {
+    sopsSecrets.${redis-secret} = self.lib.createSecret {
       inherit lib pkgs;
       inherit (config) ageRecipients;
       inherit (cfg) namespace;
-      inherit (self.lib) encryptString toYAML;
       secretName = redis-secret;
       values.password = cfg.redis.password;
     };
