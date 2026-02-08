@@ -105,10 +105,6 @@
                     libOverlay = final: prev: lib;
                     modules = [
                       ./applications
-                      {
-                        # FIXME: naughty config
-                        ageRecipients = "age1n372e8dgautnjhecllf7uvvldw9g6vyx3kggj0kyduz5jr2upvysue242c";
-                      }
                       self.modules.generic.ageRecipients
                     ];
                   };
