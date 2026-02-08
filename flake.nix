@@ -65,14 +65,8 @@
   };
 
   outputs =
-    {
-      flake-parts,
-      make-shell,
-      nixhelm,
-      nixidy,
-      ...
-    }@inputs:
-    flake-parts.lib.mkFlake { inherit inputs; } (
+    inputs:
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } (
       {
         config,
         self,
@@ -81,7 +75,7 @@
       }:
       {
         imports = [
-          make-shell.flakeModules.default
+          inputs.make-shell.flakeModules.default
           (inputs.import-tree ./modules)
         ];
         systems = [ "x86_64-linux" ];
@@ -91,9 +85,9 @@
             name = system;
             value = withSystem system (
               { pkgs, ... }:
-              nixidy.lib.mkEnvs {
+              inputs.nixidy.lib.mkEnvs {
                 inherit pkgs;
-                charts = nixhelm.chartsDerivations.${system};
+                charts = inputs.nixhelm.chartsDerivations.${system};
                 envs.dev.modules = [ ./env/dev.nix ];
                 extraSpecialArgs = { inherit self; };
                 modules = [
