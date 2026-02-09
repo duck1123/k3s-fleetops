@@ -112,7 +112,13 @@ self.lib.mkArgoApp { inherit config lib; } rec {
     };
 
     enableGPU = mkOption {
-      description = mdDoc "Enable GPU for hardware transcoding (NVIDIA via device plugin + Intel/AMD via /dev/dri)";
+      description = mdDoc "Enable GPU for hardware transcoding (mounts /dev/dri for AMD/Intel iGPU)";
+      type = types.bool;
+      default = false;
+    };
+
+    enableNvidiaGPU = mkOption {
+      description = mdDoc "Request an NVIDIA GPU via nvidia.com/gpu (requires NVIDIA device plugin). Set false for AMD/Intel only.";
       type = types.bool;
       default = false;
     };
@@ -159,7 +165,7 @@ self.lib.mkArgoApp { inherit config lib; } rec {
                     { name = "inContainer"; value = "true"; }
                     { name = "auth"; value = "false"; }
                   ]
-                  ++ (lib.optionals cfg.enableGPU [
+                  ++ (lib.optionals cfg.enableNvidiaGPU [
                     { name = "NVIDIA_VISIBLE_DEVICES"; value = "all"; }
                     { name = "NVIDIA_DRIVER_CAPABILITIES"; value = "all"; }
                   ])
@@ -197,7 +203,7 @@ self.lib.mkArgoApp { inherit config lib; } rec {
                   ++ (lib.optionals cfg.enableGPU [
                     { mountPath = "/dev/dri"; name = "dri"; }
                   ]);
-                  resources = lib.optionalAttrs cfg.enableGPU {
+                  resources = lib.optionalAttrs cfg.enableNvidiaGPU {
                     limits."nvidia.com/gpu" = "1";
                   };
                   securityContext = lib.optionalAttrs cfg.enableGPU {

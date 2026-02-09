@@ -40,10 +40,6 @@ spec:
               value: "true"
             - name: auth
               value: "false"
-            - name: NVIDIA_VISIBLE_DEVICES
-              value: all
-            - name: NVIDIA_DRIVER_CAPABILITIES
-              value: all
           image: ghcr.io/haveagitgat/tdarr:latest
           imagePullPolicy: IfNotPresent
           name: tdarr
@@ -54,9 +50,7 @@ spec:
             - containerPort: 8266
               name: server
               protocol: TCP
-          resources:
-            limits:
-              nvidia.com/gpu: "1"
+          resources: {}
           securityContext:
             capabilities:
               add:
