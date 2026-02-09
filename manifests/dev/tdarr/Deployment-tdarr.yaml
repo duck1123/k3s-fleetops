@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/instance: tdarr
+    app.kubernetes.io/name: tdarr
+    app.kubernetes.io/version: latest
+  name: tdarr
+  namespace: tdarr
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: tdarr
+      app.kubernetes.io/name: tdarr
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: tdarr
+        app.kubernetes.io/name: tdarr
+    spec:
+      automountServiceAccountToken: true
+      containers:
+        - env:
+            - name: PGID
+              value: "1000"
+            - name: PUID
+              value: "1000"
+            - name: TZ
+              value: Etc/UTC
+            - name: serverIP
+              value: 0.0.0.0
+            - name: serverPort
+              value: "8266"
+            - name: webUIPort
+              value: "8265"
+            - name: internalNode
+              value: "true"
+            - name: inContainer
+              value: "true"
+            - name: auth
+              value: "false"
+          image: ghcr.io/haveagitgat/tdarr:latest
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 8265
+            initialDelaySeconds: 90
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 5
+          name: tdarr
+          ports:
+            - containerPort: 8265
+              name: http
+              protocol: TCP
+            - containerPort: 8266
+              name: server
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 8265
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          volumeMounts:
+            - mountPath: /app
+              name: config
+            - mountPath: /temp
+              name: temp
+            - mountPath: /media
+              name: media
+      initContainers: []
+      nodeSelector:
+        kubernetes.io/hostname: edgenix
+      serviceAccountName: default
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: tdarr-tdarr-config
+        - name: temp
+          persistentVolumeClaim:
+            claimName: tdarr-tdarr-temp
+        - name: media
+          persistentVolumeClaim:
+            claimName: tdarr-tdarr-media

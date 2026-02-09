@@ -829,6 +829,28 @@ in
       oauth = { inherit (secrets.tailscale) authKey clientId clientSecret; };
     };
 
+    # ../applications/tdarr/default.nix
+    tdarr = {
+      enable = true;
+      hostAffinity = "edgenix";
+
+      ingress = {
+        domain = "tdarr.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+
+      nfs = {
+        enable = true;
+        server = nas-host;
+        path = "${nas-base}";
+      };
+
+      replicas = 1;
+      storageClassName = "longhorn";
+      vpn.enable = false;
+    };
+
     tempo = {
       enable = false;
       ingress = {

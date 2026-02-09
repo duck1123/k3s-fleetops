@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: tdarr-tdarr-temp
+  namespace: tdarr
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: ""
+  volumeName: tdarr-tdarr-temp-nfs

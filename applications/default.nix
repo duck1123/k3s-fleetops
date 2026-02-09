@@ -61,6 +61,7 @@
     ./specter
     ./sqlpad
     ./tailscale
+    ./tdarr
     ./tempo
     ./traefik
     ./whisparr
