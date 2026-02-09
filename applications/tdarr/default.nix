@@ -110,6 +110,12 @@ self.lib.mkArgoApp { inherit config lib; } rec {
       type = types.attrsOf types.str;
       default = { };
     };
+
+    enableGPU = mkOption {
+      description = mdDoc "Enable GPU for hardware transcoding (NVIDIA via device plugin + Intel/AMD via /dev/dri)";
+      type = types.bool;
+      default = false;
+    };
   };
 
   extraResources = cfg: {
@@ -153,6 +159,10 @@ self.lib.mkArgoApp { inherit config lib; } rec {
                     { name = "inContainer"; value = "true"; }
                     { name = "auth"; value = "false"; }
                   ]
+                  ++ (lib.optionals cfg.enableGPU [
+                    { name = "NVIDIA_VISIBLE_DEVICES"; value = "all"; }
+                    { name = "NVIDIA_DRIVER_CAPABILITIES"; value = "all"; }
+                  ])
                   ++ (lib.optionals cfg.vpn.enable [
                     { name = "HTTP_PROXY"; value = "http://${cfg.vpn.sharedGluetunService}:8888"; }
                     { name = "HTTPS_PROXY"; value = "http://${cfg.vpn.sharedGluetunService}:8888"; }
@@ -183,7 +193,16 @@ self.lib.mkArgoApp { inherit config lib; } rec {
                     { mountPath = "/temp"; name = "temp"; }
                     { mountPath = "/media/Movies"; name = "media-movies"; }
                     { mountPath = "/media/TV"; name = "media-tv"; }
-                  ];
+                  ]
+                  ++ (lib.optionals cfg.enableGPU [
+                    { mountPath = "/dev/dri"; name = "dri"; }
+                  ]);
+                  resources = lib.optionalAttrs cfg.enableGPU {
+                    limits."nvidia.com/gpu" = "1";
+                  };
+                  securityContext = lib.optionalAttrs cfg.enableGPU {
+                    capabilities.add = [ "SYS_ADMIN" ];
+                  };
                 }
               ];
 
@@ -198,7 +217,10 @@ self.lib.mkArgoApp { inherit config lib; } rec {
                 { name = "temp"; persistentVolumeClaim.claimName = "${name}-${name}-temp"; }
                 { name = "media-movies"; persistentVolumeClaim.claimName = "${name}-${name}-media-movies"; }
                 { name = "media-tv"; persistentVolumeClaim.claimName = "${name}-${name}-media-tv"; }
-              ];
+              ]
+              ++ (lib.optionals cfg.enableGPU [
+                { name = "dri"; hostPath = { path = "/dev/dri"; type = "Directory"; }; }
+              ]);
             };
           };
         };

@@ -40,6 +40,10 @@ spec:
               value: "true"
             - name: auth
               value: "false"
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: all
+            - name: NVIDIA_DRIVER_CAPABILITIES
+              value: all
           image: ghcr.io/haveagitgat/tdarr:latest
           imagePullPolicy: IfNotPresent
           name: tdarr
@@ -50,6 +54,13 @@ spec:
             - containerPort: 8266
               name: server
               protocol: TCP
+          resources:
+            limits:
+              nvidia.com/gpu: "1"
+          securityContext:
+            capabilities:
+              add:
+                - SYS_ADMIN
           volumeMounts:
             - mountPath: /app/server
               name: config
@@ -59,6 +70,8 @@ spec:
               name: media-movies
             - mountPath: /media/TV
               name: media-tv
+            - mountPath: /dev/dri
+              name: dri
       initContainers: []
       nodeSelector:
         kubernetes.io/hostname: edgenix
@@ -76,3 +89,7 @@ spec:
         - name: media-tv
           persistentVolumeClaim:
             claimName: tdarr-tdarr-media-tv
+        - hostPath:
+            path: /dev/dri
+            type: Directory
+          name: dri

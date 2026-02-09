@@ -850,6 +850,7 @@ in
       storageClassName = "longhorn";
       useProbes = false;
       vpn.enable = false;
+      enableGPU = true;
     };
 
     tempo = {
