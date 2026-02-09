@@ -47,10 +47,10 @@ spec:
             httpGet:
               path: /
               port: 8265
-            initialDelaySeconds: 90
+            initialDelaySeconds: 300
             periodSeconds: 30
             successThreshold: 1
-            timeoutSeconds: 5
+            timeoutSeconds: 10
           name: tdarr
           ports:
             - containerPort: 8265
@@ -60,14 +60,14 @@ spec:
               name: server
               protocol: TCP
           readinessProbe:
-            failureThreshold: 3
+            failureThreshold: 6
             httpGet:
               path: /
               port: 8265
-            initialDelaySeconds: 60
-            periodSeconds: 10
+            initialDelaySeconds: 180
+            periodSeconds: 15
             successThreshold: 1
-            timeoutSeconds: 5
+            timeoutSeconds: 10
           volumeMounts:
             - mountPath: /app
               name: config

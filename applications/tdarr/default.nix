@@ -158,17 +158,17 @@ self.lib.mkArgoApp { inherit config lib; } rec {
                   ];
                   readinessProbe = lib.mkIf cfg.useProbes {
                     httpGet = { path = "/"; port = cfg.service.port; };
-                    initialDelaySeconds = 60;
-                    periodSeconds = 10;
-                    timeoutSeconds = 5;
+                    initialDelaySeconds = 180;
+                    periodSeconds = 15;
+                    timeoutSeconds = 10;
                     successThreshold = 1;
-                    failureThreshold = 3;
+                    failureThreshold = 6;
                   };
                   livenessProbe = lib.mkIf cfg.useProbes {
                     httpGet = { path = "/"; port = cfg.service.port; };
-                    initialDelaySeconds = 90;
+                    initialDelaySeconds = 300;
                     periodSeconds = 30;
-                    timeoutSeconds = 5;
+                    timeoutSeconds = 10;
                     successThreshold = 1;
                     failureThreshold = 3;
                   };
