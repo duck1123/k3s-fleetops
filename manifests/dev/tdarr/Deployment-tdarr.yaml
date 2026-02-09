@@ -73,8 +73,10 @@ spec:
               name: config
             - mountPath: /temp
               name: temp
-            - mountPath: /media
-              name: media
+            - mountPath: /media/Movies
+              name: media-movies
+            - mountPath: /media/TV
+              name: media-tv
       initContainers: []
       nodeSelector:
         kubernetes.io/hostname: edgenix
@@ -86,6 +88,9 @@ spec:
         - name: temp
           persistentVolumeClaim:
             claimName: tdarr-tdarr-temp
-        - name: media
+        - name: media-movies
           persistentVolumeClaim:
-            claimName: tdarr-tdarr-media
+            claimName: tdarr-tdarr-media-movies
+        - name: media-tv
+          persistentVolumeClaim:
+            claimName: tdarr-tdarr-media-tv

@@ -175,7 +175,8 @@ self.lib.mkArgoApp { inherit config lib; } rec {
                   volumeMounts = [
                     { mountPath = "/app"; name = "config"; }
                     { mountPath = "/temp"; name = "temp"; }
-                    { mountPath = "/media"; name = "media"; }
+                    { mountPath = "/media/Movies"; name = "media-movies"; }
+                    { mountPath = "/media/TV"; name = "media-tv"; }
                   ];
                 }
               ];
@@ -189,7 +190,8 @@ self.lib.mkArgoApp { inherit config lib; } rec {
               volumes = [
                 { name = "config"; persistentVolumeClaim.claimName = "${name}-${name}-config"; }
                 { name = "temp"; persistentVolumeClaim.claimName = "${name}-${name}-temp"; }
-                { name = "media"; persistentVolumeClaim.claimName = "${name}-${name}-media"; }
+                { name = "media-movies"; persistentVolumeClaim.claimName = "${name}-${name}-media-movies"; }
+                { name = "media-tv"; persistentVolumeClaim.claimName = "${name}-${name}-media-tv"; }
               ];
             };
           };
@@ -236,13 +238,27 @@ self.lib.mkArgoApp { inherit config lib; } rec {
             accessModes = [ "ReadWriteOnce" ];
             resources.requests.storage = "50Gi";
           };
-      "${name}-${name}-media".spec =
+      "${name}-${name}-media-movies".spec =
         if cfg.nfs.enable then
           {
             accessModes = [ "ReadWriteMany" ];
             resources.requests.storage = "1Gi";
             storageClassName = "";
-            volumeName = "${name}-${name}-media-nfs";
+            volumeName = "${name}-${name}-media-movies-nfs";
+          }
+        else
+          {
+            inherit (cfg) storageClassName;
+            accessModes = [ "ReadWriteOnce" ];
+            resources.requests.storage = "100Gi";
+          };
+      "${name}-${name}-media-tv".spec =
+        if cfg.nfs.enable then
+          {
+            accessModes = [ "ReadWriteMany" ];
+            resources.requests.storage = "1Gi";
+            storageClassName = "";
+            volumeName = "${name}-${name}-media-tv-nfs";
           }
         else
           {
@@ -281,17 +297,32 @@ self.lib.mkArgoApp { inherit config lib; } rec {
           persistentVolumeReclaimPolicy = "Retain";
         };
       };
-      "${name}-${name}-media-nfs" = {
+      "${name}-${name}-media-movies-nfs" = {
         apiVersion = "v1";
         kind = "PersistentVolume";
-        metadata = { name = "${name}-${name}-media-nfs"; };
+        metadata = { name = "${name}-${name}-media-movies-nfs"; };
         spec = {
           capacity = { storage = "1Ti"; };
           accessModes = [ "ReadWriteMany" ];
           mountOptions = [ "nolock" "soft" "timeo=30" ];
           nfs = {
             server = cfg.nfs.server;
-            path = cfg.nfs.path;
+            path = "${cfg.nfs.path}/Movies";
+          };
+          persistentVolumeReclaimPolicy = "Retain";
+        };
+      };
+      "${name}-${name}-media-tv-nfs" = {
+        apiVersion = "v1";
+        kind = "PersistentVolume";
+        metadata = { name = "${name}-${name}-media-tv-nfs"; };
+        spec = {
+          capacity = { storage = "1Ti"; };
+          accessModes = [ "ReadWriteMany" ];
+          mountOptions = [ "nolock" "soft" "timeo=30" ];
+          nfs = {
+            server = cfg.nfs.server;
+            path = "${cfg.nfs.path}/TV";
           };
           persistentVolumeReclaimPolicy = "Retain";
         };

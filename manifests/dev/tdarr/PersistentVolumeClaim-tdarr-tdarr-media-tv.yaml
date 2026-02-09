@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: tdarr-tdarr-media
+  name: tdarr-tdarr-media-tv
   namespace: tdarr
 spec:
   accessModes:
@@ -10,4 +10,4 @@ spec:
     requests:
       storage: 1Gi
   storageClassName: ""
-  volumeName: tdarr-tdarr-media-nfs
+  volumeName: tdarr-tdarr-media-tv-nfs
