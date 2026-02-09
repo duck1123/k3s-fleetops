@@ -15,7 +15,7 @@ spec:
                 port:
                   name: http
             path: /
-            pathType: ImplementationSpecific
+            pathType: Prefix
   tls:
     - hosts:
         - tdarr.bearded-snake.ts.net

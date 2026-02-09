@@ -104,6 +104,12 @@ self.lib.mkArgoApp { inherit config lib; } rec {
       type = types.bool;
       default = true;
     };
+
+    ingress.annotations = mkOption {
+      description = mdDoc "Annotations for the Ingress resource";
+      type = types.attrsOf types.str;
+      default = { };
+    };
   };
 
   extraResources = cfg: {
@@ -199,23 +205,27 @@ self.lib.mkArgoApp { inherit config lib; } rec {
       };
     };
 
-    ingresses.${name}.spec = with cfg.ingress; {
-      inherit ingressClassName;
+    ingresses.${name} = with cfg.ingress; {
+      metadata = lib.optionalAttrs (annotations != { }) { inherit annotations; };
+      spec = {
+        inherit ingressClassName;
 
-      rules = [
-        {
-          host = domain;
-          http.paths = [
-            {
-              backend.service = { inherit name; port.name = "http"; };
-              path = "/";
-              pathType = "ImplementationSpecific";
-            }
-          ];
-        }
-      ];
+        rules = [
+          {
+            host = domain;
+            http.paths = [
+              {
+                backend.service = { inherit name; port.name = "http"; };
+                path = "/";
+                # Tailscale only supports Prefix path type
+                pathType = "Prefix";
+              }
+            ];
+          }
+        ];
 
-      tls = [ { hosts = [ domain ]; } ];
+        tls = [ { hosts = [ domain ]; } ];
+      };
     };
 
     persistentVolumeClaims = {
