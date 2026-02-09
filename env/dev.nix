@@ -848,6 +848,7 @@ in
 
       replicas = 1;
       storageClassName = "longhorn";
+      useProbes = false;
       vpn.enable = false;
     };
 
