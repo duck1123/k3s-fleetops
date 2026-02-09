@@ -173,7 +173,7 @@ self.lib.mkArgoApp { inherit config lib; } rec {
                     failureThreshold = 3;
                   };
                   volumeMounts = [
-                    { mountPath = "/app"; name = "config"; }
+                    { mountPath = "/app/server"; name = "config"; }
                     { mountPath = "/temp"; name = "temp"; }
                     { mountPath = "/media/Movies"; name = "media-movies"; }
                     { mountPath = "/media/TV"; name = "media-tv"; }

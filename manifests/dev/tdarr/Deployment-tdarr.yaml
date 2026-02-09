@@ -51,7 +51,7 @@ spec:
               name: server
               protocol: TCP
           volumeMounts:
-            - mountPath: /app
+            - mountPath: /app/server
               name: config
             - mountPath: /temp
               name: temp
