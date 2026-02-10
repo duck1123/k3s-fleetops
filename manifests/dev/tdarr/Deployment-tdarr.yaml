@@ -59,8 +59,6 @@ spec:
             capabilities:
               add:
                 - SYS_ADMIN
-            runAsGroup: 1000
-            runAsUser: 1000
           volumeMounts:
             - mountPath: /app/server
               name: config
@@ -75,6 +73,8 @@ spec:
       initContainers: []
       nodeSelector:
         kubernetes.io/hostname: edgenix
+      securityContext:
+        fsGroup: 1000
       serviceAccountName: default
       volumes:
         - name: config
