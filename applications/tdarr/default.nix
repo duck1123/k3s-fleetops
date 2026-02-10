@@ -105,6 +105,18 @@ self.lib.mkArgoApp { inherit config lib; } rec {
       default = true;
     };
 
+    healthcheckcpuWorkers = mkOption {
+      description = mdDoc "Number of CPU workers for media health checks (Quick: HandBrake header scan). Set to 0 to disable.";
+      type = types.int;
+      default = 1;
+    };
+
+    healthcheckgpuWorkers = mkOption {
+      description = mdDoc "Number of GPU workers for media health checks (Thorough: FFmpeg frame-by-frame). Set to 0 to disable.";
+      type = types.int;
+      default = 0;
+    };
+
     ingress.annotations = mkOption {
       description = mdDoc "Annotations for the Ingress resource";
       type = types.attrsOf types.str;
@@ -164,6 +176,8 @@ self.lib.mkArgoApp { inherit config lib; } rec {
                     { name = "internalNode"; value = if cfg.internalNode then "true" else "false"; }
                     { name = "inContainer"; value = "true"; }
                     { name = "auth"; value = "false"; }
+                    { name = "healthcheckcpuWorkers"; value = toString cfg.healthcheckcpuWorkers; }
+                    { name = "healthcheckgpuWorkers"; value = toString cfg.healthcheckgpuWorkers; }
                   ]
                   ++ (lib.optionals cfg.enableNvidiaGPU [
                     { name = "NVIDIA_VISIBLE_DEVICES"; value = "all"; }

@@ -832,6 +832,8 @@ in
     # ../applications/tdarr/default.nix
     tdarr = {
       enable = true;
+      healthcheckcpuWorkers = 1;
+      healthcheckgpuWorkers = 1;
       hostAffinity = "edgenix";
 
       ingress = {
