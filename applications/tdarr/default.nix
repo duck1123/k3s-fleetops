@@ -220,7 +220,10 @@ self.lib.mkArgoApp { inherit config lib; } rec {
                   resources = lib.optionalAttrs cfg.enableNvidiaGPU {
                     limits."nvidia.com/gpu" = "1";
                   };
-                  securityContext = lib.optionalAttrs cfg.enableGPU {
+                  securityContext = {
+                    runAsUser = cfg.puid;
+                    runAsGroup = cfg.pgid;
+                  } // lib.optionalAttrs cfg.enableGPU {
                     capabilities.add = [ "SYS_ADMIN" ];
                   };
                 }

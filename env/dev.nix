@@ -848,6 +848,9 @@ in
         path = "${nas-base}";
       };
 
+      puid = 1000;
+      pgid = 1000;
+
       replicas = 1;
       storageClassName = "longhorn";
       useProbes = false;

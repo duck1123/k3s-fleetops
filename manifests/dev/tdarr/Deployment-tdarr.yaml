@@ -59,6 +59,8 @@ spec:
             capabilities:
               add:
                 - SYS_ADMIN
+            runAsGroup: 1000
+            runAsUser: 1000
           volumeMounts:
             - mountPath: /app/server
               name: config
