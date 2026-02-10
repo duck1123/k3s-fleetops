@@ -833,7 +833,7 @@ in
     tdarr = {
       enable = true;
       healthcheckcpuWorkers = 1;
-      healthcheckgpuWorkers = 1;
+      healthcheckgpuWorkers = 0;
       hostAffinity = "edgenix";
 
       ingress = {
@@ -855,7 +855,7 @@ in
       storageClassName = "longhorn";
       useProbes = false;
       vpn.enable = false;
-      enableGPU = true;
+      enableGPU = false;
     };
 
     tempo = {
