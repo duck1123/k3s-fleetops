@@ -80,6 +80,8 @@ spec:
             - mountPath: /music
               name: music
       initContainers: []
+      securityContext:
+        fsGroup: 1000
       serviceAccountName: default
       volumes:
         - name: config
