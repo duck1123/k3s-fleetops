@@ -79,7 +79,20 @@ spec:
               name: downloads
             - mountPath: /music
               name: music
-      initContainers: []
+      initContainers:
+        - command:
+            - chown
+            - -R
+            - 1000:1000
+            - /config
+          image: busybox:latest
+          imagePullPolicy: IfNotPresent
+          name: fix-config-permissions
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - mountPath: /config
+              name: config
       securityContext:
         fsGroup: 1000
       serviceAccountName: default

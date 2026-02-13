@@ -171,11 +171,32 @@ self.lib.mkArgoApp { inherit config lib; } rec {
 
             spec = {
               automountServiceAccountToken = true;
-              securityContext.fsGroup = cfg.pgid;
+              securityContext = {
+                fsGroup = cfg.pgid;
+              };
               serviceAccountName = "default";
-              initContainers = lib.optionalAttrs cfg.vpn.enable (
+              initContainers = [
+                {
+                  name = "fix-config-permissions";
+                  image = "busybox:latest";
+                  imagePullPolicy = "IfNotPresent";
+                  command = [
+                    "chown"
+                    "-R"
+                    "${toString cfg.puid}:${toString cfg.pgid}"
+                    "/config"
+                  ];
+                  securityContext.runAsUser = 0;
+                  volumeMounts = [
+                    {
+                      mountPath = "/config";
+                      name = "config";
+                    }
+                  ];
+                }
+              ] ++ (lib.optionals cfg.vpn.enable (
                 self.lib.waitForGluetun { inherit lib; } cfg.vpn.sharedGluetunService
-              );
+              ));
               containers = [
                 {
                   inherit name;
