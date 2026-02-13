@@ -202,6 +202,14 @@ self.lib.mkArgoApp { inherit config lib; } rec {
                   inherit name;
                   image = cfg.image;
                   imagePullPolicy = "IfNotPresent";
+                  # Run as root so wrapper can chown /config; image /init then drops to PUID:PGID
+                  securityContext.runAsUser = 0;
+                  # Chown /config in same container as app so mount is identical (fixes NFS/storage permission issues)
+                  command = [
+                    "sh"
+                    "-c"
+                    "chown -R ${toString cfg.puid}:${toString cfg.pgid} /config && exec /init"
+                  ];
                   env = [
                     {
                       name = "PGID";

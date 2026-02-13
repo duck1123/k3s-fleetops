@@ -21,7 +21,11 @@ spec:
     spec:
       automountServiceAccountToken: true
       containers:
-        - env:
+        - command:
+            - sh
+            - -c
+            - chown -R 1000:1000 /config && exec /init
+          env:
             - name: PGID
               value: "1000"
             - name: PUID
@@ -72,6 +76,8 @@ spec:
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 5
+          securityContext:
+            runAsUser: 0
           volumeMounts:
             - mountPath: /config
               name: config
