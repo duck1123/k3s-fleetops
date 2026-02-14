@@ -183,7 +183,9 @@ self.lib.mkArgoApp { inherit config lib; } rec {
               "app.kubernetes.io/name" = name;
             };
 
-            spec = {
+            spec = lib.optionalAttrs (cfg.hostAffinity != null) {
+              nodeSelector."kubernetes.io/hostname" = cfg.hostAffinity;
+            } // {
               automountServiceAccountToken = true;
               securityContext = {
                 fsGroup = cfg.pgid;

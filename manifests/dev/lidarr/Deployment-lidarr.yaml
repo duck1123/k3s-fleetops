@@ -101,6 +101,8 @@ spec:
           volumeMounts:
             - mountPath: /config
               name: config
+      nodeSelector:
+        kubernetes.io/hostname: edgenix
       securityContext:
         fsGroup: 1000
       serviceAccountName: default
