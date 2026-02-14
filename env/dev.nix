@@ -109,7 +109,7 @@ in
 
     # ../applications/booklore/default.nix
     booklore = {
-      enable = false;
+      enable = true;
 
       database = {
         host = "mariadb.mariadb";
