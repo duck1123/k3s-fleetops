@@ -47,6 +47,20 @@ self.lib.mkArgoApp { inherit config lib; } rec {
       default = true;
     };
 
+    vpn = {
+      enable = mkOption {
+        description = mdDoc "Route traffic through shared Gluetun VPN (HTTP proxy)";
+        type = types.bool;
+        default = false;
+      };
+
+      sharedGluetunService = mkOption {
+        description = mdDoc "Service name for shared Gluetun (e.g. gluetun.gluetun)";
+        type = types.str;
+        default = "gluetun.gluetun";
+      };
+    };
+
     nfs = {
       enable = mkOption {
         description = mdDoc "Use NFS for download directory (same path as Soularr/Lidarr)";
@@ -93,6 +107,9 @@ self.lib.mkArgoApp { inherit config lib; } rec {
           } // {
             securityContext.fsGroup = 1000;
             serviceAccountName = "default";
+            initContainers = lib.optionals cfg.vpn.enable (
+              self.lib.waitForGluetun { inherit lib; } cfg.vpn.sharedGluetunService
+            );
             containers = [
               {
                 inherit name;
@@ -101,7 +118,15 @@ self.lib.mkArgoApp { inherit config lib; } rec {
                 env = [
                   { name = "TZ"; value = cfg.tz; }
                   { name = "SLSKD_REMOTE_CONFIGURATION"; value = "true"; }
-                ];
+                ]
+                ++ (lib.optionals cfg.vpn.enable [
+                  { name = "HTTP_PROXY"; value = "http://${cfg.vpn.sharedGluetunService}:8888"; }
+                  { name = "HTTPS_PROXY"; value = "http://${cfg.vpn.sharedGluetunService}:8888"; }
+                  {
+                    name = "NO_PROXY";
+                    value = "localhost,127.0.0.1,.svc,.svc.cluster.local,soularr.soularr,lidarr.lidarr";
+                  }
+                ]);
                 ports = [
                   { name = "http"; containerPort = cfg.service.port; protocol = "TCP"; }
                   { name = "https"; containerPort = 5031; protocol = "TCP"; }

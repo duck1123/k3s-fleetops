@@ -459,6 +459,11 @@ in
 
       hostAffinity = "edgenix";
 
+      vpn = {
+        enable = true;
+        sharedGluetunService = "gluetun.gluetun";
+      };
+
       nfs = {
         enable = true;
         server = nas-host;
