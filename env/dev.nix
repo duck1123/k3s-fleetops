@@ -272,23 +272,22 @@ in
 
       # Additional scrape configs for monitoring other hosts
       # Example format (uncomment and modify as needed):
-      # additionalScrapeConfigs = [
-      #   {
-      #     job_name = "node-exporter-remote";
-      #     static_configs = [
-      #       {
-      #         targets = [
-      #           "host1.${tail-domain}:9100"
-      #           "host2.${tail-domain}:9100"
-      #         ];
-      #         labels = {
-      #           instance = "remote-host";
-      #         };
-      #       }
-      #     ];
-      #   }
-      # ];
-      additionalScrapeConfigs = [ ];
+      additionalScrapeConfigs = [
+        # {
+        #   job_name = "node-exporter-remote";
+        #   static_configs = [
+        #     {
+        #       targets = [
+        #         "host1.${tail-domain}:9100"
+        #         "host2.${tail-domain}:9100"
+        #       ];
+        #       labels = {
+        #         instance = "remote-host";
+        #       };
+        #     }
+        #   ];
+        # }
+      ];
 
       alertmanager = {
         enabled = true;
