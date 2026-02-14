@@ -459,6 +459,11 @@ in
 
       hostAffinity = "edgenix";
 
+      webAuth = {
+        username = (secrets.slskd or { }).username or "";
+        password = (secrets.slskd or { }).password or "";
+      };
+
       vpn = {
         enable = true;
         sharedGluetunService = "gluetun.gluetun";

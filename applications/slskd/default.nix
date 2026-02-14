@@ -6,6 +6,9 @@
   ...
 }:
 with lib;
+let
+  web-auth-secret = "slskd-web-credentials";
+in
 self.lib.mkArgoApp { inherit config lib; } rec {
   name = "slskd";
   uses-ingress = true;
@@ -47,6 +50,20 @@ self.lib.mkArgoApp { inherit config lib; } rec {
       default = true;
     };
 
+    webAuth = {
+      username = mkOption {
+        description = mdDoc "Web UI login username (stored in secret); set from secrets.slskd.username";
+        type = types.str;
+        default = "";
+      };
+
+      password = mkOption {
+        description = mdDoc "Web UI login password (stored in secret); set from secrets.slskd.password";
+        type = types.str;
+        default = "";
+      };
+    };
+
     vpn = {
       enable = mkOption {
         description = mdDoc "Route traffic through shared Gluetun VPN (HTTP proxy)";
@@ -83,6 +100,19 @@ self.lib.mkArgoApp { inherit config lib; } rec {
   };
 
   extraResources = cfg: {
+    sopsSecrets = lib.optionalAttrs (cfg.webAuth.username != "" && cfg.webAuth.password != "") {
+      ${web-auth-secret} = self.lib.createSecret {
+        inherit lib pkgs;
+        inherit (config) ageRecipients;
+        inherit (cfg) namespace;
+        secretName = web-auth-secret;
+        values = {
+          username = cfg.webAuth.username;
+          password = cfg.webAuth.password;
+        };
+      };
+    };
+
     deployments.${name} = {
       metadata.labels = {
         "app.kubernetes.io/instance" = name;
@@ -119,6 +149,22 @@ self.lib.mkArgoApp { inherit config lib; } rec {
                   { name = "TZ"; value = cfg.tz; }
                   { name = "SLSKD_REMOTE_CONFIGURATION"; value = "true"; }
                 ]
+                ++ (lib.optionals (cfg.webAuth.username != "" && cfg.webAuth.password != "") [
+                  {
+                    name = "SLSKD_SLSK_USERNAME";
+                    valueFrom.secretKeyRef = {
+                      name = web-auth-secret;
+                      key = "username";
+                    };
+                  }
+                  {
+                    name = "SLSKD_SLSK_PASSWORD";
+                    valueFrom.secretKeyRef = {
+                      name = web-auth-secret;
+                      key = "password";
+                    };
+                  }
+                ])
                 ++ (lib.optionals cfg.vpn.enable [
                   { name = "HTTP_PROXY"; value = "http://${cfg.vpn.sharedGluetunService}:8888"; }
                   { name = "HTTPS_PROXY"; value = "http://${cfg.vpn.sharedGluetunService}:8888"; }

@@ -24,6 +24,16 @@ spec:
               value: Etc/UTC
             - name: SLSKD_REMOTE_CONFIGURATION
               value: "true"
+            - name: SLSKD_SLSK_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: slskd-web-credentials
+            - name: SLSKD_SLSK_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: slskd-web-credentials
             - name: HTTP_PROXY
               value: http://gluetun.gluetun:8888
             - name: HTTPS_PROXY
