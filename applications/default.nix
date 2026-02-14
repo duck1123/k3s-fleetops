@@ -54,7 +54,9 @@
     ./sabnzbd
     ./satisfactory
     ./sonarr
+    ./soularr
     ./sealed-secrets
+    ./slskd
     ./sops
     ./stashapp
     ./spark

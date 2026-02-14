@@ -424,6 +424,11 @@ in
         enable = true;
         server = nas-host;
         path = "${nas-base}";
+
+        slskdDownloads = {
+          enable = true;
+          path = "${nas-base}/slskd_downloads";
+        };
       };
 
       database = {
@@ -438,6 +443,62 @@ in
       hostAffinity = "edgenix";
 
       replicas = 1;
+      storageClassName = "longhorn";
+    };
+
+    # ../applications/slskd/default.nix
+    # Slskd: Soulseek client. Soularr uses it to download; set download path in Slskd UI to /downloads.
+    slskd = {
+      enable = true;
+
+      ingress = {
+        domain = "slskd.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+
+      hostAffinity = "edgenix";
+
+      nfs = {
+        enable = true;
+        server = nas-host;
+        path = "${nas-base}/slskd_downloads";
+      };
+
+      replicas = 1;
+      storageClassName = "longhorn";
+    };
+
+    # ../applications/soularr/default.nix
+    # Soularr: Lidarr companion that fetches wanted music via Soulseek (Slskd).
+    # Set lidarr.apiKey from Lidarr Settings > General > Security; add soularr.lidarrApiKey to secrets.
+    # Set slskd.apiKey when using Slskd; add soularr.slskdApiKey to secrets.
+    # Lidarr mounts slskd_downloads at /downloads/slskd_downloads (nfs.slskdDownloads).
+    soularr = {
+      enable = false;
+
+      hostAffinity = "edgenix";
+
+      lidarr = {
+        host = "lidarr.lidarr";
+        port = 8686;
+        downloadDir = "/downloads/slskd_downloads";
+        apiKey = (secrets.soularr or { }).lidarrApiKey or "";
+      };
+
+      slskd = {
+        host = "slskd.slskd";
+        port = 5030;
+        apiKey = (secrets.soularr or { }).slskdApiKey or "";
+      };
+
+      nfs = {
+        enable = true;
+        server = nas-host;
+        path = "${nas-base}/slskd_downloads";
+      };
+
+      scriptInterval = 300;
       storageClassName = "longhorn";
     };
 

@@ -168,33 +168,92 @@ self.lib.mkArgoApp { inherit config lib; } rec {
                   image = cfg.image;
                   imagePullPolicy = "IfNotPresent";
                   env = [
-                    { name = "PGID"; value = "${toString cfg.pgid}"; }
-                    { name = "PUID"; value = "${toString cfg.puid}"; }
-                    { name = "TZ"; value = cfg.tz; }
-                    { name = "serverIP"; value = "0.0.0.0"; }
-                    { name = "serverPort"; value = toString cfg.server.port; }
-                    { name = "webUIPort"; value = toString cfg.service.port; }
-                    { name = "internalNode"; value = if cfg.internalNode then "true" else "false"; }
-                    { name = "inContainer"; value = "true"; }
-                    { name = "auth"; value = "false"; }
-                    { name = "healthcheckcpuWorkers"; value = toString cfg.healthcheckcpuWorkers; }
-                    { name = "healthcheckgpuWorkers"; value = toString cfg.healthcheckgpuWorkers; }
+                    {
+                      name = "PGID";
+                      value = "${toString cfg.pgid}";
+                    }
+                    {
+                      name = "PUID";
+                      value = "${toString cfg.puid}";
+                    }
+                    {
+                      name = "TZ";
+                      value = cfg.tz;
+                    }
+                    {
+                      name = "serverIP";
+                      value = "0.0.0.0";
+                    }
+                    {
+                      name = "serverPort";
+                      value = toString cfg.server.port;
+                    }
+                    {
+                      name = "webUIPort";
+                      value = toString cfg.service.port;
+                    }
+                    {
+                      name = "internalNode";
+                      value = if cfg.internalNode then "true" else "false";
+                    }
+                    {
+                      name = "inContainer";
+                      value = "true";
+                    }
+                    {
+                      name = "auth";
+                      value = "false";
+                    }
+                    {
+                      name = "healthcheckcpuWorkers";
+                      value = toString cfg.healthcheckcpuWorkers;
+                    }
+                    {
+                      name = "healthcheckgpuWorkers";
+                      value = toString cfg.healthcheckgpuWorkers;
+                    }
                   ]
                   ++ (lib.optionals cfg.enableNvidiaGPU [
-                    { name = "NVIDIA_VISIBLE_DEVICES"; value = "all"; }
-                    { name = "NVIDIA_DRIVER_CAPABILITIES"; value = "all"; }
+                    {
+                      name = "NVIDIA_VISIBLE_DEVICES";
+                      value = "all";
+                    }
+                    {
+                      name = "NVIDIA_DRIVER_CAPABILITIES";
+                      value = "all";
+                    }
                   ])
                   ++ (lib.optionals cfg.vpn.enable [
-                    { name = "HTTP_PROXY"; value = "http://${cfg.vpn.sharedGluetunService}:8888"; }
-                    { name = "HTTPS_PROXY"; value = "http://${cfg.vpn.sharedGluetunService}:8888"; }
-                    { name = "NO_PROXY"; value = "localhost,127.0.0.1,.svc,.svc.cluster.local"; }
+                    {
+                      name = "HTTP_PROXY";
+                      value = "http://${cfg.vpn.sharedGluetunService}:8888";
+                    }
+                    {
+                      name = "HTTPS_PROXY";
+                      value = "http://${cfg.vpn.sharedGluetunService}:8888";
+                    }
+                    {
+                      name = "NO_PROXY";
+                      value = "localhost,127.0.0.1,.svc,.svc.cluster.local";
+                    }
                   ]);
                   ports = [
-                    { containerPort = cfg.service.port; name = "http"; protocol = "TCP"; }
-                    { containerPort = cfg.server.port; name = "server"; protocol = "TCP"; }
+                    {
+                      containerPort = cfg.service.port;
+                      name = "http";
+                      protocol = "TCP";
+                    }
+                    {
+                      containerPort = cfg.server.port;
+                      name = "server";
+                      protocol = "TCP";
+                    }
                   ];
                   readinessProbe = lib.mkIf cfg.useProbes {
-                    httpGet = { path = "/"; port = cfg.service.port; };
+                    httpGet = {
+                      path = "/";
+                      port = cfg.service.port;
+                    };
                     initialDelaySeconds = 180;
                     periodSeconds = 15;
                     timeoutSeconds = 10;
@@ -202,7 +261,10 @@ self.lib.mkArgoApp { inherit config lib; } rec {
                     failureThreshold = 6;
                   };
                   livenessProbe = lib.mkIf cfg.useProbes {
-                    httpGet = { path = "/"; port = cfg.service.port; };
+                    httpGet = {
+                      path = "/";
+                      port = cfg.service.port;
+                    };
                     initialDelaySeconds = 300;
                     periodSeconds = 30;
                     timeoutSeconds = 10;
@@ -210,13 +272,28 @@ self.lib.mkArgoApp { inherit config lib; } rec {
                     failureThreshold = 3;
                   };
                   volumeMounts = [
-                    { mountPath = "/app/server"; name = "config"; }
-                    { mountPath = "/temp"; name = "temp"; }
-                    { mountPath = "/media/Movies"; name = "media-movies"; }
-                    { mountPath = "/media/TV"; name = "media-tv"; }
+                    {
+                      mountPath = "/app/server";
+                      name = "config";
+                    }
+                    {
+                      mountPath = "/temp";
+                      name = "temp";
+                    }
+                    {
+                      mountPath = "/media/Movies";
+                      name = "media-movies";
+                    }
+                    {
+                      mountPath = "/media/TV";
+                      name = "media-tv";
+                    }
                   ]
                   ++ (lib.optionals cfg.enableGPU [
-                    { mountPath = "/dev/dri"; name = "dri"; }
+                    {
+                      mountPath = "/dev/dri";
+                      name = "dri";
+                    }
                   ]);
                   resources = lib.optionalAttrs cfg.enableNvidiaGPU {
                     limits."nvidia.com/gpu" = "1";
@@ -234,13 +311,31 @@ self.lib.mkArgoApp { inherit config lib; } rec {
               );
 
               volumes = [
-                { name = "config"; persistentVolumeClaim.claimName = "${name}-${name}-config"; }
-                { name = "temp"; persistentVolumeClaim.claimName = "${name}-${name}-temp"; }
-                { name = "media-movies"; persistentVolumeClaim.claimName = "${name}-${name}-media-movies"; }
-                { name = "media-tv"; persistentVolumeClaim.claimName = "${name}-${name}-media-tv"; }
+                {
+                  name = "config";
+                  persistentVolumeClaim.claimName = "${name}-${name}-config";
+                }
+                {
+                  name = "temp";
+                  persistentVolumeClaim.claimName = "${name}-${name}-temp";
+                }
+                {
+                  name = "media-movies";
+                  persistentVolumeClaim.claimName = "${name}-${name}-media-movies";
+                }
+                {
+                  name = "media-tv";
+                  persistentVolumeClaim.claimName = "${name}-${name}-media-tv";
+                }
               ]
               ++ (lib.optionals cfg.enableGPU [
-                { name = "dri"; hostPath = { path = "/dev/dri"; type = "Directory"; }; }
+                {
+                  name = "dri";
+                  hostPath = {
+                    path = "/dev/dri";
+                    type = "Directory";
+                  };
+                }
               ]);
             };
           };
@@ -258,7 +353,10 @@ self.lib.mkArgoApp { inherit config lib; } rec {
             host = domain;
             http.paths = [
               {
-                backend.service = { inherit name; port.name = "http"; };
+                backend.service = {
+                  inherit name;
+                  port.name = "http";
+                };
                 path = "/";
                 # Tailscale only supports Prefix path type
                 pathType = "Prefix";
@@ -323,8 +421,18 @@ self.lib.mkArgoApp { inherit config lib; } rec {
 
     services.${name}.spec = {
       ports = [
-        { name = "http"; port = cfg.service.port; protocol = "TCP"; targetPort = "http"; }
-        { name = "server"; port = cfg.server.port; protocol = "TCP"; targetPort = "server"; }
+        {
+          name = "http";
+          port = cfg.service.port;
+          protocol = "TCP";
+          targetPort = "http";
+        }
+        {
+          name = "server";
+          port = cfg.server.port;
+          protocol = "TCP";
+          targetPort = "server";
+        }
       ];
       selector = {
         "app.kubernetes.io/instance" = name;
@@ -338,11 +446,19 @@ self.lib.mkArgoApp { inherit config lib; } rec {
       "${name}-${name}-temp-nfs" = {
         apiVersion = "v1";
         kind = "PersistentVolume";
-        metadata = { name = "${name}-${name}-temp-nfs"; };
+        metadata = {
+          name = "${name}-${name}-temp-nfs";
+        };
         spec = {
-          capacity = { storage = "1Ti"; };
+          capacity = {
+            storage = "1Ti";
+          };
           accessModes = [ "ReadWriteMany" ];
-          mountOptions = [ "nolock" "soft" "timeo=30" ];
+          mountOptions = [
+            "nolock"
+            "soft"
+            "timeo=30"
+          ];
           nfs = {
             server = cfg.nfs.server;
             path = "${cfg.nfs.path}/tdarr-temp";
@@ -353,11 +469,19 @@ self.lib.mkArgoApp { inherit config lib; } rec {
       "${name}-${name}-media-movies-nfs" = {
         apiVersion = "v1";
         kind = "PersistentVolume";
-        metadata = { name = "${name}-${name}-media-movies-nfs"; };
+        metadata = {
+          name = "${name}-${name}-media-movies-nfs";
+        };
         spec = {
-          capacity = { storage = "1Ti"; };
+          capacity = {
+            storage = "1Ti";
+          };
           accessModes = [ "ReadWriteMany" ];
-          mountOptions = [ "nolock" "soft" "timeo=30" ];
+          mountOptions = [
+            "nolock"
+            "soft"
+            "timeo=30"
+          ];
           nfs = {
             server = cfg.nfs.server;
             path = "${cfg.nfs.path}/Movies";
@@ -368,11 +492,19 @@ self.lib.mkArgoApp { inherit config lib; } rec {
       "${name}-${name}-media-tv-nfs" = {
         apiVersion = "v1";
         kind = "PersistentVolume";
-        metadata = { name = "${name}-${name}-media-tv-nfs"; };
+        metadata = {
+          name = "${name}-${name}-media-tv-nfs";
+        };
         spec = {
-          capacity = { storage = "1Ti"; };
+          capacity = {
+            storage = "1Ti";
+          };
           accessModes = [ "ReadWriteMany" ];
-          mountOptions = [ "nolock" "soft" "timeo=30" ];
+          mountOptions = [
+            "nolock"
+            "soft"
+            "timeo=30"
+          ];
           nfs = {
             server = cfg.nfs.server;
             path = "${cfg.nfs.path}/TV";

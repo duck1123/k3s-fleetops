@@ -85,6 +85,8 @@ spec:
               name: downloads
             - mountPath: /music
               name: music
+            - mountPath: /downloads/slskd_downloads
+              name: slskd-downloads
       initContainers:
         - command:
             - chown
@@ -115,3 +117,6 @@ spec:
         - name: music
           persistentVolumeClaim:
             claimName: lidarr-lidarr-music
+        - name: slskd-downloads
+          persistentVolumeClaim:
+            claimName: lidarr-lidarr-slskd-downloads

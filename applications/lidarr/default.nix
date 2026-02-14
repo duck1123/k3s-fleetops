@@ -64,6 +64,20 @@ self.lib.mkArgoApp { inherit config lib; } rec {
         type = types.str;
         default = "/mnt/media";
       };
+
+      slskdDownloads = {
+        enable = mkOption {
+          description = mdDoc "Mount NFS path for Slskd/Soularr downloads so Lidarr can import them";
+          type = types.bool;
+          default = false;
+        };
+
+        path = mkOption {
+          description = mdDoc "NFS path for Slskd downloads (e.g. /volume1/slskd_downloads)";
+          type = types.str;
+          default = "/slskd_downloads";
+        };
+      };
     };
 
     tz = mkOption {
@@ -194,7 +208,8 @@ self.lib.mkArgoApp { inherit config lib; } rec {
                     }
                   ];
                 }
-              ] ++ (lib.optionals cfg.vpn.enable (
+              ]
+              ++ (lib.optionals cfg.vpn.enable (
                 self.lib.waitForGluetun { inherit lib; } cfg.vpn.sharedGluetunService
               ));
               containers = [
@@ -332,7 +347,13 @@ self.lib.mkArgoApp { inherit config lib; } rec {
                       mountPath = "/music";
                       name = "music";
                     }
-                  ];
+                  ]
+                  ++ (lib.optionals (cfg.nfs.enable && cfg.nfs.slskdDownloads.enable) [
+                    {
+                      mountPath = "/downloads/slskd_downloads";
+                      name = "slskd-downloads";
+                    }
+                  ]);
                 }
               ];
               volumes = [
@@ -356,7 +377,13 @@ self.lib.mkArgoApp { inherit config lib; } rec {
                   name = "music";
                   persistentVolumeClaim.claimName = "${name}-${name}-music";
                 }
-              ];
+              ]
+              ++ (lib.optionals (cfg.nfs.enable && cfg.nfs.slskdDownloads.enable) [
+                {
+                  name = "slskd-downloads";
+                  persistentVolumeClaim.claimName = "${name}-${name}-slskd-downloads";
+                }
+              ]);
             };
           };
         };
@@ -387,46 +414,68 @@ self.lib.mkArgoApp { inherit config lib; } rec {
       tls = [ { hosts = [ domain ]; } ];
     };
 
-    persistentVolumes = lib.optionalAttrs (cfg.nfs.enable) {
-      "${name}-${name}-downloads-nfs" = {
-        apiVersion = "v1";
-        metadata.name = "${name}-${name}-downloads-nfs";
-        spec = {
-          accessModes = [ "ReadWriteMany" ];
-          capacity.storage = "1Ti";
-          mountOptions = [
-            "nolock"
-            "soft"
-            "timeo=30"
-          ];
-          nfs = {
-            server = cfg.nfs.server;
-            path = "${cfg.nfs.path}/Downloads";
+    persistentVolumes = lib.optionalAttrs (cfg.nfs.enable) (
+      {
+        "${name}-${name}-downloads-nfs" = {
+          apiVersion = "v1";
+          metadata.name = "${name}-${name}-downloads-nfs";
+          spec = {
+            accessModes = [ "ReadWriteMany" ];
+            capacity.storage = "1Ti";
+            mountOptions = [
+              "nolock"
+              "soft"
+              "timeo=30"
+            ];
+            nfs = {
+              server = cfg.nfs.server;
+              path = "${cfg.nfs.path}/Downloads";
+            };
+            persistentVolumeReclaimPolicy = "Retain";
           };
-          persistentVolumeReclaimPolicy = "Retain";
         };
-      };
-      "${name}-${name}-music-nfs" = {
-        apiVersion = "v1";
-        metadata.name = "${name}-${name}-music-nfs";
-        spec = {
-          capacity = {
-            storage = "1Ti";
+        "${name}-${name}-music-nfs" = {
+          apiVersion = "v1";
+          metadata.name = "${name}-${name}-music-nfs";
+          spec = {
+            capacity = {
+              storage = "1Ti";
+            };
+            accessModes = [ "ReadWriteMany" ];
+            mountOptions = [
+              "nolock"
+              "soft"
+              "timeo=30"
+            ];
+            nfs = {
+              server = cfg.nfs.server;
+              path = "${cfg.nfs.path}/Music";
+            };
+            persistentVolumeReclaimPolicy = "Retain";
           };
-          accessModes = [ "ReadWriteMany" ];
-          mountOptions = [
-            "nolock"
-            "soft"
-            "timeo=30"
-          ];
-          nfs = {
-            server = cfg.nfs.server;
-            path = "${cfg.nfs.path}/Music";
-          };
-          persistentVolumeReclaimPolicy = "Retain";
         };
-      };
-    };
+      }
+      // (lib.optionalAttrs cfg.nfs.slskdDownloads.enable {
+        "${name}-${name}-slskd-downloads-nfs" = {
+          apiVersion = "v1";
+          metadata.name = "${name}-${name}-slskd-downloads-nfs";
+          spec = {
+            accessModes = [ "ReadWriteMany" ];
+            capacity.storage = "1Ti";
+            mountOptions = [
+              "nolock"
+              "soft"
+              "timeo=30"
+            ];
+            nfs = {
+              server = cfg.nfs.server;
+              path = cfg.nfs.slskdDownloads.path;
+            };
+            persistentVolumeReclaimPolicy = "Retain";
+          };
+        };
+      })
+    );
 
     persistentVolumeClaims = {
       "${name}-${name}-config".spec = {
@@ -462,7 +511,15 @@ self.lib.mkArgoApp { inherit config lib; } rec {
             accessModes = [ "ReadWriteOnce" ];
             resources.requests.storage = "100Gi";
           };
-    };
+    }
+    // (lib.optionalAttrs (cfg.nfs.enable && cfg.nfs.slskdDownloads.enable) {
+      "${name}-${name}-slskd-downloads".spec = {
+        accessModes = [ "ReadWriteMany" ];
+        resources.requests.storage = "1Gi";
+        storageClassName = "";
+        volumeName = "${name}-${name}-slskd-downloads-nfs";
+      };
+    });
 
     services.${name}.spec = {
       ports = [
