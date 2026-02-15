@@ -72,331 +72,329 @@ let
     chown -R ''${PUID}:''${PGID} /data
   '';
 in
-self.lib.mkArgoApp { inherit config lib; } rec {
-  name = "soularr";
-  uses-ingress = false;
+self.lib.mkArgoApp
+  {
+    inherit
+      config
+      lib
+      self
+      pkgs
+      ;
+  }
+  rec {
+    name = "soularr";
+    uses-ingress = false;
 
-  extraOptions = {
-    image = mkOption {
-      description = mdDoc "Soularr Docker image (Lidarr–Soulseek companion)";
-      type = types.str;
-      default = "mrusse08/soularr:latest";
-    };
-
-    storageClassName = mkOption {
-      description = mdDoc "Storage class for config PVC";
-      type = types.str;
-      default = "longhorn";
-    };
-
-    tz = mkOption {
-      description = mdDoc "Timezone";
-      type = types.str;
-      default = "Etc/UTC";
-    };
-
-    pgid = mkOption {
-      description = mdDoc "Group ID for file ownership";
-      type = types.int;
-      default = 1000;
-    };
-
-    puid = mkOption {
-      description = mdDoc "User ID for file ownership";
-      type = types.int;
-      default = 1000;
-    };
-
-    scriptInterval = mkOption {
-      description = mdDoc "How often (seconds) Soularr runs to sync Lidarr wanted with Slskd";
-      type = types.int;
-      default = 300;
-    };
-
-    nfs = {
-      enable = mkOption {
-        description = mdDoc "Use NFS for Slskd downloads (must be visible to Lidarr as well)";
-        type = types.bool;
-        default = false;
-      };
-
-      server = mkOption {
-        description = mdDoc "NFS server hostname/IP";
-        type = types.str;
-        default = "nasnix";
-      };
-
-      path = mkOption {
-        description = mdDoc "NFS path for Slskd downloads (e.g. /volume1/slskd_downloads)";
-        type = types.str;
-        default = "/mnt/media/slskd_downloads";
-      };
-    };
-
-    lidarr = {
-      host = mkOption {
-        description = mdDoc "Lidarr service host (e.g. lidarr.lidarr for in-cluster)";
-        type = types.str;
-        default = "lidarr.lidarr";
-      };
-
-      port = mkOption {
-        description = mdDoc "Lidarr API port";
-        type = types.int;
-        default = 8686;
-      };
-
-      downloadDir = mkOption {
-        description = mdDoc "Path inside Lidarr container where it sees Slskd downloads (must match Lidarr root folder)";
-        type = types.str;
-        default = "/downloads";
-      };
-
-      apiKey = mkOption {
-        description = mdDoc "Lidarr API key (from Settings > General > Security in Lidarr); stored in a secret";
-        type = types.str;
-        default = "";
-      };
-    };
-
-    slskd = {
-      host = mkOption {
-        description = mdDoc "Slskd service host (e.g. slskd.slskd for in-cluster)";
-        type = types.str;
-        default = "slskd.slskd";
-      };
-
-      port = mkOption {
-        description = mdDoc "Slskd API port";
-        type = types.int;
-        default = 5030;
-      };
-
-      apiKey = mkOption {
-        description = mdDoc "Slskd API key; stored in a secret";
-        type = types.str;
-        default = "";
-      };
-    };
-  };
-
-  extraResources = cfg: {
     sopsSecrets =
+      cfg:
       { }
-      // (lib.optionalAttrs (cfg.lidarr.apiKey != "") {
-        ${lidarr-api-secret} = self.lib.createSecret {
-          inherit lib pkgs;
-          inherit (config) ageRecipients;
-          inherit (cfg) namespace;
-          secretName = lidarr-api-secret;
-          values = {
-            api_key = cfg.lidarr.apiKey;
-          };
+      // lib.optionalAttrs (cfg.lidarr.apiKey != "") {
+        ${lidarr-api-secret} = {
+          api_key = cfg.lidarr.apiKey;
         };
-      })
-      // (lib.optionalAttrs (cfg.slskd.apiKey != "") {
-        ${slskd-api-secret} = self.lib.createSecret {
-          inherit lib pkgs;
-          inherit (config) ageRecipients;
-          inherit (cfg) namespace;
-          secretName = slskd-api-secret;
-          values = {
-            api_key = cfg.slskd.apiKey;
-          };
+      }
+      // lib.optionalAttrs (cfg.slskd.apiKey != "") {
+        ${slskd-api-secret} = {
+          api_key = cfg.slskd.apiKey;
         };
-      });
-
-    deployments.${name} = {
-      metadata.labels = {
-        "app.kubernetes.io/instance" = name;
-        "app.kubernetes.io/name" = name;
       };
 
-      spec = {
-        replicas = 1;
-        selector.matchLabels = {
+    extraOptions = {
+      image = mkOption {
+        description = mdDoc "Soularr Docker image (Lidarr–Soulseek companion)";
+        type = types.str;
+        default = "mrusse08/soularr:latest";
+      };
+
+      storageClassName = mkOption {
+        description = mdDoc "Storage class for config PVC";
+        type = types.str;
+        default = "longhorn";
+      };
+
+      tz = mkOption {
+        description = mdDoc "Timezone";
+        type = types.str;
+        default = "Etc/UTC";
+      };
+
+      pgid = mkOption {
+        description = mdDoc "Group ID for file ownership";
+        type = types.int;
+        default = 1000;
+      };
+
+      puid = mkOption {
+        description = mdDoc "User ID for file ownership";
+        type = types.int;
+        default = 1000;
+      };
+
+      scriptInterval = mkOption {
+        description = mdDoc "How often (seconds) Soularr runs to sync Lidarr wanted with Slskd";
+        type = types.int;
+        default = 300;
+      };
+
+      nfs = {
+        enable = mkOption {
+          description = mdDoc "Use NFS for Slskd downloads (must be visible to Lidarr as well)";
+          type = types.bool;
+          default = false;
+        };
+
+        server = mkOption {
+          description = mdDoc "NFS server hostname/IP";
+          type = types.str;
+          default = "nasnix";
+        };
+
+        path = mkOption {
+          description = mdDoc "NFS path for Slskd downloads (e.g. /volume1/slskd_downloads)";
+          type = types.str;
+          default = "/mnt/media/slskd_downloads";
+        };
+      };
+
+      lidarr = {
+        host = mkOption {
+          description = mdDoc "Lidarr service host (e.g. lidarr.lidarr for in-cluster)";
+          type = types.str;
+          default = "lidarr.lidarr";
+        };
+
+        port = mkOption {
+          description = mdDoc "Lidarr API port";
+          type = types.int;
+          default = 8686;
+        };
+
+        downloadDir = mkOption {
+          description = mdDoc "Path inside Lidarr container where it sees Slskd downloads (must match Lidarr root folder)";
+          type = types.str;
+          default = "/downloads";
+        };
+
+        apiKey = mkOption {
+          description = mdDoc "Lidarr API key (from Settings > General > Security in Lidarr); stored in a secret";
+          type = types.str;
+          default = "";
+        };
+      };
+
+      slskd = {
+        host = mkOption {
+          description = mdDoc "Slskd service host (e.g. slskd.slskd for in-cluster)";
+          type = types.str;
+          default = "slskd.slskd";
+        };
+
+        port = mkOption {
+          description = mdDoc "Slskd API port";
+          type = types.int;
+          default = 5030;
+        };
+
+        apiKey = mkOption {
+          description = mdDoc "Slskd API key; stored in a secret";
+          type = types.str;
+          default = "";
+        };
+      };
+    };
+
+    extraResources = cfg: {
+      deployments.${name} = {
+        metadata.labels = {
           "app.kubernetes.io/instance" = name;
           "app.kubernetes.io/name" = name;
         };
 
-        template = {
-          metadata.labels = {
+        spec = {
+          replicas = 1;
+          selector.matchLabels = {
             "app.kubernetes.io/instance" = name;
             "app.kubernetes.io/name" = name;
           };
 
+          template = {
+            metadata.labels = {
+              "app.kubernetes.io/instance" = name;
+              "app.kubernetes.io/name" = name;
+            };
+
+            spec = {
+              securityContext.fsGroup = cfg.pgid;
+              serviceAccountName = "default";
+              initContainers = [
+                {
+                  name = "write-config";
+                  image = "busybox:latest";
+                  imagePullPolicy = "IfNotPresent";
+                  command = [
+                    "sh"
+                    "-c"
+                    writeConfigScript
+                  ];
+                  env = [
+                    {
+                      name = "LIDARR_HOST_URL";
+                      value = "http://${cfg.lidarr.host}:${toString cfg.lidarr.port}";
+                    }
+                    {
+                      name = "LIDARR_DOWNLOAD_DIR";
+                      value = cfg.lidarr.downloadDir;
+                    }
+                    {
+                      name = "SLSKD_HOST_URL";
+                      value = "http://${cfg.slskd.host}:${toString cfg.slskd.port}";
+                    }
+                    {
+                      name = "PUID";
+                      value = toString cfg.puid;
+                    }
+                    {
+                      name = "PGID";
+                      value = toString cfg.pgid;
+                    }
+                  ]
+                  ++ (lib.optionals (cfg.lidarr.apiKey != "") [
+                    {
+                      name = "LIDARR_API_KEY";
+                      valueFrom.secretKeyRef = {
+                        name = lidarr-api-secret;
+                        key = "api_key";
+                      };
+                    }
+                  ])
+                  ++ (lib.optionals (cfg.slskd.apiKey != "") [
+                    {
+                      name = "SLSKD_API_KEY";
+                      valueFrom.secretKeyRef = {
+                        name = slskd-api-secret;
+                        key = "api_key";
+                      };
+                    }
+                  ])
+                  ++ (lib.optionals (cfg.lidarr.apiKey == "") [
+                    {
+                      name = "LIDARR_API_KEY";
+                      value = "";
+                    }
+                  ])
+                  ++ (lib.optionals (cfg.slskd.apiKey == "") [
+                    {
+                      name = "SLSKD_API_KEY";
+                      value = "";
+                    }
+                  ]);
+                  volumeMounts = [
+                    {
+                      mountPath = "/data";
+                      name = "config";
+                    }
+                  ];
+                }
+              ];
+              containers = [
+                {
+                  inherit name;
+                  image = cfg.image;
+                  imagePullPolicy = "IfNotPresent";
+                  command = [
+                    "sh"
+                    "-c"
+                    "while true; do python soularr.py; sleep ${toString cfg.scriptInterval}; done"
+                  ];
+                  env = [
+                    {
+                      name = "PGID";
+                      value = toString cfg.pgid;
+                    }
+                    {
+                      name = "PUID";
+                      value = toString cfg.puid;
+                    }
+                    {
+                      name = "TZ";
+                      value = cfg.tz;
+                    }
+                    {
+                      name = "SCRIPT_INTERVAL";
+                      value = toString cfg.scriptInterval;
+                    }
+                  ];
+                  workingDir = "/app";
+                  securityContext.runAsUser = cfg.puid;
+                  securityContext.runAsGroup = cfg.pgid;
+                  volumeMounts = [
+                    {
+                      mountPath = "/data";
+                      name = "config";
+                    }
+                    {
+                      mountPath = "/downloads";
+                      name = "downloads";
+                    }
+                  ];
+                }
+              ];
+              volumes = [
+                {
+                  name = "config";
+                  persistentVolumeClaim.claimName = "${name}-${name}-config";
+                }
+                {
+                  name = "downloads";
+                  persistentVolumeClaim.claimName = "${name}-${name}-downloads";
+                }
+              ];
+            };
+          };
+        };
+      };
+
+      persistentVolumes = lib.optionalAttrs cfg.nfs.enable {
+        "${name}-${name}-downloads-nfs" = {
+          apiVersion = "v1";
+          metadata.name = "${name}-${name}-downloads-nfs";
           spec = {
-            securityContext.fsGroup = cfg.pgid;
-            serviceAccountName = "default";
-            initContainers = [
-              {
-                name = "write-config";
-                image = "busybox:latest";
-                imagePullPolicy = "IfNotPresent";
-                command = [
-                  "sh"
-                  "-c"
-                  writeConfigScript
-                ];
-                env = [
-                  {
-                    name = "LIDARR_HOST_URL";
-                    value = "http://${cfg.lidarr.host}:${toString cfg.lidarr.port}";
-                  }
-                  {
-                    name = "LIDARR_DOWNLOAD_DIR";
-                    value = cfg.lidarr.downloadDir;
-                  }
-                  {
-                    name = "SLSKD_HOST_URL";
-                    value = "http://${cfg.slskd.host}:${toString cfg.slskd.port}";
-                  }
-                  {
-                    name = "PUID";
-                    value = toString cfg.puid;
-                  }
-                  {
-                    name = "PGID";
-                    value = toString cfg.pgid;
-                  }
-                ]
-                ++ (lib.optionals (cfg.lidarr.apiKey != "") [
-                  {
-                    name = "LIDARR_API_KEY";
-                    valueFrom.secretKeyRef = {
-                      name = lidarr-api-secret;
-                      key = "api_key";
-                    };
-                  }
-                ])
-                ++ (lib.optionals (cfg.slskd.apiKey != "") [
-                  {
-                    name = "SLSKD_API_KEY";
-                    valueFrom.secretKeyRef = {
-                      name = slskd-api-secret;
-                      key = "api_key";
-                    };
-                  }
-                ])
-                ++ (lib.optionals (cfg.lidarr.apiKey == "") [
-                  {
-                    name = "LIDARR_API_KEY";
-                    value = "";
-                  }
-                ])
-                ++ (lib.optionals (cfg.slskd.apiKey == "") [
-                  {
-                    name = "SLSKD_API_KEY";
-                    value = "";
-                  }
-                ]);
-                volumeMounts = [
-                  {
-                    mountPath = "/data";
-                    name = "config";
-                  }
-                ];
-              }
-            ];
-            containers = [
-              {
-                inherit name;
-                image = cfg.image;
-                imagePullPolicy = "IfNotPresent";
-                command = [
-                  "sh"
-                  "-c"
-                  "while true; do python soularr.py; sleep ${toString cfg.scriptInterval}; done"
-                ];
-                env = [
-                  {
-                    name = "PGID";
-                    value = toString cfg.pgid;
-                  }
-                  {
-                    name = "PUID";
-                    value = toString cfg.puid;
-                  }
-                  {
-                    name = "TZ";
-                    value = cfg.tz;
-                  }
-                  {
-                    name = "SCRIPT_INTERVAL";
-                    value = toString cfg.scriptInterval;
-                  }
-                ];
-                workingDir = "/app";
-                securityContext.runAsUser = cfg.puid;
-                securityContext.runAsGroup = cfg.pgid;
-                volumeMounts = [
-                  {
-                    mountPath = "/data";
-                    name = "config";
-                  }
-                  {
-                    mountPath = "/downloads";
-                    name = "downloads";
-                  }
-                ];
-              }
-            ];
-            volumes = [
-              {
-                name = "config";
-                persistentVolumeClaim.claimName = "${name}-${name}-config";
-              }
-              {
-                name = "downloads";
-                persistentVolumeClaim.claimName = "${name}-${name}-downloads";
-              }
-            ];
-          };
-        };
-      };
-    };
-
-    persistentVolumes = lib.optionalAttrs cfg.nfs.enable {
-      "${name}-${name}-downloads-nfs" = {
-        apiVersion = "v1";
-        metadata.name = "${name}-${name}-downloads-nfs";
-        spec = {
-          accessModes = [ "ReadWriteMany" ];
-          capacity.storage = "1Ti";
-          mountOptions = [
-            "nolock"
-            "soft"
-            "timeo=30"
-          ];
-          nfs = {
-            server = cfg.nfs.server;
-            path = cfg.nfs.path;
-          };
-          persistentVolumeReclaimPolicy = "Retain";
-        };
-      };
-    };
-
-    persistentVolumeClaims = {
-      "${name}-${name}-config".spec = {
-        inherit (cfg) storageClassName;
-        accessModes = [ "ReadWriteOnce" ];
-        resources.requests.storage = "1Gi";
-      };
-      "${name}-${name}-downloads".spec =
-        if cfg.nfs.enable then
-          {
             accessModes = [ "ReadWriteMany" ];
-            resources.requests.storage = "1Gi";
-            storageClassName = "";
-            volumeName = "${name}-${name}-downloads-nfs";
-          }
-        else
-          {
-            inherit (cfg) storageClassName;
-            accessModes = [ "ReadWriteOnce" ];
-            resources.requests.storage = "10Gi";
+            capacity.storage = "1Ti";
+            mountOptions = [
+              "nolock"
+              "soft"
+              "timeo=30"
+            ];
+            nfs = {
+              server = cfg.nfs.server;
+              path = cfg.nfs.path;
+            };
+            persistentVolumeReclaimPolicy = "Retain";
           };
+        };
+      };
+
+      persistentVolumeClaims = {
+        "${name}-${name}-config".spec = {
+          inherit (cfg) storageClassName;
+          accessModes = [ "ReadWriteOnce" ];
+          resources.requests.storage = "1Gi";
+        };
+        "${name}-${name}-downloads".spec =
+          if cfg.nfs.enable then
+            {
+              accessModes = [ "ReadWriteMany" ];
+              resources.requests.storage = "1Gi";
+              storageClassName = "";
+              volumeName = "${name}-${name}-downloads-nfs";
+            }
+          else
+            {
+              inherit (cfg) storageClassName;
+              accessModes = [ "ReadWriteOnce" ];
+              resources.requests.storage = "10Gi";
+            };
+      };
     };
-  };
-}
+  }

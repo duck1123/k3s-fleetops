@@ -10,165 +10,161 @@ let
   postgresql-secret = "authentik-postgres-auth";
   secret-secret = "authentik-secret-key";
 in
-self.lib.mkArgoApp { inherit config lib; } {
-  name = "authentik";
+self.lib.mkArgoApp
+  {
+    inherit
+      config
+      lib
+      self
+      pkgs
+      ;
+  }
+  {
+    name = "authentik";
 
-  # https://artifacthub.io/packages/helm/goauthentik/authentik
-  chart = lib.helm.downloadHelmChart {
-    repo = "https://charts.goauthentik.io/";
-    chart = "authentik";
-    version = "2025.6.3";
-    chartHash = "sha256-KDAuA7Wmn1Q+OOUyZh2uD1FwTFlWOm5yOkKQDbZFKUg=";
-  };
-
-  uses-ingress = true;
-
-  extraOptions = {
-    postgresql = {
-      host = mkOption {
-        description = mdDoc "The postgreql host";
-        type = types.str;
-        default = "authentik-postgresql";
+    sopsSecrets = cfg: {
+      ${postgresql-secret} = with cfg.postgresql; {
+        inherit password postgres-password replicationPassword;
       };
-
-      name = mkOption {
-        description = mdDoc "The postgreql database name";
-        type = types.str;
-        default = "authentik";
-      };
-
-      password = mkOption {
-        description = mdDoc "The admin password";
-        type = types.str;
-        default = "CHANGEME";
-      };
-
-      postgres-password = mkOption {
-        description = mdDoc "The user password";
-        type = types.str;
-        default = "CHANGEME";
-      };
-
-      replicationPassword = mkOption {
-        description = mdDoc "The replication password";
-        type = types.str;
-        default = "CHANGEME";
-      };
-
-      user = mkOption {
-        description = mdDoc "The database user";
-        type = types.str;
-        default = "postgresql";
+      ${secret-secret} = {
+        "authentik-secret-key" = cfg.secret-key;
       };
     };
 
-    secret-key = mkOption {
-      description = mdDoc "The secret key";
-      type = types.str;
-      default = "CHANGEME";
+    # https://artifacthub.io/packages/helm/goauthentik/authentik
+    chart = lib.helm.downloadHelmChart {
+      repo = "https://charts.goauthentik.io/";
+      chart = "authentik";
+      version = "2025.6.3";
+      chartHash = "sha256-KDAuA7Wmn1Q+OOUyZh2uD1FwTFlWOm5yOkKQDbZFKUg=";
     };
-  };
 
-  defaultValues =
-    cfg: with cfg; {
-      authentik = {
-        error_reporting.enabled = true;
-        postgresql = {
-          inherit (cfg.postgresql)
-            host
-            name
-            password
-            user
-            ;
+    uses-ingress = true;
+
+    extraOptions = {
+      postgresql = {
+        host = mkOption {
+          description = mdDoc "The postgreql host";
+          type = types.str;
+          default = "authentik-postgresql";
         };
-        secret_key = "this is a secret";
+
+        name = mkOption {
+          description = mdDoc "The postgreql database name";
+          type = types.str;
+          default = "authentik";
+        };
+
+        password = mkOption {
+          description = mdDoc "The admin password";
+          type = types.str;
+          default = "CHANGEME";
+        };
+
+        postgres-password = mkOption {
+          description = mdDoc "The user password";
+          type = types.str;
+          default = "CHANGEME";
+        };
+
+        replicationPassword = mkOption {
+          description = mdDoc "The replication password";
+          type = types.str;
+          default = "CHANGEME";
+        };
+
+        user = mkOption {
+          description = mdDoc "The database user";
+          type = types.str;
+          default = "postgresql";
+        };
       };
 
-      global.env = [
-        {
-          name = "AUTHENTIK_SECRET_KEY";
-          valueFrom.secretKeyRef = {
-            name = secret-secret;
-            key = "authentik-secret-key";
+      secret-key = mkOption {
+        description = mdDoc "The secret key";
+        type = types.str;
+        default = "CHANGEME";
+      };
+    };
+
+    defaultValues =
+      cfg: with cfg; {
+        authentik = {
+          error_reporting.enabled = true;
+          postgresql = {
+            inherit (cfg.postgresql)
+              host
+              name
+              password
+              user
+              ;
           };
-        }
-        # {
-        #   name = "AUTHENTIK_POSTGRESQL__PASSWORD";
-        #   valueFrom.secretKeyRef = {
-        #     name = postgresql-secret;
-        #     key = "password";
-        #   };
-        # }
-      ];
-
-      postgresql = with cfg.postgresql; {
-        inherit host;
-        auth.existingSecret = postgresql-secret;
-        enabled = false;
-      };
-
-      redis.enabled = true;
-
-      server.ingress = with ingress; {
-        enabled = true;
-        inherit ingressClassName;
-        annotations = {
-          "cert-manager.io/cluster-issuer" = clusterIssuer;
-          "ingress.kubernetes.io/force-ssl-redirect" = "true";
-          "ingress.kubernetes.io/proxy-body-size" = "0";
-          "ingress.kubernetes.io/ssl-redirect" = "true";
+          secret_key = "this is a secret";
         };
-        hosts = [ domain ];
-        tls = [
+
+        global.env = [
           {
-            secretName = "authentik-tls";
-            hosts = [ domain ];
+            name = "AUTHENTIK_SECRET_KEY";
+            valueFrom.secretKeyRef = {
+              name = secret-secret;
+              key = "authentik-secret-key";
+            };
           }
+          # {
+          #   name = "AUTHENTIK_POSTGRESQL__PASSWORD";
+          #   valueFrom.secretKeyRef = {
+          #     name = postgresql-secret;
+          #     key = "password";
+          #   };
+          # }
         ];
-        https = false;
-      };
-    };
 
-  extraResources = cfg: {
-    middlewares.middlewares-authentik.spec.forwardAuth = {
-      address = "http://authentik-server/outpost.goauthentik.io/auth/traefik";
-      trustForwardHeader = true;
-      authResponseHeaders = [
-        "X-authentik-username"
-        "X-authentik-groups"
-        "X-authentik-email"
-        "X-authentik-name"
-        "X-authentik-uid"
-        "X-authentik-jwt"
-        "X-authentik-meta-jwks"
-        "X-authentik-meta-outpost"
-        "X-authentik-meta-provider"
-        "X-authentik-meta-app"
-        "X-authentik-meta-version"
-      ];
-    };
+        postgresql = with cfg.postgresql; {
+          inherit host;
+          auth.existingSecret = postgresql-secret;
+          enabled = false;
+        };
 
-    sopsSecrets = {
-      ${postgresql-secret} = self.lib.createSecret {
-        inherit lib pkgs;
-        inherit (config) ageRecipients;
-        inherit (cfg) namespace;
-        secretName = postgresql-secret;
-        values = {
-          inherit (cfg.postgresql)
-            password
-            postgres-password
-            replicationPassword
-            ;
+        redis.enabled = true;
+
+        server.ingress = with ingress; {
+          enabled = true;
+          inherit ingressClassName;
+          annotations = {
+            "cert-manager.io/cluster-issuer" = clusterIssuer;
+            "ingress.kubernetes.io/force-ssl-redirect" = "true";
+            "ingress.kubernetes.io/proxy-body-size" = "0";
+            "ingress.kubernetes.io/ssl-redirect" = "true";
+          };
+          hosts = [ domain ];
+          tls = [
+            {
+              secretName = "authentik-tls";
+              hosts = [ domain ];
+            }
+          ];
+          https = false;
         };
       };
-      ${secret-secret} = self.lib.createSecret {
-        inherit lib pkgs;
-        inherit (config) ageRecipients;
-        inherit (cfg) namespace;
-        secretName = secret-secret;
-        values.authentik-secret-key = cfg.secret-key;
+
+    extraResources = cfg: {
+      middlewares.middlewares-authentik.spec.forwardAuth = {
+        address = "http://authentik-server/outpost.goauthentik.io/auth/traefik";
+        trustForwardHeader = true;
+        authResponseHeaders = [
+          "X-authentik-username"
+          "X-authentik-groups"
+          "X-authentik-email"
+          "X-authentik-name"
+          "X-authentik-uid"
+          "X-authentik-jwt"
+          "X-authentik-meta-jwks"
+          "X-authentik-meta-outpost"
+          "X-authentik-meta-provider"
+          "X-authentik-meta-app"
+          "X-authentik-meta-version"
+        ];
       };
+
     };
-  };
-}
+  }

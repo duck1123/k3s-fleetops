@@ -10,147 +10,152 @@ let
   hub-secret = "jupyterhub-hub2";
   postgresql-secret = "jupyterhub-postgresql";
 in
-self.lib.mkArgoApp { inherit config lib; } {
-  name = "jupyterhub";
+self.lib.mkArgoApp
+  {
+    inherit
+      config
+      lib
+      self
+      pkgs
+      ;
+  }
+  {
+    name = "jupyterhub";
 
-  # https://artifacthub.io/packages/helm/bitnami/jupyterhub
-  chart = lib.helmChart {
-    inherit pkgs;
-    chartTgz = ../../chart-archives/jupyterhub-8.1.5.tgz;
-    chartName = "jupyterhub";
-  };
-
-  uses-ingress = true;
-
-  extraOptions = {
-    cookieSecret = mkOption {
-      description = mdDoc "The cookie secret";
-      type = types.str;
-      default = "CHANGEME";
+    sopsSecrets = cfg: {
+      ${postgresql-secret} = {
+        password = cfg.postgresql.adminPassword;
+        postgres-password = cfg.postgresql.adminPassword;
+      };
     };
 
-    cryptkeeperKeys = mkOption {
-      description = mdDoc "The cryptkeeper keys";
-      type = types.str;
-      default = "CHANGEME";
+    # https://artifacthub.io/packages/helm/bitnami/jupyterhub
+    chart = lib.helmChart {
+      inherit pkgs;
+      chartTgz = ../../chart-archives/jupyterhub-8.1.5.tgz;
+      chartName = "jupyterhub";
     };
 
-    password = mkOption {
-      description = mdDoc "The admin user password";
-      type = types.str;
-      default = "CHANGEME";
-    };
+    uses-ingress = true;
 
-    postgresql = {
-      adminPassword = mkOption {
-        description = mdDoc "The admin password";
+    extraOptions = {
+      cookieSecret = mkOption {
+        description = mdDoc "The cookie secret";
         type = types.str;
         default = "CHANGEME";
       };
 
-      adminUsername = mkOption {
-        description = mdDoc "The admin username";
-        type = types.str;
-        default = "admin";
-      };
-
-      replicationPassword = mkOption {
-        description = mdDoc "The replication password";
+      cryptkeeperKeys = mkOption {
+        description = mdDoc "The cryptkeeper keys";
         type = types.str;
         default = "CHANGEME";
       };
 
-      userPassword = mkOption {
-        description = mdDoc "The user password";
+      password = mkOption {
+        description = mdDoc "The admin user password";
         type = types.str;
         default = "CHANGEME";
       };
-    };
 
-    proxyToken = mkOption {
-      description = mdDoc "The proxy token";
-      type = types.str;
-      default = "CHANGEME";
-    };
-  };
-
-  defaultValues = cfg: {
-    hub = {
-      adminUser = "admin";
-      existingSecret = hub-secret;
-    };
-
-    postgresql.auth.existingSecret = postgresql-secret;
-
-    proxy.ingress = with cfg.ingress; {
-      inherit ingressClassName tls;
-      enabled = true;
-      hostname = domain;
-      annotations = {
-        "cert-manager.io/cluster-issuer" = clusterIssuer;
-        "ingress.kubernetes.io/force-ssl-redirect" = "true";
-      };
-    };
-  };
-
-  extraResources =
-    cfg:
-    let
-      hub-values = self.lib.toYAML {
-        inherit pkgs;
-        value = import ./config.nix { inherit (cfg) password; };
-      };
-
-      hub-secret-config = {
-        apiVersion = "isindir.github.com/v1alpha3";
-        kind = "SopsSecret";
-        metadata = {
-          name = hub-secret;
-          inherit (cfg) namespace;
+      postgresql = {
+        adminPassword = mkOption {
+          description = mdDoc "The admin password";
+          type = types.str;
+          default = "CHANGEME";
         };
-        spec.secretTemplates = [
-          {
+
+        adminUsername = mkOption {
+          description = mdDoc "The admin username";
+          type = types.str;
+          default = "admin";
+        };
+
+        replicationPassword = mkOption {
+          description = mdDoc "The replication password";
+          type = types.str;
+          default = "CHANGEME";
+        };
+
+        userPassword = mkOption {
+          description = mdDoc "The user password";
+          type = types.str;
+          default = "CHANGEME";
+        };
+      };
+
+      proxyToken = mkOption {
+        description = mdDoc "The proxy token";
+        type = types.str;
+        default = "CHANGEME";
+      };
+    };
+
+    defaultValues = cfg: {
+      hub = {
+        adminUser = "admin";
+        existingSecret = hub-secret;
+      };
+
+      postgresql.auth.existingSecret = postgresql-secret;
+
+      proxy.ingress = with cfg.ingress; {
+        inherit ingressClassName tls;
+        enabled = true;
+        hostname = domain;
+        annotations = {
+          "cert-manager.io/cluster-issuer" = clusterIssuer;
+          "ingress.kubernetes.io/force-ssl-redirect" = "true";
+        };
+      };
+    };
+
+    extraResources =
+      cfg:
+      let
+        hub-values = self.lib.toYAML {
+          inherit pkgs;
+          value = import ./config.nix { inherit (cfg) password; };
+        };
+
+        hub-secret-config = {
+          apiVersion = "isindir.github.com/v1alpha3";
+          kind = "SopsSecret";
+          metadata = {
             name = hub-secret;
-            stringData = {
-              "hub.config.CryptKeeper.keys" = cfg.cryptkeeperKeys;
-              "hub.config.JupyterHub.cookie_secret" = cfg.cookieSecret;
-              "proxy-token" = cfg.proxyToken;
-              "values.yaml" = hub-values;
-            };
-          }
-        ];
-      };
-
-      hub-secret-config-yaml = self.lib.toYAML {
-        inherit pkgs;
-        value = hub-secret-config;
-      };
-
-      encrypted-secret-config = self.lib.encryptString {
-        inherit pkgs;
-        inherit (config) ageRecipients;
-        secretName = hub-secret;
-        value = hub-secret-config-yaml;
-      };
-
-      encrypted-secret-config-object = builtins.fromJSON encrypted-secret-config;
-    in
-    {
-      sopsSecrets = {
-        ${hub-secret} = {
-          inherit (encrypted-secret-config-object) sops spec;
+            inherit (cfg) namespace;
+          };
+          spec.secretTemplates = [
+            {
+              name = hub-secret;
+              stringData = {
+                "hub.config.CryptKeeper.keys" = cfg.cryptkeeperKeys;
+                "hub.config.JupyterHub.cookie_secret" = cfg.cookieSecret;
+                "proxy-token" = cfg.proxyToken;
+                "values.yaml" = hub-values;
+              };
+            }
+          ];
         };
 
-        ${postgresql-secret} = self.lib.createSecret {
-          inherit lib pkgs;
+        hub-secret-config-yaml = self.lib.toYAML {
+          inherit pkgs;
+          value = hub-secret-config;
+        };
+
+        encrypted-secret-config = self.lib.encryptString {
+          inherit pkgs;
           inherit (config) ageRecipients;
-          inherit (cfg) namespace;
-          secretName = postgresql-secret;
-          values = {
-            password = cfg.postgresql.adminPassword;
-            postgres-password = cfg.postgresql.adminPassword;
+          secretName = hub-secret;
+          value = hub-secret-config-yaml;
+        };
+
+        encrypted-secret-config-object = builtins.fromJSON encrypted-secret-config;
+      in
+      {
+        sopsSecrets = {
+          ${hub-secret} = {
+            inherit (encrypted-secret-config-object) sops spec;
           };
         };
       };
-    };
-}
+  }

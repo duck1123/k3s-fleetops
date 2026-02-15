@@ -4,7 +4,13 @@
   #
   # Takes the current config and lib and returns a function that creates a nixidy application with defaults
   flake.lib.mkArgoApp =
-    { config, lib, ... }:
+    {
+      config,
+      lib,
+      self ? null,
+      pkgs ? null,
+      ...
+    }:
     {
       # The name of the application (string)
       name,
@@ -23,6 +29,8 @@
       extraOptions ? { },
       # A function that takes the config and returns extra resources to deploy with the application
       extraResources ? (cfg: { }),
+      # A function that takes the config and returns secrets to create via createSecret (name -> stringData attrs)
+      sopsSecrets ? (cfg: { }),
       # Does this chart expose an ingress
       uses-ingress ? false,
     }:
@@ -39,6 +47,24 @@
         ;
       cfg = config.services.${name};
       values = attrsets.recursiveUpdate (defaultValues cfg) cfg.values;
+
+      # Combined secrets from sopsSecrets parameter and cfg.sopsSecrets option (option overrides)
+      combinedSopsSecrets = (sopsSecrets cfg) // cfg.sopsSecrets;
+
+      # Expand combinedSopsSecrets (name -> data) into createSecret results when self and pkgs are available
+      expandedSopsSecrets =
+        if combinedSopsSecrets != { } && self != null && pkgs != null then
+          lib.mapAttrs (
+            secretName: data:
+            self.lib.createSecret {
+              ageRecipients = config.ageRecipients;
+              namespace = cfg.namespace;
+              inherit pkgs secretName;
+              values = if data ? values then data.values else data;
+            }
+          ) combinedSopsSecrets
+        else
+          { };
 
       # Inject hostAffinity nodeSelector into all deployment and statefulSet pod specs
       addHostAffinityToResources =
@@ -163,6 +189,16 @@
           description = "List of secrets needed by ${name}.";
         };
 
+        # Attrset of secrets to create via createSecret. Key = secret name, value = stringData
+        # attrs or { values = attrs }. createSecret is called with defaults: namespace =
+        # cfg.namespace, ageRecipients = config.ageRecipients. Pass self and pkgs to
+        # mkArgoApp when using this option.
+        sopsSecrets = mkOption {
+          default = { };
+          description = mdDoc "Secrets to create via createSecret. Key = secret name, value = stringData attrs (or { values = attrs }).";
+          type = types.attrsOf types.anything;
+        };
+
         values = mkOption {
           description = "All the values";
           type = types.attrsOf types.anything;
@@ -179,25 +215,33 @@
       config = mkIf cfg.enable (mkMerge [
         {
           # This is the application config for nixidy
-          applications.${name} = mkMerge [
-            {
-              inherit (cfg) namespace;
-              createNamespace = true;
-              finalizer = "foreground";
-
-              # TODO: Should I be using some sort of overlay here?
-              resources = addHostAffinityToResources (lib.recursiveUpdate (extraResources cfg) cfg.extraResources) cfg.hostAffinity;
-              syncPolicy.finalSyncOpts = [ "CreateNamespace=true" ];
-            }
-            (mkIf (cfg.chart != null) {
-              helm.releases.${name} = {
-                inherit values;
-                inherit (cfg) chart;
+          applications.${name} =
+            let
+              baseResources = lib.recursiveUpdate (extraResources cfg) cfg.extraResources;
+              resourcesWithSops = baseResources // {
+                sopsSecrets = (baseResources.sopsSecrets or { }) // expandedSopsSecrets;
               };
-            })
-            (extraAppConfig cfg)
-            cfg.extraAppConfig
-          ];
+              resources = addHostAffinityToResources resourcesWithSops cfg.hostAffinity;
+            in
+            mkMerge [
+              {
+                inherit (cfg) namespace;
+                createNamespace = true;
+                finalizer = "foreground";
+
+                # TODO: Should I be using some sort of overlay here?
+                inherit resources;
+                syncPolicy.finalSyncOpts = [ "CreateNamespace=true" ];
+              }
+              (mkIf (cfg.chart != null) {
+                helm.releases.${name} = {
+                  inherit values;
+                  inherit (cfg) chart;
+                };
+              })
+              (extraAppConfig cfg)
+              cfg.extraAppConfig
+            ];
         }
         (extraConfig cfg)
       ]);
