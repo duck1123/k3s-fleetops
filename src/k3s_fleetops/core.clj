@@ -4,7 +4,6 @@
    [babashka.process :refer [process shell]]
    [cli-matic.core :as cli]
    [cli-matic.utils-v2 :as U2]
-   [clojure.edn :as edn]
    [clojure.string :as str]))
 
 (def dry-run
@@ -189,11 +188,6 @@
     (fs/create-dirs sealed-dir)
     (shell {:in secret-json} cmd)))
 
-(defn get-secret-data
-  "Read the secrets config"
-  []
-  (edn/read-string (slurp "secrets.edn")))
-
 (defn get-secret-values
   [{:keys [fields]} keepass-password]
   (->> (for [[k {:keys [literal path field]
@@ -205,89 +199,6 @@
                       :else         (throw (ex-info "Missing key" {:data data})))]
            (str k "=" data)))
        (str/join "\n")))
-
-(defn create-secret-file
-  [secret-key chosen-maps keepass-password]
-  (doseq [chosen-data chosen-maps]
-    (prn chosen-data)
-    (let [{:keys [secret-name]} chosen-data
-          secret-values (get-secret-values chosen-data keepass-password)]
-      (println "\n\n")
-      (spit (str secret-name ".json") (create-secret chosen-data secret-values))
-      (let [args ["cat"
-                  (str secret-name ".json")
-                  "|"
-                  "yq -y ."
-                  ">"
-                  (str secret-name ".yaml")]
-            cmd (str/join " " args)]
-        (shell (str "sh -c \"" cmd "\""))))))
-
-(defn create-sealed-secret
-  ([]
-   (let [secret-data  (get-secret-data)
-         secret-names (->> secret-data keys (map name))
-         secret-key   (keyword (choose secret-names))
-         chosen-maps  (get secret-data secret-key)]
-     (create-sealed-secret secret-key chosen-maps)))
-  ([secret-key]
-   (let [secret-data (get-secret-data)
-         chosen-maps (get secret-data secret-key)]
-     (create-sealed-secret secret-key chosen-maps)))
-  ([secret-key chosen-maps]
-   (let [keepass-password (prompt-password)]
-     (create-sealed-secret secret-key chosen-maps keepass-password)))
-  ([_secret-key chosen-maps keepass-password]
-   (doseq [chosen-data chosen-maps]
-     (let [secret-values (get-secret-values chosen-data keepass-password)
-           secret-json   (create-secret chosen-data secret-values [])]
-       (seal-secret chosen-data secret-json)))))
-
-(defn create-sealed-secret-command
-  [{:keys [keepass-password secret-name]}]
-  (try
-    (let [secret-data      (get-secret-data)
-          secret-names     (->> secret-data keys (map name))
-          secret-name      (or secret-name (str/trim (choose secret-names)))
-          keepass-password (or keepass-password (str/trim (prompt-password)))
-          secret-key       (keyword secret-name)
-          chosen-maps      (get secret-data secret-key [])]
-      #_(binding [*out* *err*]
-          (println {:secret-key           secret-key
-                    #_#_:keepass-password keepass-password
-                    :chosen-maps          chosen-maps}))
-      (create-sealed-secret secret-key chosen-maps keepass-password))
-    (catch Exception ex
-      (binding [*out* *err*] (println (ex-message ex)))
-      #_(binding [*out* *err*] (println ex))
-      (System/exit 1))))
-
-#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
-(defn create-secret-command
-  [{:keys [keepass-password secret-name]}]
-  (try
-    (let [secret-data      (get-secret-data)
-          secret-names     (->> secret-data keys (map name))
-          secret-name      (or secret-name (str/trim (choose secret-names)))
-          keepass-password (or keepass-password (str/trim (prompt-password)))
-          secret-key       (keyword secret-name)
-          chosen-maps      (get secret-data secret-key [])]
-      #_(binding [*out* *err*]
-          (println {:secret-key           secret-key
-                    #_#_:keepass-password keepass-password
-                    :chosen-maps          chosen-maps}))
-      (create-secret-file secret-key chosen-maps keepass-password))
-    (catch Exception ex
-      (binding [*out* *err*] (println (ex-message ex)))
-      #_(binding [*out* *err*] (println ex))
-      (System/exit 1))))
-
-(defn list-secrets-command
-  [_opts]
-  #_(println opts)
-  (let [secret-data      (get-secret-data)
-        secret-names     (->> secret-data keys (map name))]
-    (->> secret-names (str/join "\n") println)))
 
 (defn k3d-create
   [& [opts]]
@@ -475,29 +386,6 @@
     {:command     "completion"
      :description "Completion script"
      :runs        completion-command}
-    {:command     "secrets"
-     :short       "s"
-     :description "Manages secrets"
-     :subcommands
-     [{:command     "create"
-       :short       "c"
-       :description "Seals a secret"
-       :opts
-       [{:option "keepass-password"
-         :short  "p"
-         :env    "KEEPASS_PASSWORD"
-         :type   :string
-         :as     "Keepass Password"}
-        {:option "secret-name"
-         :short  "n"
-         :as     "Secret Name"
-         :env    "SECRET_NAME"
-         :type   :string}]
-       :runs        create-sealed-secret-command}
-      {:command     "list"
-       :short       "l"
-       :description "Lists the configured secrets"
-       :runs        list-secrets-command}]}
     {:command "tasks"
      :descriptions "Display tasks"
      :runs display-tasks}]})

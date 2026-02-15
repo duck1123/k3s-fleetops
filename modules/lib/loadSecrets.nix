@@ -1,4 +1,4 @@
-{ config, self, ... }:
+{ self, ... }:
 {
   flake.lib.loadSecrets =
     { pkgs }:
@@ -12,6 +12,9 @@
           value = builtins.readFile decryptedPath;
         }
       else
-        throw "Missing decrypted secret: ${decryptedPath}"
+        throw ''
+          Secrets are only supported from the encrypted file. Set DECRYPTED_SECRET_FILE by running
+          commands via:  ./scripts/with-decrypted-secrets.sh <command>
+          or by setting DECRYPTED_SECRET_FILE to the path of a decrypted copy of secrets/secrets.enc.yaml.''
     );
 }

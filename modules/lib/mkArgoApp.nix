@@ -51,9 +51,15 @@
       # Combined secrets from sopsSecrets parameter and cfg.sopsSecrets option (option overrides)
       combinedSopsSecrets = (sopsSecrets cfg) // cfg.sopsSecrets;
 
-      # Expand combinedSopsSecrets (name -> data) into createSecret results when self and pkgs are available
+      # When preEncryptedSecretsDir is set (e.g. by CI), load secret JSONs from disk instead of
+      # calling createSecret at eval time (avoids plaintext in the Nix store).
       expandedSopsSecrets =
-        if combinedSopsSecrets != { } && self != null && pkgs != null then
+        if config.preEncryptedSecretsDir or "" != "" then
+          lib.mapAttrs (
+            secretName: _:
+            builtins.fromJSON (builtins.readFile (config.preEncryptedSecretsDir + "/" + secretName + ".json"))
+          ) combinedSopsSecrets
+        else if combinedSopsSecrets != { } && self != null && pkgs != null then
           lib.mapAttrs (
             secretName: data:
             self.lib.createSecret {
@@ -199,6 +205,14 @@
           type = types.attrsOf types.anything;
         };
 
+        # Internal: populated by mkArgoApp for CI manifest (list of { app, secretName, namespace, keys }).
+        sopsSecretsManifest = mkOption {
+          default = [ ];
+          type = types.listOf types.attrs;
+          internal = true;
+          description = "Secret manifest entries for this app (for CI).";
+        };
+
         values = mkOption {
           description = "All the values";
           type = types.attrsOf types.anything;
@@ -213,6 +227,14 @@
       ];
 
       config = mkIf cfg.enable (mkMerge [
+        (mkIf (combinedSopsSecrets != { }) {
+          services.${name}.sopsSecretsManifest = lib.mapAttrsToList (sn: data: {
+            app = name;
+            secretName = sn;
+            namespace = cfg.namespace;
+            keys = lib.attrNames (if data ? values then data.values else data);
+          }) combinedSopsSecrets;
+        })
         {
           # This is the application config for nixidy
           applications.${name} =

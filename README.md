@@ -88,26 +88,38 @@ command will read the `secrets.edn` file which describes the mappings between
 entries in that keepass database and
 secret to be encrypted.
 
-You must create a file at `secrets/secrets.yaml` with all the required secrets and
-`$DECRYPTED_SECRET_FILE` should be pointing to it.
+All secrets must live in the **encrypted** file `secrets/secrets.enc.yaml`. The old unencrypted `secrets/secrets.yaml` file is not used or supported.
 
-### Create Encrypted Secrets
+### Creating and editing secrets
 
-This turns the unencrypted yaml file into an encrypted version
-
-``` nushell
-# bb encrypt
-sops -e secrets/secrets.yaml | save -f secrets/secrets.enc.yaml
-```
-
-### Decrypt Secrets
-
-To unencrypt the stored passwords
+You can edit in place (no plaintext file on disk):
 
 ```sh
-# bb decrypt
-sops --decrypt secrets/secrets.enc.yaml > secrets/secrets.yaml
+sops secrets/secrets.enc.yaml
+# or: bb edit-secrets
 ```
+
+Or decrypt to a file, edit, then encrypt back (plaintext exists only while you edit):
+
+```sh
+bb decrypt
+# edit secrets/secrets.yaml, then:
+bb encrypt
+```
+
+To create the encrypted file from scratch (e.g. from Keepass or another source), produce a YAML file, encrypt it with sops, and save as `secrets/secrets.enc.yaml`; do not keep an unencrypted `secrets/secrets.yaml` in the repo or in normal use.
+
+### Using secrets when running commands
+
+Any command that needs secrets must be run via the decrypt-to-temp script, which sets `DECRYPTED_SECRET_FILE` for the duration of the command:
+
+```sh
+./scripts/with-decrypted-secrets.sh bb switch-charts
+# or
+./scripts/with-decrypted-secrets.sh nix build .#nixidyEnvs.x86_64-linux.dev.activationPackage --impure --no-link --print-out-paths
+```
+
+The script decrypts `secrets/secrets.enc.yaml` to a temporary file, sets `DECRYPTED_SECRET_FILE`, runs your command, then removes the temp file so no decrypted copy is left on disk.
 
 # Build
 

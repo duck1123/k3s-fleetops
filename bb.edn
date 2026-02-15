@@ -60,6 +60,11 @@
          command   (str "kubectl -n \"" namespace "\" delete pod -l name=sealed-secrets-controller")]
      (shell command))}
 
+  edit-secrets
+  {:doc "Edit secrets in the encrypted file in place (no plaintext file). Alternative: bb decrypt, edit secrets/secrets.yaml, bb encrypt."
+   :task
+   (shell "sops secrets/secrets.enc.yaml")}
+
   encrypt
   {:doc "Update secrets with latest changes"
    :task
@@ -129,8 +134,8 @@
                                        ;; See all output
                                        "--print-out-paths"]
                                       (when show-trace? ["--show-trace"]))
-               cmd            (str/join " " args)
-               drv-path       (str/trim (:out (shell {:out :string} cmd)))
+               ;; Nix build needs secrets from encrypted file; decrypt to temp and run
+               drv-path       (str/trim (:out (apply shell (into [{:out :string} "./scripts/with-decrypted-secrets.sh"] args))))
                activation-cmd (str drv-path "/activate")]
            #_(binding [*out* *err*] (println "path: " activation-cmd))
            (shell activation-cmd)
