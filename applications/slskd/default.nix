@@ -144,8 +144,14 @@ self.lib.mkArgoApp { inherit config lib; } rec {
                 image = cfg.image;
                 imagePullPolicy = "IfNotPresent";
                 env = [
-                  { name = "TZ"; value = cfg.tz; }
-                  { name = "SLSKD_REMOTE_CONFIGURATION"; value = "true"; }
+                  {
+                    name = "TZ";
+                    value = cfg.tz;
+                  }
+                  {
+                    name = "SLSKD_REMOTE_CONFIGURATION";
+                    value = "true";
+                  }
                 ]
                 ++ (lib.optionals (cfg.webAuth.username != "" && cfg.webAuth.password != "") [
                   {
@@ -164,17 +170,35 @@ self.lib.mkArgoApp { inherit config lib; } rec {
                   }
                 ])
                 ++ (lib.optionals cfg.vpn.enable [
-                  { name = "HTTP_PROXY"; value = "http://${cfg.vpn.sharedGluetunService}:8888"; }
-                  { name = "HTTPS_PROXY"; value = "http://${cfg.vpn.sharedGluetunService}:8888"; }
+                  {
+                    name = "HTTP_PROXY";
+                    value = "http://${cfg.vpn.sharedGluetunService}:8888";
+                  }
+                  {
+                    name = "HTTPS_PROXY";
+                    value = "http://${cfg.vpn.sharedGluetunService}:8888";
+                  }
                   {
                     name = "NO_PROXY";
                     value = "localhost,127.0.0.1,.svc,.svc.cluster.local,soularr.soularr,lidarr.lidarr";
                   }
                 ]);
                 ports = [
-                  { name = "http"; containerPort = cfg.service.port; protocol = "TCP"; }
-                  { name = "https"; containerPort = 5031; protocol = "TCP"; }
-                  { name = "p2p"; containerPort = 50300; protocol = "TCP"; }
+                  {
+                    name = "http";
+                    containerPort = cfg.service.port;
+                    protocol = "TCP";
+                  }
+                  {
+                    name = "https";
+                    containerPort = 5031;
+                    protocol = "TCP";
+                  }
+                  {
+                    name = "p2p";
+                    containerPort = 50300;
+                    protocol = "TCP";
+                  }
                 ];
                 readinessProbe = lib.mkIf cfg.useProbes {
                   httpGet = {
@@ -201,13 +225,22 @@ self.lib.mkArgoApp { inherit config lib; } rec {
                   failureThreshold = 3;
                 };
                 volumeMounts = [
-                  { mountPath = "/app"; name = "config"; }
-                  { mountPath = "/downloads"; name = "downloads"; }
+                  {
+                    mountPath = "/app";
+                    name = "config";
+                  }
+                  {
+                    mountPath = "/downloads";
+                    name = "downloads";
+                  }
                 ];
               }
             ];
             volumes = [
-              { name = "config"; persistentVolumeClaim.claimName = "${name}-${name}-config"; }
+              {
+                name = "config";
+                persistentVolumeClaim.claimName = "${name}-${name}-config";
+              }
               {
                 name = "downloads";
                 persistentVolumeClaim.claimName = "${name}-${name}-downloads";
@@ -225,7 +258,11 @@ self.lib.mkArgoApp { inherit config lib; } rec {
         spec = {
           accessModes = [ "ReadWriteMany" ];
           capacity.storage = "1Ti";
-          mountOptions = [ "nolock" "soft" "timeo=30" ];
+          mountOptions = [
+            "nolock"
+            "soft"
+            "timeo=30"
+          ];
           nfs = {
             server = cfg.nfs.server;
             path = cfg.nfs.path;
@@ -283,9 +320,24 @@ self.lib.mkArgoApp { inherit config lib; } rec {
 
     services.${name}.spec = {
       ports = [
-        { name = "http"; port = cfg.service.port; protocol = "TCP"; targetPort = "http"; }
-        { name = "https"; port = 5031; protocol = "TCP"; targetPort = "https"; }
-        { name = "p2p"; port = 50300; protocol = "TCP"; targetPort = "p2p"; }
+        {
+          name = "http";
+          port = cfg.service.port;
+          protocol = "TCP";
+          targetPort = "http";
+        }
+        {
+          name = "https";
+          port = 5031;
+          protocol = "TCP";
+          targetPort = "https";
+        }
+        {
+          name = "p2p";
+          port = 50300;
+          protocol = "TCP";
+          targetPort = "p2p";
+        }
       ];
 
       selector = {

@@ -41,18 +41,25 @@
       values = attrsets.recursiveUpdate (defaultValues cfg) cfg.values;
 
       # Inject hostAffinity nodeSelector into all deployment and statefulSet pod specs
-      addHostAffinityToResources = resources: hostAffinity:
+      addHostAffinityToResources =
+        resources: hostAffinity:
         if hostAffinity == null then
           resources
         else
           let
-            nodeSelectorFragment = { "kubernetes.io/hostname" = hostAffinity; };
-            addToPodSpec = spec:
-              spec // {
+            nodeSelectorFragment = {
+              "kubernetes.io/hostname" = hostAffinity;
+            };
+            addToPodSpec =
+              spec:
+              spec
+              // {
                 nodeSelector = (spec.nodeSelector or { }) // nodeSelectorFragment;
               };
-            addToWorkload = workload:
-              workload // {
+            addToWorkload =
+              workload:
+              workload
+              // {
                 spec = (workload.spec or { }) // {
                   template = (workload.spec.template or { }) // {
                     spec = addToPodSpec (workload.spec.template.spec or { });
@@ -60,7 +67,8 @@
                 };
               };
           in
-          resources // {
+          resources
+          // {
             deployments = lib.mapAttrs (_: addToWorkload) (resources.deployments or { });
             statefulSets = lib.mapAttrs (_: addToWorkload) (resources.statefulSets or { });
           };

@@ -228,130 +228,130 @@ self.lib.mkArgoApp { inherit config lib; } rec {
           spec = {
             securityContext.fsGroup = cfg.pgid;
             serviceAccountName = "default";
-              initContainers = [
-                {
-                  name = "write-config";
-                  image = "busybox:latest";
-                  imagePullPolicy = "IfNotPresent";
-                  command = [
-                    "sh"
-                    "-c"
-                    writeConfigScript
-                  ];
-                  env = [
-                    {
-                      name = "LIDARR_HOST_URL";
-                      value = "http://${cfg.lidarr.host}:${toString cfg.lidarr.port}";
-                    }
-                    {
-                      name = "LIDARR_DOWNLOAD_DIR";
-                      value = cfg.lidarr.downloadDir;
-                    }
-                    {
-                      name = "SLSKD_HOST_URL";
-                      value = "http://${cfg.slskd.host}:${toString cfg.slskd.port}";
-                    }
-                    {
-                      name = "PUID";
-                      value = toString cfg.puid;
-                    }
-                    {
-                      name = "PGID";
-                      value = toString cfg.pgid;
-                    }
-                  ]
-                  ++ (lib.optionals (cfg.lidarr.apiKey != "") [
-                    {
-                      name = "LIDARR_API_KEY";
-                      valueFrom.secretKeyRef = {
-                        name = lidarr-api-secret;
-                        key = "api_key";
-                      };
-                    }
-                  ])
-                  ++ (lib.optionals (cfg.slskd.apiKey != "") [
-                    {
-                      name = "SLSKD_API_KEY";
-                      valueFrom.secretKeyRef = {
-                        name = slskd-api-secret;
-                        key = "api_key";
-                      };
-                    }
-                  ])
-                  ++ (lib.optionals (cfg.lidarr.apiKey == "") [
-                    {
-                      name = "LIDARR_API_KEY";
-                      value = "";
-                    }
-                  ])
-                  ++ (lib.optionals (cfg.slskd.apiKey == "") [
-                    {
-                      name = "SLSKD_API_KEY";
-                      value = "";
-                    }
-                  ]);
-                  volumeMounts = [
-                    {
-                      mountPath = "/data";
-                      name = "config";
-                    }
-                  ];
-                }
-              ];
-              containers = [
-                {
-                  inherit name;
-                  image = cfg.image;
-                  imagePullPolicy = "IfNotPresent";
-                  command = [
-                    "sh"
-                    "-c"
-                    "while true; do python soularr.py; sleep ${toString cfg.scriptInterval}; done"
-                  ];
-                  env = [
-                    {
-                      name = "PGID";
-                      value = toString cfg.pgid;
-                    }
-                    {
-                      name = "PUID";
-                      value = toString cfg.puid;
-                    }
-                    {
-                      name = "TZ";
-                      value = cfg.tz;
-                    }
-                    {
-                      name = "SCRIPT_INTERVAL";
-                      value = toString cfg.scriptInterval;
-                    }
-                  ];
-                  workingDir = "/app";
-                  securityContext.runAsUser = cfg.puid;
-                  securityContext.runAsGroup = cfg.pgid;
-                  volumeMounts = [
-                    {
-                      mountPath = "/data";
-                      name = "config";
-                    }
-                    {
-                      mountPath = "/downloads";
-                      name = "downloads";
-                    }
-                  ];
-                }
-              ];
-              volumes = [
-                {
-                  name = "config";
-                  persistentVolumeClaim.claimName = "${name}-${name}-config";
-                }
-                {
-                  name = "downloads";
-                  persistentVolumeClaim.claimName = "${name}-${name}-downloads";
-                }
-              ];
-            };
+            initContainers = [
+              {
+                name = "write-config";
+                image = "busybox:latest";
+                imagePullPolicy = "IfNotPresent";
+                command = [
+                  "sh"
+                  "-c"
+                  writeConfigScript
+                ];
+                env = [
+                  {
+                    name = "LIDARR_HOST_URL";
+                    value = "http://${cfg.lidarr.host}:${toString cfg.lidarr.port}";
+                  }
+                  {
+                    name = "LIDARR_DOWNLOAD_DIR";
+                    value = cfg.lidarr.downloadDir;
+                  }
+                  {
+                    name = "SLSKD_HOST_URL";
+                    value = "http://${cfg.slskd.host}:${toString cfg.slskd.port}";
+                  }
+                  {
+                    name = "PUID";
+                    value = toString cfg.puid;
+                  }
+                  {
+                    name = "PGID";
+                    value = toString cfg.pgid;
+                  }
+                ]
+                ++ (lib.optionals (cfg.lidarr.apiKey != "") [
+                  {
+                    name = "LIDARR_API_KEY";
+                    valueFrom.secretKeyRef = {
+                      name = lidarr-api-secret;
+                      key = "api_key";
+                    };
+                  }
+                ])
+                ++ (lib.optionals (cfg.slskd.apiKey != "") [
+                  {
+                    name = "SLSKD_API_KEY";
+                    valueFrom.secretKeyRef = {
+                      name = slskd-api-secret;
+                      key = "api_key";
+                    };
+                  }
+                ])
+                ++ (lib.optionals (cfg.lidarr.apiKey == "") [
+                  {
+                    name = "LIDARR_API_KEY";
+                    value = "";
+                  }
+                ])
+                ++ (lib.optionals (cfg.slskd.apiKey == "") [
+                  {
+                    name = "SLSKD_API_KEY";
+                    value = "";
+                  }
+                ]);
+                volumeMounts = [
+                  {
+                    mountPath = "/data";
+                    name = "config";
+                  }
+                ];
+              }
+            ];
+            containers = [
+              {
+                inherit name;
+                image = cfg.image;
+                imagePullPolicy = "IfNotPresent";
+                command = [
+                  "sh"
+                  "-c"
+                  "while true; do python soularr.py; sleep ${toString cfg.scriptInterval}; done"
+                ];
+                env = [
+                  {
+                    name = "PGID";
+                    value = toString cfg.pgid;
+                  }
+                  {
+                    name = "PUID";
+                    value = toString cfg.puid;
+                  }
+                  {
+                    name = "TZ";
+                    value = cfg.tz;
+                  }
+                  {
+                    name = "SCRIPT_INTERVAL";
+                    value = toString cfg.scriptInterval;
+                  }
+                ];
+                workingDir = "/app";
+                securityContext.runAsUser = cfg.puid;
+                securityContext.runAsGroup = cfg.pgid;
+                volumeMounts = [
+                  {
+                    mountPath = "/data";
+                    name = "config";
+                  }
+                  {
+                    mountPath = "/downloads";
+                    name = "downloads";
+                  }
+                ];
+              }
+            ];
+            volumes = [
+              {
+                name = "config";
+                persistentVolumeClaim.claimName = "${name}-${name}-config";
+              }
+              {
+                name = "downloads";
+                persistentVolumeClaim.claimName = "${name}-${name}-downloads";
+              }
+            ];
+          };
         };
       };
     };
