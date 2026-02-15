@@ -3,6 +3,7 @@
    [babashka.fs :as fs]
    [babashka.process :refer [shell]]
    [cheshire.core :as json]
+   [clj-yaml.core :as yaml]
    [clojure.string :as str]))
 
 (def pg-namespace "postgresql")
@@ -216,47 +217,90 @@
     (shell (str "kubectl exec -n " pg-namespace " " pod-name " -- rm -f /tmp/restore_backup.sql"))
     (when temp-sql (fs/delete temp-sql))))
 
+(defn restore-from-pvc
+  "Restore full cluster from a backup file on the postgresql-backups PVC (pg_dumpall format).
+   backup-filename should be e.g. postgresql-backup-20250215_020000.sql.gz"
+  [backup-filename]
+  (let [job-name   (str "postgresql-restore-" (System/currentTimeMillis))
+        restore-cmd (str "set -e\n"
+                         "echo \"Restoring from /backups/" backup-filename "\"\n"
+                         "gunzip -c /backups/" backup-filename " | PGPASSWORD=\"$PGPASSWORD\" psql -h postgresql." pg-namespace " -U " admin-user " -d postgres\n"
+                         "echo \"Restore completed successfully.\"")
+        pod-spec   {"restartPolicy" "Never"
+                    "containers"   [{"name"    "restore"
+                                     "image"   "pgvector/pgvector:pg17"
+                                     "command" ["/bin/bash" "-c" restore-cmd]
+                                     "env"     [{"name" "PGPASSWORD"
+                                                "valueFrom" {"secretKeyRef" {"name" secret-name
+                                                                             "key"  "adminPassword"}}}]
+                                     "volumeMounts" [{"name" "backups" "mountPath" "/backups"}]}]
+                    "volumes"     [{"name" "backups"
+                                    "persistentVolumeClaim" {"claimName" "postgresql-backups"}}]}
+        job-spec   {"apiVersion" "batch/v1"
+                    "kind"       "Job"
+                    "metadata"   {"name" job-name "namespace" pg-namespace}
+                    "spec"       {"ttlSecondsAfterFinished" 300
+                                  "template" {"spec" pod-spec}}}
+        job-yaml   (yaml/generate-string job-spec)]
+    (println "=== PostgreSQL Restore from PVC ===")
+    (println "Backup file on PVC:" backup-filename)
+    (println "Creating restore Job:" job-name)
+    (shell {:in job-yaml} "kubectl apply -f -")
+    (println "Monitor progress: kubectl logs -n " pg-namespace " -f job/" job-name)
+    (println "Waiting for Job to complete...")
+    (shell (str "kubectl wait --for=condition=complete job/" job-name " -n " pg-namespace " --timeout=600s"))
+    (println "=== Restore Complete ===")
+    (println "Full cluster restored from:" backup-filename)))
+
 (defn restore-database
-  "Restore PostgreSQL database from backup"
+  "Restore PostgreSQL database from backup.
+   If backup-file is a path to a local file, restores from that file.
+   If backup-file is a filename only (no /) and not found locally, restores from the postgresql-backups PVC."
   [backup-file target-db recreate?]
-  (let [pod-name (get-pod-name)]
-    (when (empty? pod-name)
-      (println "Error: Could not find PostgreSQL pod in pg-namespace" pg-namespace)
-      (System/exit 1))
-    (when (or (nil? backup-file) (empty? backup-file))
-      (println "Error: BACKUP_FILE environment variable is required")
-      (println "Usage: BACKUP_FILE=path/to/backup.sql.gz [DATABASE=dbname] [RECREATE=true] bb postgres-restore")
-      (System/exit 1))
-    (when-not (fs/exists? backup-file)
-      (println "Error: Backup file not found:" backup-file)
-      (System/exit 1))
-    (let [backup-basename (fs/file-name backup-file)
-          db-name (or target-db (extract-db-name-from-filename backup-basename))
-          password (get-admin-password)]
-      (when (nil? db-name)
-        (println "Error: Could not determine database name from filename:" backup-basename)
-        (println "Please specify DATABASE environment variable")
+  (when (or (nil? backup-file) (empty? backup-file))
+    (println "Error: BACKUP_FILE environment variable is required")
+    (println "Usage: BACKUP_FILE=path/to/backup.sql.gz or BACKUP_FILE=postgresql-backup-YYYYMMDD_HHMMSS.sql.gz")
+    (println "       [DATABASE=dbname] [RECREATE=true] bb postgres-restore")
+    (System/exit 1))
+  ;; Restore from PVC when file does not exist locally and looks like a backup filename (no path)
+  (if (and (not (fs/exists? backup-file))
+           (not (str/includes? backup-file "/"))
+           (or (str/ends-with? backup-file ".sql.gz") (str/ends-with? backup-file ".sql")))
+    (restore-from-pvc backup-file)
+    (let [pod-name (get-pod-name)]
+      (when (empty? pod-name)
+        (println "Error: Could not find PostgreSQL pod in pg-namespace" pg-namespace)
         (System/exit 1))
-      (println "=== PostgreSQL Restore Script ===")
-      (println "Namespace:" pg-namespace)
-      (println "Backup file:" backup-file)
-      (println "Target database:" db-name)
-      (println "")
-      (when recreate?
-        (drop-database pod-name password db-name))
-      (cond
-        (str/ends-with? backup-file ".custom")
-        (restore-custom-format pod-name password backup-file)
-        (or (str/ends-with? backup-file ".sql.gz") (str/ends-with? backup-file ".sql"))
-        (restore-sql-format pod-name password backup-file)
-        :else
-        (do
-          (println "Error: Unsupported backup file format. Expected .sql, .sql.gz, or .custom")
-          (System/exit 1)))
-      (println "")
-      (println "=== Restore Complete ===")
-      (println "Database '" db-name "' has been restored from:" backup-file)
-      (println "")
-      (println "Verifying database...")
-      (exec-psql pod-name password "\\l"))))
+      (when-not (fs/exists? backup-file)
+        (println "Error: Backup file not found:" backup-file)
+        (System/exit 1))
+      (let [backup-basename (fs/file-name backup-file)
+            db-name (or target-db (extract-db-name-from-filename backup-basename))
+            password (get-admin-password)]
+        (when (nil? db-name)
+          (println "Error: Could not determine database name from filename:" backup-basename)
+          (println "Please specify DATABASE environment variable")
+          (System/exit 1))
+        (println "=== PostgreSQL Restore Script ===")
+        (println "Namespace:" pg-namespace)
+        (println "Backup file:" backup-file)
+        (println "Target database:" db-name)
+        (println "")
+        (when recreate?
+          (drop-database pod-name password db-name))
+        (cond
+          (str/ends-with? backup-file ".custom")
+          (restore-custom-format pod-name password backup-file)
+          (or (str/ends-with? backup-file ".sql.gz") (str/ends-with? backup-file ".sql"))
+          (restore-sql-format pod-name password backup-file)
+          :else
+          (do
+            (println "Error: Unsupported backup file format. Expected .sql, .sql.gz, or .custom")
+            (System/exit 1)))
+        (println "")
+        (println "=== Restore Complete ===")
+        (println "Database '" db-name "' has been restored from:" backup-file)
+        (println "")
+        (println "Verifying database...")
+        (exec-psql pod-name password "\\l")))))
 

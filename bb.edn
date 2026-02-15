@@ -1,8 +1,10 @@
 {:paths ["src"]
- :deps  {io.github.l3nz/cli-matic {:sha "ddbcad077ba63e0abb3597a7ec6f62c40f91c9e5"}}
+ :deps  {io.github.l3nz/cli-matic {:sha "ddbcad077ba63e0abb3597a7ec6f62c40f91c9e5"}
+         clj-commons/clj-yaml     {:mvn/version "1.0.29"}}
  :tasks
  {:requires
   ([babashka.fs :as fs]
+   [clj-yaml.core :as yaml]
    [clojure.string :as str]
    [k3s-fleetops.core :as c]
    [k3s-fleetops.postgres :as pg])
@@ -119,30 +121,30 @@
   switch-charts
   {:doc     "Switch nixidy charts"
    :depends [post-process-manifests]
-   :task (let [show-trace?    (= (System/getenv "SHOW_TRACE") "true")
-               env            "dev"
-               args           (concat ["nix"
-                                       "run"
-                                       "nixpkgs#nix-output-monitor"
-                                       "--"
-                                       "build"
-                                       (str ".#nixidyEnvs.x86_64-linux." env ".activationPackage")
-                                       ;; Read environment
-                                       "--impure"
-                                       ;; Don't create results directory
-                                       "--no-link"
-                                       ;; See all output
-                                       "--print-out-paths"]
-                                      (when show-trace? ["--show-trace"]))
-               ;; Nix build needs secrets from encrypted file; decrypt to temp and run
-               drv-path       (str/trim (:out (apply shell (into [{:out :string} "./scripts/with-decrypted-secrets.sh"] args))))
-               activation-cmd (str drv-path "/activate")]
-           #_(binding [*out* *err*] (println "path: " activation-cmd))
-           (shell activation-cmd)
-           ;; Run post-processing after nixidy generates manifests
-           (let [post-process-path (str/trim (:out (shell {:out :string} "nix-build --no-link --expr '(import <nixpkgs> {}).callPackage ./lib/postProcessManifests.nix {}'")))
-                 post-process-cmd  (str post-process-path "/bin/post-process-manifests")]
-             (shell post-process-cmd)))}
+   :task    (let [show-trace?    (= (System/getenv "SHOW_TRACE") "true")
+                  env            "dev"
+                  args           (concat ["nix"
+                                          "run"
+                                          "nixpkgs#nix-output-monitor"
+                                          "--"
+                                          "build"
+                                          (str ".#nixidyEnvs.x86_64-linux." env ".activationPackage")
+                                          ;; Read environment
+                                          "--impure"
+                                          ;; Don't create results directory
+                                          "--no-link"
+                                          ;; See all output
+                                          "--print-out-paths"]
+                                         (when show-trace? ["--show-trace"]))
+                  ;; Nix build needs secrets from encrypted file; decrypt to temp and run
+                  drv-path       (str/trim (:out (apply shell (into [{:out :string} "./scripts/with-decrypted-secrets.sh"] args))))
+                  activation-cmd (str drv-path "/activate")]
+              #_(binding [*out* *err*] (println "path: " activation-cmd))
+              (shell activation-cmd)
+              ;; Run post-processing after nixidy generates manifests
+              (let [post-process-path (str/trim (:out (shell {:out :string} "nix-build --no-link --expr '(import <nixpkgs> {}).callPackage ./lib/postProcessManifests.nix {}'")))
+                    post-process-cmd  (str post-process-path "/bin/post-process-manifests")]
+                (shell post-process-cmd)))}
 
   update-charts
   {:doc  "Update Helm chart archives from OCI registries"
@@ -172,79 +174,59 @@
    :task
    (let [namespace "mariadb"
          temp-pod  "mariadb-backup-lister"
-         job-yaml  (str "apiVersion: v1
-kind: Pod
-metadata:
-  name: " temp-pod "
-  namespace: " namespace "
-spec:
-  restartPolicy: Never
-  containers:
-  - name: lister
-    image: bitnami/mariadb:latest
-    command: [\"/bin/bash\", \"-c\", \"ls -lh /backups/*.sql.gz 2>/dev/null || echo 'No backups found'\"]
-    volumeMounts:
-    - name: backups
-      mountPath: /backups
-  volumes:
-  - name: backups
-    persistentVolumeClaim:
-      claimName: mariadb-backups")]
+         pod-spec  {"apiVersion" "v1"
+                    "kind"       "Pod"
+                    "metadata"   {"name"      temp-pod
+                                  "namespace" namespace}
+                    "spec"       {"restartPolicy" "Never"
+                                  "containers"    [{"name"         "lister"
+                                                    "image"        "bitnami/mariadb:latest"
+                                                    "command"      ["/bin/bash" "-c" "ls -lh /backups/*.sql.gz 2>/dev/null || echo 'No backups found'"]
+                                                    "volumeMounts" [{"name" "backups" "mountPath" "/backups"}]}]
+                                  "volumes"       [{"name"                  "backups"
+                                                    "persistentVolumeClaim" {"claimName" "mariadb-backups"}}]}}
+         job-yaml  (yaml/generate-string pod-spec)]
      (shell {:in job-yaml} "kubectl apply -f -")
-     (shell (str "kubectl wait --for=condition=Ready pod/" temp-pod " -n " namespace " --timeout=30s || true"))
-     (shell (str "kubectl logs " temp-pod " -n " namespace))
-     (shell (str "kubectl delete pod " temp-pod " -n " namespace " --ignore-not-found=true")))}
+     (shell (str "sh -c \"kubectl -n " namespace " wait --for=condition=Ready pods " temp-pod " --timeout=60s || true\""))
+     (shell (str "kubectl -n " namespace " logs " temp-pod))
+     (shell (str "kubectl -n " namespace " delete pods " temp-pod " --ignore-not-found=true")))}
 
   mariadb-restore
   {:doc "Restore MariaDB from a backup file. Usage: BACKUP_FILE=filename.sql.gz bb mariadb-restore"
    :task
-   (let [namespace "mariadb"
+   (let [namespace   "mariadb"
          backup-file (or (System/getenv "BACKUP_FILE")
-                        (do
-                          (println "Available backups:")
-                          (shell (str "bb mariadb-list-backups"))
-                          (print "Enter backup filename (e.g., mariadb-backup-20250101_020000.sql.gz): ")
-                          (flush)
-                          (read-line)))
-         _          (when (or (nil? backup-file) (empty? backup-file))
-                     (println "Error: Backup file is required")
-                     (System/exit 1))
-         job-name   (str "mariadb-restore-" (System/currentTimeMillis))
-         job-yaml   (str "apiVersion: batch/v1
-kind: Job
-metadata:
-  name: " job-name "
-  namespace: " namespace "
-spec:
-  ttlSecondsAfterFinished: 300
-  template:
-    spec:
-      restartPolicy: Never
-      containers:
-      - name: restore
-        image: bitnami/mariadb:latest
-        command:
-        - /bin/bash
-        - -c
-        - |
-          set -e
-          echo \"Starting restore from: " backup-file "\"
-          echo \"WARNING: This will replace all existing databases!\"
-          gunzip -c /backups/" backup-file " | mysql -h mariadb.mariadb -u root -p\"$MARIADB_ROOT_PASSWORD\"
-          echo \"Restore completed successfully!\"
-        env:
-        - name: MARIADB_ROOT_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: mariadb-password
-              key: mariadb-root-password
-        volumeMounts:
-        - name: backups
-          mountPath: /backups
-      volumes:
-      - name: backups
-        persistentVolumeClaim:
-          claimName: mariadb-backups")]
+                         (do
+                           (println "Available backups:")
+                           (shell (str "bb mariadb-list-backups"))
+                           (print "Enter backup filename (e.g., mariadb-backup-20250101_020000.sql.gz): ")
+                           (flush)
+                           (read-line)))
+         _           (when (or (nil? backup-file) (empty? backup-file))
+                       (println "Error: Backup file is required")
+                       (System/exit 1))
+         job-name    (str "mariadb-restore-" (System/currentTimeMillis))
+         restore-cmd (str "set -e\n"
+                          "echo \"Starting restore from: " backup-file "\"\n"
+                          "echo \"WARNING: This will replace all existing databases!\"\n"
+                          "gunzip -c /backups/" backup-file " | mysql -h mariadb.mariadb -u root -p\"$MARIADB_ROOT_PASSWORD\"\n"
+                          "echo \"Restore completed successfully!\"")
+         pod-spec    {"restartPolicy" "Never"
+                      "containers"    [{"name"         "restore"
+                                        "image"        "bitnami/mariadb:latest"
+                                        "command"      ["/bin/bash" "-c" restore-cmd]
+                                        "env"          [{"name"      "MARIADB_ROOT_PASSWORD"
+                                                         "valueFrom" {"secretKeyRef" {"name" "mariadb-password"
+                                                                                      "key"  "mariadb-root-password"}}}]
+                                        "volumeMounts" [{"name" "backups" "mountPath" "/backups"}]}]
+                      "volumes"       [{"name"                  "backups"
+                                        "persistentVolumeClaim" {"claimName" "mariadb-backups"}}]}
+         job-spec    {"apiVersion" "batch/v1"
+                      "kind"       "Job"
+                      "metadata"   {"name" job-name "namespace" namespace}
+                      "spec"       {"ttlSecondsAfterFinished" 300
+                                    "template"                {"spec" pod-spec}}}
+         job-yaml    (yaml/generate-string job-spec)]
      (println "Creating restore job...")
      (shell {:in job-yaml} "kubectl apply -f -")
      (println "Restore job created: " job-name)
@@ -252,16 +234,37 @@ spec:
      (println "Or watch the job: kubectl get job -n " namespace " " job-name " -w"))}
 
   postgres-list
-  {:doc "List all PostgreSQL databases and their sizes. Use --json for JSON output"
-   :task (let [args *command-line-args*
+  {:doc  "List all PostgreSQL databases and their sizes. Use --json for JSON output"
+   :task (let [args  *command-line-args*
                json? (some #{"--json" "-j"} args)]
            (pg/list-databases json?))}
 
+  postgres-list-backups
+  {:doc "List available PostgreSQL backups on the postgresql-backups PVC"
+   :task
+   (let [namespace "postgresql"
+         temp-pod  "postgresql-backup-lister"
+         pod-spec  {"apiVersion" "v1"
+                    "kind"       "Pod"
+                    "metadata"   {"name"      temp-pod
+                                  "namespace" namespace}
+                    "spec"       {"restartPolicy" "Never"
+                                  "containers"    [{"name"         "lister"
+                                                    "image"        "pgvector/pgvector:pg17"
+                                                    "command"      ["/bin/bash" "-c" "ls -lht /backups/postgresql-backup-*.sql.gz 2>/dev/null || echo 'No backups found'"]
+                                                    "volumeMounts" [{"name" "backups" "mountPath" "/backups"}]}]
+                                  "volumes"       [{"name"                  "backups"
+                                                    "persistentVolumeClaim" {"claimName" "postgresql-backups"}}]}}
+         job-yaml  (yaml/generate-string pod-spec)]
+     (shell {:in job-yaml} "kubectl apply -f -")
+     (shell (str "sh -c \"kubectl -n " namespace " wait --for=condition=Ready pods " temp-pod " --timeout=60s || true\""))
+     (shell (str "kubectl -n " namespace " logs " temp-pod))
+     (shell (str "kubectl -n " namespace " delete pods " temp-pod " --ignore-not-found=true")))}
+
   postgres-backup
-  {:doc "Backup PostgreSQL databases. Usage: DATABASE=dbname OUTPUT_DIR=./backups bb postgres-backup (omit DATABASE to backup all)"
+  {:doc  "Backup PostgreSQL databases. Usage: DATABASE=dbname OUTPUT_DIR=./backups bb postgres-backup (omit DATABASE to backup all)"
    :task (pg/backup-databases (System/getenv "DATABASE") (or (System/getenv "OUTPUT_DIR") "./backups/postgresql"))}
 
   postgres-restore
-  {:doc "Restore PostgreSQL from a backup file. Usage: BACKUP_FILE=path/to/backup.sql.gz DATABASE=dbname [RECREATE=true] bb postgres-restore"
-   :task (pg/restore-database (System/getenv "BACKUP_FILE") (System/getenv "DATABASE") (= "true" (System/getenv "RECREATE")))}
-}}
+  {:doc  "Restore PostgreSQL from a backup. Use BACKUP_FILE=path/to/file.sql.gz for local file, or BACKUP_FILE=postgresql-backup-YYYYMMDD_HHMMSS.sql.gz to restore from PVC. For PVC backups use DATABASE=postgres (full cluster restore). [RECREATE=true] only for single-DB restores."
+   :task (pg/restore-database (System/getenv "BACKUP_FILE") (System/getenv "DATABASE") (= "true" (System/getenv "RECREATE")))}}}
