@@ -1,9 +1,7 @@
 (ns k3s-fleetops.core
   (:require
    [babashka.fs :as fs]
-   [babashka.process :refer [process shell]]
-   [cli-matic.core :as cli]
-   [cli-matic.utils-v2 :as U2]
+   [babashka.process :refer [shell]]
    [clojure.string :as str]))
 
 (def dry-run
@@ -12,48 +10,6 @@
    :as      "Dry Run?"
    :type    :with-flag
    :default false})
-
-(defn env
-  ([key]
-   (System/getenv key))
-  ([key default]
-   (or (env key) default)))
-
-#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
-(defn env+
-  [key]
-  (or (env key) (throw (ex-info "Missing key" {:key key}))))
-
-#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
-(defn earthly
-  ([target]
-   (earthly target {}))
-  ([target opts]
-   (println opts)
-   (let [flags   (->> [(when (:interactive opts) "-i")
-                       (when (:privileged opts) "-P")]
-                      (filter identity)
-                      (str/join " "))
-         secrets (if-let [secret-names (:secrets opts)]
-                   (->> secret-names
-                        (map (fn [n] (str "--secret " n)))
-                        (str/join " "))
-                   "")
-         args    (if-let [arg-map (:args opts)]
-                   (let [ks (keys arg-map)]
-                     (->> ks
-                          (map (fn [k] (str "--" k "=" (get arg-map k))))
-                          (str/join " ")))
-
-                   "")
-         parts ["earthly"
-                flags
-                secrets
-                target
-                args]
-         cmd   (str/join " " parts)]
-     #_(println cmd)
-     (shell cmd))))
 
 (defn build-yaml
   [opts]
@@ -119,86 +75,13 @@
               (fs/create-dirs target-directory)))
           (let [target-path-string (fs/relativize cwd target-path)
                 parts              [(str "cat " absolute)
-                                    (str "jet -i edn -o yaml")
+                                    "jet -i edn -o yaml"
                                     (str (if verbose? "tee " "dd of=") target-path-string)]
                 command            (str "sh -c \"" (str/join " | " parts) "\"")]
             (if dry-run?
               (println (str "[DRY-RUN] " command))
               (shell command))))))
     (build-yaml opts)))
-
-(defn prompt-password
-  []
-  (let [prompt-cmd "gum input --password --prompt 'Enter Keepass Password> '"
-        response   (shell {:out :string} prompt-cmd)]
-    (if (zero? (:exit response))
-      (:out response)
-      (throw (ex-info "Failed to prompt password" {})))))
-
-(defn choose
-  [options]
-  (let [cmd (str "gum choose " (str/join " " options))]
-    (:out (shell {:out :string} cmd))))
-
-(def sealed-secrets-controller {:name "sealed-secrets" :ns "sealed-secrets"})
-
-(defn read-password
-  ([keepass-password key-path]
-   (let [field "Password"]
-     (read-password keepass-password key-path field)))
-  ([keepass-password key-path field]
-   (read-password keepass-password key-path field (env+ "KEEPASS_DB_PATH")))
-  ([keepass-password key-path field db-path]
-   (let [cmd      (str "keepassxc-cli show -s -a " field  " " db-path " " key-path)
-         response @(process {:in keepass-password :out :string} cmd)]
-     (if (zero? (:exit response))
-       (->> response :out str/trim-newline)
-       (throw (ex-info "Failed to read password" {:type :password-read-error}))))))
-
-(defn create-secret
-  ([chosen-data secret-values]
-   (let [extra-args []]
-     (create-secret chosen-data secret-values extra-args)))
-  ([{target-ns :ns :keys [secret-name]} secret-values extra-args]
-   (let [args (concat ["kubectl create secret generic"
-                       secret-name
-                       (str "--namespace " target-ns)
-                       "--dry-run=client"
-                       "--from-env-file=/dev/stdin"
-                       "-o json"]
-                      extra-args)
-         cmd (str/join " " args)]
-     #_(binding [*out* *err*] (println cmd))
-     (:out (shell {:in secret-values :out :string} cmd)))))
-
-(defn seal-secret
-  [{target-ns :ns :keys [secret-name]} secret-json]
-  (let [sealed-dir      "argo-manifests/"
-        sealed-file     (str sealed-dir secret-name "-sealed-secret.yaml")
-        controller-name (:name sealed-secrets-controller)
-        controller-ns   (:ns sealed-secrets-controller)
-        args            ["kubeseal"
-                         (str "--namespace " target-ns)
-                         (str "--controller-name " controller-name)
-                         (str "--controller-namespace " controller-ns)
-                         "--secret-file /dev/stdin"
-                         (str "--sealed-secret-file " sealed-file)]
-        cmd             (str/join " " args)]
-    #_(binding [*out* *err*] (println cmd))
-    (fs/create-dirs sealed-dir)
-    (shell {:in secret-json} cmd)))
-
-(defn get-secret-values
-  [{:keys [fields]} keepass-password]
-  (->> (for [[k {:keys [literal path field]
-                 :or   {field "Password"}
-                 :as   data}] fields]
-         (let [data (cond
-                      (seq literal) literal
-                      (seq path)    (read-password keepass-password path field)
-                      :else         (throw (ex-info "Missing key" {:data data})))]
-           (str k "=" data)))
-       (str/join "\n")))
 
 (defn k3d-create
   [& [opts]]
@@ -275,53 +158,6 @@
     (case shell
       "zsh"    (zsh-completion)
       :default (throw (ex-info "Unknown shell type" {:shell shell})))))
-
-(defn find-command
-  [config subcommand-path]
-  (reduce
-   (fn [m cn]
-     (first (filter
-             (fn [co]
-               (= cn (:command co)))
-             (:subcommands m))))
-   config
-   (rest subcommand-path)))
-
-(defn complete
-  [args config-obj]
-  (let [config (U2/cfg-v2 config-obj)]
-    (println config)
-    (let [args (if (nil? args) [] args)]
-      (println "args" args)
-      (let [{:keys [parse-errors subcommand-path]
-             :as parsed} (cli/parse-command-line args config)
-            command-config (find-command config subcommand-path)]
-        (if (= parse-errors :ERR-NO-SUBCMD)
-          (println (str/join "\n" (map :command (:subcommands command-config))))
-          (if (= parse-errors :ERR-UNKNOWN-SUBCMD)
-            (do
-              (println "parsed" parsed)
-              (println "command-config" command-config)
-              (let [other-paths (drop-last subcommand-path)
-                    final-stub (last subcommand-path)]
-                (if (not= final-stub (last args))
-                  (do
-                    ;; This path doesn't match a command, but the non-matching command isn't the last token
-                    (println "not final token")
-                    [])
-                  (do
-                    (println "other-paths" other-paths)
-                    (let [prev-command (find-command config other-paths)]
-                      (println "prev-command" prev-command)
-                      (let [matched-commands (filter
-                                              (fn [command]
-                                                (str/starts-with? (:command command) final-stub))
-                                              (:subcommands prev-command))]
-                        (println "matched commands" (map :command matched-commands))))))))
-            (do
-              (println "parsed" parsed)
-              (println "command-config" command-config)
-              (println (str/join "\n" (map #(str "--" %) (map :option (:opts command-config))))))))))))
 
 (defn display-tasks
   [& [_args]]

@@ -244,5 +244,5 @@
       (println "Database '" db-name "' has been restored from:" backup-file)
       (println "")
       (println "Verifying database...")
-      (exec-psql pod-name password (str "\\l")))))
+      (exec-psql pod-name password "\\l"))))
 
