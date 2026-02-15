@@ -9,7 +9,6 @@
 (def secret-name "postgresql-password")
 (def admin-user "postgres")
 (def port "5432")
-(def default-databases ["prowlarr-main" "prowlarr-log"])
 
 (defn get-pod-name
   "Get the PostgreSQL pod name from the cluster"
@@ -55,6 +54,19 @@
         {:name (str/trim (first parts))
          :size (str/trim (second parts))}))))
 
+
+(defn get-all-database-names
+  "Return a list of all database names (excluding templates). Requires pod-name and password."
+  [pod-name password]
+  (let [query "SELECT datname FROM pg_database WHERE datistemplate = false ORDER BY datname;"
+        result (:out (shell {:out :string}
+                            (str "sh -c \"kubectl exec -n " pg-namespace " " pod-name " --"
+                                 " env PGPASSWORD='" password "'"
+                                 " psql -h localhost -U " admin-user
+                                 " -p " port " -t -A -c '" query "' postgres\"")))]
+    (->> (str/split-lines result)
+         (map str/trim)
+         (filter seq))))
 
 (defn list-databases
   "List all PostgreSQL databases. If json? is true, output JSON format"
@@ -141,7 +153,9 @@
       (System/exit 1))
     (let [password (get-admin-password)
           timestamp (str/replace (str/replace (str (java.util.Date.)) " " "_") ":" "")
-          dbs-to-backup (if target-db [target-db] default-databases)]
+          dbs-to-backup (if target-db
+                          [target-db]
+                          (get-all-database-names pod-name password))]
       (fs/create-dirs output-dir)
       (println "=== PostgreSQL Backup Script ===")
       (println "Namespace:" pg-namespace)
