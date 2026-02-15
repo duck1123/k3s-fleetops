@@ -88,14 +88,14 @@ command will read the `secrets.edn` file which describes the mappings between
 entries in that keepass database and
 secret to be encrypted.
 
-All secrets must live in the **encrypted** file `secrets/secrets.enc.yaml`. The old unencrypted `secrets/secrets.yaml` file is not used or supported.
+All secrets must live in the **encrypted** file `secrets.enc.yaml` at the project root. The old unencrypted `secrets/secrets.yaml` file is not used or supported.
 
 ### Creating and editing secrets
 
 You can edit in place (no plaintext file on disk):
 
 ```sh
-sops secrets/secrets.enc.yaml
+sops secrets.enc.yaml
 # or: bb edit-secrets
 ```
 
@@ -107,7 +107,7 @@ bb decrypt
 bb encrypt
 ```
 
-To create the encrypted file from scratch (e.g. from Keepass or another source), produce a YAML file, encrypt it with sops, and save as `secrets/secrets.enc.yaml`; do not keep an unencrypted `secrets/secrets.yaml` in the repo or in normal use.
+To create the encrypted file from scratch (e.g. from Keepass or another source), produce a YAML file, encrypt it with sops, and save as `secrets.enc.yaml`; do not keep an unencrypted `secrets/secrets.yaml` in the repo or in normal use.
 
 ### Using secrets when running commands
 
@@ -119,7 +119,7 @@ Any command that needs secrets must be run via the decrypt-to-temp script, which
 ./scripts/with-decrypted-secrets.sh nix build .#nixidyEnvs.x86_64-linux.dev.activationPackage --impure --no-link --print-out-paths
 ```
 
-The script decrypts `secrets/secrets.enc.yaml` to a temporary file, sets `DECRYPTED_SECRET_FILE`, runs your command, then removes the temp file so no decrypted copy is left on disk.
+The script decrypts `secrets.enc.yaml` to a temporary file, sets `DECRYPTED_SECRET_FILE`, runs your command, then removes the temp file so no decrypted copy is left on disk.
 
 # Build
 

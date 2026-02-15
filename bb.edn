@@ -51,7 +51,7 @@
   decrypt
   {:doc "Extract secrets from encrypted form"
    :task
-   (shell "sh -c \"sops --decrypt secrets/secrets.enc.yaml > secrets/secrets.yaml\"")}
+   (shell "sh -c \"sops --decrypt secrets.enc.yaml > secrets/secrets.yaml\"")}
 
   delete-secret-controller
   {:doc "Delete the sealed secrets controller"
@@ -63,12 +63,12 @@
   edit-secrets
   {:doc "Edit secrets in the encrypted file in place (no plaintext file). Alternative: bb decrypt, edit secrets/secrets.yaml, bb encrypt."
    :task
-   (shell "sops secrets/secrets.enc.yaml")}
+   (shell "sops secrets.enc.yaml")}
 
   encrypt
   {:doc "Update secrets with latest changes"
    :task
-   (shell "sh -c \"sops --encrypt secrets/secrets.yaml > secrets/secrets.enc.yaml\"")}
+   (shell "sh -c \"sops --encrypt secrets/secrets.yaml > secrets.enc.yaml\"")}
 
   format
   {:doc  "format code"
