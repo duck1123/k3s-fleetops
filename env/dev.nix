@@ -110,6 +110,7 @@ in
     # ../applications/booklore/default.nix
     booklore = {
       enable = true;
+      hostAffinity = "edgenix";
 
       database = {
         host = "mariadb.mariadb";
@@ -715,6 +716,7 @@ in
     # ../applications/qbittorrent/default.nix
     qbittorrent = {
       enable = true;
+      hostAffinity = "edgenix";
 
       ingress = {
         domain = "qbittorrent.${tail-domain}";
@@ -769,6 +771,7 @@ in
     # ../applications/redis/default.nix
     redis = {
       enable = true;
+      hostAffinity = "edgenix";
       password = secrets.redis.password;
     };
 

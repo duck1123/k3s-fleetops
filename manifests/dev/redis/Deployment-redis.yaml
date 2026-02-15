@@ -58,6 +58,8 @@ spec:
           volumeMounts:
             - mountPath: /data
               name: data
+      nodeSelector:
+        kubernetes.io/hostname: edgenix
       serviceAccountName: default
       volumes:
         - name: data
