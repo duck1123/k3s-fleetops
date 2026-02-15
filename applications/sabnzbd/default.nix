@@ -122,7 +122,6 @@ self.lib.mkArgoApp { inherit config lib; } rec {
 
           spec = {
             automountServiceAccountToken = true;
-            nodeSelector."kubernetes.io/hostname" = cfg.hostAffinity;
             serviceAccountName = "default";
 
             # Init container to set hostname whitelist in config

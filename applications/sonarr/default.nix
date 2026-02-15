@@ -298,7 +298,6 @@ self.lib.mkArgoApp { inherit config lib; } rec {
               initContainers = lib.optionalAttrs cfg.vpn.enable (
                 self.lib.waitForGluetun { inherit lib; } cfg.vpn.sharedGluetunService
               );
-              nodeSelector."kubernetes.io/hostname" = cfg.hostAffinity;
               serviceAccountName = "default";
 
               volumes = [

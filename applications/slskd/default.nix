@@ -132,9 +132,7 @@ self.lib.mkArgoApp { inherit config lib; } rec {
             "app.kubernetes.io/name" = name;
           };
 
-          spec = lib.optionalAttrs (cfg.hostAffinity != null) {
-            nodeSelector."kubernetes.io/hostname" = cfg.hostAffinity;
-          } // {
+          spec = {
             securityContext.fsGroup = 1000;
             serviceAccountName = "default";
             initContainers = lib.optionals cfg.vpn.enable (

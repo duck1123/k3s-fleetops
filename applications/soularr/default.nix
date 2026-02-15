@@ -225,13 +225,9 @@ self.lib.mkArgoApp { inherit config lib; } rec {
             "app.kubernetes.io/name" = name;
           };
 
-          spec =
-            lib.optionalAttrs (cfg.hostAffinity != null) {
-              nodeSelector."kubernetes.io/hostname" = cfg.hostAffinity;
-            }
-            // {
-              securityContext.fsGroup = cfg.pgid;
-              serviceAccountName = "default";
+          spec = {
+            securityContext.fsGroup = cfg.pgid;
+            serviceAccountName = "default";
               initContainers = [
                 {
                   name = "write-config";

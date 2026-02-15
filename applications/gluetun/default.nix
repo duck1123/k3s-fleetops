@@ -376,7 +376,6 @@ self.lib.mkArgoApp { inherit config lib; } rec {
                 }
               ];
 
-              nodeSelector."kubernetes.io/hostname" = cfg.hostAffinity;
               serviceAccountName = "default";
 
               volumes = [

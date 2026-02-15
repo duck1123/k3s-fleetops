@@ -171,7 +171,6 @@ self.lib.mkArgoApp { inherit config lib; } rec {
 
             spec = {
               automountServiceAccountToken = true;
-              nodeSelector."kubernetes.io/hostname" = cfg.hostAffinity;
               serviceAccountName = "default";
 
               initContainers =
