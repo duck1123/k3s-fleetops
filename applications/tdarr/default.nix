@@ -160,7 +160,10 @@ self.lib.mkArgoApp { inherit config lib; } rec {
 
             spec = {
               automountServiceAccountToken = true;
-              securityContext.fsGroup = cfg.pgid;
+              securityContext = {
+                fsGroup = cfg.pgid;
+                fsGroupChangePolicy = "OnRootMismatch";
+              };
 
               containers = [
                 {

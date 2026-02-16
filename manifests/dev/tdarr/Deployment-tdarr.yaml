@@ -82,6 +82,7 @@ spec:
         kubernetes.io/hostname: edgenix
       securityContext:
         fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
       serviceAccountName: default
       volumes:
         - name: config
