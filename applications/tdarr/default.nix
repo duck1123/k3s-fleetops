@@ -170,10 +170,10 @@ self.lib.mkArgoApp { inherit config lib; } rec {
               securityContext = {
                 fsGroup = cfg.pgid;
                 fsGroupChangePolicy = "OnRootMismatch";
-                # Run as tdarr user so subworkers inherit supplemental groups (image entrypoint drops root→PUID and can strip them).
-                runAsUser = cfg.puid;
-                runAsGroup = cfg.pgid;
-                # Allow access to /dev/dri/renderD* (AMD/Intel VAAPI). Device is typically root:render on the host.
+                # With GPU: run as root so main process and all subworkers can access /dev/dri (image may drop to PUID and strip supplementalGroups).
+                # Without GPU: run as tdarr user.
+                runAsUser = if cfg.enableGPU then 0 else cfg.puid;
+                runAsGroup = if cfg.enableGPU then 0 else cfg.pgid;
                 supplementalGroups = lib.optionals cfg.enableGPU [ cfg.renderGroupGID ];
               };
 

@@ -106,8 +106,8 @@ spec:
       securityContext:
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
-        runAsGroup: 1000
-        runAsUser: 1000
+        runAsGroup: 0
+        runAsUser: 0
         supplementalGroups:
           - 108
       serviceAccountName: default
