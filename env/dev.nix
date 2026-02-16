@@ -906,7 +906,7 @@ in
     tdarr = {
       enable = true;
       healthcheckcpuWorkers = 1;
-      healthcheckgpuWorkers = 0;
+      healthcheckgpuWorkers = 1;
       hostAffinity = "edgenix";
 
       ingress = {

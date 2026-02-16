@@ -43,7 +43,7 @@ spec:
             - name: healthcheckcpuWorkers
               value: "1"
             - name: healthcheckgpuWorkers
-              value: "0"
+              value: "1"
           image: ghcr.io/haveagitgat/tdarr:latest
           imagePullPolicy: IfNotPresent
           name: tdarr
