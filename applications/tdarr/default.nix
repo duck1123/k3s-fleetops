@@ -305,9 +305,27 @@ self.lib.mkArgoApp { inherit config lib; } rec {
               ];
 
               serviceAccountName = "default";
-              initContainers = lib.optionalAttrs cfg.vpn.enable (
+              initContainers = [
+                {
+                  name = "init-temp-cache";
+                  image = "busybox:latest";
+                  imagePullPolicy = "IfNotPresent";
+                  command = [
+                    "sh"
+                    "-c"
+                    "mkdir -p /temp/cache && chown -R ${toString cfg.puid}:${toString cfg.pgid} /temp/cache"
+                  ];
+                  securityContext.runAsUser = 0;
+                  volumeMounts = [
+                    {
+                      mountPath = "/temp";
+                      name = "temp";
+                    }
+                  ];
+                }
+              ] ++ (lib.optionals cfg.vpn.enable (
                 self.lib.waitForGluetun { inherit lib; } cfg.vpn.sharedGluetunService
-              );
+              ));
 
               volumes = [
                 {

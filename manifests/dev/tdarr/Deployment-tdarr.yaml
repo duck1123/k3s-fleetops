@@ -65,7 +65,19 @@ spec:
               name: media-movies
             - mountPath: /media/TV
               name: media-tv
-      initContainers: []
+      initContainers:
+        - command:
+            - sh
+            - -c
+            - mkdir -p /temp/cache && chown -R 1000:1000 /temp/cache
+          image: busybox:latest
+          imagePullPolicy: IfNotPresent
+          name: init-temp-cache
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - mountPath: /temp
+              name: temp
       nodeSelector:
         kubernetes.io/hostname: edgenix
       securityContext:
