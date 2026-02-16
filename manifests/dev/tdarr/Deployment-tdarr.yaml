@@ -46,6 +46,15 @@ spec:
               value: "1"
           image: ghcr.io/haveagitgat/tdarr:latest
           imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 8265
+            initialDelaySeconds: 300
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 10
           name: tdarr
           ports:
             - containerPort: 8265
@@ -54,6 +63,15 @@ spec:
             - containerPort: 8266
               name: server
               protocol: TCP
+          readinessProbe:
+            failureThreshold: 6
+            httpGet:
+              path: /
+              port: 8265
+            initialDelaySeconds: 180
+            periodSeconds: 15
+            successThreshold: 1
+            timeoutSeconds: 10
           resources: {}
           securityContext: {}
           volumeMounts:

@@ -926,7 +926,7 @@ in
 
       replicas = 1;
       storageClassName = "longhorn";
-      useProbes = false;
+      useProbes = true;
       vpn.enable = false;
       enableGPU = false;
     };
