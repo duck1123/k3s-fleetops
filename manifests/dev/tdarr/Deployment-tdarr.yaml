@@ -73,7 +73,10 @@ spec:
             successThreshold: 1
             timeoutSeconds: 10
           resources: {}
-          securityContext: {}
+          securityContext:
+            capabilities:
+              add:
+                - SYS_ADMIN
           volumeMounts:
             - mountPath: /app/server
               name: config
@@ -83,6 +86,8 @@ spec:
               name: media-movies
             - mountPath: /media/TV
               name: media-tv
+            - mountPath: /dev/dri
+              name: dri
       initContainers:
         - command:
             - sh
@@ -115,3 +120,7 @@ spec:
         - name: media-tv
           persistentVolumeClaim:
             claimName: tdarr-tdarr-media-tv
+        - hostPath:
+            path: /dev/dri
+            type: Directory
+          name: dri

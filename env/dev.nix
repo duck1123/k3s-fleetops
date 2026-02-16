@@ -928,7 +928,8 @@ in
       storageClassName = "longhorn";
       useProbes = true;
       vpn.enable = false;
-      enableGPU = false;
+      enableGPU = true;
+      enableNvidiaGPU = false;
     };
 
     tempo = {
