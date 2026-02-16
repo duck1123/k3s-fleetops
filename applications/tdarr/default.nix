@@ -134,6 +134,13 @@ self.lib.mkArgoApp { inherit config lib; } rec {
       type = types.bool;
       default = false;
     };
+
+    # GID of the host's 'render' group for /dev/dri access (AMD/Intel VAAPI). Common: 108 (Debian/Ubuntu), 106 (Fedora).
+    renderGroupGID = mkOption {
+      description = mdDoc "GID of the host render group for /dev/dri device access when enableGPU is true. Run 'getent group render' on the node to get the GID.";
+      type = types.int;
+      default = 108;
+    };
   };
 
   extraResources = cfg: {
@@ -163,6 +170,8 @@ self.lib.mkArgoApp { inherit config lib; } rec {
               securityContext = {
                 fsGroup = cfg.pgid;
                 fsGroupChangePolicy = "OnRootMismatch";
+                # Allow access to /dev/dri/renderD* (AMD/Intel VAAPI). Device is typically root:render on the host.
+                supplementalGroups = lib.optionals cfg.enableGPU [ cfg.renderGroupGID ];
               };
 
               containers = [

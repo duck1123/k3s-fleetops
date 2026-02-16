@@ -106,6 +106,8 @@ spec:
       securityContext:
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
+        supplementalGroups:
+          - 108
       serviceAccountName: default
       volumes:
         - name: config
