@@ -43,7 +43,9 @@ spec:
             - name: healthcheckcpuWorkers
               value: "1"
             - name: healthcheckgpuWorkers
-              value: "1"
+              value: "0"
+            - name: XDG_RUNTIME_DIR
+              value: ""
           image: ghcr.io/haveagitgat/tdarr:latest
           imagePullPolicy: IfNotPresent
           livenessProbe:
@@ -86,7 +88,7 @@ spec:
               name: media-movies
             - mountPath: /media/TV
               name: media-tv
-            - mountPath: /dev/dri
+            - mountPath: /dev/dri/renderD128
               name: dri
       initContainers:
         - command:
@@ -109,7 +111,7 @@ spec:
         runAsGroup: 0
         runAsUser: 0
         supplementalGroups:
-          - 108
+          - 303
       serviceAccountName: default
       volumes:
         - name: config
@@ -125,6 +127,6 @@ spec:
           persistentVolumeClaim:
             claimName: tdarr-tdarr-media-tv
         - hostPath:
-            path: /dev/dri
-            type: Directory
+            path: /dev/dri/renderD129
+            type: CharDevice
           name: dri

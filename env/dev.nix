@@ -220,6 +220,7 @@ in
       };
 
       enableGPU = true;
+      vaapiRenderDevice = "renderD129";
     };
 
     # ../applications/gluetun/default.nix
@@ -906,7 +907,8 @@ in
     tdarr = {
       enable = true;
       healthcheckcpuWorkers = 1;
-      healthcheckgpuWorkers = 1;
+      # GPU health checks need VAAPI; container libva often can't use host /dev/dri. Use CPU until image/host VA stack matches.
+      healthcheckgpuWorkers = 0;
       hostAffinity = "edgenix";
 
       ingress = {
@@ -930,6 +932,7 @@ in
       vpn.enable = false;
       enableGPU = true;
       enableNvidiaGPU = false;
+      vaapiRenderDevice = "renderD129";
     };
 
     tempo = {
@@ -961,6 +964,7 @@ in
 
       replicas = 1;
       enableGPU = true;
+      vaapiRenderDevice = "renderD129";
     };
 
     # ../applications/whisparr/default.nix

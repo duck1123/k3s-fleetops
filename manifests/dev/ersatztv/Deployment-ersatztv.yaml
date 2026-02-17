@@ -50,7 +50,7 @@ spec:
               name: media
             - mountPath: /app/data
               name: data
-            - mountPath: /dev/dri
+            - mountPath: /dev/dri/renderD128
               name: dri
       initContainers:
         - args:
@@ -78,6 +78,6 @@ spec:
           persistentVolumeClaim:
             claimName: ersatztv-ersatztv-media
         - hostPath:
-            path: /dev/dri
-            type: Directory
+            path: /dev/dri/renderD129
+            type: CharDevice
           name: dri

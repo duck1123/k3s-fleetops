@@ -235,7 +235,7 @@ self.lib.mkArgoApp
                       name = "config";
                     }
                     {
-                      mountPath = "/downloads";
+                      mountPath = "/app/downloads";
                       name = "downloads";
                     }
                   ];

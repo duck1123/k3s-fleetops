@@ -77,6 +77,13 @@ self.lib.mkArgoApp { inherit config lib; } rec {
       type = types.bool;
       default = false;
     };
+
+    # Use a specific DRI render node (e.g. renderD129) as /dev/dri/renderD128 in the container. Set when your VAAPI GPU is not renderD128 on the node. Empty = mount entire /dev/dri.
+    vaapiRenderDevice = mkOption {
+      description = mdDoc "Host DRI render device name (e.g. renderD129) to mount as /dev/dri/renderD128 when enableGPU is true. Empty = mount entire /dev/dri.";
+      type = types.str;
+      default = "";
+    };
   };
 
   extraResources = cfg: {
@@ -177,12 +184,18 @@ self.lib.mkArgoApp { inherit config lib; } rec {
                         name = "data";
                       }
                     ]
-                    ++ (lib.optionalAttrs cfg.enableGPU [
-                      {
-                        mountPath = "/dev/dri";
-                        name = "dri";
-                      }
-                    ]);
+                    ++ (lib.optionals cfg.enableGPU (
+                      if cfg.vaapiRenderDevice != "" then
+                        [{
+                          mountPath = "/dev/dri/renderD128";
+                          name = "dri";
+                        }]
+                      else
+                        [{
+                          mountPath = "/dev/dri";
+                          name = "dri";
+                        }]
+                    ));
                   }
                   // (lib.optionalAttrs cfg.enableGPU {
                     securityContext = {
@@ -204,15 +217,24 @@ self.lib.mkArgoApp { inherit config lib; } rec {
                   persistentVolumeClaim.claimName = "${name}-${name}-data";
                 }
               ]
-              ++ (lib.optionalAttrs cfg.enableGPU [
-                {
-                  name = "dri";
-                  hostPath = {
-                    path = "/dev/dri";
-                    type = "Directory";
-                  };
-                }
-              ]);
+              ++ (lib.optionals cfg.enableGPU (
+                if cfg.vaapiRenderDevice != "" then
+                  [{
+                    name = "dri";
+                    hostPath = {
+                      path = "/dev/dri/${cfg.vaapiRenderDevice}";
+                      type = "CharDevice";
+                    };
+                  }]
+                else
+                  [{
+                    name = "dri";
+                    hostPath = {
+                      path = "/dev/dri";
+                      type = "Directory";
+                    };
+                  }]
+              ));
             };
           };
         };
