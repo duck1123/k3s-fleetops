@@ -252,6 +252,10 @@ self.lib.mkArgoApp { inherit config lib; } rec {
                   ++ (lib.optionals cfg.enableGPU [
                     # Avoid "resource allocation failed" (vaInitialize error 2) in headless/container.
                     { name = "XDG_RUNTIME_DIR"; value = ""; }
+                    # Help libva find container's VA drivers (Debian/Ubuntu path; image may use this).
+                    { name = "LIBVA_DRIVERS_PATH"; value = "/usr/lib/x86_64-linux-gnu/dri"; }
+                    # Verbose libva messages to diagnose "No VA display found" (set to "0" to quiet).
+                    { name = "LIBVA_MESSAGING"; value = "1"; }
                   ])
                   ++ (lib.optionals cfg.enableNvidiaGPU [
                     {
@@ -395,7 +399,10 @@ self.lib.mkArgoApp { inherit config lib; } rec {
                 if cfg.vaapiRenderDevice != "" then
                   [{
                     name = "dri";
-                    hostPath.path = "/dev/dri/${cfg.vaapiRenderDevice}";
+                    hostPath = {
+                      path = "/dev/dri/${cfg.vaapiRenderDevice}";
+                      type = "CharDevice";
+                    };
                   }]
                 else
                   [{

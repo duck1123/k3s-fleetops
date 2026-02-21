@@ -44,8 +44,14 @@ spec:
               value: "1"
             - name: healthcheckgpuWorkers
               value: "1"
+            - name: LIBVA_DRIVER_NAME
+              value: radeonsi
             - name: XDG_RUNTIME_DIR
               value: ""
+            - name: LIBVA_DRIVERS_PATH
+              value: /usr/lib/x86_64-linux-gnu/dri
+            - name: LIBVA_MESSAGING
+              value: "1"
           image: ghcr.io/haveagitgat/tdarr:latest
           imagePullPolicy: IfNotPresent
           livenessProbe:
@@ -128,4 +134,5 @@ spec:
             claimName: tdarr-tdarr-media-tv
         - hostPath:
             path: /dev/dri/renderD129
+            type: CharDevice
           name: dri
