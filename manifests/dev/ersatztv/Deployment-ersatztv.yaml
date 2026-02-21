@@ -79,5 +79,4 @@ spec:
             claimName: ersatztv-ersatztv-media
         - hostPath:
             path: /dev/dri/renderD129
-            type: CharDevice
           name: dri

@@ -69,7 +69,7 @@ spec:
               name: config
             - mountPath: /data
               name: data
-            - mountPath: /dev/dri/renderD128
+            - mountPath: /dev/dri
               name: dri
       serviceAccountName: default
       volumes:
@@ -80,6 +80,6 @@ spec:
           persistentVolumeClaim:
             claimName: stashapp-stashapp-data
         - hostPath:
-            path: /dev/dri/renderD129
-            type: CharDevice
+            path: /dev/dri
+            type: Directory
           name: dri

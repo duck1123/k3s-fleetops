@@ -128,5 +128,4 @@ spec:
             claimName: tdarr-tdarr-media-tv
         - hostPath:
             path: /dev/dri/renderD129
-            type: CharDevice
           name: dri

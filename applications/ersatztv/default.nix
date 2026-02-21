@@ -229,10 +229,7 @@ self.lib.mkArgoApp { inherit config lib; } rec {
                 if cfg.vaapiRenderDevice != "" then
                   [{
                     name = "dri";
-                    hostPath = {
-                      path = "/dev/dri/${cfg.vaapiRenderDevice}";
-                      type = "CharDevice";
-                    };
+                    hostPath.path = "/dev/dri/${cfg.vaapiRenderDevice}";
                   }]
                 else
                   [{

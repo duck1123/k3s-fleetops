@@ -964,7 +964,6 @@ in
 
       replicas = 1;
       enableGPU = true;
-      vaapiRenderDevice = "renderD129";
     };
 
     # ../applications/whisparr/default.nix
