@@ -934,6 +934,7 @@ in
       # Edgenix has two cards; WX 3200 (VAAPI) is renderD129. Mount it as renderD128 so Tdarr's hardcoded path works.
       vaapiRenderDevice = "renderD129";
       libvaDriverName = "radeonsi";
+      transcodegpuWorkers = 1;
     };
 
     tempo = {

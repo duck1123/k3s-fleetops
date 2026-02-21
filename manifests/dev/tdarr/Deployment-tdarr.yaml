@@ -44,6 +44,10 @@ spec:
               value: "1"
             - name: healthcheckgpuWorkers
               value: "1"
+            - name: transcodecpuWorkers
+              value: "1"
+            - name: transcodegpuWorkers
+              value: "1"
             - name: LIBVA_DRIVER_NAME
               value: radeonsi
             - name: XDG_RUNTIME_DIR

@@ -117,6 +117,18 @@ self.lib.mkArgoApp { inherit config lib; } rec {
       default = 0;
     };
 
+    transcodecpuWorkers = mkOption {
+      description = mdDoc "Number of CPU workers for transcoding. Can be overridden in Tdarr UI.";
+      type = types.int;
+      default = 1;
+    };
+
+    transcodegpuWorkers = mkOption {
+      description = mdDoc "Number of GPU workers for transcoding (VAAPI/NVENC). Set to 0 to disable GPU transcodes. Can be overridden in Tdarr UI.";
+      type = types.int;
+      default = 0;
+    };
+
     ingress.annotations = mkOption {
       description = mdDoc "Annotations for the Ingress resource";
       type = types.attrsOf types.str;
@@ -241,6 +253,14 @@ self.lib.mkArgoApp { inherit config lib; } rec {
                     {
                       name = "healthcheckgpuWorkers";
                       value = toString cfg.healthcheckgpuWorkers;
+                    }
+                    {
+                      name = "transcodecpuWorkers";
+                      value = toString cfg.transcodecpuWorkers;
+                    }
+                    {
+                      name = "transcodegpuWorkers";
+                      value = toString cfg.transcodegpuWorkers;
                     }
                   ]
                   ++ (lib.optionals (cfg.libvaDriverName != "") [
