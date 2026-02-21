@@ -907,8 +907,7 @@ in
     tdarr = {
       enable = true;
       healthcheckcpuWorkers = 1;
-      # GPU health checks need VAAPI; container libva often can't use host /dev/dri. Use CPU until image/host VA stack matches.
-      healthcheckgpuWorkers = 0;
+      healthcheckgpuWorkers = 1;
       hostAffinity = "edgenix";
 
       ingress = {
