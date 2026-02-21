@@ -350,6 +350,8 @@ self.lib.mkArgoApp { inherit config lib; } rec {
                   };
                   securityContext = lib.optionalAttrs cfg.enableGPU {
                     capabilities.add = [ "SYS_ADMIN" ];
+                    # Required for some runtimes to open hostPath DRI device ("Failed to open the given device").
+                    privileged = true;
                   };
                 }
               ];

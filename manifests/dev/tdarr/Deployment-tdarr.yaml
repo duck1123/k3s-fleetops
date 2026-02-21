@@ -85,6 +85,7 @@ spec:
             capabilities:
               add:
                 - SYS_ADMIN
+            privileged: true
           volumeMounts:
             - mountPath: /app/server
               name: config
