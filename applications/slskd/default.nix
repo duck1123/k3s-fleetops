@@ -28,6 +28,9 @@ self.lib.mkArgoApp
         ${web-auth-secret} = {
           username = cfg.webAuth.username;
           password = cfg.webAuth.password;
+        }
+        // lib.optionalAttrs (cfg.apiKey != "") {
+          apiKey = cfg.apiKey;
         };
       };
 
@@ -80,6 +83,12 @@ self.lib.mkArgoApp
           type = types.str;
           default = "";
         };
+      };
+
+      apiKey = mkOption {
+        description = mdDoc "API key for slskd (stored in secret); set from secrets.slskd.apiKey; used by Soularr etc.";
+        type = types.str;
+        default = "";
       };
 
       vpn = {
@@ -159,6 +168,7 @@ self.lib.mkArgoApp
                     }
                   ]
                   ++ (lib.optionals (cfg.webAuth.username != "" && cfg.webAuth.password != "") [
+                    # Soulseek network credentials
                     {
                       name = "SLSKD_SLSK_USERNAME";
                       valueFrom.secretKeyRef = {
@@ -172,6 +182,35 @@ self.lib.mkArgoApp
                         name = web-auth-secret;
                         key = "password";
                       };
+                    }
+                    # Web UI login (same credentials; .NET config: web:authentication:*)
+                    {
+                      name = "SLSKD_WEB__AUTHENTICATION__USERNAME";
+                      valueFrom.secretKeyRef = {
+                        name = web-auth-secret;
+                        key = "username";
+                      };
+                    }
+                    {
+                      name = "SLSKD_WEB__AUTHENTICATION__PASSWORD";
+                      valueFrom.secretKeyRef = {
+                        name = web-auth-secret;
+                        key = "password";
+                      };
+                    }
+                  ])
+                  ++ (lib.optionals (cfg.webAuth.username != "" && cfg.webAuth.password != "" && cfg.apiKey != "") [
+                    # API key (web:api_keys:default in slskd config)
+                    {
+                      name = "SLSKD_WEB__API_KEYS__DEFAULT__KEY";
+                      valueFrom.secretKeyRef = {
+                        name = web-auth-secret;
+                        key = "apiKey";
+                      };
+                    }
+                    {
+                      name = "SLSKD_WEB__API_KEYS__DEFAULT__ROLE";
+                      value = "readwrite";
                     }
                   ])
                   ++ (lib.optionals cfg.vpn.enable [

@@ -34,6 +34,23 @@ spec:
                 secretKeyRef:
                   key: password
                   name: slskd-web-credentials
+            - name: SLSKD_WEB__AUTHENTICATION__USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: slskd-web-credentials
+            - name: SLSKD_WEB__AUTHENTICATION__PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: slskd-web-credentials
+            - name: SLSKD_WEB__API_KEYS__DEFAULT__KEY
+              valueFrom:
+                secretKeyRef:
+                  key: apiKey
+                  name: slskd-web-credentials
+            - name: SLSKD_WEB__API_KEYS__DEFAULT__ROLE
+              value: readwrite
             - name: HTTP_PROXY
               value: http://gluetun.gluetun:8888
             - name: HTTPS_PROXY

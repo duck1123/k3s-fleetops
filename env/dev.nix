@@ -466,6 +466,8 @@ in
         password = (secrets.slskd or { }).password or "";
       };
 
+      apiKey = (secrets.slskd or { }).apiKey or "";
+
       vpn = {
         enable = true;
         sharedGluetunService = "gluetun.gluetun";
