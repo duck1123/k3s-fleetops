@@ -196,7 +196,7 @@ self.lib.mkArgoApp
         };
 
         apiKey = mkOption {
-          description = mdDoc "Slskd API key; stored in a secret";
+          description = mdDoc "Slskd API key (same as slskd app); set from secrets.slskd.apiKey; stored in a secret";
           type = types.str;
           default = "";
         };

@@ -485,11 +485,12 @@ in
 
     # ../applications/soularr/default.nix
     # Soularr: Lidarr companion that fetches wanted music via Soulseek (Slskd).
-    # Set lidarr.apiKey from Lidarr Settings > General > Security; add soularr.lidarrApiKey to secrets.
-    # Set slskd.apiKey when using Slskd; add soularr.slskdApiKey to secrets.
-    # Lidarr mounts slskd_downloads at /downloads/slskd_downloads (nfs.slskdDownloads).
+    # - lidarr.apiKey: from Lidarr Settings > General > Security; add soularr.lidarrApiKey to secrets.
+    # - slskd.apiKey: same as slskd app (secrets.slskd.apiKey).
+    # - lidarr.downloadDir must match Lidarr’s Slskd root folder (Lidarr nfs.slskdDownloads → /downloads/slskd_downloads).
+    # - nfs: same path as slskd (slskd_downloads) so Soularr can see downloads.
     soularr = {
-      enable = false;
+      enable = true;
 
       hostAffinity = "edgenix";
 
@@ -503,7 +504,7 @@ in
       slskd = {
         host = "slskd.slskd";
         port = 5030;
-        apiKey = (secrets.soularr or { }).slskdApiKey or "";
+        apiKey = (secrets.slskd or { }).apiKey or "";
       };
 
       nfs = {
