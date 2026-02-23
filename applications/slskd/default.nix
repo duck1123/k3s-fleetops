@@ -186,6 +186,10 @@ self.lib.mkArgoApp
                       name = "SLSKD_REMOTE_CONFIGURATION";
                       value = "true";
                     }
+                    {
+                      name = "SLSKD_SHARED_DIR";
+                      value = "/shares";
+                    }
                   ]
                   ++ (lib.optionals (cfg.webAuth.username != "" && cfg.webAuth.password != "") [
                     {

@@ -24,6 +24,8 @@ spec:
               value: Etc/UTC
             - name: SLSKD_REMOTE_CONFIGURATION
               value: "true"
+            - name: SLSKD_SHARED_DIR
+              value: /shares
             - name: SLSKD_SLSK_USERNAME
               valueFrom:
                 secretKeyRef:
