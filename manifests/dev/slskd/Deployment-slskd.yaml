@@ -59,16 +59,6 @@ spec:
               value: localhost,127.0.0.1,.svc,.svc.cluster.local,soularr.soularr,lidarr.lidarr
           image: slskd/slskd:latest
           imagePullPolicy: IfNotPresent
-          livenessProbe:
-            failureThreshold: 3
-            httpGet:
-              path: /
-              port: 5030
-              scheme: HTTP
-            initialDelaySeconds: 60
-            periodSeconds: 30
-            successThreshold: 1
-            timeoutSeconds: 5
           name: slskd
           ports:
             - containerPort: 5030
@@ -80,16 +70,6 @@ spec:
             - containerPort: 50300
               name: p2p
               protocol: TCP
-          readinessProbe:
-            failureThreshold: 5
-            httpGet:
-              path: /
-              port: 5030
-              scheme: HTTP
-            initialDelaySeconds: 30
-            periodSeconds: 10
-            successThreshold: 1
-            timeoutSeconds: 5
           volumeMounts:
             - mountPath: /app
               name: config

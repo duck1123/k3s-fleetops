@@ -488,6 +488,7 @@ in
 
       replicas = 1;
       storageClassName = "longhorn";
+      useProbes = false;
     };
 
     # ../applications/soularr/default.nix
