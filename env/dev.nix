@@ -450,6 +450,7 @@ in
 
     # ../applications/slskd/default.nix
     # Slskd: Soulseek client. Soularr uses it to download; set download path in Slskd UI to /downloads.
+    # shares: mount music/library for Soulseek sharing; add /shares in Slskd Web UI → Shares.
     slskd = {
       enable = true;
 
@@ -477,6 +478,12 @@ in
         enable = true;
         server = nas-host;
         path = "${nas-base}/slskd_downloads";
+      };
+
+      shares = {
+        enable = true;
+        server = nas-host;
+        path = "${nas-base}/Music";
       };
 
       replicas = 1;

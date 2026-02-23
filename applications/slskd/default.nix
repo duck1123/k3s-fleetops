@@ -124,6 +124,26 @@ self.lib.mkArgoApp
           default = "/mnt/media/slskd_downloads";
         };
       };
+
+      shares = {
+        enable = mkOption {
+          description = mdDoc "Mount an NFS path as shared content (e.g. music collection) for Soulseek sharing; add the mount path in Slskd Web UI → Shares";
+          type = types.bool;
+          default = false;
+        };
+
+        server = mkOption {
+          description = mdDoc "NFS server for shares (e.g. NAS hostname)";
+          type = types.str;
+          default = "nasnix";
+        };
+
+        path = mkOption {
+          description = mdDoc "NFS path to music/library to share (e.g. /volume1/Music)";
+          type = types.str;
+          default = "/mnt/media";
+        };
+      };
     };
 
     extraResources = cfg: {
@@ -270,7 +290,13 @@ self.lib.mkArgoApp
                       mountPath = "/app/downloads";
                       name = "downloads";
                     }
-                  ];
+                  ]
+                  ++ (lib.optionals cfg.shares.enable [
+                    {
+                      mountPath = "/shares";
+                      name = "shares";
+                    }
+                  ]);
                 }
               ];
               volumes = [
@@ -282,32 +308,59 @@ self.lib.mkArgoApp
                   name = "downloads";
                   persistentVolumeClaim.claimName = "${name}-${name}-downloads";
                 }
-              ];
+              ]
+              ++ (lib.optionals cfg.shares.enable [
+                {
+                  name = "shares";
+                  persistentVolumeClaim.claimName = "${name}-${name}-shares";
+                }
+              ]);
             };
           };
         };
       };
 
-      persistentVolumes = lib.optionalAttrs cfg.nfs.enable {
-        "${name}-${name}-downloads-nfs" = {
-          apiVersion = "v1";
-          metadata.name = "${name}-${name}-downloads-nfs";
-          spec = {
-            accessModes = [ "ReadWriteMany" ];
-            capacity.storage = "1Ti";
-            mountOptions = [
-              "nolock"
-              "soft"
-              "timeo=30"
-            ];
-            nfs = {
-              server = cfg.nfs.server;
-              path = cfg.nfs.path;
+      persistentVolumes =
+        lib.optionalAttrs cfg.nfs.enable {
+          "${name}-${name}-downloads-nfs" = {
+            apiVersion = "v1";
+            metadata.name = "${name}-${name}-downloads-nfs";
+            spec = {
+              accessModes = [ "ReadWriteMany" ];
+              capacity.storage = "1Ti";
+              mountOptions = [
+                "nolock"
+                "soft"
+                "timeo=30"
+              ];
+              nfs = {
+                server = cfg.nfs.server;
+                path = cfg.nfs.path;
+              };
+              persistentVolumeReclaimPolicy = "Retain";
             };
-            persistentVolumeReclaimPolicy = "Retain";
+          };
+        }
+        // lib.optionalAttrs cfg.shares.enable {
+          "${name}-${name}-shares-nfs" = {
+            apiVersion = "v1";
+            metadata.name = "${name}-${name}-shares-nfs";
+            spec = {
+              accessModes = [ "ReadWriteMany" ];
+              capacity.storage = "1Ti";
+              mountOptions = [
+                "nolock"
+                "soft"
+                "timeo=30"
+              ];
+              nfs = {
+                server = cfg.shares.server;
+                path = cfg.shares.path;
+              };
+              persistentVolumeReclaimPolicy = "Retain";
+            };
           };
         };
-      };
 
       persistentVolumeClaims = {
         "${name}-${name}-config".spec = {
@@ -329,6 +382,14 @@ self.lib.mkArgoApp
               accessModes = [ "ReadWriteOnce" ];
               resources.requests.storage = "50Gi";
             };
+      }
+      // lib.optionalAttrs cfg.shares.enable {
+        "${name}-${name}-shares".spec = {
+          accessModes = [ "ReadWriteMany" ];
+          resources.requests.storage = "1Gi";
+          storageClassName = "";
+          volumeName = "${name}-${name}-shares-nfs";
+        };
       };
 
       ingresses.${name}.spec = with cfg.ingress; {

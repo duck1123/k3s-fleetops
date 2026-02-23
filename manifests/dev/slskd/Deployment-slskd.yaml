@@ -93,6 +93,8 @@ spec:
               name: config
             - mountPath: /app/downloads
               name: downloads
+            - mountPath: /shares
+              name: shares
       initContainers:
         - args:
             - -c
@@ -131,3 +133,6 @@ spec:
         - name: downloads
           persistentVolumeClaim:
             claimName: slskd-slskd-downloads
+        - name: shares
+          persistentVolumeClaim:
+            claimName: slskd-slskd-shares
