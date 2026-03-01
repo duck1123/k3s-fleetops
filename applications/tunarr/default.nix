@@ -101,6 +101,13 @@ self.lib.mkArgoApp
         type = types.str;
         default = "";
       };
+
+      # Set to true once to clear corrupted SQLite DB (e.g. "database disk image is malformed"); Tunarr will start fresh. Set back to false after the pod has started.
+      resetDatabase = mkOption {
+        description = mdDoc "If true, clear /config/tunarr before startup so Tunarr creates a new DB. Use once to recover from corruption, then set back to false.";
+        type = types.bool;
+        default = false;
+      };
     };
 
     extraResources = cfg: {
@@ -229,7 +236,25 @@ self.lib.mkArgoApp
                   }
                 ];
 
-                initContainers = [
+                initContainers = (lib.optionals cfg.resetDatabase [
+                  {
+                    name = "config-reset";
+                    image = "busybox:latest";
+                    imagePullPolicy = "IfNotPresent";
+                    command = [
+                      "sh"
+                      "-c"
+                      "rm -rf /config/tunarr/*"
+                    ];
+                    securityContext.runAsUser = 0;
+                    volumeMounts = [
+                      {
+                        mountPath = "/config/tunarr";
+                        name = "config";
+                      }
+                    ];
+                  }
+                ]) ++ [
                   {
                     name = "config-permissions";
                     image = "busybox:latest";

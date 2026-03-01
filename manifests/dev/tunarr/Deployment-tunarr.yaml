@@ -79,6 +79,18 @@ spec:
         - command:
             - sh
             - -c
+            - rm -rf /config/tunarr/*
+          image: busybox:latest
+          imagePullPolicy: IfNotPresent
+          name: config-reset
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - mountPath: /config/tunarr
+              name: config
+        - command:
+            - sh
+            - -c
             - chown -R 0:0 /config/tunarr && chmod -R 755 /config/tunarr
           image: busybox:latest
           imagePullPolicy: IfNotPresent

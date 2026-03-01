@@ -889,6 +889,7 @@ in
       enable = true;
       enableGPU = true;
       hostAffinity = "edgenix";
+      resetDatabase = true;
 
       ingress = {
         domain = "tunarr.${tail-domain}";
