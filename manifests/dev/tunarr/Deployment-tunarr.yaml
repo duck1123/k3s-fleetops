@@ -61,15 +61,32 @@ spec:
           volumeMounts:
             - mountPath: /config/tunarr
               name: config
+              readOnly: false
+            - mountPath: /tmp
+              name: tmp
             - mountPath: /tv
               name: tv
             - mountPath: /movies
               name: movies
             - mountPath: /dev/dri/renderD128
               name: dri
+      initContainers:
+        - command:
+            - sh
+            - -c
+            - chown -R 0:0 /config/tunarr && chmod -R 755 /config/tunarr
+          image: busybox:latest
+          imagePullPolicy: IfNotPresent
+          name: config-permissions
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - mountPath: /config/tunarr
+              name: config
       nodeSelector:
         kubernetes.io/hostname: edgenix
       securityContext:
+        fsGroup: 0
         runAsGroup: 0
         runAsUser: 0
         supplementalGroups:
@@ -79,6 +96,8 @@ spec:
         - name: config
           persistentVolumeClaim:
             claimName: tunarr-tunarr-config
+        - emptyDir: {}
+          name: tmp
         - name: tv
           persistentVolumeClaim:
             claimName: tunarr-tunarr-tv

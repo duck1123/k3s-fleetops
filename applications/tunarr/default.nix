@@ -127,10 +127,14 @@ self.lib.mkArgoApp
 
               spec = {
                 automountServiceAccountToken = true;
-                securityContext = lib.optionalAttrs cfg.enableGPU {
+                # Ensure config volume is writable: root when using GPU, else GID 1000 for typical app user.
+                securityContext = if cfg.enableGPU then {
                   runAsUser = 0;
                   runAsGroup = 0;
                   supplementalGroups = [ cfg.renderGroupGID ];
+                  fsGroup = 0;
+                } else {
+                  fsGroup = 1000;
                 };
 
                 containers = [
@@ -185,6 +189,12 @@ self.lib.mkArgoApp
                       {
                         mountPath = "/config/tunarr";
                         name = "config";
+                        readOnly = false;
+                      }
+                      # Writable /tmp for SQLite temp files and Meilisearch; avoids EROFS during library scans.
+                      {
+                        mountPath = "/tmp";
+                        name = "tmp";
                       }
                     ]
                     ++ (lib.optionals cfg.nfs.enable [
@@ -216,12 +226,36 @@ self.lib.mkArgoApp
                   }
                 ];
 
+                initContainers = [
+                  {
+                    name = "config-permissions";
+                    image = "busybox:latest";
+                    imagePullPolicy = "IfNotPresent";
+                    command = [
+                      "sh"
+                      "-c"
+                      "chown -R 0:0 /config/tunarr && chmod -R 755 /config/tunarr"
+                    ];
+                    securityContext.runAsUser = 0;
+                    volumeMounts = [
+                      {
+                        mountPath = "/config/tunarr";
+                        name = "config";
+                      }
+                    ];
+                  }
+                ];
+
                 serviceAccountName = "default";
 
                 volumes = [
                   {
                     name = "config";
                     persistentVolumeClaim.claimName = "${name}-${name}-config";
+                  }
+                  {
+                    name = "tmp";
+                    emptyDir = { };
                   }
                 ]
                 ++ (lib.optionals cfg.nfs.enable [
