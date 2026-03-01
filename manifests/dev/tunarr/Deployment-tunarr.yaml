@@ -21,7 +21,12 @@ spec:
     spec:
       automountServiceAccountToken: true
       containers:
-        - env:
+        - args: []
+          command:
+            - sh
+            - -c
+            - ulimit -n 65536 && exec /tunarr/tunarr
+          env:
             - name: TZ
               value: Etc/UTC
             - name: TUNARR_SERVER_PORT

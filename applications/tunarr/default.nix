@@ -142,6 +142,9 @@ self.lib.mkArgoApp
                     inherit name;
                     image = cfg.image;
                     imagePullPolicy = "IfNotPresent";
+                    # Raise nofile limit so embedded Meilisearch doesn't hit EAGAIN (os error 11) during indexing.
+                    command = [ "sh" "-c" "ulimit -n 65536 && exec /tunarr/tunarr" ];
+                    args = [ ];
                     env = [
                       {
                         name = "TZ";
