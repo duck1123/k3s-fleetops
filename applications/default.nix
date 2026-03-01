@@ -64,6 +64,7 @@
     ./sqlpad
     ./tailscale
     ./tdarr
+    ./tunarr
     ./tempo
     ./traefik
     ./whisparr

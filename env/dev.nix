@@ -883,6 +883,28 @@ in
       vpn.enable = false;
     };
 
+    # ../applications/tunarr/default.nix
+    # Tunarr: DVR/streaming guide, integrates with Plex and *arr. Uses same NFS base as arr stack for TV/Movies.
+    tunarr = {
+      enable = true;
+      hostAffinity = "edgenix";
+
+      ingress = {
+        domain = "tunarr.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+
+      nfs = {
+        enable = true;
+        server = nas-host;
+        path = "${nas-base}";
+      };
+
+      replicas = 1;
+      storageClassName = "longhorn";
+    };
+
     # ../applications/sops/default.nix
     sops.enable = true;
 
