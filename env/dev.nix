@@ -900,10 +900,15 @@ in
         enable = false;
         server = nas-host;
         path = "${nas-base}";
+
+        config = {
+          enable = false;
+          path = "${nas-base}/tunarr";
+        };
       };
 
       replicas = 1;
-      storageClassName = "longhorn";
+      storageClassName = "local-path";
       vaapiRenderDevice = "renderD129";
     };
 

@@ -56,6 +56,25 @@ self.lib.mkArgoApp
           type = types.str;
           default = "/mnt/media";
         };
+
+        # Use NFS for config volume instead of PVC (avoids EROFS; use same server/path style as media).
+        config = {
+          enable = mkOption {
+            description = mdDoc "Use NFS for Tunarr config/data volume instead of storageClassName (e.g. longhorn). Avoids read-only issues.";
+            type = types.bool;
+            default = false;
+          };
+          server = mkOption {
+            description = mdDoc "NFS server for config (defaults to nfs.server)";
+            type = types.str;
+            default = "";
+          };
+          path = mkOption {
+            description = mdDoc "NFS path for config (e.g. /volume1/tunarr)";
+            type = types.str;
+            default = "";
+          };
+        };
       };
 
       tz = mkOption {
@@ -149,7 +168,6 @@ self.lib.mkArgoApp
                     inherit name;
                     image = cfg.image;
                     imagePullPolicy = "IfNotPresent";
-                    # Raise nofile limit so embedded Meilisearch doesn't hit EAGAIN (os error 11) during indexing.
                     command = [ "sh" "-c" "ulimit -n 65536 && exec /tunarr/tunarr" ];
                     args = [ ];
                     env = [
@@ -201,7 +219,6 @@ self.lib.mkArgoApp
                         name = "config";
                         readOnly = false;
                       }
-                      # Writable /tmp for SQLite temp files and Meilisearch; avoids EROFS during library scans.
                       {
                         mountPath = "/tmp";
                         name = "tmp";
@@ -244,36 +261,19 @@ self.lib.mkArgoApp
                     name = "config-reset";
                     image = "busybox:latest";
                     imagePullPolicy = "IfNotPresent";
-                    command = [
-                      "sh"
-                      "-c"
-                      "rm -rf /config/tunarr/*"
-                    ];
+                    command = [ "sh" "-c" "rm -rf /config/tunarr/*" ];
                     securityContext.runAsUser = 0;
-                    volumeMounts = [
-                      {
-                        mountPath = "/config/tunarr";
-                        name = "config";
-                      }
-                    ];
+                    volumeMounts = [ { mountPath = "/config/tunarr"; name = "config"; } ];
                   }
                 ]) ++ [
                   {
                     name = "config-permissions";
                     image = "busybox:latest";
                     imagePullPolicy = "IfNotPresent";
-                    command = [
-                      "sh"
-                      "-c"
-                      "chown -R 0:0 /config/tunarr && chmod -R 1777 /config/tunarr && touch /config/tunarr/.write-test && rm -f /config/tunarr/.write-test"
-                    ];
+                    command = [ "sh" "-c" "chown -R 0:0 /config/tunarr && chmod -R 1777 /config/tunarr" ];
                     securityContext.runAsUser = 0;
                     volumeMounts = [
-                      {
-                        mountPath = "/config/tunarr";
-                        name = "config";
-                        readOnly = false;
-                      }
+                      { mountPath = "/config/tunarr"; name = "config"; readOnly = false; }
                     ];
                   }
                 ];
@@ -281,14 +281,8 @@ self.lib.mkArgoApp
                 serviceAccountName = "default";
 
                 volumes = [
-                  {
-                    name = "config";
-                    persistentVolumeClaim.claimName = "${name}-${name}-config";
-                  }
-                  {
-                    name = "tmp";
-                    emptyDir = { };
-                  }
+                  { name = "config"; persistentVolumeClaim.claimName = "${name}-${name}-config"; }
+                  { name = "tmp"; emptyDir = { }; }
                 ]
                 ++ (lib.optionals cfg.nfs.enable [
                   {
@@ -349,11 +343,20 @@ self.lib.mkArgoApp
       };
 
       persistentVolumeClaims = {
-        "${name}-${name}-config".spec = {
-          inherit (cfg) storageClassName;
-          accessModes = [ "ReadWriteOnce" ];
-          resources.requests.storage = "5Gi";
-        };
+        "${name}-${name}-config".spec =
+          if cfg.nfs.config.enable then
+            {
+              accessModes = [ "ReadWriteMany" ];
+              resources.requests.storage = "1Gi";
+              storageClassName = "";
+              volumeName = "${name}-${name}-config-nfs";
+            }
+          else
+            {
+              inherit (cfg) storageClassName;
+              accessModes = [ "ReadWriteOnce" ];
+              resources.requests.storage = "5Gi";
+            };
       }
       // (lib.optionalAttrs cfg.nfs.enable {
         "${name}-${name}-tv".spec = {
@@ -388,8 +391,24 @@ self.lib.mkArgoApp
         type = "ClusterIP";
       };
 
-      # NFS PersistentVolumes for TV and Movies (same paths as arr stack)
-      persistentVolumes = lib.optionalAttrs cfg.nfs.enable {
+      # NFS PersistentVolumes
+      persistentVolumes = lib.optionalAttrs cfg.nfs.config.enable {
+        "${name}-${name}-config-nfs" = {
+          apiVersion = "v1";
+          kind = "PersistentVolume";
+          metadata = { name = "${name}-${name}-config-nfs"; };
+          spec = {
+            capacity.storage = "10Gi";
+            accessModes = [ "ReadWriteMany" ];
+            mountOptions = [ "nolock" "soft" "timeo=30" ];
+            nfs = {
+              server = if cfg.nfs.config.server != "" then cfg.nfs.config.server else cfg.nfs.server;
+              path = if cfg.nfs.config.path != "" then cfg.nfs.config.path else "${cfg.nfs.path}/tunarr";
+            };
+            persistentVolumeReclaimPolicy = "Retain";
+          };
+        };
+      } // lib.optionalAttrs cfg.nfs.enable {
         "${name}-${name}-tv-nfs" = {
           apiVersion = "v1";
           kind = "PersistentVolume";

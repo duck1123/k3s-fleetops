@@ -76,7 +76,7 @@ spec:
         - command:
             - sh
             - -c
-            - chown -R 0:0 /config/tunarr && chmod -R 1777 /config/tunarr && touch /config/tunarr/.write-test && rm -f /config/tunarr/.write-test
+            - chown -R 0:0 /config/tunarr && chmod -R 1777 /config/tunarr
           image: busybox:latest
           imagePullPolicy: IfNotPresent
           name: config-permissions
