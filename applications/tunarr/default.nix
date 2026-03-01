@@ -81,6 +81,26 @@ self.lib.mkArgoApp
         type = types.bool;
         default = true;
       };
+
+      enableGPU = mkOption {
+        description = mdDoc "Enable GPU for hardware transcoding (mounts /dev/dri for AMD/Intel VAAPI)";
+        type = types.bool;
+        default = false;
+      };
+
+      # GID of the host's 'render' group for /dev/dri access (AMD/Intel VAAPI).
+      renderGroupGID = mkOption {
+        description = mdDoc "GID of the host render group for /dev/dri when enableGPU is true. Run 'getent group render' on the node (e.g. 303 on NixOS).";
+        type = types.int;
+        default = 303;
+      };
+
+      # Use a specific DRI render node (e.g. renderD129) as /dev/dri/renderD128 in the container. Set when your GPU is the second card on the node. Empty = mount whole /dev/dri.
+      vaapiRenderDevice = mkOption {
+        description = mdDoc "Host DRI render device name (e.g. renderD129) to mount as /dev/dri/renderD128 when enableGPU is true. Empty = mount entire /dev/dri.";
+        type = types.str;
+        default = "";
+      };
     };
 
     extraResources = cfg: {
@@ -107,6 +127,11 @@ self.lib.mkArgoApp
 
               spec = {
                 automountServiceAccountToken = true;
+                securityContext = lib.optionalAttrs cfg.enableGPU {
+                  runAsUser = 0;
+                  runAsGroup = 0;
+                  supplementalGroups = [ cfg.renderGroupGID ];
+                };
 
                 containers = [
                   {
@@ -171,7 +196,23 @@ self.lib.mkArgoApp
                         mountPath = "/movies";
                         name = "movies";
                       }
-                    ]);
+                    ])
+                    ++ (lib.optionals cfg.enableGPU (
+                      if cfg.vaapiRenderDevice != "" then
+                        [{
+                          mountPath = "/dev/dri/renderD128";
+                          name = "dri";
+                        }]
+                      else
+                        [{
+                          mountPath = "/dev/dri";
+                          name = "dri";
+                        }]
+                    ));
+                    securityContext = lib.optionalAttrs cfg.enableGPU {
+                      capabilities.add = [ "SYS_ADMIN" ];
+                      privileged = true;
+                    };
                   }
                 ];
 
@@ -192,7 +233,25 @@ self.lib.mkArgoApp
                     name = "movies";
                     persistentVolumeClaim.claimName = "${name}-${name}-movies";
                   }
-                ]);
+                ])
+                ++ (lib.optionals cfg.enableGPU (
+                  if cfg.vaapiRenderDevice != "" then
+                    [{
+                      name = "dri";
+                      hostPath = {
+                        path = "/dev/dri/${cfg.vaapiRenderDevice}";
+                        type = "CharDevice";
+                      };
+                    }]
+                  else
+                    [{
+                      name = "dri";
+                      hostPath = {
+                        path = "/dev/dri";
+                        type = "Directory";
+                      };
+                    }]
+                ));
               };
             };
           };
