@@ -63,6 +63,7 @@ spec:
               add:
                 - SYS_ADMIN
             privileged: true
+            readOnlyRootFilesystem: false
           volumeMounts:
             - mountPath: /config/tunarr
               name: config
@@ -75,7 +76,7 @@ spec:
         - command:
             - sh
             - -c
-            - chown -R 0:0 /config/tunarr && chmod -R 755 /config/tunarr
+            - chown -R 0:0 /config/tunarr && chmod -R 1777 /config/tunarr && touch /config/tunarr/.write-test && rm -f /config/tunarr/.write-test
           image: busybox:latest
           imagePullPolicy: IfNotPresent
           name: config-permissions
@@ -84,6 +85,7 @@ spec:
           volumeMounts:
             - mountPath: /config/tunarr
               name: config
+              readOnly: false
       nodeSelector:
         kubernetes.io/hostname: edgenix
       securityContext:

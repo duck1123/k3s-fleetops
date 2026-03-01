@@ -229,7 +229,10 @@ self.lib.mkArgoApp
                           name = "dri";
                         }]
                     ));
-                    securityContext = lib.optionalAttrs cfg.enableGPU {
+                    # Force writable root and config; image may default readOnlyRootFilesystem which can make mounts appear read-only on some runtimes.
+                    securityContext = {
+                      readOnlyRootFilesystem = false;
+                    } // lib.optionalAttrs cfg.enableGPU {
                       capabilities.add = [ "SYS_ADMIN" ];
                       privileged = true;
                     };
@@ -262,13 +265,14 @@ self.lib.mkArgoApp
                     command = [
                       "sh"
                       "-c"
-                      "chown -R 0:0 /config/tunarr && chmod -R 755 /config/tunarr"
+                      "chown -R 0:0 /config/tunarr && chmod -R 1777 /config/tunarr && touch /config/tunarr/.write-test && rm -f /config/tunarr/.write-test"
                     ];
                     securityContext.runAsUser = 0;
                     volumeMounts = [
                       {
                         mountPath = "/config/tunarr";
                         name = "config";
+                        readOnly = false;
                       }
                     ];
                   }
