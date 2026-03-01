@@ -887,7 +887,7 @@ in
     # Tunarr: DVR/streaming guide, integrates with Plex and *arr. Uses same NFS base as arr stack for TV/Movies.
     tunarr = {
       enable = true;
-      enableGPU = true;
+      enableGPU = false;
       hostAffinity = "edgenix";
 
       ingress = {

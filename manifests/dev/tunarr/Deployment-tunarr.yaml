@@ -53,11 +53,7 @@ spec:
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 5
-          securityContext:
-            capabilities:
-              add:
-                - SYS_ADMIN
-            privileged: true
+          securityContext: {}
           volumeMounts:
             - mountPath: /config/tunarr
               name: config
@@ -65,15 +61,9 @@ spec:
               name: tv
             - mountPath: /movies
               name: movies
-            - mountPath: /dev/dri/renderD128
-              name: dri
       nodeSelector:
         kubernetes.io/hostname: edgenix
-      securityContext:
-        runAsGroup: 0
-        runAsUser: 0
-        supplementalGroups:
-          - 303
+      securityContext: {}
       serviceAccountName: default
       volumes:
         - name: config
@@ -85,7 +75,3 @@ spec:
         - name: movies
           persistentVolumeClaim:
             claimName: tunarr-tunarr-movies
-        - hostPath:
-            path: /dev/dri/renderD129
-            type: CharDevice
-          name: dri
