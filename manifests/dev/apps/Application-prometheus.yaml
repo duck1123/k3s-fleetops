@@ -34,3 +34,8 @@ spec:
       name: prometheus-kube-prometheus-admission
     - kind: ClusterRoleBinding
       name: prometheus-kube-prometheus-admission
+    - group: admissionregistration.k8s.io
+      kind: ValidatingWebhookConfiguration
+      name: prometheus-kube-prometheus-admission
+      jqPathExpressions:
+        - .webhooks[].clientConfig.caBundle

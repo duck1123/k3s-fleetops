@@ -16,11 +16,13 @@ pkgs.writeShellScriptBin "post-process-manifests" ''
   PROM_APP_FILE="manifests/dev/apps/Application-prometheus.yaml"
   if [ -f "$PROM_APP_FILE" ]; then
     # Always update ignoreDifferences to ensure it has the correct format with namespace
+    # ValidatingWebhookConfiguration: caBundle is injected by the API server; ignore to avoid perpetual OutOfSync
     ${pkgs.yq-go}/bin/yq eval -i '.spec.ignoreDifferences = [
       {"kind": "Role", "name": "prometheus-kube-prometheus-admission", "namespace": "prometheus"},
       {"kind": "RoleBinding", "name": "prometheus-kube-prometheus-admission", "namespace": "prometheus"},
       {"kind": "ClusterRole", "name": "prometheus-kube-prometheus-admission"},
-      {"kind": "ClusterRoleBinding", "name": "prometheus-kube-prometheus-admission"}
+      {"kind": "ClusterRoleBinding", "name": "prometheus-kube-prometheus-admission"},
+      {"group": "admissionregistration.k8s.io", "kind": "ValidatingWebhookConfiguration", "name": "prometheus-kube-prometheus-admission", "jqPathExpressions": [".webhooks[].clientConfig.caBundle"]}
     ]' "$PROM_APP_FILE"
     echo "Updated ignoreDifferences for Prometheus admission webhook RBAC resources"
   fi
