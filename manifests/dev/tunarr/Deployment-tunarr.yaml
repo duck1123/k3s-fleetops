@@ -69,10 +69,6 @@ spec:
               readOnly: false
             - mountPath: /tmp
               name: tmp
-            - mountPath: /tv
-              name: tv
-            - mountPath: /movies
-              name: movies
             - mountPath: /dev/dri/renderD128
               name: dri
       initContainers:
@@ -103,12 +99,6 @@ spec:
             claimName: tunarr-tunarr-config
         - emptyDir: {}
           name: tmp
-        - name: tv
-          persistentVolumeClaim:
-            claimName: tunarr-tunarr-tv
-        - name: movies
-          persistentVolumeClaim:
-            claimName: tunarr-tunarr-movies
         - hostPath:
             path: /dev/dri/renderD129
             type: CharDevice
