@@ -39,3 +39,8 @@ spec:
       name: prometheus-kube-prometheus-admission
       jqPathExpressions:
         - .webhooks[].clientConfig.caBundle
+    - group: admissionregistration.k8s.io
+      kind: MutatingWebhookConfiguration
+      name: prometheus-kube-prometheus-admission
+      jqPathExpressions:
+        - .webhooks[].clientConfig.caBundle

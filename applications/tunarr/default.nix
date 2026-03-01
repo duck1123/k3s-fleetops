@@ -154,21 +154,29 @@ self.lib.mkArgoApp
               spec = {
                 automountServiceAccountToken = true;
                 # Ensure config volume is writable: root when using GPU, else GID 1000 for typical app user.
-                securityContext = if cfg.enableGPU then {
-                  runAsUser = 0;
-                  runAsGroup = 0;
-                  supplementalGroups = [ cfg.renderGroupGID ];
-                  fsGroup = 0;
-                } else {
-                  fsGroup = 1000;
-                };
+                securityContext =
+                  if cfg.enableGPU then
+                    {
+                      runAsUser = 0;
+                      runAsGroup = 0;
+                      supplementalGroups = [ cfg.renderGroupGID ];
+                      fsGroup = 0;
+                    }
+                  else
+                    {
+                      fsGroup = 1000;
+                    };
 
                 containers = [
                   {
                     inherit name;
                     image = cfg.image;
                     imagePullPolicy = "IfNotPresent";
-                    command = [ "sh" "-c" "ulimit -n 65536 && exec /tunarr/tunarr" ];
+                    command = [
+                      "sh"
+                      "-c"
+                      "ulimit -n 65536 && exec /tunarr/tunarr"
+                    ];
                     args = [ ];
                     env = [
                       {
@@ -236,53 +244,83 @@ self.lib.mkArgoApp
                     ])
                     ++ (lib.optionals cfg.enableGPU (
                       if cfg.vaapiRenderDevice != "" then
-                        [{
-                          mountPath = "/dev/dri/renderD128";
-                          name = "dri";
-                        }]
+                        [
+                          {
+                            mountPath = "/dev/dri/renderD128";
+                            name = "dri";
+                          }
+                        ]
                       else
-                        [{
-                          mountPath = "/dev/dri";
-                          name = "dri";
-                        }]
+                        [
+                          {
+                            mountPath = "/dev/dri";
+                            name = "dri";
+                          }
+                        ]
                     ));
                     # Force writable root and config; image may default readOnlyRootFilesystem which can make mounts appear read-only on some runtimes.
                     securityContext = {
                       readOnlyRootFilesystem = false;
-                    } // lib.optionalAttrs cfg.enableGPU {
+                    }
+                    // lib.optionalAttrs cfg.enableGPU {
                       capabilities.add = [ "SYS_ADMIN" ];
                       privileged = true;
                     };
                   }
                 ];
 
-                initContainers = (lib.optionals cfg.resetDatabase [
-                  {
-                    name = "config-reset";
-                    image = "busybox:latest";
-                    imagePullPolicy = "IfNotPresent";
-                    command = [ "sh" "-c" "rm -rf /config/tunarr/*" ];
-                    securityContext.runAsUser = 0;
-                    volumeMounts = [ { mountPath = "/config/tunarr"; name = "config"; } ];
-                  }
-                ]) ++ [
-                  {
-                    name = "config-permissions";
-                    image = "busybox:latest";
-                    imagePullPolicy = "IfNotPresent";
-                    command = [ "sh" "-c" "chown -R 0:0 /config/tunarr && chmod -R 1777 /config/tunarr" ];
-                    securityContext.runAsUser = 0;
-                    volumeMounts = [
-                      { mountPath = "/config/tunarr"; name = "config"; readOnly = false; }
-                    ];
-                  }
-                ];
+                initContainers =
+                  (lib.optionals cfg.resetDatabase [
+                    {
+                      name = "config-reset";
+                      image = "busybox:latest";
+                      imagePullPolicy = "IfNotPresent";
+                      command = [
+                        "sh"
+                        "-c"
+                        "rm -rf /config/tunarr/*"
+                      ];
+                      securityContext.runAsUser = 0;
+                      volumeMounts = [
+                        {
+                          mountPath = "/config/tunarr";
+                          name = "config";
+                        }
+                      ];
+                    }
+                  ])
+                  ++ [
+                    {
+                      name = "config-permissions";
+                      image = "busybox:latest";
+                      imagePullPolicy = "IfNotPresent";
+                      command = [
+                        "sh"
+                        "-c"
+                        "chown -R 0:0 /config/tunarr && chmod -R 1777 /config/tunarr"
+                      ];
+                      securityContext.runAsUser = 0;
+                      volumeMounts = [
+                        {
+                          mountPath = "/config/tunarr";
+                          name = "config";
+                          readOnly = false;
+                        }
+                      ];
+                    }
+                  ];
 
                 serviceAccountName = "default";
 
                 volumes = [
-                  { name = "config"; persistentVolumeClaim.claimName = "${name}-${name}-config"; }
-                  { name = "tmp"; emptyDir = { }; }
+                  {
+                    name = "config";
+                    persistentVolumeClaim.claimName = "${name}-${name}-config";
+                  }
+                  {
+                    name = "tmp";
+                    emptyDir = { };
+                  }
                 ]
                 ++ (lib.optionals cfg.nfs.enable [
                   {
@@ -296,21 +334,25 @@ self.lib.mkArgoApp
                 ])
                 ++ (lib.optionals cfg.enableGPU (
                   if cfg.vaapiRenderDevice != "" then
-                    [{
-                      name = "dri";
-                      hostPath = {
-                        path = "/dev/dri/${cfg.vaapiRenderDevice}";
-                        type = "CharDevice";
-                      };
-                    }]
+                    [
+                      {
+                        name = "dri";
+                        hostPath = {
+                          path = "/dev/dri/${cfg.vaapiRenderDevice}";
+                          type = "CharDevice";
+                        };
+                      }
+                    ]
                   else
-                    [{
-                      name = "dri";
-                      hostPath = {
-                        path = "/dev/dri";
-                        type = "Directory";
-                      };
-                    }]
+                    [
+                      {
+                        name = "dri";
+                        hostPath = {
+                          path = "/dev/dri";
+                          type = "Directory";
+                        };
+                      }
+                    ]
                 ));
               };
             };
@@ -392,69 +434,77 @@ self.lib.mkArgoApp
       };
 
       # NFS PersistentVolumes
-      persistentVolumes = lib.optionalAttrs cfg.nfs.config.enable {
-        "${name}-${name}-config-nfs" = {
-          apiVersion = "v1";
-          kind = "PersistentVolume";
-          metadata = { name = "${name}-${name}-config-nfs"; };
-          spec = {
-            capacity.storage = "10Gi";
-            accessModes = [ "ReadWriteMany" ];
-            mountOptions = [ "nolock" "soft" "timeo=30" ];
-            nfs = {
-              server = if cfg.nfs.config.server != "" then cfg.nfs.config.server else cfg.nfs.server;
-              path = if cfg.nfs.config.path != "" then cfg.nfs.config.path else "${cfg.nfs.path}/tunarr";
+      persistentVolumes =
+        lib.optionalAttrs cfg.nfs.config.enable {
+          "${name}-${name}-config-nfs" = {
+            apiVersion = "v1";
+            kind = "PersistentVolume";
+            metadata = {
+              name = "${name}-${name}-config-nfs";
             };
-            persistentVolumeReclaimPolicy = "Retain";
+            spec = {
+              capacity.storage = "10Gi";
+              accessModes = [ "ReadWriteMany" ];
+              mountOptions = [
+                "nolock"
+                "soft"
+                "timeo=30"
+              ];
+              nfs = {
+                server = if cfg.nfs.config.server != "" then cfg.nfs.config.server else cfg.nfs.server;
+                path = if cfg.nfs.config.path != "" then cfg.nfs.config.path else "${cfg.nfs.path}/tunarr";
+              };
+              persistentVolumeReclaimPolicy = "Retain";
+            };
+          };
+        }
+        // lib.optionalAttrs cfg.nfs.enable {
+          "${name}-${name}-tv-nfs" = {
+            apiVersion = "v1";
+            kind = "PersistentVolume";
+            metadata = {
+              name = "${name}-${name}-tv-nfs";
+            };
+            spec = {
+              capacity = {
+                storage = "1Ti";
+              };
+              accessModes = [ "ReadWriteMany" ];
+              mountOptions = [
+                "nolock"
+                "soft"
+                "timeo=30"
+              ];
+              nfs = {
+                server = cfg.nfs.server;
+                path = "${cfg.nfs.path}/TV";
+              };
+              persistentVolumeReclaimPolicy = "Retain";
+            };
+          };
+          "${name}-${name}-movies-nfs" = {
+            apiVersion = "v1";
+            kind = "PersistentVolume";
+            metadata = {
+              name = "${name}-${name}-movies-nfs";
+            };
+            spec = {
+              capacity = {
+                storage = "1Ti";
+              };
+              accessModes = [ "ReadWriteMany" ];
+              mountOptions = [
+                "nolock"
+                "soft"
+                "timeo=30"
+              ];
+              nfs = {
+                server = cfg.nfs.server;
+                path = "${cfg.nfs.path}/Movies";
+              };
+              persistentVolumeReclaimPolicy = "Retain";
+            };
           };
         };
-      } // lib.optionalAttrs cfg.nfs.enable {
-        "${name}-${name}-tv-nfs" = {
-          apiVersion = "v1";
-          kind = "PersistentVolume";
-          metadata = {
-            name = "${name}-${name}-tv-nfs";
-          };
-          spec = {
-            capacity = {
-              storage = "1Ti";
-            };
-            accessModes = [ "ReadWriteMany" ];
-            mountOptions = [
-              "nolock"
-              "soft"
-              "timeo=30"
-            ];
-            nfs = {
-              server = cfg.nfs.server;
-              path = "${cfg.nfs.path}/TV";
-            };
-            persistentVolumeReclaimPolicy = "Retain";
-          };
-        };
-        "${name}-${name}-movies-nfs" = {
-          apiVersion = "v1";
-          kind = "PersistentVolume";
-          metadata = {
-            name = "${name}-${name}-movies-nfs";
-          };
-          spec = {
-            capacity = {
-              storage = "1Ti";
-            };
-            accessModes = [ "ReadWriteMany" ];
-            mountOptions = [
-              "nolock"
-              "soft"
-              "timeo=30"
-            ];
-            nfs = {
-              server = cfg.nfs.server;
-              path = "${cfg.nfs.path}/Movies";
-            };
-            persistentVolumeReclaimPolicy = "Retain";
-          };
-        };
-      };
     };
   }

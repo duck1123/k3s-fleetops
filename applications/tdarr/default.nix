@@ -271,11 +271,20 @@ self.lib.mkArgoApp { inherit config lib; } rec {
                   ])
                   ++ (lib.optionals cfg.enableGPU [
                     # Avoid "resource allocation failed" (vaInitialize error 2) in headless/container.
-                    { name = "XDG_RUNTIME_DIR"; value = ""; }
+                    {
+                      name = "XDG_RUNTIME_DIR";
+                      value = "";
+                    }
                     # Help libva find container's VA drivers (Debian/Ubuntu path; image may use this).
-                    { name = "LIBVA_DRIVERS_PATH"; value = "/usr/lib/x86_64-linux-gnu/dri"; }
+                    {
+                      name = "LIBVA_DRIVERS_PATH";
+                      value = "/usr/lib/x86_64-linux-gnu/dri";
+                    }
                     # Verbose libva messages to diagnose "No VA display found" (set to "0" to quiet).
-                    { name = "LIBVA_MESSAGING"; value = "1"; }
+                    {
+                      name = "LIBVA_MESSAGING";
+                      value = "1";
+                    }
                   ])
                   ++ (lib.optionals cfg.enableNvidiaGPU [
                     {
@@ -355,15 +364,19 @@ self.lib.mkArgoApp { inherit config lib; } rec {
                   ]
                   ++ (lib.optionals cfg.enableGPU (
                     if cfg.vaapiRenderDevice != "" then
-                      [{
-                        mountPath = "/dev/dri/renderD128";
-                        name = "dri";
-                      }]
+                      [
+                        {
+                          mountPath = "/dev/dri/renderD128";
+                          name = "dri";
+                        }
+                      ]
                     else
-                      [{
-                        mountPath = "/dev/dri";
-                        name = "dri";
-                      }]
+                      [
+                        {
+                          mountPath = "/dev/dri";
+                          name = "dri";
+                        }
+                      ]
                   ));
                   resources = lib.optionalAttrs cfg.enableNvidiaGPU {
                     limits."nvidia.com/gpu" = "1";
@@ -395,7 +408,8 @@ self.lib.mkArgoApp { inherit config lib; } rec {
                     }
                   ];
                 }
-              ] ++ (lib.optionals cfg.vpn.enable (
+              ]
+              ++ (lib.optionals cfg.vpn.enable (
                 self.lib.waitForGluetun { inherit lib; } cfg.vpn.sharedGluetunService
               ));
 
@@ -419,21 +433,25 @@ self.lib.mkArgoApp { inherit config lib; } rec {
               ]
               ++ (lib.optionals cfg.enableGPU (
                 if cfg.vaapiRenderDevice != "" then
-                  [{
-                    name = "dri";
-                    hostPath = {
-                      path = "/dev/dri/${cfg.vaapiRenderDevice}";
-                      type = "CharDevice";
-                    };
-                  }]
+                  [
+                    {
+                      name = "dri";
+                      hostPath = {
+                        path = "/dev/dri/${cfg.vaapiRenderDevice}";
+                        type = "CharDevice";
+                      };
+                    }
+                  ]
                 else
-                  [{
-                    name = "dri";
-                    hostPath = {
-                      path = "/dev/dri";
-                      type = "Directory";
-                    };
-                  }]
+                  [
+                    {
+                      name = "dri";
+                      hostPath = {
+                        path = "/dev/dri";
+                        type = "Directory";
+                      };
+                    }
+                  ]
               ));
             };
           };

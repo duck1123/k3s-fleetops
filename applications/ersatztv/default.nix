@@ -199,15 +199,19 @@ self.lib.mkArgoApp { inherit config lib; } rec {
                   ]
                   ++ (lib.optionals cfg.enableGPU (
                     if cfg.vaapiRenderDevice != "" then
-                      [{
-                        mountPath = "/dev/dri/renderD128";
-                        name = "dri";
-                      }]
+                      [
+                        {
+                          mountPath = "/dev/dri/renderD128";
+                          name = "dri";
+                        }
+                      ]
                     else
-                      [{
-                        mountPath = "/dev/dri";
-                        name = "dri";
-                      }]
+                      [
+                        {
+                          mountPath = "/dev/dri";
+                          name = "dri";
+                        }
+                      ]
                   ));
                 }
               ];
@@ -227,18 +231,22 @@ self.lib.mkArgoApp { inherit config lib; } rec {
               ]
               ++ (lib.optionals cfg.enableGPU (
                 if cfg.vaapiRenderDevice != "" then
-                  [{
-                    name = "dri";
-                    hostPath.path = "/dev/dri/${cfg.vaapiRenderDevice}";
-                  }]
+                  [
+                    {
+                      name = "dri";
+                      hostPath.path = "/dev/dri/${cfg.vaapiRenderDevice}";
+                    }
+                  ]
                 else
-                  [{
-                    name = "dri";
-                    hostPath = {
-                      path = "/dev/dri";
-                      type = "Directory";
-                    };
-                  }]
+                  [
+                    {
+                      name = "dri";
+                      hostPath = {
+                        path = "/dev/dri";
+                        type = "Directory";
+                      };
+                    }
+                  ]
               ));
             };
           };
