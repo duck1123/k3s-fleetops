@@ -885,7 +885,7 @@ in
 
     # ../applications/tunarr/default.nix
     tunarr = {
-      enable = false;
+      enable = true;
       enableGPU = true;
       hostAffinity = "edgenix";
       resetDatabase = false;
