@@ -90,7 +90,7 @@ spec:
           - ReadWriteOnce
         resources:
           requests:
-            storage: 50Gi
+            storage: 100Gi
         storageClassName: longhorn
   tsdb:
     outOfOrderTimeWindow: 0s

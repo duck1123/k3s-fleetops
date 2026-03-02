@@ -79,7 +79,7 @@ self.lib.mkArgoApp { inherit config lib; } {
 
         storageSpec.volumeClaimTemplate.spec = {
           accessModes = [ "ReadWriteOnce" ];
-          resources.requests.storage = "50Gi";
+          resources.requests.storage = cfg.prometheusStorageSize;
           storageClassName = cfg.storageClassName;
         };
 
@@ -107,6 +107,12 @@ self.lib.mkArgoApp { inherit config lib; } {
       description = mdDoc "Additional Prometheus scrape configurations";
       type = types.listOf types.attrs;
       default = [ ];
+    };
+
+    prometheusStorageSize = mkOption {
+      description = mdDoc "Storage size for Prometheus TSDB (e.g. 50Gi, 100Gi). Increase if you hit 'no space left on device'.";
+      type = types.str;
+      default = "100Gi";
     };
 
     alertmanager = {
