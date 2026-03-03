@@ -32,6 +32,20 @@ self.lib.mkArgoApp
         default = 8000;
       };
 
+      # Secondary NodePort service so Plex on the host can reach Tunarr at http://<node>:nodePort
+      nodePort = {
+        enable = mkOption {
+          description = mdDoc "Expose a NodePort service for Tunarr (e.g. for Plex DVR on the same host).";
+          type = types.bool;
+          default = true;
+        };
+        port = mkOption {
+          description = mdDoc "NodePort number (30000-32767). Omit or set to 0 for auto-assign.";
+          type = types.int;
+          default = 38000;
+        };
+      };
+
       storageClassName = mkOption {
         description = mdDoc "The storage class";
         type = types.str;
@@ -431,6 +445,29 @@ self.lib.mkArgoApp
         };
 
         type = "ClusterIP";
+      };
+
+      services."${name}-nodeport".spec = lib.mkIf cfg.nodePort.enable {
+        ports = [
+          (
+            let
+              base = {
+                name = "http";
+                port = cfg.service.port;
+                protocol = "TCP";
+                targetPort = "http";
+              };
+            in
+            if cfg.nodePort.port > 0 then base // { nodePort = cfg.nodePort.port; } else base
+          )
+        ];
+
+        selector = {
+          "app.kubernetes.io/instance" = name;
+          "app.kubernetes.io/name" = name;
+        };
+
+        type = "NodePort";
       };
 
       # NFS PersistentVolumes
