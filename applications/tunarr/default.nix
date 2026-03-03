@@ -42,7 +42,7 @@ self.lib.mkArgoApp
         port = mkOption {
           description = mdDoc "NodePort number (30000-32767). Omit or set to 0 for auto-assign.";
           type = types.int;
-          default = 38000;
+          default = 30080;
         };
       };
 
