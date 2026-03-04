@@ -257,7 +257,7 @@ in
     # ../applications/grafana/default.nix
     grafana = {
       adminPassword = secrets.grafana.password or "";
-      enable = true;
+      enable = false;
       hostAffinity = "edgenix";
 
       ingress = {
@@ -269,7 +269,7 @@ in
 
     # ../applications/prometheus/default.nix
     prometheus = {
-      enable = true;
+      enable = false;
       hostAffinity = "edgenix";
 
       # Additional scrape configs for monitoring other hosts
