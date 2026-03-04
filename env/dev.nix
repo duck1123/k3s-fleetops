@@ -203,7 +203,7 @@ in
 
     # ../applications/ersatztv/default.nix
     ersatztv = {
-      enable = true;
+      enable = false;
       # logLevel = "Debug";
       hostAffinity = "edgenix";
 
