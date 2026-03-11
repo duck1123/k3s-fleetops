@@ -399,6 +399,16 @@ self.lib.mkArgoApp
                             name = "ES_JAVA_OPTS";
                             value = cfg.elasticsearch.javaOpts;
                           }
+                          # Single-node discovery (required when binding to non-loopback)
+                          {
+                            name = "discovery.type";
+                            value = "single-node";
+                          }
+                          # Disable security so transport SSL is not required (internal single-node)
+                          {
+                            name = "xpack.security.enabled";
+                            value = "false";
+                          }
                         ]
                         ++ (lib.optionals (cfg.elasticsearch.elasticPassword != "") [
                           {
