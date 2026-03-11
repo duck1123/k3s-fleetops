@@ -12,7 +12,8 @@ self.lib.mkArgoApp { inherit config lib; } rec {
   name = "homarr";
   uses-ingress = true;
 
-  sopsSecrets = cfg:
+  sopsSecrets =
+    cfg:
     lib.optionalAttrs (cfg.secretEncryptionKey != "") {
       ${secret-encryption-key-secret} = {
         SECRET_ENCRYPTION_KEY = cfg.secretEncryptionKey;
@@ -114,22 +115,17 @@ self.lib.mkArgoApp { inherit config lib; } rec {
                       value = if cfg.disableAnalytics then "true" else "false";
                     }
                   ]
-                  ++ (
-                    if cfg.secretEncryptionKey != "" then
-                      [
-                        {
-                          name = "SECRET_ENCRYPTION_KEY";
-                          valueFrom = {
-                            secretKeyRef = {
-                              name = secret-encryption-key-secret;
-                              key = "SECRET_ENCRYPTION_KEY";
-                            };
-                          };
-                        }
-                      ]
-                    else
-                      [ ]
-                  );
+                  ++ (lib.optionals (cfg.secretEncryptionKey != "") [
+                    {
+                      name = "SECRET_ENCRYPTION_KEY";
+                      valueFrom = {
+                        secretKeyRef = {
+                          name = secret-encryption-key-secret;
+                          key = "SECRET_ENCRYPTION_KEY";
+                        };
+                      };
+                    }
+                  ]);
                   ports = [
                     {
                       containerPort = cfg.service.port;
