@@ -64,6 +64,7 @@
     ./sqlpad
     ./tailscale
     ./tdarr
+    ./tube-archivist
     ./tunarr
     ./tempo
     ./traefik

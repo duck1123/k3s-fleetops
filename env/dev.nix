@@ -912,6 +912,33 @@ in
       vaapiRenderDevice = "renderD129";
     };
 
+    # ../applications/tube-archivist/default.nix
+    tube-archivist = {
+      auth = {
+        inherit (secrets.tube-archivist.auth) username password;
+      };
+
+      elasticsearch.elasticPassword = secrets.tube-archivist.auth.password;
+      enable = true;
+      hostAffinity = "edgenix";
+
+      ingress = {
+        domain = "tube-archivist.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+
+      nfs = {
+        enable = true;
+        server = nas-host;
+        path = "${nas-base}";
+      };
+
+      redisHost = "redis.redis";
+      storageClassName = "longhorn";
+      replicas = 1;
+    };
+
     # ../applications/sops/default.nix
     sops.enable = true;
 
