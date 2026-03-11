@@ -327,6 +327,27 @@ self.lib.mkArgoApp
                   automountServiceAccountToken = true;
                   serviceAccountName = "default";
 
+                  # Elasticsearch runs as UID 1000; PVC is often root-owned. Chown so ES can write node.lock.
+                  initContainers = [
+                    {
+                      name = "fix-es-data-permissions";
+                      image = "busybox:latest";
+                      imagePullPolicy = "IfNotPresent";
+                      command = [
+                        "sh"
+                        "-c"
+                        "chown -R 1000:1000 /usr/share/elasticsearch/data"
+                      ];
+                      securityContext.runAsUser = 0;
+                      volumeMounts = [
+                        {
+                          mountPath = "/usr/share/elasticsearch/data";
+                          name = "es-data";
+                        }
+                      ];
+                    }
+                  ];
+
                   containers = [
                     {
                       name = "${name}-es";
