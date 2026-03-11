@@ -409,6 +409,11 @@ self.lib.mkArgoApp
                             name = "xpack.security.enabled";
                             value = "false";
                           }
+                          # Snapshot repo path (required by Tube Archivist ES checks)
+                          {
+                            name = "path.repo";
+                            value = "/usr/share/elasticsearch/data/snapshot";
+                          }
                         ]
                         ++ (lib.optionals (cfg.elasticsearch.elasticPassword != "") [
                           {

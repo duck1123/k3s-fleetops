@@ -28,6 +28,8 @@ spec:
               value: single-node
             - name: xpack.security.enabled
               value: "false"
+            - name: path.repo
+              value: /usr/share/elasticsearch/data/snapshot
             - name: ELASTIC_PASSWORD
               valueFrom:
                 secretKeyRef:
