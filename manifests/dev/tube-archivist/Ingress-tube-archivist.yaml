@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: tube-archivist
+  namespace: tube-archivist
+spec:
+  ingressClassName: tailscale
+  rules:
+    - host: tube-archivist.bearded-snake.ts.net
+      http:
+        paths:
+          - backend:
+              service:
+                name: tube-archivist
+                port:
+                  name: http
+            path: /
+            pathType: ImplementationSpecific
+  tls:
+    - hosts:
+        - tube-archivist.bearded-snake.ts.net

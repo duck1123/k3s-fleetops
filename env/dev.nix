@@ -919,7 +919,7 @@ in
       };
 
       elasticsearch.elasticPassword = secrets.tube-archivist.auth.password;
-      enable = false;
+      enable = true;
       hostAffinity = "edgenix";
 
       ingress = {

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: tube-archivist
+  namespace: tube-archivist
+spec:
+  ports:
+    - name: http
+      port: 8000
+      protocol: TCP
+      targetPort: http
+  selector:
+    app.kubernetes.io/instance: tube-archivist
+    app.kubernetes.io/name: tube-archivist
+  type: ClusterIP
