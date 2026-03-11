@@ -23,6 +23,7 @@
     ./grafana
     ./harbor
     ./homer
+    ./homarr
     ./immich
     ./kavita
     ./keycloak

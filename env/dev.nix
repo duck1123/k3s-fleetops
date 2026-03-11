@@ -316,6 +316,21 @@ in
       };
     };
 
+    # ../applications/homarr/default.nix
+    homarr = {
+      enable = true;
+      hostAffinity = "edgenix";
+
+      ingress = {
+        domain = "homarr.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+
+      secretEncryptionKey = (secrets.homarr or { }).secretEncryptionKey or "";
+      storageClassName = "longhorn";
+    };
+
     # ../applications/immich/default.nix
     immich = {
       enable = false;
