@@ -934,7 +934,11 @@ in
         path = "${nas-base}";
       };
 
-      redisHost = "redis.redis";
+      redis = {
+        host = "redis.redis";
+        port = 6379;
+        password = secrets.redis.password;
+      };
       storageClassName = "longhorn";
       replicas = 1;
     };

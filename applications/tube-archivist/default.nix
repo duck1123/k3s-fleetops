@@ -9,6 +9,13 @@ with lib;
 let
   auth-secret = "tube-archivist-auth";
   elastic-secret = "tube-archivist-elastic-password";
+  redis-con-secret = "tube-archivist-redis-con";
+  # Minimal URL-encoding for Redis password in connection string
+  urlEnc = s:
+    builtins.replaceStrings
+      [ "%" "@" ":" "/" "?" "#" "[" "]" ]
+      [ "%25" "%40" "%3A" "%2F" "%3F" "%23" "%5B" "%5D" ]
+      s;
 in
 self.lib.mkArgoApp
   {
@@ -34,6 +41,12 @@ self.lib.mkArgoApp
       // (lib.optionalAttrs (cfg.elasticsearch.elasticPassword != "") {
         ${elastic-secret} = {
           password = cfg.elasticsearch.elasticPassword;
+        };
+      })
+      // (lib.optionalAttrs (cfg.redis.password != "") {
+        ${redis-con-secret} = {
+          connectionString =
+            "redis://:${urlEnc cfg.redis.password}@${cfg.redis.host}:${toString cfg.redis.port}";
         };
       });
 
@@ -106,10 +119,24 @@ self.lib.mkArgoApp
         default = "http://tube-archivist-es:9200";
       };
 
-      redisHost = mkOption {
-        description = mdDoc "Redis host (REDIS_HOST) used by Tube Archivist";
-        type = types.str;
-        default = "redis.redis";
+      redis = {
+        host = mkOption {
+          description = mdDoc "Redis host for REDIS_CON connection string";
+          type = types.str;
+          default = "redis.redis";
+        };
+
+        port = mkOption {
+          description = mdDoc "Redis port for REDIS_CON connection string";
+          type = types.int;
+          default = 6379;
+        };
+
+        password = mkOption {
+          description = mdDoc "Redis password. If set, REDIS_CON is stored in a secret (redis://:password@host:port).";
+          type = types.str;
+          default = "";
+        };
       };
 
       auth = {
@@ -207,10 +234,23 @@ self.lib.mkArgoApp
                             name = "ES_URL";
                             value = cfg.esUrl;
                           }
-                          {
-                            name = "REDIS_HOST";
-                            value = cfg.redisHost;
-                          }
+                          (
+                            if cfg.redis.password != "" then
+                              {
+                                name = "REDIS_CON";
+                                valueFrom = {
+                                  secretKeyRef = {
+                                    name = redis-con-secret;
+                                    key = "connectionString";
+                                  };
+                                };
+                              }
+                            else
+                              {
+                                name = "REDIS_CON";
+                                value = "redis://${cfg.redis.host}:${toString cfg.redis.port}";
+                              }
+                          )
                         ]
                         ++ (lib.optionals (cfg.auth.username != "" && cfg.auth.password != "") [
                           {

@@ -32,8 +32,11 @@ spec:
               value: tube-archivist.bearded-snake.ts.net
             - name: ES_URL
               value: http://tube-archivist-es:9200
-            - name: REDIS_HOST
-              value: redis.redis
+            - name: REDIS_CON
+              valueFrom:
+                secretKeyRef:
+                  key: connectionString
+                  name: tube-archivist-redis-con
             - name: TA_USERNAME
               valueFrom:
                 secretKeyRef:
