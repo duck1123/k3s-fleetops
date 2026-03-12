@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/instance: windmill
+    app.kubernetes.io/name: windmill
+    app.kubernetes.io/version: latest
+  name: windmill
+  namespace: windmill
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: windmill
+      app.kubernetes.io/name: windmill
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: windmill
+        app.kubernetes.io/name: windmill
+    spec:
+      automountServiceAccountToken: true
+      containers:
+        - env:
+            - name: TZ
+              value: Etc/UTC
+            - name: MODE
+              value: standalone
+            - name: BASE_URL
+              value: https://windmill.bearded-snake.ts.net
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  key: DATABASE_URL
+                  name: windmill-database-url
+          image: ghcr.io/windmill-labs/windmill:latest
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /healthz
+              port: 8000
+            initialDelaySeconds: 40
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 5
+          name: windmill
+          ports:
+            - containerPort: 8000
+              name: http
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /healthz
+              port: 8000
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+      nodeSelector:
+        kubernetes.io/hostname: edgenix
+      serviceAccountName: default

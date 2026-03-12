@@ -961,6 +961,31 @@ in
     # ../applications/sops/default.nix
     sops.enable = true;
 
+    # ../applications/windmill/default.nix
+    windmill = {
+      enable = true;
+      hostAffinity = "edgenix";
+
+      ingress = {
+        domain = "windmill.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+
+      database = {
+        inherit (secrets.windmill.database)
+          host
+          name
+          password
+          port
+          username
+          ;
+      };
+
+      storageClassName = "longhorn";
+      replicas = 1;
+    };
+
     # ../applications/spark/default.nix
     spark = {
       enable = false;
