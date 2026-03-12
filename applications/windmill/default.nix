@@ -8,12 +8,13 @@
 with lib;
 let
   database-url-secret = "windmill-database-url";
-  # URL-encode password for postgresql:// URL. Encode % first, then : @ / ? # [ ] + space and other chars
-  # that can be misinterpreted (e.g. + as space, > ; in userinfo).
+  # Minimal URL-encode for postgresql:// URL: only chars that break parsing.
+  # : separates user from password, @ separates password from host. % starts escape sequences.
+  # Space and + can be misinterpreted; encode them. Avoid over-encoding.
   urlEncPassword = s:
     builtins.replaceStrings
-      [ "%" "@" ":" "/" "?" "#" "[" "]" "+" " " ">" ";" "&" "=" ]
-      [ "%25" "%40" "%3A" "%2F" "%3F" "%23" "%5B" "%5D" "%2B" "%20" "%3E" "%3B" "%26" "%3D" ]
+      [ "%" "@" ":" " " "+" ]
+      [ "%25" "%40" "%3A" "%20" "%2B" ]
       s;
 in
 self.lib.mkArgoApp
