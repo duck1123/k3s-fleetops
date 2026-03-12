@@ -973,13 +973,11 @@ in
       };
 
       database = {
-        inherit (secrets.windmill.database)
-          host
-          name
-          password
-          port
-          username
-          ;
+        host = "postgresql.postgresql";
+        port = 5432;
+        name = "windmill";
+        username = secrets.postgresql.adminUsername;
+        password = secrets.postgresql.adminPassword;
       };
 
       storageClassName = "longhorn";
