@@ -21,18 +21,17 @@ spec:
     spec:
       automountServiceAccountToken: true
       containers:
-        - env:
+        - command:
+            - /bin/sh
+            - -c
+            - export DATABASE_URL=$(cat /work/database_url) && exec windmill standalone
+          env:
             - name: TZ
               value: Etc/UTC
             - name: MODE
               value: standalone
             - name: BASE_URL
               value: https://windmill.bearded-snake.ts.net
-            - name: DATABASE_URL
-              valueFrom:
-                secretKeyRef:
-                  key: DATABASE_URL
-                  name: windmill-database-url
           image: ghcr.io/windmill-labs/windmill:latest
           imagePullPolicy: IfNotPresent
           livenessProbe:
@@ -58,6 +57,48 @@ spec:
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 5
+          volumeMounts:
+            - mountPath: /work
+              name: windmill-db-url-work
+      initContainers:
+        - command:
+            - python3
+            - -c
+            - |
+              import urllib.parse
+              import os
+              user = os.environ["PGUSER"]
+              password = os.environ["PGPASSWORD"]
+              host = os.environ["PGHOST"]
+              port = os.environ["PGPORT"]
+              db = os.environ["PGDATABASE"]
+              enc = urllib.parse.quote(password, safe="")
+              url = f"postgresql://{user}:{enc}@{host}:{port}/{db}?sslmode=disable"
+              with open("/work/database_url", "w") as f:
+                  f.write(url)
+          env:
+            - name: PGUSER
+              value: admin
+            - name: PGHOST
+              value: postgresql.postgresql
+            - name: PGPORT
+              value: "5432"
+            - name: PGDATABASE
+              value: windmill
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: windmill-database-password
+          image: python:3-alpine
+          imagePullPolicy: IfNotPresent
+          name: build-database-url
+          volumeMounts:
+            - mountPath: /work
+              name: windmill-db-url-work
       nodeSelector:
         kubernetes.io/hostname: edgenix
       serviceAccountName: default
+      volumes:
+        - emptyDir: {}
+          name: windmill-db-url-work

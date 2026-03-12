@@ -7,15 +7,8 @@
 }:
 with lib;
 let
-  database-url-secret = "windmill-database-url";
-  # Minimal URL-encode for postgresql:// URL: only chars that break parsing.
-  # : separates user from password, @ separates password from host. % starts escape sequences.
-  # Space and + can be misinterpreted; encode them. Avoid over-encoding.
-  urlEncPassword = s:
-    builtins.replaceStrings
-      [ "%" "@" ":" " " "+" ]
-      [ "%25" "%40" "%3A" "%20" "%2B" ]
-      s;
+  db-password-secret = "windmill-database-password";
+  shared-work-volume = "windmill-db-url-work";
 in
 self.lib.mkArgoApp
   {
@@ -30,13 +23,12 @@ self.lib.mkArgoApp
     name = "windmill";
     uses-ingress = true;
 
-    # Create DATABASE_URL as a SOPS secret, built from the configured Postgres connection.
+    # Store only the raw password; init container builds DATABASE_URL at runtime with proper URL encoding.
     sopsSecrets =
       cfg:
       lib.optionalAttrs (cfg.database.password != "") {
-        ${database-url-secret} = {
-          DATABASE_URL =
-            "postgresql://${cfg.database.username}:${urlEncPassword cfg.database.password}@${cfg.database.host}:${toString cfg.database.port}/${cfg.database.name}?sslmode=disable";
+        ${db-password-secret} = {
+          password = cfg.database.password;
         };
       };
 
@@ -130,8 +122,50 @@ self.lib.mkArgoApp
                 automountServiceAccountToken = true;
                 serviceAccountName = "default";
 
-                containers = [
+                # Build DATABASE_URL at runtime with proper URL encoding (handles special chars in password).
+                initContainers = lib.optionals (cfg.database.password != "") [
                   {
+                    name = "build-database-url";
+                    image = "python:3-alpine";
+                    imagePullPolicy = "IfNotPresent";
+                    command = [
+                      "python3"
+                      "-c"
+                      ''
+                        import urllib.parse
+                        import os
+                        user = os.environ["PGUSER"]
+                        password = os.environ["PGPASSWORD"]
+                        host = os.environ["PGHOST"]
+                        port = os.environ["PGPORT"]
+                        db = os.environ["PGDATABASE"]
+                        enc = urllib.parse.quote(password, safe="")
+                        url = f"postgresql://{user}:{enc}@{host}:{port}/{db}?sslmode=disable"
+                        with open("/work/database_url", "w") as f:
+                            f.write(url)
+                      ''
+                    ];
+                    env = [
+                      { name = "PGUSER"; value = cfg.database.username; }
+                      { name = "PGHOST"; value = cfg.database.host; }
+                      { name = "PGPORT"; value = toString cfg.database.port; }
+                      { name = "PGDATABASE"; value = cfg.database.name; }
+                      {
+                        name = "PGPASSWORD";
+                        valueFrom.secretKeyRef = {
+                          name = db-password-secret;
+                          key = "password";
+                        };
+                      }
+                    ];
+                    volumeMounts = [
+                      { mountPath = "/work"; name = shared-work-volume; }
+                    ];
+                  }
+                ];
+
+                containers = [
+                  ({
                     inherit name;
                     image = cfg.image;
                     imagePullPolicy = "IfNotPresent";
@@ -141,33 +175,15 @@ self.lib.mkArgoApp
                           name = "TZ";
                           value = cfg.tz;
                         }
-                        # Windmill defaults MODE to standalone, but we set it explicitly.
                         {
                           name = "MODE";
                           value = "standalone";
                         }
-                        # BASE_URL should be the external URL users hit (via ingress).
                         {
                           name = "BASE_URL";
                           value = "https://${cfg.ingress.domain}";
                         }
-                      ]
-                      ++ (
-                        if cfg.database.password != "" then
-                          [
-                            {
-                              name = "DATABASE_URL";
-                              valueFrom = {
-                                secretKeyRef = {
-                                  name = database-url-secret;
-                                  key = "DATABASE_URL";
-                                };
-                              };
-                            }
-                          ]
-                        else
-                          [ ]
-                      );
+                      ];
                     ports = [
                       {
                         containerPort = cfg.service.port;
@@ -197,6 +213,23 @@ self.lib.mkArgoApp
                       successThreshold = 1;
                       failureThreshold = 5;
                     };
+                  }
+                  // lib.optionalAttrs (cfg.database.password != "") {
+                    command = [
+                      "/bin/sh"
+                      "-c"
+                      "export DATABASE_URL=$(cat /work/database_url) && exec windmill standalone"
+                    ];
+                    volumeMounts = [
+                      { mountPath = "/work"; name = shared-work-volume; }
+                    ];
+                  })
+                ];
+
+                volumes = lib.optionals (cfg.database.password != "") [
+                  {
+                    name = shared-work-volume;
+                    emptyDir = { };
                   }
                 ];
               };
