@@ -8,6 +8,12 @@
 with lib;
 let
   database-url-secret = "windmill-database-url";
+  # URL-encode password for use in postgresql:// URL (handles :, @, /, ?, #, %, etc.)
+  urlEncPassword = s:
+    builtins.replaceStrings
+      [ "%" "@" ":" "/" "?" "#" "[" "]" ]
+      [ "%25" "%40" "%3A" "%2F" "%3F" "%23" "%5B" "%5D" ]
+      s;
 in
 self.lib.mkArgoApp
   {
@@ -28,7 +34,7 @@ self.lib.mkArgoApp
       lib.optionalAttrs (cfg.database.password != "") {
         ${database-url-secret} = {
           DATABASE_URL =
-            "postgresql://${cfg.database.username}:${cfg.database.password}@${cfg.database.host}:${toString cfg.database.port}/${cfg.database.name}?sslmode=disable";
+            "postgresql://${cfg.database.username}:${urlEncPassword cfg.database.password}@${cfg.database.host}:${toString cfg.database.port}/${cfg.database.name}?sslmode=disable";
         };
       };
 
