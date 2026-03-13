@@ -78,7 +78,7 @@ spec:
                   f.write(url)
           env:
             - name: PGUSER
-              value: admin
+              value: postgres
             - name: PGHOST
               value: postgresql.postgresql
             - name: PGPORT

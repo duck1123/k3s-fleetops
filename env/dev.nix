@@ -976,8 +976,8 @@ in
         host = "postgresql.postgresql";
         port = 5432;
         name = "windmill";
-        username = secrets.postgresql.adminUsername;
-        password = secrets.postgresql.adminPassword;
+        username = secrets.windmill.database.username;
+        password = secrets.windmill.database.password;
       };
 
       storageClassName = "longhorn";
@@ -1088,7 +1088,7 @@ in
         password = secrets.postgresql.userPassword;
       };
 
-      enable = false;
+      enable = true;
 
       ingress = {
         domain = "whisparr.${tail-domain}";
