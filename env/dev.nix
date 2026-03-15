@@ -467,7 +467,7 @@ in
     # Slskd: Soulseek client. Soularr uses it to download; set download path in Slskd UI to /downloads.
     # shares: mount music/library for Soulseek sharing; add /shares in Slskd Web UI → Shares.
     slskd = {
-      enable = false;
+      enable = true;
 
       ingress = {
         domain = "slskd.${tail-domain}";
