@@ -467,7 +467,7 @@ in
     # Slskd: Soulseek client. Soularr uses it to download; set download path in Slskd UI to /downloads.
     # shares: mount music/library for Soulseek sharing; add /shares in Slskd Web UI → Shares.
     slskd = {
-      enable = true;
+      enable = false;
 
       ingress = {
         domain = "slskd.${tail-domain}";
@@ -934,7 +934,7 @@ in
       };
 
       elasticsearch.elasticPassword = secrets.tube-archivist.auth.password;
-      enable = true;
+      enable = false;
       hostAffinity = "edgenix";
 
       ingress = {
@@ -1088,7 +1088,7 @@ in
         password = secrets.postgresql.userPassword;
       };
 
-      enable = true;
+      enable = false;
 
       ingress = {
         domain = "whisparr.${tail-domain}";
