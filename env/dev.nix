@@ -109,7 +109,7 @@ in
 
     # ../applications/booklore/default.nix
     booklore = {
-      enable = true;
+      enable = false;
       hostAffinity = "edgenix";
 
       database = {
@@ -192,7 +192,7 @@ in
 
     # ../applications/dozzle/default.nix
     dozzle = {
-      enable = false;
+      enable = true;
 
       ingress = {
         domain = "dozzle.${tail-domain}";
@@ -257,7 +257,7 @@ in
     # ../applications/grafana/default.nix
     grafana = {
       adminPassword = secrets.grafana.password or "";
-      enable = false;
+      enable = true;
       hostAffinity = "edgenix";
 
       ingress = {
@@ -269,7 +269,7 @@ in
 
     # ../applications/prometheus/default.nix
     prometheus = {
-      enable = false;
+      enable = true;
       hostAffinity = "edgenix";
 
       # Additional scrape configs for monitoring other hosts
@@ -318,7 +318,7 @@ in
 
     # ../applications/homarr/default.nix
     homarr = {
-      enable = true;
+      enable = false;
       hostAffinity = "edgenix";
 
       ingress = {
@@ -513,7 +513,7 @@ in
     # - lidarr.downloadDir must match Lidarr’s Slskd root folder (Lidarr nfs.slskdDownloads → /downloads/slskd_downloads).
     # - nfs: same path as slskd (slskd_downloads) so Soularr can see downloads.
     soularr = {
-      enable = true;
+      enable = false;
 
       hostAffinity = "edgenix";
 
@@ -742,7 +742,7 @@ in
 
     # ../applications/qbittorrent/default.nix
     qbittorrent = {
-      enable = true;
+      enable = false;
       hostAffinity = "edgenix";
 
       ingress = {
@@ -963,7 +963,7 @@ in
 
     # ../applications/windmill/default.nix
     windmill = {
-      enable = true;
+      enable = false;
       hostAffinity = "edgenix";
 
       ingress = {
