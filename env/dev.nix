@@ -669,36 +669,61 @@ in
     };
 
     # ../applications/nocodb/default.nix
-    nocodb = {
-      enable = false;
+    # NocoDB: Airtable alternative. Uses shared postgresql, redis, optional S3 storage (rustfs or minio).
+    # Add nocodb to postgresql.extraDatabases when enabling. Set auth.jwtSecret (openssl rand -hex 32).
+    nocodb =
+      let
+        storage-backend = "rustfs";
+      in
+      {
+        enable = false;
 
-      ingress = {
-        domain = "nocodb.${tail-domain}";
-        ingressClassName = "tailscale";
-      };
+        auth.jwtSecret = (secrets.nocodb or { }).jwtSecret or "";
 
-      databases = {
-        minio = {
-          inherit (secrets.nocodb.minio)
-            bucketName
-            endpoint
-            region
-            rootPassword
-            rootUser
-            ;
+        ingress = {
+          domain = "nocodb.${tail-domain}";
+          ingressClassName = "tailscale";
+          clusterIssuer = "tailscale";
         };
-        postgresql = {
-          inherit (secrets.nocodb.postgresql)
-            database
-            password
-            postgresPassword
-            replicationPassword
-            username
-            ;
+
+        database = {
+          host = "postgresql.postgresql";
+          port = 5432;
+          name = "nocodb";
+          username = "nocodb";
+          password = (secrets.nocodb.postgresql or { }).password or secrets.postgresql.userPassword;
         };
-        redis = { inherit (secrets.nocodb.redis) password; };
+
+        redis = {
+          host = "redis.redis";
+          port = 6379;
+          password = secrets.redis.password;
+        };
+
+        storage =
+          if storage-backend == "rustfs" then
+            {
+              enable = true;
+              backend = "rustfs";
+              bucketName = (secrets.rustfs or { }).bucketName or "nocodb";
+              endpoint = "http://rustfs.rustfs:9000";
+              region = (secrets.rustfs or { }).region or "us-east-1";
+              accessKey = (secrets.rustfs or { }).accessKey or "";
+              secretKey = (secrets.rustfs or { }).secretKey or "";
+            }
+          else
+            {
+              enable = true;
+              backend = "minio";
+              bucketName = (secrets.nocodb.minio or { }).bucketName or "nocodb";
+              endpoint = "http://minio.minio:9000";
+              region = (secrets.nocodb.minio or { }).region or "us-east-1";
+              accessKey = (secrets.nocodb.minio or { }).rootUser or "";
+              secretKey = (secrets.nocodb.minio or { }).rootPassword or "";
+            };
+
+        publicUrl = "https://nocodb.${tail-domain}";
       };
-    };
 
     # ../applications/pihole/default.nix
     pihole = {
@@ -727,13 +752,21 @@ in
       hostAffinity = "edgenix";
       storageClass = "longhorn";
 
-      extraDatabases = arrDatabases [
-        { name = "prowlarr"; }
-        { name = "sonarr"; }
-        { name = "radarr"; }
-        { name = "lidarr"; }
-        { name = "whisparr"; }
-      ];
+      extraDatabases =
+        arrDatabases [
+          { name = "prowlarr"; }
+          { name = "sonarr"; }
+          { name = "radarr"; }
+          { name = "lidarr"; }
+          { name = "whisparr"; }
+        ]
+        ++ [
+          {
+            name = "nocodb";
+            username = "nocodb";
+            password = secrets.postgresql.userPassword;
+          }
+        ];
     };
 
     # ../applications/prowlarr/default.nix
@@ -1034,7 +1067,7 @@ in
     # ../applications/tdarr/default.nix
     tdarr = {
       enable = true;
-      healthcheckcpuWorkers = 1;
+      healthcheckcpuWorkers = 0;
       healthcheckgpuWorkers = 1;
       hostAffinity = "edgenix";
 
@@ -1055,7 +1088,7 @@ in
 
       replicas = 1;
       storageClassName = "longhorn";
-      useProbes = true;
+      useProbes = false;
       vpn.enable = false;
       enableGPU = true;
       enableNvidiaGPU = false;

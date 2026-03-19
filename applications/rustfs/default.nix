@@ -11,12 +11,18 @@ let
 in
 self.lib.mkArgoApp
   {
-    inherit config lib self pkgs;
+    inherit
+      config
+      lib
+      self
+      pkgs
+      ;
   }
   {
     name = "rustfs";
 
-    sopsSecrets = cfg:
+    sopsSecrets =
+      cfg:
       optionalAttrs (cfg.accessKey != "" && cfg.secretKey != "") {
         ${credentials-secret} = {
           RUSTFS_ACCESS_KEY = cfg.accessKey;
@@ -61,7 +67,10 @@ self.lib.mkArgoApp
 
       mode = mkOption {
         description = mdDoc "Deployment mode: standalone (single pod) or distributed";
-        type = types.enum [ "standalone" "distributed" ];
+        type = types.enum [
+          "standalone"
+          "distributed"
+        ];
         default = "standalone";
       };
     };
@@ -96,7 +105,10 @@ self.lib.mkArgoApp
           {
             host = domain;
             paths = [
-              { path = "/"; pathType = "Prefix"; }
+              {
+                path = "/";
+                pathType = "Prefix";
+              }
             ];
           }
         ];

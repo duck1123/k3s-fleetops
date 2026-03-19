@@ -146,10 +146,22 @@ self.lib.mkArgoApp
                       ''
                     ];
                     env = [
-                      { name = "PGUSER"; value = cfg.database.username; }
-                      { name = "PGHOST"; value = cfg.database.host; }
-                      { name = "PGPORT"; value = toString cfg.database.port; }
-                      { name = "PGDATABASE"; value = cfg.database.name; }
+                      {
+                        name = "PGUSER";
+                        value = cfg.database.username;
+                      }
+                      {
+                        name = "PGHOST";
+                        value = cfg.database.host;
+                      }
+                      {
+                        name = "PGPORT";
+                        value = toString cfg.database.port;
+                      }
+                      {
+                        name = "PGDATABASE";
+                        value = cfg.database.name;
+                      }
                       {
                         name = "PGPASSWORD";
                         valueFrom.secretKeyRef = {
@@ -159,18 +171,21 @@ self.lib.mkArgoApp
                       }
                     ];
                     volumeMounts = [
-                      { mountPath = "/work"; name = shared-work-volume; }
+                      {
+                        mountPath = "/work";
+                        name = shared-work-volume;
+                      }
                     ];
                   }
                 ];
 
                 containers = [
-                  ({
-                    inherit name;
-                    image = cfg.image;
-                    imagePullPolicy = "IfNotPresent";
-                    env =
-                      [
+                  (
+                    {
+                      inherit name;
+                      image = cfg.image;
+                      imagePullPolicy = "IfNotPresent";
+                      env = [
                         {
                           name = "TZ";
                           value = cfg.tz;
@@ -184,46 +199,50 @@ self.lib.mkArgoApp
                           value = "https://${cfg.ingress.domain}";
                         }
                       ];
-                    ports = [
-                      {
-                        containerPort = cfg.service.port;
-                        name = "http";
-                        protocol = "TCP";
-                      }
-                    ];
-                    readinessProbe = {
-                      httpGet = {
-                        path = "/healthz";
-                        port = cfg.service.port;
+                      ports = [
+                        {
+                          containerPort = cfg.service.port;
+                          name = "http";
+                          protocol = "TCP";
+                        }
+                      ];
+                      readinessProbe = {
+                        httpGet = {
+                          path = "/healthz";
+                          port = cfg.service.port;
+                        };
+                        initialDelaySeconds = 20;
+                        periodSeconds = 10;
+                        timeoutSeconds = 5;
+                        successThreshold = 1;
+                        failureThreshold = 5;
                       };
-                      initialDelaySeconds = 20;
-                      periodSeconds = 10;
-                      timeoutSeconds = 5;
-                      successThreshold = 1;
-                      failureThreshold = 5;
-                    };
-                    livenessProbe = {
-                      httpGet = {
-                        path = "/healthz";
-                        port = cfg.service.port;
+                      livenessProbe = {
+                        httpGet = {
+                          path = "/healthz";
+                          port = cfg.service.port;
+                        };
+                        initialDelaySeconds = 40;
+                        periodSeconds = 30;
+                        timeoutSeconds = 5;
+                        successThreshold = 1;
+                        failureThreshold = 5;
                       };
-                      initialDelaySeconds = 40;
-                      periodSeconds = 30;
-                      timeoutSeconds = 5;
-                      successThreshold = 1;
-                      failureThreshold = 5;
-                    };
-                  }
-                  // lib.optionalAttrs (cfg.database.password != "") {
-                    command = [
-                      "/bin/sh"
-                      "-c"
-                      "export DATABASE_URL=$(cat /work/database_url) && exec windmill standalone"
-                    ];
-                    volumeMounts = [
-                      { mountPath = "/work"; name = shared-work-volume; }
-                    ];
-                  })
+                    }
+                    // lib.optionalAttrs (cfg.database.password != "") {
+                      command = [
+                        "/bin/sh"
+                        "-c"
+                        "export DATABASE_URL=$(cat /work/database_url) && exec windmill standalone"
+                      ];
+                      volumeMounts = [
+                        {
+                          mountPath = "/work";
+                          name = shared-work-volume;
+                        }
+                      ];
+                    }
+                  )
                 ];
 
                 volumes = lib.optionals (cfg.database.password != "") [
@@ -281,4 +300,3 @@ self.lib.mkArgoApp
       };
     };
   }
-
