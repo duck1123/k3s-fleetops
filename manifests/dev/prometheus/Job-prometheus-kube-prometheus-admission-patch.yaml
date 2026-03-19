@@ -58,4 +58,4 @@ spec:
         seccompProfile:
           type: RuntimeDefault
       serviceAccountName: prometheus-kube-prometheus-admission
-  ttlSecondsAfterFinished: 60
+  ttlSecondsAfterFinished: 300

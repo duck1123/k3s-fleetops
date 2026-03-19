@@ -99,6 +99,8 @@ self.lib.mkArgoApp { inherit config lib; } {
     prometheusOperator = {
       enabled = true;
       nodeSelector."kubernetes.io/hostname" = cfg.hostAffinity;
+      # Give ArgoCD time to recognize job completion before k8s deletes it (avoids "waiting for completion of hook" sync hang)
+      admissionWebhooks.patch.ttlSecondsAfterFinished = 60;
     };
   };
 

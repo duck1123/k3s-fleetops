@@ -5,6 +5,12 @@ pkgs.writeShellScriptBin "post-process-manifests" ''
   # Remove Prometheus admission webhook RBAC resources from manifests
   # These are managed by Helm hooks and shouldn't be synced by ArgoCD
   PROM_MANIFESTS_DIR="manifests/dev/prometheus"
+  for job in "Job-prometheus-kube-prometheus-admission-create.yaml" "Job-prometheus-kube-prometheus-admission-patch.yaml"; do
+    if [ -f "$PROM_MANIFESTS_DIR/$job" ]; then
+      ${pkgs.yq-go}/bin/yq eval -i '.spec.ttlSecondsAfterFinished = 300' "$PROM_MANIFESTS_DIR/$job"
+      echo "Patched $job: ttlSecondsAfterFinished=300 (gives ArgoCD time to see completion)"
+    fi
+  done
   for resource in "Role-prometheus-kube-prometheus-admission.yaml" "RoleBinding-prometheus-kube-prometheus-admission.yaml" "ClusterRole-prometheus-kube-prometheus-admission.yaml" "ClusterRoleBinding-prometheus-kube-prometheus-admission.yaml"; do
     if [ -f "$PROM_MANIFESTS_DIR/$resource" ]; then
       rm -f "$PROM_MANIFESTS_DIR/$resource"
