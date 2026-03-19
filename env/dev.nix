@@ -676,7 +676,7 @@ in
         storage-backend = "rustfs";
       in
       {
-        enable = false;
+        enable = true;
 
         auth.jwtSecret = (secrets.nocodb or { }).jwtSecret or "";
 
