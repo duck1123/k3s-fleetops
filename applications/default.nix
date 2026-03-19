@@ -36,6 +36,7 @@
     ./mariadb
     ./marquez
     ./memos
+    ./rustfs
     ./metabase
     ./mindsdb
     ./minio
