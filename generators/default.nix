@@ -11,4 +11,6 @@ let
     }) generatorFiles
   );
 in
-{ inherit crdImports; }
+{
+  inherit crdImports;
+}

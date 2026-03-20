@@ -1,4 +1,9 @@
-{ config, crdImports, lib, ... }:
+{
+  config,
+  crdImports,
+  lib,
+  ...
+}:
 let
   cfg = config.services.sealed-secrets;
 
