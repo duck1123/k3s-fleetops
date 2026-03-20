@@ -193,6 +193,7 @@ in
     # ../applications/dozzle/default.nix
     dozzle = {
       enable = true;
+      hostAffinity = "nasnix";
 
       ingress = {
         domain = "dozzle.${tail-domain}";

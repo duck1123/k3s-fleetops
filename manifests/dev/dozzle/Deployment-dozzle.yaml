@@ -43,6 +43,8 @@ spec:
             - mountPath: /var/run/docker.sock
               name: containerd-socket
               readOnly: true
+      nodeSelector:
+        kubernetes.io/hostname: nasnix
       serviceAccountName: dozzle
       volumes:
         - hostPath:
