@@ -636,7 +636,11 @@ in
 
     # ../applications/n8n/default.nix
     n8n = {
-      enable = false;
+      enable = true;
+
+      hostAffinity = "nasnix";
+
+      encryptionKey = (secrets.n8n or { }).encryptionKey or "";
 
       ingress = {
         domain = "n8n.${tail-domain}";
