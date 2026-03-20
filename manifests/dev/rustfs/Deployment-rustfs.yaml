@@ -97,6 +97,8 @@ spec:
               name: data
             - mountPath: /mnt/rustfs
               name: logs
+      nodeSelector:
+        kubernetes.io/hostname: nasnix
       securityContext:
         fsGroup: 10001
         runAsGroup: 10001

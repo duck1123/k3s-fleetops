@@ -622,25 +622,6 @@ in
       };
     };
 
-    # ../applications/rustfs/default.nix
-    # RustFS: S3-compatible object storage (MinIO alternative). Uses port 9000 for API, 9001 for console.
-    rustfs = {
-      enable = true;
-
-      ingress = {
-        domain = "rustfs.${tail-domain}";
-        api-domain = "api-rustfs.${tail-domain}";
-        ingressClassName = "tailscale";
-        clusterIssuer = "tailscale";
-        tls.enable = true;
-      };
-
-      accessKey = (secrets.rustfs or { }).accessKey or "";
-      secretKey = (secrets.rustfs or { }).secretKey or "";
-      storageClassName = "longhorn";
-      mode = "standalone";
-    };
-
     # ../applications/minio/default.nix
     minio = {
       enable = false;
@@ -893,6 +874,26 @@ in
         assetsPath = "${nas-base}/Roms/assets";
         resourcesPath = "${nas-base}/Roms/resources";
       };
+    };
+
+    # ../applications/rustfs/default.nix
+    # RustFS: S3-compatible object storage (MinIO alternative). Uses port 9000 for API, 9001 for console.
+    rustfs = {
+      accessKey = (secrets.rustfs or { }).accessKey or "";
+      enable = true;
+      hostAffinity = "nasnix";
+
+      ingress = {
+        domain = "rustfs.${tail-domain}";
+        api-domain = "api-rustfs.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+        tls.enable = true;
+      };
+
+      mode = "standalone";
+      secretKey = (secrets.rustfs or { }).secretKey or "";
+      storageClassName = "longhorn";
     };
 
     # ../applications/satisfactory/default.nix
