@@ -75,48 +75,53 @@ self.lib.mkArgoApp
       };
     };
 
-    defaultValues = cfg: {
-      replicaCount = if cfg.mode == "standalone" then 1 else 4;
-      mode = {
-        standalone.enabled = cfg.mode == "standalone";
-        distributed.enabled = cfg.mode == "distributed";
-      };
+    defaultValues =
+      cfg:
+      {
+        replicaCount = if cfg.mode == "standalone" then 1 else 4;
+        mode = {
+          standalone.enabled = cfg.mode == "standalone";
+          distributed.enabled = cfg.mode == "distributed";
+        };
 
-      secret =
-        if cfg.accessKey != "" && cfg.secretKey != "" then
-          { existingSecret = credentials-secret; }
-        else
-          {
-            rustfs = {
-              access_key = "rustfsadmin";
-              secret_key = "rustfsadmin";
+        secret =
+          if cfg.accessKey != "" && cfg.secretKey != "" then
+            { existingSecret = credentials-secret; }
+          else
+            {
+              rustfs = {
+                access_key = "rustfsadmin";
+                secret_key = "rustfsadmin";
+              };
             };
+
+        storageclass.name = cfg.storageClassName;
+
+        ingress = with cfg.ingress; {
+          enabled = true;
+          className = ingressClassName;
+          customAnnotations = {
+            "cert-manager.io/cluster-issuer" = clusterIssuer;
           };
-
-      storageclass.name = cfg.storageClassName;
-
-      ingress = with cfg.ingress; {
-        enabled = true;
-        className = ingressClassName;
-        customAnnotations = {
-          "cert-manager.io/cluster-issuer" = clusterIssuer;
+          hosts = [
+            {
+              host = domain;
+              paths = [
+                {
+                  path = "/";
+                  pathType = "Prefix";
+                }
+              ];
+            }
+          ];
+          tls = {
+            enabled = tls.enable;
+            certManager.enabled = false;
+            existingSecret.enabled = false;
+          };
         };
-        hosts = [
-          {
-            host = domain;
-            paths = [
-              {
-                path = "/";
-                pathType = "Prefix";
-              }
-            ];
-          }
-        ];
-        tls = {
-          enabled = tls.enable;
-          certManager.enabled = false;
-          existingSecret.enabled = false;
-        };
+      }
+      // optionalAttrs (cfg.hostAffinity != null) {
+        nodeSelector."kubernetes.io/hostname" = cfg.hostAffinity;
       };
-    };
   }
