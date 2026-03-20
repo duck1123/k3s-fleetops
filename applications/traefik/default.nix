@@ -1,6 +1,7 @@
 {
   charts,
   config,
+  crdImports,
   lib,
   self,
   ...
@@ -22,5 +23,5 @@ self.lib.mkArgoApp { inherit config lib; } {
     ];
   };
 
-  extraConfig = cfg: { nixidy.resourceImports = [ ./generated.nix ]; };
+  extraConfig = cfg: { nixidy.resourceImports = [ (toString crdImports.traefik) ]; };
 }

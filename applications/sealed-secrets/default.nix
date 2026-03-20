@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, crdImports, lib, ... }:
 let
   cfg = config.services.sealed-secrets;
 
@@ -35,7 +35,7 @@ with lib;
   };
 
   config = mkIf cfg.enable {
-    nixidy.resourceImports = [ ./generated.nix ];
+    nixidy.resourceImports = [ (toString crdImports."sealed-secrets") ];
 
     applications.sealed-secrets = {
       inherit namespace;

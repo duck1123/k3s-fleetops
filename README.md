@@ -321,13 +321,9 @@ Read argo workflow token from secret
 echo "Bearer $(kubectl -n argo-workflows get secret duck.service-account-token -o=jsonpath='{.data.token}' | base64 --decode)"
 ```
 
-# Generate CRD
+# CRD schemas
 
-Generate nixidy schemas from CRDs
-
-```sh {"name": "generate-crds"}
-nix run .#generate
-```
+Nixidy CRD option modules under `generators/` are imported at evaluation time (`crdImports` in the dev env).
 
 # Build charts
 

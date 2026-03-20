@@ -12,11 +12,12 @@
   perSystem =
     { pkgs, system, ... }:
     let
+      crdImports = (import ../generators { inherit inputs system pkgs; }).crdImports;
       devEnv = inputs.nixidy.lib.mkEnvs {
         inherit pkgs;
         charts = inputs.nixhelm.chartsDerivations.${system};
         envs.dev.modules = [ ../env/dev.nix ];
-        extraSpecialArgs = { inherit self; };
+        extraSpecialArgs = { inherit self crdImports; };
         modules = [
           ../applications
           self.modules.generic.ageRecipients

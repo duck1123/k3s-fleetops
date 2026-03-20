@@ -28,11 +28,7 @@
 
   ci
   {:doc     "Run all build steps"
-   :depends [clean generate switch-charts]}
-
-  clean
-  {:doc  "Clean generated files"
-   :task (shell "rm -rf target")}
+   :depends [switch-charts]}
 
   create-harbor-password-secret
   {:doc  "Create secret for Harbor"
@@ -88,10 +84,6 @@
            pod-name         (shell get-name-command)
            command          (str "kubectl port-forward " pod-name " 9000:9000")]
        (shell command)))}
-
-  generate
-  {:doc  "Run CRD generators"
-   :task (shell "nix run '.#generate'")}
 
   ;; https://github.com/bitnami-labs/sealed-secrets/blob/main/docs/bring-your-own-certificates.md
   install-sealed-key

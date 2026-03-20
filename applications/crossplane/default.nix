@@ -1,5 +1,6 @@
 {
   config,
+  crdImports,
   lib,
   self,
   ...
@@ -17,7 +18,7 @@ self.lib.mkArgoApp { inherit config lib; } {
 
   defaultValues = cfg: { image.pullPolicy = "Always"; };
 
-  extraConfig = cfg: { nixidy.resourceImports = [ ./generated.nix ]; };
+  extraConfig = cfg: { nixidy.resourceImports = [ (toString crdImports.crossplane) ]; };
 }
 // {
   imports = [ ./providers ];
