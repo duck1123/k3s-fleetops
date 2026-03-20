@@ -173,12 +173,6 @@ in
       storageClass = "longhorn";
     };
 
-    # ../applications/crossplane/default.nix
-    crossplane = {
-      enable = false;
-      providers.digital-ocean.enable = false;
-    };
-
     # ../applications/dinsro/default.nix
     dinsro = {
       enable = false;

@@ -13,7 +13,6 @@
     ./calibre
     ./cert-manager
     ./cloudbeaver
-    ./crossplane
     ./demo
     ./dinsro
     ./dozzle
