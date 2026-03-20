@@ -795,8 +795,8 @@ in
 
     # ../applications/qbittorrent/default.nix
     qbittorrent = {
-      enable = false;
-      hostAffinity = "edgenix";
+      enable = true;
+      hostAffinity = "nasnix";
 
       ingress = {
         domain = "qbittorrent.${tail-domain}";
