@@ -821,10 +821,7 @@ in
 
       enable = true;
       hostAffinity = "edgenix";
-
-      # Use a specific stable version to avoid v6.0.4.10291 DryIoc bug
-      # Version 5.22.4.9896-ls272 is a known stable release
-      image = "linuxserver/radarr:5.22.4.9896-ls272";
+      image = "linuxserver/radarr:6.0.4.10291-ls295";
 
       ingress = {
         domain = "radarr.${tail-domain}";
