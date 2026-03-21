@@ -326,6 +326,21 @@ in
       storageClassName = "longhorn";
     };
 
+    # ../applications/home-assistant/default.nix
+    home-assistant = {
+      enable = true;
+      # hostAffinity = "edgenix";
+
+      ingress = {
+        domain = "home-assistant.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+        tls.enable = true;
+      };
+
+      storageClassName = "longhorn";
+    };
+
     # ../applications/immich/default.nix
     immich = {
       enable = false;

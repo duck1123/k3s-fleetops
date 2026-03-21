@@ -23,6 +23,7 @@
     ./harbor
     ./homer
     ./homarr
+    ./home-assistant
     ./immich
     ./kavita
     ./keycloak
