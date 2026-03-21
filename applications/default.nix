@@ -14,7 +14,6 @@
     ./cert-manager
     ./cloudbeaver
     ./demo
-    ./dinsro
     ./dozzle
     ./ersatztv
     ./forgejo

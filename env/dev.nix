@@ -173,17 +173,6 @@ in
       storageClass = "longhorn";
     };
 
-    # ../applications/dinsro/default.nix
-    dinsro = {
-      enable = false;
-
-      ingress = {
-        clusterIssuer = "tailscale";
-        domain = "dinsro.${tail-domain}";
-        ingressClassName = "tailscale";
-      };
-    };
-
     # ../applications/dozzle/default.nix
     dozzle = {
       enable = true;
