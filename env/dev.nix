@@ -405,6 +405,7 @@ in
       inherit (secrets.kite) encryptKey jwtSecret;
       enable = true;
       hostAffinity = "edgenix";
+      storageClassName = "longhorn";
 
       ingress = {
         domain = "kite.${tail-domain}";

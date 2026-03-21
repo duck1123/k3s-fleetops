@@ -56,5 +56,6 @@ spec:
         kubernetes.io/hostname: edgenix
       serviceAccountName: kite
       volumes:
-        - emptyDir: {}
-          name: kite-storage
+        - name: kite-storage
+          persistentVolumeClaim:
+            claimName: kite-storage

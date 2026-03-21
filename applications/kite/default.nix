@@ -30,13 +30,24 @@ self.lib.mkArgoApp { inherit config lib; } {
       type = types.str;
       default = "kite-default-jwt-secret-key-change-in-production";
     };
+
+    storageClassName = mkOption {
+      description = mdDoc "Storage class for the SQLite database PVC (empty string uses the cluster default)";
+      type = types.str;
+      default = "";
+    };
   };
 
   defaultValues =
     cfg: with cfg; {
       inherit encryptKey jwtSecret;
+      db.sqlite.persistence = {
+        accessModes = [ "ReadWriteOnce" ];
+        pvc.enabled = true;
+        size = "1Gi";
+        storageClass = cfg.storageClassName;
+      };
       host = ingress.domain;
-
       ingress = with cfg.ingress; {
         className = ingressClassName;
         enabled = enable;
@@ -53,7 +64,6 @@ self.lib.mkArgoApp { inherit config lib; } {
         ];
         tls = [ { hosts = [ domain ]; } ];
       };
-
       nodeSelector."kubernetes.io/hostname" = cfg.hostAffinity;
     };
 }
