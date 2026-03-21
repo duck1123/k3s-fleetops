@@ -565,6 +565,15 @@ in
       };
     };
 
+    # ../applications/metallb/default.nix
+    # Pool: high end of 192.168.0.0/24 — reserve for MetalLB VIPs; ensure your router DHCP range does not include 240–250.
+    # Traefik LoadBalancer gets one of these; point port 443 forwarding at that VIP (or the advertising node).
+    # On k3s, disable the built-in ServiceLB if it conflicts (e.g. --disable servicelb) when using MetalLB.
+    metallb = {
+      enable = true;
+      l2.addresses = [ "192.168.0.240-192.168.0.250" ];
+    };
+
     # ../applications/mariadb/default.nix
     mariadb = {
       auth = {
@@ -1120,6 +1129,7 @@ in
       };
     };
 
+    # ../applications/traefik/default.nix (service.type defaults to LoadBalancer for MetalLB VIPs)
     traefik.enable = true;
 
     # ../applications/stashapp/default.nix

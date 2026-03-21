@@ -127,7 +127,9 @@
         };
 
         ingressClassName = mkOption {
-          description = mdDoc "The name of the ingress class to use";
+          description = mdDoc ''
+            Ingress class: `traefik` for the in-cluster Traefik controller (often exposed with `Service` type LoadBalancer and MetalLB), or `tailscale` for the Tailscale Kubernetes operator.
+          '';
           type = str;
           default = "traefik";
         };

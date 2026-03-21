@@ -38,6 +38,7 @@
     ./memos
     ./rustfs
     ./metabase
+    ./metallb
     ./mindsdb
     ./minio
     ./mssql

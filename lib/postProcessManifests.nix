@@ -34,4 +34,13 @@ pkgs.writeShellScriptBin "post-process-manifests" ''
     ]' "$PROM_APP_FILE"
     echo "Updated ignoreDifferences for Prometheus admission webhook RBAC and caBundle"
   fi
+
+  # MetalLB: webhook TLS is written into the Secret by the controller; Git keeps an empty placeholder.
+  METALLB_APP_FILE="manifests/dev/apps/Application-metallb.yaml"
+  if [ -f "$METALLB_APP_FILE" ]; then
+    ${pkgs.yq-go}/bin/yq eval -i '.spec.ignoreDifferences = [
+      {"group": "", "kind": "Secret", "name": "metallb-webhook-cert", "namespace": "metallb-system", "jsonPointers": ["/data"]}
+    ]' "$METALLB_APP_FILE"
+    echo "Updated ignoreDifferences for MetalLB webhook cert Secret data"
+  fi
 ''
