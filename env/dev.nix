@@ -302,7 +302,7 @@ in
 
     # ../applications/homarr/default.nix
     homarr = {
-      enable = false;
+      enable = true;
       hostAffinity = "edgenix";
 
       ingress = {
@@ -311,7 +311,7 @@ in
         clusterIssuer = "tailscale";
       };
 
-      secretEncryptionKey = (secrets.homarr or { }).secretEncryptionKey or "";
+      secretEncryptionKey = secrets.homarr.secretEncryptionKey;
       storageClassName = "longhorn";
     };
 
