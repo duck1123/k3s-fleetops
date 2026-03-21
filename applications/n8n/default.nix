@@ -53,6 +53,7 @@ self.lib.mkArgoApp
       cfg:
       {
         ingress = with cfg.ingress; {
+          annotations."cert-manager.io/cluster-issuer" = clusterIssuer;
           enabled = true;
           className = ingressClassName;
 

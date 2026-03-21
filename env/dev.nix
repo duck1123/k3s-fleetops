@@ -670,6 +670,7 @@ in
       ingress = {
         domain = "n8n.${tail-domain}";
         ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
       };
     };
 
