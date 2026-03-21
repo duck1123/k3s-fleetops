@@ -33,6 +33,16 @@ self.lib.mkArgoApp { inherit config lib; } rec {
       type = types.str;
       default = "10Gi";
     };
+
+    trustedProxyCidrs = mkOption {
+      description = mdDoc "CIDRs for reverse-proxy forwarded headers (Kubernetes pod networks are usually in 10.0.0.0/8).";
+      type = types.listOf types.str;
+      default = [
+        "10.0.0.0/8"
+        "172.16.0.0/12"
+        "192.168.0.0/16"
+      ];
+    };
   };
 
   extraResources = cfg: {
@@ -60,6 +70,58 @@ self.lib.mkArgoApp { inherit config lib; } rec {
           spec = {
             automountServiceAccountToken = true;
             serviceAccountName = "default";
+
+            initContainers = [
+              {
+                name = "ensure-reverse-proxy-config";
+                image = "busybox:1.36";
+                imagePullPolicy = "IfNotPresent";
+                command = [
+                  "sh"
+                  "-ec"
+                  ''
+                    CONFIG=/config/configuration.yaml
+                    mkdir -p /config
+                    CIDRS="${lib.concatStringsSep " " cfg.trustedProxyCidrs}"
+                    if [ ! -f "$CONFIG" ]; then
+                      {
+                        echo "default_config:"
+                        echo ""
+                        echo "http:"
+                        echo "  use_x_forwarded_for: true"
+                        echo "  trusted_proxies:"
+                      } > "$CONFIG"
+                      for cidr in $CIDRS; do
+                        echo "    - $cidr" >> "$CONFIG"
+                      done
+                      exit 0
+                    fi
+                    if grep -q 'use_x_forwarded_for' "$CONFIG"; then
+                      exit 0
+                    fi
+                    if grep -q '^http:' "$CONFIG"; then
+                      echo "home-assistant: configuration.yaml has top-level http: but not use_x_forwarded_for — merge use_x_forwarded_for and trusted_proxies under http: manually" >&2
+                      exit 0
+                    fi
+                    {
+                      echo ""
+                      echo "http:"
+                      echo "  use_x_forwarded_for: true"
+                      echo "  trusted_proxies:"
+                    } >> "$CONFIG"
+                    for cidr in $CIDRS; do
+                      echo "    - $cidr" >> "$CONFIG"
+                    done
+                  ''
+                ];
+                volumeMounts = [
+                  {
+                    mountPath = "/config";
+                    name = "config";
+                  }
+                ];
+              }
+            ];
 
             containers = [
               {

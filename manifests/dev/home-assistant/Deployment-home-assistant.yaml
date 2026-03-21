@@ -51,6 +51,49 @@ spec:
           volumeMounts:
             - mountPath: /config
               name: config
+      initContainers:
+        - command:
+            - sh
+            - -ec
+            - |
+              CONFIG=/config/configuration.yaml
+              mkdir -p /config
+              CIDRS="10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
+              if [ ! -f "$CONFIG" ]; then
+                {
+                  echo "default_config:"
+                  echo ""
+                  echo "http:"
+                  echo "  use_x_forwarded_for: true"
+                  echo "  trusted_proxies:"
+                } > "$CONFIG"
+                for cidr in $CIDRS; do
+                  echo "    - $cidr" >> "$CONFIG"
+                done
+                exit 0
+              fi
+              if grep -q 'use_x_forwarded_for' "$CONFIG"; then
+                exit 0
+              fi
+              if grep -q '^http:' "$CONFIG"; then
+                echo "home-assistant: configuration.yaml has top-level http: but not use_x_forwarded_for — merge use_x_forwarded_for and trusted_proxies under http: manually" >&2
+                exit 0
+              fi
+              {
+                echo ""
+                echo "http:"
+                echo "  use_x_forwarded_for: true"
+                echo "  trusted_proxies:"
+              } >> "$CONFIG"
+              for cidr in $CIDRS; do
+                echo "    - $cidr" >> "$CONFIG"
+              done
+          image: busybox:1.36
+          imagePullPolicy: IfNotPresent
+          name: ensure-reverse-proxy-config
+          volumeMounts:
+            - mountPath: /config
+              name: config
       serviceAccountName: default
       volumes:
         - name: config
