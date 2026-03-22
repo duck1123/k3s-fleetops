@@ -99,6 +99,9 @@ spec:
               cpu: 100m
               memory: 256Mi
           securityContext:
+            capabilities:
+              add:
+                - SYS_TIME
             privileged: false
           volumeMounts:
             - mountPath: /etc/pihole

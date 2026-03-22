@@ -107,6 +107,12 @@ self.lib.mkArgoApp
         type = types.bool;
         default = true;
       };
+
+      enableSysTimeCapability = mkOption {
+        description = mdDoc "Grant Linux capability SYS_TIME to the Pi-hole container (quiets FTL NTP warning)";
+        type = types.bool;
+        default = true;
+      };
     };
 
     defaultValues =
@@ -168,6 +174,10 @@ self.lib.mkArgoApp
 
         podDnsConfig = {
           enabled = cfg.podDnsConfigEnabled;
+        };
+
+        capabilities = optionalAttrs cfg.enableSysTimeCapability {
+          add = [ "SYS_TIME" ];
         };
 
         resources = {
