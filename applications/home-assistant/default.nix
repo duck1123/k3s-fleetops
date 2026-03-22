@@ -43,6 +43,17 @@ self.lib.mkArgoApp { inherit config lib; } rec {
         "192.168.0.0/16"
       ];
     };
+
+    # https://github.com/AiDot-Development-Team/hass-AiDot
+    installAidot = {
+      enable = mkEnableOption "Install the AiDot custom integration (hass-AiDot) under /config/custom_components/aidot on each pod start (skips if already at the configured tag)";
+
+      tag = mkOption {
+        description = mdDoc "Git tag to fetch from hass-AiDot releases (e.g. v1.0.8)";
+        type = types.str;
+        default = "v1.0.8";
+      };
+    };
   };
 
   extraResources = cfg: {
@@ -71,57 +82,103 @@ self.lib.mkArgoApp { inherit config lib; } rec {
             automountServiceAccountToken = true;
             serviceAccountName = "default";
 
-            initContainers = [
-              {
-                name = "ensure-reverse-proxy-config";
-                image = "busybox:1.36";
-                imagePullPolicy = "IfNotPresent";
-                command = [
-                  "sh"
-                  "-ec"
-                  ''
-                    CONFIG=/config/configuration.yaml
-                    mkdir -p /config
-                    CIDRS="${lib.concatStringsSep " " cfg.trustedProxyCidrs}"
-                    if [ ! -f "$CONFIG" ]; then
+            initContainers =
+              [
+                {
+                  name = "ensure-reverse-proxy-config";
+                  image = "busybox:1.36";
+                  imagePullPolicy = "IfNotPresent";
+                  command = [
+                    "sh"
+                    "-ec"
+                    ''
+                      CONFIG=/config/configuration.yaml
+                      mkdir -p /config
+                      CIDRS="${lib.concatStringsSep " " cfg.trustedProxyCidrs}"
+                      if [ ! -f "$CONFIG" ]; then
+                        {
+                          echo "default_config:"
+                          echo ""
+                          echo "http:"
+                          echo "  use_x_forwarded_for: true"
+                          echo "  trusted_proxies:"
+                        } > "$CONFIG"
+                        for cidr in $CIDRS; do
+                          echo "    - $cidr" >> "$CONFIG"
+                        done
+                        exit 0
+                      fi
+                      if grep -q 'use_x_forwarded_for' "$CONFIG"; then
+                        exit 0
+                      fi
+                      if grep -q '^http:' "$CONFIG"; then
+                        echo "home-assistant: configuration.yaml has top-level http: but not use_x_forwarded_for — merge use_x_forwarded_for and trusted_proxies under http: manually" >&2
+                        exit 0
+                      fi
                       {
-                        echo "default_config:"
                         echo ""
                         echo "http:"
                         echo "  use_x_forwarded_for: true"
                         echo "  trusted_proxies:"
-                      } > "$CONFIG"
+                      } >> "$CONFIG"
                       for cidr in $CIDRS; do
                         echo "    - $cidr" >> "$CONFIG"
                       done
-                      exit 0
-                    fi
-                    if grep -q 'use_x_forwarded_for' "$CONFIG"; then
-                      exit 0
-                    fi
-                    if grep -q '^http:' "$CONFIG"; then
-                      echo "home-assistant: configuration.yaml has top-level http: but not use_x_forwarded_for — merge use_x_forwarded_for and trusted_proxies under http: manually" >&2
-                      exit 0
-                    fi
+                    ''
+                  ];
+                  volumeMounts = [
                     {
-                      echo ""
-                      echo "http:"
-                      echo "  use_x_forwarded_for: true"
-                      echo "  trusted_proxies:"
-                    } >> "$CONFIG"
-                    for cidr in $CIDRS; do
-                      echo "    - $cidr" >> "$CONFIG"
-                    done
-                  ''
-                ];
-                volumeMounts = [
-                  {
-                    mountPath = "/config";
-                    name = "config";
-                  }
-                ];
-              }
-            ];
+                      mountPath = "/config";
+                      name = "config";
+                    }
+                  ];
+                }
+              ]
+              ++ lib.optionals cfg.installAidot.enable [
+                {
+                  name = "install-aidot-integration";
+                  image = "busybox:1.36";
+                  imagePullPolicy = "IfNotPresent";
+                  env = [
+                    {
+                      name = "INSTALL_AIDOT_TAG";
+                      value = cfg.installAidot.tag;
+                    }
+                  ];
+                  command = [
+                    "sh"
+                    "-ec"
+                    ''
+                      set -e
+                      MARKER=/config/custom_components/aidot/.fleetops-aidot-version
+                      if [ -f "$MARKER" ] && [ "$(cat "$MARKER")" = "$INSTALL_AIDOT_TAG" ]; then
+                        echo "AiDot integration $INSTALL_AIDOT_TAG already installed; skipping"
+                        exit 0
+                      fi
+                      mkdir -p /config/custom_components /tmp/aidot-dl
+                      cd /tmp/aidot-dl
+                      rm -rf ./*
+                      wget -q -O aidot.tgz "https://github.com/AiDot-Development-Team/hass-AiDot/archive/refs/tags/$INSTALL_AIDOT_TAG.tar.gz"
+                      tar -xzf aidot.tgz
+                      DIR=$(echo hass-AiDot-*)
+                      if [ ! -d "$DIR/custom_components/aidot" ]; then
+                        echo "hass-AiDot archive missing custom_components/aidot" >&2
+                        exit 1
+                      fi
+                      rm -rf /config/custom_components/aidot
+                      cp -r "$DIR/custom_components/aidot" /config/custom_components/
+                      printf '%s' "$INSTALL_AIDOT_TAG" > "$MARKER"
+                      echo "Installed AiDot integration $INSTALL_AIDOT_TAG"
+                    ''
+                  ];
+                  volumeMounts = [
+                    {
+                      mountPath = "/config";
+                      name = "config";
+                    }
+                  ];
+                }
+              ];
 
             containers = [
               {

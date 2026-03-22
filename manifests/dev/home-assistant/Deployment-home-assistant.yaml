@@ -94,6 +94,39 @@ spec:
           volumeMounts:
             - mountPath: /config
               name: config
+        - command:
+            - sh
+            - -ec
+            - |
+              set -e
+              MARKER=/config/custom_components/aidot/.fleetops-aidot-version
+              if [ -f "$MARKER" ] && [ "$(cat "$MARKER")" = "$INSTALL_AIDOT_TAG" ]; then
+                echo "AiDot integration $INSTALL_AIDOT_TAG already installed; skipping"
+                exit 0
+              fi
+              mkdir -p /config/custom_components /tmp/aidot-dl
+              cd /tmp/aidot-dl
+              rm -rf ./*
+              wget -q -O aidot.tgz "https://github.com/AiDot-Development-Team/hass-AiDot/archive/refs/tags/$INSTALL_AIDOT_TAG.tar.gz"
+              tar -xzf aidot.tgz
+              DIR=$(echo hass-AiDot-*)
+              if [ ! -d "$DIR/custom_components/aidot" ]; then
+                echo "hass-AiDot archive missing custom_components/aidot" >&2
+                exit 1
+              fi
+              rm -rf /config/custom_components/aidot
+              cp -r "$DIR/custom_components/aidot" /config/custom_components/
+              printf '%s' "$INSTALL_AIDOT_TAG" > "$MARKER"
+              echo "Installed AiDot integration $INSTALL_AIDOT_TAG"
+          env:
+            - name: INSTALL_AIDOT_TAG
+              value: v1.0.8
+          image: busybox:1.36
+          imagePullPolicy: IfNotPresent
+          name: install-aidot-integration
+          volumeMounts:
+            - mountPath: /config
+              name: config
       serviceAccountName: default
       volumes:
         - name: config
