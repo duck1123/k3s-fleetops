@@ -36,54 +36,150 @@ self.lib.mkArgoApp
     extraOptions = {
       auth = {
         email = mkOption {
-          description = mdDoc "The admin email";
+          description = mdDoc "Admin email";
           type = types.str;
-          default = defaultApiDomain;
+          default = "admin@example.com";
         };
 
         password = mkOption {
-          description = mdDoc "The password";
+          description = mdDoc "Web admin password";
           type = types.str;
           default = "CHANGEME";
         };
       };
 
       storageClass = mkOption {
-        description = mdDoc "The storage class for persistence";
+        description = mdDoc "Storage class for the Pi-hole data PVC";
         type = types.str;
         default = "longhorn";
       };
 
+      pvcSize = mkOption {
+        description = mdDoc "Persistent volume size for Pi-hole configuration and data";
+        type = types.str;
+        default = "2Gi";
+      };
+
       timezone = mkOption {
-        description = mdDoc "The time zone";
+        description = mdDoc "Container TZ (Pi-hole / FTL)";
         type = types.str;
         default = "America/Detroit";
+      };
+
+      dns1 = mkOption {
+        description = mdDoc "Upstream DNS server 1 (Pi-hole `DNS1` value)";
+        type = types.str;
+        default = "1.1.1.1";
+      };
+
+      dns2 = mkOption {
+        description = mdDoc "Upstream DNS server 2 (Pi-hole `DNS2` value)";
+        type = types.str;
+        default = "1.0.0.1";
+      };
+
+      serviceDnsType = mkOption {
+        description = mdDoc "`serviceDns.type` — use LoadBalancer with MetalLB so LAN clients can use a stable VIP for DNS";
+        type = types.str;
+        default = "LoadBalancer";
+      };
+
+      serviceDnsMixedService = mkOption {
+        description = mdDoc "Single Service with TCP+UDP port 53 (recommended for LoadBalancer / MetalLB)";
+        type = types.bool;
+        default = true;
+      };
+
+      serviceDnsLoadBalancerIP = mkOption {
+        description = mdDoc "Optional fixed MetalLB IP for the DNS service (null = pool assigns)";
+        type = types.nullOr types.str;
+        default = null;
+      };
+
+      serviceDhcpEnabled = mkOption {
+        description = mdDoc "Expose DHCP `Service` (usually unnecessary in Kubernetes; disable unless you use Pi-hole DHCP through the cluster)";
+        type = types.bool;
+        default = false;
+      };
+
+      podDnsConfigEnabled = mkOption {
+        description = mdDoc "Keep chart default pod DNS so the pod can resolve during bootstrap (uses 127.0.0.1 + fallback)";
+        type = types.bool;
+        default = true;
       };
     };
 
     defaultValues =
-      cfg: with cfg; {
+      cfg:
+      {
         admin = {
           enabled = true;
           existingSecret = password-secret;
+          passwordKey = "password";
         };
 
         ingress = with cfg.ingress; {
           inherit ingressClassName;
 
-          enabled = enable;
+          enabled = true;
           hosts = [ domain ];
+
+          annotations = optionalAttrs (clusterIssuer != "") {
+            "cert-manager.io/cluster-issuer" = clusterIssuer;
+          };
+
           tls = [
             {
-              secretName = "pihole-tls";
+              secretName = tls.secretName;
               hosts = [ domain ];
             }
           ];
         };
 
-        persistence = { inherit (cfg) storageClass; };
-        pihole = { inherit (cfg) timezone; };
-        webui.admin = { inherit (cfg.auth) email password; };
+        virtualHost = cfg.ingress.domain;
+
+        persistentVolumeClaim = {
+          enabled = true;
+          inherit (cfg) storageClass;
+          size = cfg.pvcSize;
+          accessModes = [ "ReadWriteOnce" ];
+        };
+
+        extraEnvVars = {
+          TZ = cfg.timezone;
+          FTLCONF_dns_listeningMode = "all";
+        };
+
+        DNS1 = cfg.dns1;
+        DNS2 = cfg.dns2;
+
+        serviceDns =
+          {
+            type = cfg.serviceDnsType;
+            mixedService = cfg.serviceDnsMixedService;
+          }
+          // optionalAttrs (cfg.serviceDnsLoadBalancerIP != null) {
+            loadBalancerIP = cfg.serviceDnsLoadBalancerIP;
+          };
+
+        serviceDhcp = {
+          enabled = cfg.serviceDhcpEnabled;
+        };
+
+        podDnsConfig = {
+          enabled = cfg.podDnsConfigEnabled;
+        };
+
+        resources = {
+          requests = {
+            cpu = "100m";
+            memory = "256Mi";
+          };
+          limits = {
+            cpu = "500m";
+            memory = "512Mi";
+          };
+        };
       };
 
   }

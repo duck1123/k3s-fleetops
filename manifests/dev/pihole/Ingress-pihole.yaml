@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: tailscale
+  labels:
+    app: pihole
+    chart: pihole-2.34.0
+    heritage: Helm
+    release: pihole
+  name: pihole
+  namespace: pihole
+spec:
+  ingressClassName: tailscale
+  rules:
+    - host: pihole.bearded-snake.ts.net
+      http:
+        paths:
+          - backend:
+              service:
+                name: pihole-web
+                port:
+                  name: http
+            path: /
+            pathType: ImplementationSpecific
+  tls:
+    - hosts:
+        - pihole.bearded-snake.ts.net
+      secretName: pihole-tls

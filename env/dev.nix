@@ -725,14 +725,19 @@ in
 
     # ../applications/pihole/default.nix
     pihole = {
-      enable = false;
-
       auth = { inherit (secrets.pihole) email password; };
+      enable = true;
+      hostAffinity = "nasnix";
 
       ingress = {
         domain = "pihole.${tail-domain}";
         ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+        tls.enable = true;
       };
+
+      serviceDnsLoadBalancerIP = "192.168.0.242";
+      storageClass = "longhorn";
     };
 
     # ../applications/postgresql/default.nix
