@@ -108,10 +108,13 @@ self.lib.mkArgoApp
         default = true;
       };
 
-      enableSysTimeCapability = mkOption {
-        description = mdDoc "Grant Linux capability SYS_TIME to the Pi-hole container (quiets FTL NTP warning)";
-        type = types.bool;
-        default = true;
+      extraLinuxCapabilities = mkOption {
+        description = mdDoc "Linux capabilities added to the Pi-hole container (`capabilities.add` in the Helm chart)";
+        type = types.listOf types.str;
+        default = [
+          "SYS_TIME"
+          "SYS_NICE"
+        ];
       };
     };
 
@@ -176,8 +179,31 @@ self.lib.mkArgoApp
           enabled = cfg.podDnsConfigEnabled;
         };
 
-        capabilities = optionalAttrs cfg.enableSysTimeCapability {
-          add = [ "SYS_TIME" ];
+        capabilities = optionalAttrs (cfg.extraLinuxCapabilities != [ ]) {
+          add = cfg.extraLinuxCapabilities;
+        };
+
+        # Chart default probes call `/api/info/login` + `jq` (v5 API). Pi-hole v6 image often has no `jq` and a different API — probes never succeed.
+        # Use built-in httpGet on `/admin` (chart template); HTTP 2xx/3xx counts as healthy.
+        probes = {
+          liveness = {
+            type = "httpGet";
+            port = "http";
+            scheme = "HTTP";
+            enabled = true;
+            initialDelaySeconds = 90;
+            failureThreshold = 5;
+            timeoutSeconds = 5;
+          };
+          readiness = {
+            type = "httpGet";
+            port = "http";
+            scheme = "HTTP";
+            enabled = true;
+            initialDelaySeconds = 30;
+            failureThreshold = 6;
+            timeoutSeconds = 5;
+          };
         };
 
         resources = {

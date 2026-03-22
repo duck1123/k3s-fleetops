@@ -57,13 +57,12 @@ spec:
           image: pihole/pihole:2025.08.0
           imagePullPolicy: IfNotPresent
           livenessProbe:
-            exec:
-              command:
-                - /bin/sh
-                - -c
-                - curl --silent http://localhost/api/info/login | jq 'if (.dns | not) then halt_error(1) end'
-            failureThreshold: 10
-            initialDelaySeconds: 60
+            failureThreshold: 5
+            httpGet:
+              path: /admin
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 90
             timeoutSeconds: 5
           name: pihole
           ports:
@@ -83,13 +82,12 @@ spec:
               name: client-udp
               protocol: UDP
           readinessProbe:
-            exec:
-              command:
-                - /bin/sh
-                - -c
-                - curl --silent http://localhost/api/info/login | jq 'if (.dns | not) then halt_error(1) end'
-            failureThreshold: 10
-            initialDelaySeconds: 60
+            failureThreshold: 6
+            httpGet:
+              path: /admin
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 30
             timeoutSeconds: 5
           resources:
             limits:
@@ -102,6 +100,7 @@ spec:
             capabilities:
               add:
                 - SYS_TIME
+                - SYS_NICE
             privileged: false
           volumeMounts:
             - mountPath: /etc/pihole
