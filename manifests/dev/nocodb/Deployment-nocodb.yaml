@@ -35,6 +35,8 @@ spec:
               value: /usr/app/data
             - name: NC_DISABLE_TELE
               value: "true"
+            - name: NC_ALLOW_LOCAL_EXTERNAL_DBS
+              value: "true"
             - name: NC_AUTH_JWT_SECRET
               valueFrom:
                 secretKeyRef:

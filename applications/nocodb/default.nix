@@ -178,6 +178,16 @@ self.lib.mkArgoApp
         type = types.int;
         default = 1;
       };
+
+      # https://nocodb.com/docs/self-hosting/environment-variables — defaults to false (blocks private IPs).
+      allowLocalExternalDatabases = mkOption {
+        description = mdDoc ''
+          Set `NC_ALLOW_LOCAL_EXTERNAL_DBS=true` so the “external connection” UI can use hosts that resolve to
+          private/cluster addresses (e.g. `postgresql.postgresql` → ClusterIP). NocoDB blocks these by default (SSRF protection).
+        '';
+        type = types.bool;
+        default = false;
+      };
     };
 
     extraResources = cfg: {
@@ -302,6 +312,10 @@ self.lib.mkArgoApp
                         value = if cfg.disableTelemetry then "true" else "false";
                       }
                     ]
+                    ++ optional cfg.allowLocalExternalDatabases {
+                      name = "NC_ALLOW_LOCAL_EXTERNAL_DBS";
+                      value = "true";
+                    }
                     ++ optional (cfg.auth.jwtSecret != "") {
                       name = "NC_AUTH_JWT_SECRET";
                       valueFrom.secretKeyRef = {

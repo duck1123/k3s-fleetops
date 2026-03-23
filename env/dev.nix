@@ -674,9 +674,9 @@ in
         storage-backend = "rustfs";
       in
       {
-        enable = true;
-
+        allowLocalExternalDatabases = true;
         auth.jwtSecret = (secrets.nocodb or { }).jwtSecret or "";
+        enable = true;
 
         ingress = {
           domain = "nocodb.${tail-domain}";
