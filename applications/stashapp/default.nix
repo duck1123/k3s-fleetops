@@ -274,7 +274,7 @@ self.lib.mkArgoApp { inherit config lib; } rec {
       "${name}-${name}-config".spec = {
         inherit (cfg) storageClassName;
         accessModes = [ "ReadWriteOnce" ];
-        resources.requests.storage = "10Gi";
+        resources.requests.storage = "30Gi";
       };
       "${name}-${name}-data".spec =
         if cfg.nfs.enable then
