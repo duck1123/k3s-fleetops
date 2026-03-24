@@ -43,7 +43,7 @@ spec:
                 secretKeyRef:
                   key: password
                   name: sonarr-database-password
-          image: linuxserver/sonarr:v4.0.17.2952
+          image: linuxserver/sonarr:version-4.0.17.2952
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3
