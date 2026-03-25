@@ -76,6 +76,16 @@ self.lib.mkArgoApp
             }
           ];
         };
+
+        # Match the Tailscale / cert-manager hostname so redirects, cookies, and webhooks work.
+        main = {
+          editorBaseUrl = "https://${cfg.ingress.domain}";
+          extraEnvVars = {
+            N8N_HOST = cfg.ingress.domain;
+            N8N_PROTOCOL = "https";
+            WEBHOOK_URL = "https://${cfg.ingress.domain}/";
+          };
+        };
       }
       // optionalAttrs (cfg.hostAffinity != null) {
         nodeSelector."kubernetes.io/hostname" = cfg.hostAffinity;

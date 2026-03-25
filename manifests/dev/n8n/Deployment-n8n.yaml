@@ -53,6 +53,12 @@ spec:
               value: "30"
             - name: N8N_EDITOR_BASE_URL
               value: https://n8n.bearded-snake.ts.net
+            - name: N8N_HOST
+              value: n8n.bearded-snake.ts.net
+            - name: N8N_PROTOCOL
+              value: https
+            - name: WEBHOOK_URL
+              value: https://n8n.bearded-snake.ts.net/
           envFrom:
             - configMapRef:
                 name: n8n-database-configmap
