@@ -6,7 +6,6 @@
   ([babashka.fs :as fs]
    [clj-yaml.core :as yaml]
    [clojure.string :as str]
-   [k3s-fleetops.core :as c]
    [k3s-fleetops.postgres :as pg])
 
   apply-git-hooks
@@ -15,12 +14,7 @@
 
   apply-master-application
   {:doc     "Install 00-master argo application"
-   :depends [build]
    :task    (shell "kubectl apply -f target/infra-manifests/00-master.yaml")}
-
-  build
-  {:doc  "Convert all edn files to yaml"
-   :task (exec 'k3s-fleetops.core/build {})}
 
   build-charts
   {:doc  "Build nixidy charts"
@@ -29,22 +23,6 @@
   ci
   {:doc     "Run all build steps"
    :depends [switch-charts]}
-
-  create-harbor-password-secret
-  {:doc  "Create secret for Harbor"
-   :task (c/create-sealed-secret :harbor)}
-
-  create-keycloak-password-secret
-  {:doc  "Create secret for Keycloak"
-   :task (c/create-sealed-secret :keycloak)}
-
-  create-sealed-secret
-  {:doc  "Create sealed secrets"
-   :task (exec 'k3s-fleetops.core/create-sealed-secret-command {})}
-
-  create-secret
-  {:doc  "Create secrets"
-   :task (exec 'k3s-fleetops.core/create-secret-command {})}
 
   decrypt
   {:doc "Extract secrets from encrypted form"
@@ -145,10 +123,6 @@
   generate-key-file
   {:doc  "Generate random keyfile"
    :task (shell "openssl rand -out keepass.keyx 256")}
-
-  k3d-create
-  {:doc  "Create a k3d cluster"
-   :task (c/k3d-create)}
 
   apply-sealed-key-label
   {:doc "Marked the sealed key as active"

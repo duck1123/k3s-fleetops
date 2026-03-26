@@ -129,26 +129,6 @@ Compile all edn templates to yaml
 bb build
 ```
 
-# K3D Setup
-
-## Registry
-
-Create a k3d registry for storing localally-built dev images
-
-```sh {"name":"create-registry","id":"01J9HAPD89ZH24ER7CP99BVFM4"}
-bbg k3d-create-registry
-```
-
-## Cluster
-
-Create a k3d cluster
-
-```sh {"name":"create-cluster","id":"01J9HAPD89ZH24ER7CPE4916TR"}
-bbg k3d-create
-```
-
-See https://github.com/duck1123/dotfiles
-
 # Other
 
 ### Check Pod Status
@@ -289,24 +269,6 @@ Flag sealed secret key as active
 
 ```sh {"id":"01J9HAPD89ZH24ER7CPY71BQTB","name":"apply-sealed-key-label"}
 bb apply-sealed-key-label
-```
-
-# Clean Up
-
-## Delete Cluster
-
-Completely destroy dev cluster
-
-```sh {"excludeFromRunAll":"true","id":"01JBT0MF6SEC8NMMCZW8ZPSWA5","name":"delete-cluster"}
-k3d cluster delete
-```
-
-## Delete Registry
-
-Delete registry for locally-built images
-
-```sh {"excludeFromRunAll":"true","id":"01J9M6SR2R5G8JE646YKSHWZ9T","name":"delete-registry"}
-k3d registry delete k3d-myregistry.localtest.me
 ```
 
 # Inspect
