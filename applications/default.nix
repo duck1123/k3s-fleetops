@@ -48,6 +48,7 @@
     ./metallb.nix
     ./mindsdb.nix
     ./minio.nix
+    ./mosquitto.nix
     ./mssql.nix
     ./n8n.nix
     ./nocodb.nix

@@ -540,6 +540,15 @@ in
       l2.excludeNodes = [ "powerspecnix" ];
     };
 
+    # MQTT (TCP 1883): `kubectl get svc -n mosquitto mosquitto` when enabled; set `enable = true` or use ClusterIP alongside HiveMQ.
+    mosquitto = {
+      enable = false;
+      hostAffinity = "edgenix";
+
+      serviceType = "LoadBalancer";
+      storageClassName = "longhorn";
+    };
+
     n8n = {
       enable = false;
 
