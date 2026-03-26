@@ -131,14 +131,6 @@ bb build
 
 # Other
 
-### Check Pod Status
-
-Wait until all pods are running or completed
-
-```sh {"name":"get-pods","id":"01J9EFNB7W63FD7K94XHHQB0Z9"}
-kubectl get pods -A
-```
-
 ## Argo CD
 
 ### Install
@@ -249,28 +241,6 @@ spec:
 EOF
 ```
 
-### Install Sealed Key
-
-Ensure that `001-infra` is properly healthy
-
-Ensure that `tls.crt` and `tls.key` have been installed to the root of the directory. (from Keepass)
-
-#### Upload sealed key to server
-
-Create a secret from the keypair
-
-```sh {"id":"01J9HAPD89ZH24ER7CPX4JV20M","name":"install-sealed-key"}
-bb install-sealed-key
-```
-
-#### Mark key as active
-
-Flag sealed secret key as active
-
-```sh {"id":"01J9HAPD89ZH24ER7CPY71BQTB","name":"apply-sealed-key-label"}
-bb apply-sealed-key-label
-```
-
 # Inspect
 
 ## Argo Workflows
@@ -282,10 +252,6 @@ Read argo workflow token from secret
 ```sh {"name": "read-token"}
 echo "Bearer $(kubectl -n argo-workflows get secret duck.service-account-token -o=jsonpath='{.data.token}' | base64 --decode)"
 ```
-
-# CRD schemas
-
-Nixidy CRD option modules under `generators/` are imported at evaluation time (`crdImports` in the dev env).
 
 # Build charts
 
