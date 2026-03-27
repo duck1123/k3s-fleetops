@@ -13,8 +13,8 @@ self.lib.mkArgoApp { inherit config lib; } {
   chart = lib.helm.downloadHelmChart {
     repo = "https://charts.longhorn.io";
     chart = "longhorn";
-    version = "1.10.2";
-    chartHash = "sha256-Vb0UZWbR4Xp5XHDyhm3USxqEMY191+36UVJesxD/L9A=";
+    version = "1.11.1";
+    chartHash = "sha256-SNioTADFpERPgGtYU3R3simosglVHhORmATH1os1Q/s=";
   };
 
   uses-ingress = true;
