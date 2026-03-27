@@ -1,4 +1,5 @@
 {
+  charts,
   config,
   lib,
   self,
@@ -10,12 +11,7 @@ self.lib.mkArgoApp { inherit config lib; } {
   namespace = "longhorn-system";
 
   # https://artifacthub.io/packages/helm/longhorn/longhorn
-  chart = lib.helm.downloadHelmChart {
-    repo = "https://charts.longhorn.io";
-    chart = "longhorn";
-    version = "1.11.1";
-    chartHash = "sha256-SNioTADFpERPgGtYU3R3simosglVHhORmATH1os1Q/s=";
-  };
+  chart = charts.longhorn.longhorn;
 
   uses-ingress = true;
 
