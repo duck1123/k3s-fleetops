@@ -2,13 +2,13 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.15.0
+    controller-gen.kubebuilder.io/version: v0.17.1
   labels:
     app.kubernetes.io/instance: longhorn
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: longhorn
-    app.kubernetes.io/version: v1.8.1
-    helm.sh/chart: longhorn-1.8.1
+    app.kubernetes.io/version: v1.9.2
+    helm.sh/chart: longhorn-1.9.2
     longhorn-manager: ""
   name: engines.longhorn.io
 spec:
@@ -20,7 +20,6 @@ spec:
     shortNames:
       - lhe
     singular: engine
-  preserveUnknownFields: false
   scope: Namespaced
   versions:
     - additionalPrinterColumns:
@@ -43,6 +42,8 @@ spec:
         - jsonPath: .metadata.creationTimestamp
           name: Age
           type: date
+      deprecated: true
+      deprecationWarning: longhorn.io/v1beta1 Engine is deprecated; use longhorn.io/v1beta2 Engine instead
       name: v1beta1
       schema:
         openAPIV3Schema:
@@ -70,7 +71,7 @@ spec:
             status:
               x-kubernetes-preserve-unknown-fields: true
           type: object
-      served: true
+      served: false
       storage: false
       subresources:
         status: {}
@@ -125,9 +126,6 @@ spec:
               properties:
                 active:
                   type: boolean
-                backendStoreDriver:
-                  description: Deprecated:Replaced by field `dataEngine`.
-                  type: string
                 backupVolume:
                   type: string
                 dataEngine:
@@ -139,14 +137,12 @@ spec:
                   type: string
                 disableFrontend:
                   type: boolean
-                engineImage:
-                  description: 'Deprecated: Replaced by field `image`.'
-                  type: string
                 frontend:
                   enum:
                     - blockdev
                     - iscsi
                     - nvmf
+                    - ublk
                     - ""
                   type: string
                 image:
@@ -385,10 +381,17 @@ spec:
                   type: string
                 started:
                   type: boolean
+                starting:
+                  type: boolean
                 storageIP:
                   type: string
+                ublkID:
+                  format: int32
+                  type: integer
                 unmapMarkSnapChainRemovedEnabled:
                   type: boolean
+                uuid:
+                  type: string
               type: object
           type: object
       served: true

@@ -2,13 +2,13 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.15.0
+    controller-gen.kubebuilder.io/version: v0.17.1
   labels:
     app.kubernetes.io/instance: longhorn
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: longhorn
-    app.kubernetes.io/version: v1.8.1
-    helm.sh/chart: longhorn-1.8.1
+    app.kubernetes.io/version: v1.9.2
+    helm.sh/chart: longhorn-1.9.2
     longhorn-manager: ""
   name: recurringjobs.longhorn.io
 spec:
@@ -50,6 +50,8 @@ spec:
           jsonPath: .spec.labels
           name: Labels
           type: string
+      deprecated: true
+      deprecationWarning: longhorn.io/v1beta1 RecurringJob is deprecated; use longhorn.io/v1beta2 RecurringJob instead
       name: v1beta1
       schema:
         openAPIV3Schema:
@@ -77,7 +79,7 @@ spec:
             status:
               x-kubernetes-preserve-unknown-fields: true
           type: object
-      served: true
+      served: false
       storage: false
       subresources:
         status: {}
@@ -86,7 +88,7 @@ spec:
           jsonPath: .spec.groups
           name: Groups
           type: string
-        - description: Should be one of "snapshot", "snapshot-force-create", "snapshot-cleanup", "snapshot-delete", "backup", "backup-force-create" or "filesystem-trim"
+        - description: Should be one of "snapshot", "snapshot-force-create", "snapshot-cleanup", "snapshot-delete", "backup", "backup-force-create", "filesystem-trim" or "system-backup"
           jsonPath: .spec.task
           name: Task
           type: string
@@ -158,7 +160,7 @@ spec:
                     type: string
                   description: |-
                     The parameters of the snapshot/backup.
-                    Support parameters: "full-backup-interval".
+                    Support parameters: "full-backup-interval", "volume-backup-policy".
                   type: object
                 retain:
                   description: The retain count of the snapshot/backup.
@@ -166,7 +168,7 @@ spec:
                 task:
                   description: |-
                     The recurring job task.
-                    Can be "snapshot", "snapshot-force-create", "snapshot-cleanup", "snapshot-delete", "backup", "backup-force-create" or "filesystem-trim"
+                    Can be "snapshot", "snapshot-force-create", "snapshot-cleanup", "snapshot-delete", "backup", "backup-force-create", "filesystem-trim" or "system-backup".
                   enum:
                     - snapshot
                     - snapshot-force-create
@@ -175,6 +177,7 @@ spec:
                     - backup
                     - backup-force-create
                     - filesystem-trim
+                    - system-backup
                   type: string
               type: object
             status:
