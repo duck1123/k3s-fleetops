@@ -280,7 +280,7 @@ in
       };
     };
 
-    harbor-nix = {
+    harbor = {
       domain = "harbor.${base-domain}";
       enable = false;
     };

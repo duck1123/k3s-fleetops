@@ -18,8 +18,7 @@
         charts = inputs.nixhelm.chartsDerivations.${system};
         envs.dev.modules = [ ../env/dev.nix ];
         extraSpecialArgs = { inherit self crdImports; };
-        modules = [
-          ../applications
+        modules = (builtins.attrValues self.nixidyApps) ++ [
           self.modules.generic.ageRecipients
           self.modules.generic.preEncryptedSecretsDir
           ./secretManifest.nix
