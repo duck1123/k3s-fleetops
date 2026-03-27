@@ -7,8 +7,8 @@ metadata:
     app.kubernetes.io/instance: cloudbeaver
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: cloudbeaver
-    app.kubernetes.io/version: 25.1.5
-    helm.sh/chart: cloudbeaver-1.0.4
+    app.kubernetes.io/version: 25.2.5
+    helm.sh/chart: cloudbeaver-1.0.10
   name: cloudbeaver-test-connection
   namespace: cloudbeaver
 spec:
