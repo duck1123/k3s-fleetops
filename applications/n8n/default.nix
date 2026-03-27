@@ -25,8 +25,8 @@ self.lib.mkArgoApp
     chart = lib.helm.downloadHelmChart {
       repo = "https://community-charts.github.io/helm-charts";
       chart = "n8n";
-      version = "1.16.31";
-      chartHash = "sha256-Cw7xJxtBuwWvRoZjrHS7PYbisyYcFtihm1Y8cFV1zDA=";
+      version = "1.16.33";
+      chartHash = "sha256-fmbF78bCn+X+7SvFtSTtHbDVxaP6my/QGSBbN7OIdeM=";
     };
 
     uses-ingress = true;

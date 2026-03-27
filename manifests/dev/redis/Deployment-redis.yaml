@@ -30,7 +30,7 @@ spec:
                 secretKeyRef:
                   key: password
                   name: redis-password
-          image: redis:7-alpine
+          image: redis:8-alpine
           imagePullPolicy: IfNotPresent
           livenessProbe:
             exec:

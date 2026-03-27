@@ -34,8 +34,8 @@ self.lib.mkArgoApp
     chart = lib.helm.downloadHelmChart {
       repo = "https://charts.rustfs.com/";
       chart = "rustfs";
-      version = "0.0.85";
-      chartHash = "sha256-8Y7MVBznOnnQAfWFOAxQNnUYtzLOAopkHfZZB6cZL/k=";
+      version = "0.0.90";
+      chartHash = "sha256-QoBu6mNbuJeF8DZLTQfG+QhZP/mU2ZD/uq6TZbPbqpU=";
     };
 
     uses-ingress = true;

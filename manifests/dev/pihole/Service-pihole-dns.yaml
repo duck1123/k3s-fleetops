@@ -4,7 +4,7 @@ metadata:
   labels:
     app: pihole
     app.kubernetes.io/name: pihole
-    chart: pihole-2.34.0
+    chart: pihole-2.35.0
     heritage: Helm
     release: pihole
   name: pihole-dns

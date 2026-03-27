@@ -32,8 +32,8 @@ self.lib.mkArgoApp
     chart = helm.downloadHelmChart {
       repo = "https://pkgs.tailscale.com/helmcharts";
       chart = "tailscale-operator";
-      version = "1.92.4";
-      chartHash = "sha256-uFzbD6qJqgxwAR7v4+t1fd89S7dyugnFWBlpA8MgtHE=";
+      version = "1.94.2";
+      chartHash = "sha256-Lf+DnB+C3WOEJUeAa5cEiWzfNjSl7ChBv4bT4IwzVT0=";
     };
 
     extraOptions = {

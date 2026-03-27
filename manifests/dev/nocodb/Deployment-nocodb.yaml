@@ -62,7 +62,7 @@ spec:
                 secretKeyRef:
                   key: secretKey
                   name: nocodb-storage
-          image: nocodb/nocodb:0.301.4
+          image: nocodb/nocodb:0.301.5
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5

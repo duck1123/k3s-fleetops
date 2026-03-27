@@ -3,7 +3,7 @@ kind: PersistentVolumeClaim
 metadata:
   labels:
     app: pihole
-    chart: pihole-2.34.0
+    chart: pihole-2.35.0
     component: ""
     heritage: Helm
     release: pihole

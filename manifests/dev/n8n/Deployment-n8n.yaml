@@ -7,8 +7,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: n8n
     app.kubernetes.io/part-of: n8n
-    app.kubernetes.io/version: 2.11.4
-    helm.sh/chart: n8n-1.16.31
+    app.kubernetes.io/version: 2.13.3
+    helm.sh/chart: n8n-1.16.33
   name: n8n
   namespace: n8n
 spec:
@@ -25,15 +25,15 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: 928e98866599d7bb707ed7fa47f7396d6791cc28f067c5a80b01eb2ae6db9c72
+        checksum/config: 7a61718cfe719099aa15efb976d72a36fedee0c30253c3acb88723c9c52efc24
       labels:
         app.kubernetes.io/component: main
         app.kubernetes.io/instance: n8n
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: n8n
         app.kubernetes.io/part-of: n8n
-        app.kubernetes.io/version: 2.11.4
-        helm.sh/chart: n8n-1.16.31
+        app.kubernetes.io/version: 2.13.3
+        helm.sh/chart: n8n-1.16.33
     spec:
       containers:
         - env:
@@ -80,7 +80,7 @@ spec:
                 name: n8n-binary-data-configmap
             - secretRef:
                 name: n8n-encryption-key
-          image: n8nio/n8n:2.11.4
+          image: n8nio/n8n:2.13.3
           imagePullPolicy: IfNotPresent
           livenessProbe:
             httpGet:

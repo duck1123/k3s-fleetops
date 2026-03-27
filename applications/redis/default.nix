@@ -31,7 +31,7 @@ self.lib.mkArgoApp
       image = mkOption {
         description = mdDoc "The docker image";
         type = types.str;
-        default = "redis:7-alpine";
+        default = "redis:8-alpine";
       };
 
       storageClassName = mkOption {

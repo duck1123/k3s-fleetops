@@ -48,7 +48,7 @@ self.lib.mkArgoApp
       image = mkOption {
         description = mdDoc "NocoDB Docker image";
         type = types.str;
-        default = "nocodb/nocodb:0.301.4";
+        default = "nocodb/nocodb:0.301.5";
       };
 
       service.port = mkOption {
