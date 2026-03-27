@@ -15,8 +15,8 @@
       chart = helm.downloadHelmChart {
         repo = "https://avistotelecom.github.io/charts/";
         chart = "cloudbeaver";
-        version = "1.0.10";
-        chartHash = "sha256-uvkOcYIe00mfqq+WehZAt9WXurQspMB4c+6lFjaqZDs=";
+        version = "1.1.3";
+        chartHash = "sha256-/SDk4iHzH2MZFqY7KtUu5nMbBVcBEi5s1flT2ZbjD6k=";
       };
 
       uses-ingress = true;
