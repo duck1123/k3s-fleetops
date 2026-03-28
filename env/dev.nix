@@ -206,7 +206,7 @@ in
 
     forgejo = {
       admin = { inherit (secrets.forgejo.admin) password username; };
-      enable = false;
+      enable = true;
 
       ingress = {
         domain = "forgejo.${tail-domain}";

@@ -2,6 +2,7 @@
 {
   flake.nixidyApps.forgejo =
     {
+      charts,
       config,
       lib,
       pkgs,
@@ -34,11 +35,7 @@
         };
 
         # https://artifacthub.io/packages/helm/forgejo-helm/forgejo
-        chart = self.lib.helmChart {
-          inherit pkgs;
-          chartTgz = ../../chart-archives/forgejo-12.5.2.tgz;
-          chartName = "forgejo";
-        };
+        chart = charts.forgejo-helm.forgejo;
 
         uses-ingress = true;
 
