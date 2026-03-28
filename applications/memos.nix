@@ -11,6 +11,11 @@
     with lib;
     let
       db-secret = "memos-database";
+      # Memos parses MEMOS_DSN with net/url; userinfo must be percent-encoded (passwords with : ) @ ; etc.).
+      enc = pkgs.lib.escapeURL;
+      postgresDsn =
+        cfg:
+        "postgresql://${enc cfg.database.username}:${enc cfg.database.password}@${cfg.database.host}:${toString cfg.database.port}/${cfg.database.name}?sslmode=disable";
     in
     self.lib.mkArgoApp
       {
@@ -57,7 +62,7 @@
               default = "postgres";
             };
             password = mkOption {
-              description = mdDoc "Database password (same namespace as the app; use shared cluster secret value)";
+              description = mdDoc "Database password (embedded in DSN with URL-encoding for special characters)";
               type = types.str;
               default = "";
             };
@@ -67,7 +72,7 @@
         sopsSecrets =
           cfg:
           optionalAttrs (cfg.database.password != "") {
-            ${db-secret}.postgres-password = cfg.database.password;
+            ${db-secret}.memos-dsn = postgresDsn cfg;
           };
 
         defaultValues =
@@ -94,13 +99,12 @@
           // optionalAttrs (cfg.database.password != "") {
             env = {
               MEMOS_DRIVER = "postgres";
-              DB_PASSWORD = {
+              MEMOS_DSN = {
                 valueFrom.secretKeyRef = {
                   name = db-secret;
-                  key = "postgres-password";
+                  key = "memos-dsn";
                 };
               };
-              MEMOS_DSN = "postgresql://${cfg.database.username}:\$(DB_PASSWORD)@${cfg.database.host}:${toString cfg.database.port}/${cfg.database.name}?sslmode=disable";
             };
           };
 

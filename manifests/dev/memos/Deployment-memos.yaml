@@ -27,15 +27,13 @@ spec:
       automountServiceAccountToken: true
       containers:
         - env:
-            - name: DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: postgres-password
-                  name: memos-database
             - name: MEMOS_DRIVER
               value: postgres
             - name: MEMOS_DSN
-              value: postgresql://postgres:$(DB_PASSWORD)@postgresql.postgresql:5432/memos?sslmode=disable
+              valueFrom:
+                secretKeyRef:
+                  key: memos-dsn
+                  name: memos-database
             - name: MEMOS_PORT
               value: "5230"
           image: ghcr.io/usememos/memos:0.22.4
