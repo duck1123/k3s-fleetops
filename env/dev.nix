@@ -994,6 +994,7 @@ in
     windmill = {
       enable = true;
       hostAffinity = "edgenix";
+      image = "ghcr.io/windmill-labs/windmill-full:latest";
 
       ingress = {
         domain = "windmill.${tail-domain}";

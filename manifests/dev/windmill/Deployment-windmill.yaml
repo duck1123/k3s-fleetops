@@ -32,7 +32,7 @@ spec:
               value: standalone
             - name: BASE_URL
               value: https://windmill.bearded-snake.ts.net
-          image: ghcr.io/windmill-labs/windmill:latest
+          image: ghcr.io/windmill-labs/windmill-full:latest
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
