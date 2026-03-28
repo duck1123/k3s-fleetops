@@ -717,6 +717,11 @@ in
             password = secrets.postgresql.userPassword;
           }
           {
+            name = "memos";
+            username = "postgres";
+            password = secrets.postgresql.userPassword;
+          }
+          {
             name = "nocodb";
             username = "nocodb";
             password = secrets.postgresql.userPassword;

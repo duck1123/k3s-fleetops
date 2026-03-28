@@ -301,6 +301,32 @@ spec:
               EOSQL
               echo "Database gitea created successfully"
 
+              echo "Creating database memos and user postgres..."
+              psql -v ON_ERROR_STOP=1 <<-EOSQL
+                -- Create database if it doesn't exist
+                SELECT format('CREATE DATABASE %I', 'memos') WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'memos')\gexec
+
+                -- Create user if it doesn't exist, then always update password
+                DO \$\$
+                BEGIN
+                  IF NOT EXISTS (SELECT FROM pg_user WHERE usename = 'postgres') THEN
+                    EXECUTE format('CREATE USER %I WITH PASSWORD %L', 'postgres', 'omE.6H):+]qedMo>ZG;m');
+                  ELSE
+                    EXECUTE format('ALTER USER %I WITH PASSWORD %L', 'postgres', 'omE.6H):+]qedMo>ZG;m');
+                  END IF;
+                END
+                \$\$;
+
+                -- Grant privileges (quote database name)
+                DO \$\$
+                BEGIN
+                  EXECUTE format('GRANT ALL PRIVILEGES ON DATABASE %I TO %I', 'memos', 'postgres');
+                  EXECUTE format('ALTER DATABASE %I OWNER TO %I', 'memos', 'postgres');
+                END
+                \$\$;
+              EOSQL
+              echo "Database memos created successfully"
+
               echo "Creating database nocodb and user nocodb..."
               psql -v ON_ERROR_STOP=1 <<-EOSQL
                 -- Create database if it doesn't exist
