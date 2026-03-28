@@ -45,10 +45,8 @@ in
   };
 
   services = {
-    # ../applications/adventureworks/default.nix
     adventureworks.enable = false;
 
-    # ../applications/airflow/default.nix
     airflow = {
       enable = false;
 
@@ -58,10 +56,8 @@ in
       };
     };
 
-    # ../applications/alice-bitcoin/default.nix
     alice-bitcoin.enable = false;
 
-    # ../applications/alice-lnd/default.nix
     alice-lnd =
       let
         user-env = "alice";
@@ -73,10 +69,8 @@ in
         ingress.domain = "lnd-${user-env}.dinsro.com";
       };
 
-    # ../applications/argocd/default.nix
     argocd.enable = true;
 
-    # ../applications/argo-workflows/default.nix
     argo-workflows = {
       enable = false;
 
@@ -86,7 +80,6 @@ in
       };
     };
 
-    # ../applications/authentik/default.nix
     authentik = {
       inherit (secrets.authentik) secret-key;
       enable = false;
@@ -107,7 +100,6 @@ in
       };
     };
 
-    # ../applications/booklore/default.nix
     booklore = {
       enable = false;
       hostAffinity = "edgenix";
@@ -144,7 +136,6 @@ in
       uid = "0";
     };
 
-    # ../applications/calibre/default.nix
     calibre = {
       enable = false;
 
@@ -159,7 +150,6 @@ in
 
     cert-manager.enable = true;
 
-    # ../applications/cloudbeaver/default.nix
     cloudbeaver = {
       enable = true;
       hostAffinity = "edgenix";
@@ -173,7 +163,6 @@ in
       storageClass = "longhorn";
     };
 
-    # ../applications/dozzle/default.nix
     dozzle = {
       enable = true;
       hostAffinity = "nasnix";
@@ -185,7 +174,6 @@ in
       };
     };
 
-    # ../applications/ersatztv/default.nix
     ersatztv = {
       enable = false;
       # logLevel = "Debug";
@@ -207,7 +195,6 @@ in
       vaapiRenderDevice = "renderD129";
     };
 
-    # ../applications/gluetun/default.nix
     gluetun = {
       controlServer = { inherit (secrets.gluetun) password username; };
       enable = true;
@@ -216,7 +203,6 @@ in
       storageClassName = "longhorn";
     };
 
-    # ../applications/forgejo/default.nix
     forgejo = {
       admin = { inherit (secrets.forgejo.admin) password username; };
       enable = false;
@@ -238,7 +224,6 @@ in
       storageClass = "longhorn";
     };
 
-    # ../applications/grafana/default.nix
     grafana = {
       adminPassword = secrets.grafana.password or "";
       enable = true;
@@ -251,7 +236,6 @@ in
       };
     };
 
-    # ../applications/prometheus/default.nix
     prometheus = {
       enable = true;
       hostAffinity = "edgenix";
@@ -285,7 +269,6 @@ in
       enable = false;
     };
 
-    # ../applications/homer/default.nix
     homer = {
       codeserver.ingress = {
         domain = "codeserver.${tail-domain}";
@@ -300,7 +283,6 @@ in
       };
     };
 
-    # ../applications/homarr/default.nix
     homarr = {
       enable = true;
       hostAffinity = "edgenix";
@@ -315,7 +297,6 @@ in
       storageClassName = "longhorn";
     };
 
-    # ../applications/home-assistant/default.nix
     home-assistant = {
       enable = true;
       # hostAffinity = "edgenix";
@@ -333,7 +314,6 @@ in
       storageClassName = "longhorn";
     };
 
-    # ../applications/immich/default.nix
     immich = {
       enable = false;
 
@@ -366,7 +346,6 @@ in
       storageClassName = "longhorn";
     };
 
-    # ../applications/jupyterhub/default.nix
     jupyterhub = {
       enable = false;
       inherit (secrets.jupyterhub)
@@ -386,7 +365,6 @@ in
       postgresql = { inherit (secrets.jupyterhub.postgresql) adminPassword; };
     };
 
-    # ../applications/kavita/default.nix
     kavita = {
       enable = false;
 
@@ -407,7 +385,6 @@ in
       };
     };
 
-    # ../applications/kite/default.nix
     kite = {
       inherit (secrets.kite) encryptKey jwtSecret;
       enable = true;
@@ -422,10 +399,8 @@ in
       };
     };
 
-    # ../applications/kyverno/default.nix
     kyverno.enable = false;
 
-    # ../applications/lidarr/default.nix
     lidarr = {
       enable = true;
 
@@ -466,9 +441,6 @@ in
       storageClassName = "longhorn";
     };
 
-    # ../applications/slskd/default.nix
-    # Slskd: Soulseek client. Soularr uses it to download; set download path in Slskd UI to /downloads.
-    # shares: mount music/library for Soulseek sharing; add /shares in Slskd Web UI → Shares.
     slskd = {
       enable = true;
 
@@ -509,15 +481,8 @@ in
       useProbes = false;
     };
 
-    # ../applications/soularr/default.nix
-    # Soularr: Lidarr companion that fetches wanted music via Soulseek (Slskd).
-    # - lidarr.apiKey: from Lidarr Settings > General > Security; add soularr.lidarrApiKey to secrets.
-    # - slskd.apiKey: same as slskd app (secrets.slskd.apiKey).
-    # - lidarr.downloadDir must match Lidarr’s Slskd root folder (Lidarr nfs.slskdDownloads → /downloads/slskd_downloads).
-    # - nfs: same path as slskd (slskd_downloads) so Soularr can see downloads.
     soularr = {
       enable = false;
-
       hostAffinity = "edgenix";
 
       lidarr = {
@@ -543,10 +508,8 @@ in
       storageClassName = "longhorn";
     };
 
-    # ../applications/lldap/default.nix
     lldap.enable = false;
 
-    # ../applications/longhorn/default.nix
     longhorn = {
       enable = true;
 
@@ -557,16 +520,11 @@ in
       };
     };
 
-    # ../applications/metallb/default.nix
-    # Pool: high end of 192.168.0.0/24 — reserve for MetalLB VIPs; ensure your router DHCP range does not include 240–250.
-    # Traefik LoadBalancer gets one of these; point port 443 forwarding at that VIP (or the advertising node).
-    # On k3s, disable the built-in ServiceLB if it conflicts (e.g. --disable servicelb) when using MetalLB.
     metallb = {
       enable = true;
       l2.addresses = [ "192.168.0.240-192.168.0.250" ];
     };
 
-    # ../applications/mariadb/default.nix
     mariadb = {
       auth = {
         inherit (secrets.mariadb)
@@ -588,7 +546,6 @@ in
           username = "booklore";
           password = secrets.booklore.database.password;
         }
-        # romm uses the existing 'mariadb' user, so we only need to create the database
         {
           name = "romm";
           username = "mariadb";
@@ -602,7 +559,6 @@ in
       enable = false;
     };
 
-    # ../applications/memos/default.nix
     memos = {
       enable = false;
       hostAffinity = "edgenix";
@@ -613,7 +569,6 @@ in
       };
     };
 
-    # ../applications/metabase/default.nix
     metabase = {
       enable = false;
 
@@ -623,7 +578,6 @@ in
       };
     };
 
-    # ../applications/mindsdb/default.nix
     mindsdb = {
       enable = false;
 
@@ -633,7 +587,6 @@ in
       };
     };
 
-    # ../applications/minio/default.nix
     minio = {
       enable = false;
 
@@ -648,10 +601,8 @@ in
       values.defaultBuckets = "my-default-bucket";
     };
 
-    # ../applications/mssql/default.nix
     mssql.enable = false;
 
-    # ../applications/n8n/default.nix
     n8n = {
       enable = true;
 
@@ -666,9 +617,6 @@ in
       };
     };
 
-    # ../applications/nocodb/default.nix
-    # NocoDB: Airtable alternative. Uses shared postgresql, redis, optional S3 storage (rustfs or minio).
-    # Add nocodb to postgresql.extraDatabases when enabling. Set auth.jwtSecret (openssl rand -hex 32).
     nocodb =
       let
         storage-backend = "rustfs";
@@ -723,7 +671,6 @@ in
         publicUrl = "https://nocodb.${tail-domain}";
       };
 
-    # ../applications/pihole/default.nix
     pihole = {
       auth = { inherit (secrets.pihole) email password; };
       enable = true;
@@ -740,7 +687,6 @@ in
       storageClass = "longhorn";
     };
 
-    # ../applications/postgresql/default.nix
     postgresql = {
       auth = {
         inherit (secrets.postgresql)
@@ -772,7 +718,6 @@ in
         ];
     };
 
-    # ../applications/prowlarr/default.nix
     prowlarr = {
       database = {
         enable = true;
@@ -795,7 +740,6 @@ in
       replicas = 0;
     };
 
-    # ../applications/qbittorrent/default.nix
     qbittorrent = {
       enable = true;
       hostAffinity = "nasnix";
@@ -815,7 +759,6 @@ in
       webui = { inherit (secrets.qbittorrent) password username; };
     };
 
-    # ../applications/radarr/default.nix
     radarr = {
       database = {
         enable = true;
@@ -847,14 +790,12 @@ in
       vpn.enable = false;
     };
 
-    # ../applications/redis/default.nix
     redis = {
       enable = true;
       hostAffinity = "edgenix";
       password = secrets.redis.password;
     };
 
-    # ../applications/romm/default.nix
     romm = {
       enable = false;
 
@@ -894,8 +835,6 @@ in
       };
     };
 
-    # ../applications/rustfs/default.nix
-    # RustFS: S3-compatible object storage (MinIO alternative). Uses port 9000 for API, 9001 for console.
     rustfs = {
       accessKey = (secrets.rustfs or { }).accessKey or "";
       enable = true;
@@ -914,10 +853,8 @@ in
       storageClassName = "longhorn";
     };
 
-    # ../applications/satisfactory/default.nix
     satisfactory.enable = false;
 
-    # ../applications/sabnzbd/default.nix
     sabnzbd = {
       enable = true;
       hostAffinity = "edgenix";
@@ -937,10 +874,8 @@ in
       replicas = 1;
     };
 
-    # ../applications/sealed-secrets/default.nix
     sealed-secrets.enable = true;
 
-    # ../applications/sonarr/default.nix
     sonarr = {
       database = {
         enable = true;
@@ -971,7 +906,6 @@ in
       vpn.enable = false;
     };
 
-    # ../applications/tunarr/default.nix
     tunarr = {
       enable = true;
       enableGPU = true;
@@ -1000,7 +934,6 @@ in
       vaapiRenderDevice = "renderD129";
     };
 
-    # ../applications/tube-archivist/default.nix
     tube-archivist = {
       auth = {
         inherit (secrets.tube-archivist.auth) username password;
@@ -1031,10 +964,8 @@ in
       replicas = 1;
     };
 
-    # ../applications/sops/default.nix
     sops.enable = true;
 
-    # ../applications/windmill/default.nix
     windmill = {
       enable = false;
       hostAffinity = "edgenix";
@@ -1057,7 +988,6 @@ in
       replicas = 1;
     };
 
-    # ../applications/spark/default.nix
     spark = {
       enable = false;
 
@@ -1068,7 +998,6 @@ in
       };
     };
 
-    # ../applications/specter/default.nix
     specter = {
       enable = false;
 
@@ -1085,7 +1014,6 @@ in
       oauth = { inherit (secrets.tailscale) authKey clientId clientSecret; };
     };
 
-    # ../applications/tdarr/default.nix
     tdarr = {
       enable = true;
       healthcheckcpuWorkers = 0;
@@ -1128,10 +1056,8 @@ in
       };
     };
 
-    # ../applications/traefik/default.nix (service.type defaults to LoadBalancer for MetalLB VIPs)
     traefik.enable = true;
 
-    # ../applications/stashapp/default.nix
     stashapp = {
       enable = true;
 
@@ -1151,7 +1077,6 @@ in
       enableGPU = true;
     };
 
-    # ../applications/whisparr/default.nix
     whisparr = {
       database = {
         enable = true;
