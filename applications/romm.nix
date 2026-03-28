@@ -39,9 +39,14 @@
 
         extraOptions = {
           image = mkOption {
-            description = mdDoc "The docker image to use";
+            description = mdDoc ''
+              Docker image to use. Pin a release tag (not `:latest`) so Alembic migration files
+              match `alembic_version` in MariaDB; otherwise errors like
+              `Can't locate revision identified by '0058_…'` occur when the DB was migrated
+              with a newer build than the image ships.
+            '';
             type = types.str;
-            default = "ghcr.io/rommapp/romm:latest";
+            default = "ghcr.io/rommapp/romm:4.7.0";
           };
 
           admin = {
