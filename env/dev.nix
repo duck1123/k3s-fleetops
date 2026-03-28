@@ -726,6 +726,11 @@ in
             username = "nocodb";
             password = secrets.postgresql.userPassword;
           }
+          {
+            name = "romm";
+            username = "postgres";
+            password = secrets.postgresql.userPassword;
+          }
         ];
     };
 
