@@ -70,7 +70,7 @@ in
       };
 
     argocd.enable = true;
-    argo-events.enable = true;
+    argo-events.enable = false;
 
     argo-workflows = {
       enable = false;
@@ -102,7 +102,7 @@ in
     };
 
     booklore = {
-      enable = false;
+      enable = true;
       hostAffinity = "edgenix";
 
       database = {
@@ -165,7 +165,7 @@ in
     };
 
     dozzle = {
-      enable = true;
+      enable = false;
       hostAffinity = "nasnix";
 
       ingress = {
@@ -403,7 +403,7 @@ in
     kyverno.enable = false;
 
     lidarr = {
-      enable = true;
+      enable = false;
 
       ingress = {
         domain = "lidarr.${tail-domain}";
@@ -443,7 +443,7 @@ in
     };
 
     slskd = {
-      enable = true;
+      enable = false;
 
       ingress = {
         domain = "slskd.${tail-domain}";
@@ -561,7 +561,7 @@ in
     };
 
     memos = {
-      enable = false;
+      enable = true;
       hostAffinity = "edgenix";
 
       ingress = {
@@ -742,7 +742,7 @@ in
     };
 
     qbittorrent = {
-      enable = true;
+      enable = false;
       hostAffinity = "nasnix";
 
       ingress = {
@@ -798,7 +798,7 @@ in
     };
 
     romm = {
-      enable = false;
+      enable = true;
 
       admin = {
         username = secrets.romm.admin.username;
@@ -969,7 +969,7 @@ in
     sops.enable = true;
 
     windmill = {
-      enable = false;
+      enable = true;
       hostAffinity = "edgenix";
 
       ingress = {

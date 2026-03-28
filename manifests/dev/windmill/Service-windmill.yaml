@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: windmill
+  namespace: windmill
+spec:
+  ports:
+    - name: http
+      port: 8000
+      protocol: TCP
+      targetPort: http
+  selector:
+    app.kubernetes.io/instance: windmill
+    app.kubernetes.io/name: windmill
+  type: ClusterIP
