@@ -52,6 +52,7 @@ let
     {
       id,
       title,
+      datasource ? "Prometheus",
       expr ? null,
       legendFormat ? null,
       unit ? "short",
@@ -67,7 +68,7 @@ let
         if expr != null && legendFormat != null then
           [
             {
-              datasource = "Prometheus";
+              inherit datasource;
               expr = expr;
               legendFormat = legendFormat;
               refId = "A";
@@ -77,8 +78,7 @@ let
           [ ];
     in
     {
-      inherit id title;
-      datasource = "Prometheus";
+      inherit datasource gridPos id title;
       type = "timeseries";
       fieldConfig = {
         defaults =
@@ -91,7 +91,6 @@ let
           // (if max != null then { inherit max; } else { });
         overrides = overrides;
       };
-      gridPos = gridPos;
       options = {
         legend = {
           calcs = [
@@ -113,6 +112,7 @@ let
   # Helper function to create a stat panel
   mkStatPanel =
     {
+      datasource ? "Prometheus",
       id,
       title,
       expr,
@@ -121,15 +121,12 @@ let
       thresholds ? null,
     }:
     {
-      inherit id title;
-      datasource = "Prometheus";
+      inherit datasource gridPos id title;
       type = "stat";
       pluginVersion = "12.3.1";
       fieldConfig = {
         defaults = {
-          color = {
-            mode = "thresholds";
-          };
+          color.mode = "thresholds";
           mappings = [ ];
           thresholds =
             if thresholds != null then
@@ -148,7 +145,6 @@ let
         };
         overrides = [ ];
       };
-      gridPos = gridPos;
       options = {
         colorMode = "value";
         graphMode = "area";
@@ -163,7 +159,7 @@ let
       };
       targets = [
         {
-          datasource = "Prometheus";
+          inherit datasource;
           expr = expr;
           refId = "A";
         }
