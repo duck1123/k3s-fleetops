@@ -235,6 +235,30 @@ in
         domain = "grafana.${tail-domain}";
         ingressClassName = "tailscale";
       };
+
+      additionalDatasources = [
+        {
+          name = "Prometheus";
+          type = "prometheus";
+          access = "proxy";
+          url = "http://prometheus-kube-prometheus-prometheus.prometheus:9090";
+          isDefault = true;
+          editable = true;
+          jsonData.httpMethod = "POST";
+        }
+      ];
+
+      additionalDashboardProviders = [
+        {
+          name = "default";
+          orgId = 1;
+          folder = "";
+          type = "file";
+          disableDeletion = false;
+          editable = true;
+          options.path = "/var/lib/grafana/dashboards/default";
+        }
+      ];
     };
 
     prometheus = {

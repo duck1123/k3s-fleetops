@@ -46,18 +46,7 @@
 
           dashboardProviders."dashboardproviders.yaml" = {
             apiVersion = 1;
-            providers = [
-              {
-                name = "default";
-                orgId = 1;
-                folder = "";
-                type = "file";
-                disableDeletion = false;
-                editable = true;
-                options.path = "/var/lib/grafana/dashboards/default";
-              }
-            ]
-            ++ (cfg.additionalDashboardProviders or [ ]);
+            providers = cfg.additionalDashboardProviders;
           };
 
           dashboards = lib.recursiveUpdate {
@@ -66,18 +55,7 @@
 
           datasources."datasources.yaml" = {
             apiVersion = 1;
-            datasources = [
-              {
-                name = "Prometheus";
-                type = "prometheus";
-                access = "proxy";
-                url = "http://prometheus-kube-prometheus-prometheus.prometheus:9090";
-                isDefault = true;
-                editable = true;
-                jsonData.httpMethod = "POST";
-              }
-            ]
-            ++ (cfg.additionalDatasources or [ ]);
+            datasources = cfg.additionalDatasources;
           };
 
           ingress = with cfg.ingress; {
