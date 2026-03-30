@@ -401,6 +401,23 @@ in
       };
     };
 
+    komga = {
+      enable = true;
+
+      ingress = {
+        domain = "komga.${tail-domain}";
+        clusterIssuer = "tailscale";
+        ingressClassName = "tailscale";
+        tls.enable = true;
+      };
+
+      nfs = {
+        enable = false;
+        server = "nasnix";
+        path = "/mnt/Books";
+      };
+    };
+
     keycloak = {
       enable = false;
       ingress = {

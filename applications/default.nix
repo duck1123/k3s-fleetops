@@ -26,6 +26,7 @@
     ./immich.nix
     ./kavita.nix
     ./keycloak.nix
+    ./komga.nix
     ./kite.nix
     ./lidarr.nix
     ./kyverno.nix
