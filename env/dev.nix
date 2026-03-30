@@ -402,7 +402,7 @@ in
     };
 
     komga = {
-      enable = true;
+      enable = false;
 
       ingress = {
         domain = "komga.${tail-domain}";
