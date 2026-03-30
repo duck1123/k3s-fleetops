@@ -401,23 +401,6 @@ in
       };
     };
 
-    komga = {
-      enable = false;
-
-      ingress = {
-        domain = "komga.${tail-domain}";
-        clusterIssuer = "tailscale";
-        ingressClassName = "tailscale";
-        tls.enable = true;
-      };
-
-      nfs = {
-        enable = true;
-        server = nas-host;
-        path = "${nas-base}/Books";
-      };
-    };
-
     keycloak = {
       enable = false;
       ingress = {
@@ -438,6 +421,23 @@ in
         clusterIssuer = "tailscale";
         ingressClassName = "tailscale";
         tls.enable = true;
+      };
+    };
+
+    komga = {
+      enable = false;
+
+      ingress = {
+        domain = "komga.${tail-domain}";
+        clusterIssuer = "tailscale";
+        ingressClassName = "tailscale";
+        tls.enable = true;
+      };
+
+      nfs = {
+        enable = true;
+        server = nas-host;
+        path = "${nas-base}/Books";
       };
     };
 
@@ -483,73 +483,6 @@ in
       storageClassName = "longhorn";
     };
 
-    slskd = {
-      enable = false;
-
-      ingress = {
-        domain = "slskd.${tail-domain}";
-        ingressClassName = "tailscale";
-        clusterIssuer = "tailscale";
-      };
-
-      hostAffinity = "edgenix";
-
-      webAuth = {
-        username = (secrets.slskd or { }).username or "";
-        password = (secrets.slskd or { }).password or "";
-      };
-
-      apiKey = (secrets.slskd or { }).apiKey or "";
-
-      vpn = {
-        enable = true;
-        sharedGluetunService = "gluetun.gluetun";
-      };
-
-      nfs = {
-        enable = true;
-        server = nas-host;
-        path = "${nas-base}/slskd_downloads";
-      };
-
-      shares = {
-        enable = true;
-        server = nas-host;
-        path = "${nas-base}/Music";
-      };
-
-      replicas = 1;
-      storageClassName = "longhorn";
-      useProbes = false;
-    };
-
-    soularr = {
-      enable = false;
-      hostAffinity = "edgenix";
-
-      lidarr = {
-        host = "lidarr.lidarr";
-        port = 8686;
-        downloadDir = "/downloads/slskd_downloads";
-        apiKey = (secrets.soularr or { }).lidarrApiKey or "";
-      };
-
-      slskd = {
-        host = "slskd.slskd";
-        port = 5030;
-        apiKey = (secrets.slskd or { }).apiKey or "";
-      };
-
-      nfs = {
-        enable = true;
-        server = nas-host;
-        path = "${nas-base}/slskd_downloads";
-      };
-
-      scriptInterval = 300;
-      storageClassName = "longhorn";
-    };
-
     lldap.enable = false;
 
     longhorn = {
@@ -560,11 +493,6 @@ in
         ingressClassName = "tailscale";
         tls.enable = true;
       };
-    };
-
-    metallb = {
-      enable = true;
-      l2.addresses = [ "192.168.0.240-192.168.0.250" ];
     };
 
     mariadb = {
@@ -626,6 +554,11 @@ in
         domain = "metabase.${tail-domain}";
         ingressClassName = "tailscale";
       };
+    };
+
+    metallb = {
+      enable = true;
+      l2.addresses = [ "192.168.0.240-192.168.0.250" ];
     };
 
     mindsdb = {
@@ -918,8 +851,6 @@ in
       storageClassName = "longhorn";
     };
 
-    satisfactory.enable = false;
-
     sabnzbd = {
       enable = true;
       hostAffinity = "edgenix";
@@ -940,7 +871,49 @@ in
       useProbes = false;
     };
 
+    satisfactory.enable = false;
+
     sealed-secrets.enable = true;
+
+    slskd = {
+      enable = false;
+
+      ingress = {
+        domain = "slskd.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+
+      hostAffinity = "edgenix";
+
+      webAuth = {
+        username = (secrets.slskd or { }).username or "";
+        password = (secrets.slskd or { }).password or "";
+      };
+
+      apiKey = (secrets.slskd or { }).apiKey or "";
+
+      vpn = {
+        enable = true;
+        sharedGluetunService = "gluetun.gluetun";
+      };
+
+      nfs = {
+        enable = true;
+        server = nas-host;
+        path = "${nas-base}/slskd_downloads";
+      };
+
+      shares = {
+        enable = true;
+        server = nas-host;
+        path = "${nas-base}/Music";
+      };
+
+      replicas = 1;
+      storageClassName = "longhorn";
+      useProbes = false;
+    };
 
     sonarr = {
       database = {
@@ -972,87 +945,33 @@ in
       vpn.enable = false;
     };
 
-    tunarr = {
-      enable = false;
-      enableGPU = true;
-      hostAffinity = "edgenix";
-      resetDatabase = false;
+    sops.enable = true;
 
-      ingress = {
-        domain = "tunarr.${tail-domain}";
-        ingressClassName = "tailscale";
-        clusterIssuer = "tailscale";
-      };
-
-      nfs = {
-        enable = false;
-        server = nas-host;
-        path = "${nas-base}";
-
-        config = {
-          enable = false;
-          path = "${nas-base}/tunarr";
-        };
-      };
-
-      replicas = 1;
-      storageClassName = "local-path";
-      vaapiRenderDevice = "renderD129";
-    };
-
-    tube-archivist = {
-      auth = {
-        inherit (secrets.tube-archivist.auth) username password;
-      };
-
-      elasticsearch.elasticPassword = secrets.tube-archivist.auth.password;
+    soularr = {
       enable = false;
       hostAffinity = "edgenix";
 
-      ingress = {
-        domain = "tube-archivist.${tail-domain}";
-        ingressClassName = "tailscale";
-        clusterIssuer = "tailscale";
+      lidarr = {
+        host = "lidarr.lidarr";
+        port = 8686;
+        downloadDir = "/downloads/slskd_downloads";
+        apiKey = (secrets.soularr or { }).lidarrApiKey or "";
+      };
+
+      slskd = {
+        host = "slskd.slskd";
+        port = 5030;
+        apiKey = (secrets.slskd or { }).apiKey or "";
       };
 
       nfs = {
         enable = true;
         server = nas-host;
-        path = "${nas-base}";
+        path = "${nas-base}/slskd_downloads";
       };
 
-      redis = {
-        host = "redis.redis";
-        port = 6379;
-        password = secrets.redis.password;
-      };
+      scriptInterval = 300;
       storageClassName = "longhorn";
-      replicas = 1;
-    };
-
-    sops.enable = true;
-
-    windmill = {
-      enable = true;
-      hostAffinity = "edgenix";
-      image = "ghcr.io/windmill-labs/windmill-full:latest";
-
-      ingress = {
-        domain = "windmill.${tail-domain}";
-        ingressClassName = "tailscale";
-        clusterIssuer = "tailscale";
-      };
-
-      database = {
-        host = "postgresql.postgresql";
-        port = 5432;
-        name = "windmill";
-        username = secrets.windmill.database.username;
-        password = secrets.windmill.database.password;
-      };
-
-      storageClassName = "longhorn";
-      replicas = 1;
     };
 
     spark = {
@@ -1074,6 +993,25 @@ in
       };
 
       namespace = "specter";
+    };
+
+    stashapp = {
+      enable = true;
+
+      ingress = {
+        domain = "stashapp.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+
+      nfs = {
+        enable = true;
+        server = nas-host;
+        path = "${nas-base}/Videos";
+      };
+
+      replicas = 1;
+      enableGPU = true;
     };
 
     tailscale = {
@@ -1125,11 +1063,17 @@ in
 
     traefik.enable = true;
 
-    stashapp = {
-      enable = true;
+    tube-archivist = {
+      auth = {
+        inherit (secrets.tube-archivist.auth) username password;
+      };
+
+      elasticsearch.elasticPassword = secrets.tube-archivist.auth.password;
+      enable = false;
+      hostAffinity = "edgenix";
 
       ingress = {
-        domain = "stashapp.${tail-domain}";
+        domain = "tube-archivist.${tail-domain}";
         ingressClassName = "tailscale";
         clusterIssuer = "tailscale";
       };
@@ -1137,11 +1081,44 @@ in
       nfs = {
         enable = true;
         server = nas-host;
-        path = "${nas-base}/Videos";
+        path = "${nas-base}";
+      };
+
+      redis = {
+        host = "redis.redis";
+        port = 6379;
+        password = secrets.redis.password;
+      };
+      storageClassName = "longhorn";
+      replicas = 1;
+    };
+
+    tunarr = {
+      enable = false;
+      enableGPU = true;
+      hostAffinity = "edgenix";
+      resetDatabase = false;
+
+      ingress = {
+        domain = "tunarr.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+
+      nfs = {
+        enable = false;
+        server = nas-host;
+        path = "${nas-base}";
+
+        config = {
+          enable = false;
+          path = "${nas-base}/tunarr";
+        };
       };
 
       replicas = 1;
-      enableGPU = true;
+      storageClassName = "local-path";
+      vaapiRenderDevice = "renderD129";
     };
 
     whisparr = {
@@ -1168,6 +1145,29 @@ in
         path = "${nas-base}";
       };
 
+      replicas = 1;
+    };
+
+    windmill = {
+      enable = true;
+      hostAffinity = "edgenix";
+      image = "ghcr.io/windmill-labs/windmill-full:latest";
+
+      ingress = {
+        domain = "windmill.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+
+      database = {
+        host = "postgresql.postgresql";
+        port = 5432;
+        name = "windmill";
+        username = secrets.windmill.database.username;
+        password = secrets.windmill.database.password;
+      };
+
+      storageClassName = "longhorn";
       replicas = 1;
     };
   };
