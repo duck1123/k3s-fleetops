@@ -412,9 +412,9 @@ in
       };
 
       nfs = {
-        enable = false;
-        server = "nasnix";
-        path = "/mnt/Books";
+        enable = true;
+        server = nas-host;
+        path = "${nas-base}/Books";
       };
     };
 

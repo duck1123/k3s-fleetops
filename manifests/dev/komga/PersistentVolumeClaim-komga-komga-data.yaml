@@ -5,8 +5,9 @@ metadata:
   namespace: komga
 spec:
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   resources:
     requests:
-      storage: 50Gi
-  storageClassName: longhorn
+      storage: 1Gi
+  storageClassName: ""
+  volumeName: komga-komga-data-nfs
