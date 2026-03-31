@@ -25,9 +25,21 @@ if [[ ! -f "$REPO_ROOT/$ENCRYPTED" ]]; then
 fi
 
 TMP="$(mktemp)"
-trap 'rm -f "$TMP"' EXIT
+PRE_ENC_DIR="$(mktemp -d)"
+trap 'rm -f "$TMP"; rm -rf "$PRE_ENC_DIR"' EXIT
 
 sops --decrypt "$REPO_ROOT/$ENCRYPTED" > "$TMP"
 export DECRYPTED_SECRET_FILE="$TMP"
+
+# Extract already-committed SopsSecret manifests into JSON files so mkArgoApp can
+# reuse their ciphertext instead of re-encrypting (which produces a different ciphertext
+# each run even when the plaintext is unchanged, causing spurious git diffs after GC).
+for f in "$REPO_ROOT"/manifests/dev/*/SopsSecret-*.yaml; do
+  [ -f "$f" ] || continue
+  secret_name="$(yq -r '.metadata.name' "$f")"
+  yq '{sops: .sops, spec: .spec}' "$f" > "$PRE_ENC_DIR/$secret_name.json"
+done
+export NIXIFY_PRE_ENCRYPTED_SECRETS_DIR="$PRE_ENC_DIR"
+
 cd "$REPO_ROOT"
 exec "$@"

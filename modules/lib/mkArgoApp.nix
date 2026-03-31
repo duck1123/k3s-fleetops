@@ -57,26 +57,32 @@
       # Combined secrets from sopsSecrets parameter and cfg.sopsSecrets option (option overrides)
       combinedSopsSecrets = (sopsSecrets cfg) // cfg.sopsSecrets;
 
-      # When preEncryptedSecretsDir is set (e.g. by CI), load secret JSONs from disk instead of
-      # calling createSecret at eval time (avoids plaintext in the Nix store).
+      # Per-secret: if a pre-encrypted JSON exists on disk use it (stable ciphertext across GC),
+      # otherwise fall back to createSecret (generates fresh encryption).
+      # with-decrypted-secrets.sh extracts current manifests into NIXIFY_PRE_ENCRYPTED_SECRETS_DIR
+      # so unchanged secrets are always loaded from the committed ciphertext.
       expandedSopsSecrets =
-        if config.preEncryptedSecretsDir or "" != "" then
-          lib.mapAttrs (
-            secretName: _:
-            builtins.fromJSON (builtins.readFile (config.preEncryptedSecretsDir + "/" + secretName + ".json"))
-          ) combinedSopsSecrets
-        else if combinedSopsSecrets != { } && self != null && pkgs != null then
+        if combinedSopsSecrets == { } then
+          { }
+        else
           lib.mapAttrs (
             secretName: data:
-            self.lib.createSecret {
-              ageRecipients = config.ageRecipients;
-              namespace = cfg.namespace;
-              inherit pkgs secretName;
-              values = if data ? values then data.values else data;
-            }
-          ) combinedSopsSecrets
-        else
-          { };
+            let
+              preEncDir = config.preEncryptedSecretsDir or "";
+              preEncFile = "${preEncDir}/${secretName}.json";
+            in
+            if preEncDir != "" && builtins.pathExists preEncFile then
+              builtins.fromJSON (builtins.readFile preEncFile)
+            else if self != null && pkgs != null then
+              self.lib.createSecret {
+                ageRecipients = config.ageRecipients;
+                namespace = cfg.namespace;
+                inherit pkgs secretName;
+                values = if data ? values then data.values else data;
+              }
+            else
+              { }
+          ) combinedSopsSecrets;
 
       # Inject hostAffinity nodeSelector into all deployment and statefulSet pod specs
       addHostAffinityToResources =
