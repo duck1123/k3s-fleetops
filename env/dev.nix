@@ -431,6 +431,7 @@ in
         domain = "komga.${tail-domain}";
         clusterIssuer = "tailscale";
         ingressClassName = "tailscale";
+        localIngress.enable = true;
         tls.enable = true;
       };
 

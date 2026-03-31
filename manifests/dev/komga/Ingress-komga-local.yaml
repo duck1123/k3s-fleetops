@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: komga-local
+  namespace: komga
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: komga.local
+      http:
+        paths:
+          - backend:
+              service:
+                name: komga
+                port:
+                  name: http
+            path: /
+            pathType: ImplementationSpecific
+  tls: []
