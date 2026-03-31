@@ -51,6 +51,7 @@
 
           dashboards = lib.recursiveUpdate {
             default.system-performance-nfs.json = builtins.readFile ./dashboards/system-performance.json;
+            default.node-overview.json = builtins.readFile ./dashboards/node-overview.json;
           } (cfg.additionalDashboards or { });
 
           datasources."datasources.yaml" = {
