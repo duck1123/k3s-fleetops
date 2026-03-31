@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pihole-local
+  namespace: pihole
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: pihole.local
+      http:
+        paths:
+          - backend:
+              service:
+                name: pihole-web
+                port:
+                  number: 80
+            path: /
+            pathType: ImplementationSpecific
+  tls: []

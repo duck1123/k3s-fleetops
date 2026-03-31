@@ -99,6 +99,28 @@
             default = null;
           };
 
+          ingress.localIngress = {
+            enable = mkOption {
+              description = mdDoc "Enable a local-only ingress using Traefik";
+              type = types.bool;
+              default = false;
+            };
+
+            domain = mkOption {
+              description = mdDoc "The local domain to expose pihole to";
+              type = types.str;
+              default = "pihole.local";
+            };
+
+            tls = {
+              enable = mkOption {
+                description = mdDoc "Enable TLS for local ingress";
+                type = types.bool;
+                default = false;
+              };
+            };
+          };
+
           customDnsEntries = mkOption {
             description = mdDoc ''
               Extra dnsmasq entries injected into Pi-hole. Use `address=/.domain/ip` for wildcard resolution.
@@ -228,6 +250,32 @@
             };
           };
         };
+
+        extraResources = cfg:
+          lib.optionalAttrs cfg.ingress.localIngress.enable {
+            ingresses."pihole-local" = {
+              spec = with cfg.ingress.localIngress; {
+                ingressClassName = "traefik";
+
+                rules = [
+                  {
+                    host = domain;
+                    http.paths = [
+                      {
+                        backend.service = {
+                          name = "pihole-web";
+                          port.number = 80;
+                        };
+                        path = "/";
+                        pathType = "ImplementationSpecific";
+                      }
+                    ];
+                  }
+                ];
+                tls = lib.optional tls.enable [ { hosts = [ domain ]; } ];
+              };
+            };
+          };
 
       };
 }

@@ -667,6 +667,7 @@ in
         tls.enable = true;
       };
 
+      ingress.localIngress.enable = true;
       serviceDnsLoadBalancerIP = "192.168.0.242";
       storageClass = "longhorn";
       # Wildcard: all *.local queries resolve to the Traefik LoadBalancer IP.
