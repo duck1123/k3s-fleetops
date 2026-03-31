@@ -88,6 +88,11 @@
                 N8N_PROTOCOL = "https";
                 WEBHOOK_URL = "https://${cfg.ingress.domain}/";
               };
+              persistence = {
+                enabled = true;
+                size = "8Gi";
+                storageClass = cfg.storageClassName;
+              };
             };
           }
           // optionalAttrs (cfg.hostAffinity != null) {
