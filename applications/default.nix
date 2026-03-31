@@ -32,6 +32,7 @@
     ./kyverno.nix
     ./jupyterhub
     ./lldap.nix
+    ./loki.nix
     ./longhorn.nix
     ./mariadb.nix
     ./marquez.nix
@@ -48,6 +49,7 @@
     ./opentelemetry-collector.nix
     ./pihole.nix
     ./postgresql.nix
+    ./promtail.nix
     ./prometheus.nix
     ./prowlarr.nix
     ./qbittorrent.nix

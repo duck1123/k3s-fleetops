@@ -246,6 +246,13 @@ in
           editable = true;
           jsonData.httpMethod = "POST";
         }
+        {
+          name = "Loki";
+          type = "loki";
+          access = "proxy";
+          url = "http://loki-gateway.loki.svc.cluster.local";
+          editable = true;
+        }
       ];
 
       additionalDashboardProviders = [
@@ -486,6 +493,14 @@ in
 
     lldap.enable = false;
 
+    loki = {
+      enable = true;
+      hostAffinity = "edgenix";
+      retention = "720h"; # 30 days
+      storageClassName = "longhorn";
+      storageSize = "20Gi";
+    };
+
     longhorn = {
       enable = true;
 
@@ -722,6 +737,10 @@ in
             password = secrets.postgresql.userPassword;
           }
         ];
+    };
+
+    promtail = {
+      enable = true;
     };
 
     prowlarr = {
