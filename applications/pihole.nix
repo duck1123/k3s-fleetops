@@ -99,6 +99,15 @@
             default = null;
           };
 
+          customDnsEntries = mkOption {
+            description = mdDoc ''
+              Extra dnsmasq entries injected into Pi-hole. Use `address=/.domain/ip` for wildcard resolution.
+              Example: `[ "address=/.local/192.168.0.241" ]` resolves all *.local to Traefik's MetalLB IP.
+            '';
+            type = types.listOf types.str;
+            default = [ ];
+          };
+
           serviceDhcpEnabled = mkOption {
             description = mdDoc "Expose DHCP `Service` (usually unnecessary in Kubernetes; disable unless you use Pi-hole DHCP through the cluster)";
             type = types.bool;
@@ -162,6 +171,8 @@
 
           DNS1 = cfg.dns1;
           DNS2 = cfg.dns2;
+
+          dnsmasq.customDnsEntries = cfg.customDnsEntries;
 
           serviceDns = {
             type = cfg.serviceDnsType;

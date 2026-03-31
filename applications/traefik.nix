@@ -26,10 +26,19 @@
           ];
           default = "LoadBalancer";
         };
+
+        service.loadBalancerIP = mkOption {
+          description = mdDoc "Optional fixed IP to request from MetalLB via the metallb.universe.tf/loadBalancerIPs annotation. Leave empty to let MetalLB auto-assign.";
+          type = types.str;
+          default = "";
+        };
       };
 
       defaultValues = cfg: {
         service.spec.type = cfg.service.type;
+        service.annotations = optionalAttrs (cfg.service.loadBalancerIP != "") {
+          "metallb.universe.tf/loadBalancerIPs" = cfg.service.loadBalancerIP;
+        };
         # providers.kubernetesGateway.statusAddress.hostname = "localhost";
         additionalArguments = [
           "--entryPoints.web.forwardedHeaders.insecure=true"

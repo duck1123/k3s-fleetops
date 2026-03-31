@@ -669,6 +669,12 @@ in
 
       serviceDnsLoadBalancerIP = "192.168.0.242";
       storageClass = "longhorn";
+      # Wildcard: all *.local queries resolve to the Traefik LoadBalancer IP.
+      # Requires clients to use Pi-hole as their DNS server.
+      customDnsEntries = [
+        "address=/.local/192.168.0.241"
+        "address=/.dev.kronkltd.net/192.168.0.241"
+      ];
     };
 
     postgresql = {
@@ -1062,7 +1068,11 @@ in
       };
     };
 
-    traefik.enable = true;
+    traefik = {
+      enable = true;
+      # Pin to a fixed MetalLB IP so the Pi-hole wildcard DNS record stays stable.
+      service.loadBalancerIP = "192.168.0.241";
+    };
 
     tube-archivist = {
       auth = {
