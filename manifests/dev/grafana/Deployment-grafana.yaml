@@ -21,7 +21,7 @@ spec:
     metadata:
       annotations:
         checksum/config: 03addfb517e99a31d3c067f292d692a54288dbef58146fff6b4d88d3465e13ae
-        checksum/dashboards-json-config: 70b6c0b556dc48d45c361df4ea660039d07a24c4f1a90f61e1386a1d77a01554
+        checksum/dashboards-json-config: 37526c7a5900a3b4e3425cddba7fcd593afc4a5713a9524f8571d9fa061e5ece
         checksum/sc-dashboard-provider-config: e70bf6a851099d385178a76de9757bb0bef8299da6d8443602590e44f05fdf24
         kubectl.kubernetes.io/default-container: grafana
       labels:
@@ -115,6 +115,9 @@ spec:
             - mountPath: /var/lib/grafana/dashboards/default/node-overview.json
               name: dashboards-default
               subPath: node-overview.json
+            - mountPath: /var/lib/grafana/dashboards/default/pod-logs.json
+              name: dashboards-default
+              subPath: pod-logs.json
             - mountPath: /var/lib/grafana/dashboards/default/system-performance-nfs.json
               name: dashboards-default
               subPath: system-performance-nfs.json
