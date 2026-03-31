@@ -127,12 +127,6 @@
             default = true;
           };
         };
-
-        storageClassName = mkOption {
-          description = mdDoc "Storage class name for Prometheus and Alertmanager persistence";
-          type = types.str;
-          default = "longhorn";
-        };
       };
     };
 }

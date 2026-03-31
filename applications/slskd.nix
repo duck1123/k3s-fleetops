@@ -50,18 +50,6 @@
             default = 5030;
           };
 
-          storageClassName = mkOption {
-            description = mdDoc "Storage class for config PVC";
-            type = types.str;
-            default = "longhorn";
-          };
-
-          tz = mkOption {
-            description = mdDoc "Timezone";
-            type = types.str;
-            default = "Etc/UTC";
-          };
-
           replicas = mkOption {
             description = mdDoc "Number of replicas";
             type = types.int;

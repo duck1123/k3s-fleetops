@@ -38,12 +38,6 @@
             default = 8686;
           };
 
-          storageClassName = mkOption {
-            description = mdDoc "The storage class";
-            type = types.str;
-            default = "longhorn";
-          };
-
           vpn = {
             enable = mkOption {
               description = mdDoc "Enable VPN routing through shared gluetun service";
@@ -90,12 +84,6 @@
                 default = "/slskd_downloads";
               };
             };
-          };
-
-          tz = mkOption {
-            description = mdDoc "The timezone";
-            type = types.str;
-            default = "Etc/UTC";
           };
 
           pgid = mkOption {

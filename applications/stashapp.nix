@@ -25,12 +25,6 @@
           default = 9999;
         };
 
-        storageClassName = mkOption {
-          description = mdDoc "The storage class";
-          type = types.str;
-          default = "longhorn";
-        };
-
         nfs = {
           enable = mkOption {
             description = mdDoc "Enable NFS for data volume";
@@ -49,12 +43,6 @@
             type = types.str;
             default = "/mnt/media";
           };
-        };
-
-        tz = mkOption {
-          description = mdDoc "The timezone";
-          type = types.str;
-          default = "Etc/UTC";
         };
 
         pgid = mkOption {

@@ -682,7 +682,11 @@ in
         tls.enable = true;
       };
 
-      ingress.localIngress.enable = true;
+      ingress.localIngress = {
+        enable = true;
+        serviceName = "pihole-web";
+        servicePort = 80;
+      };
       serviceDnsLoadBalancerIP = "192.168.0.242";
       storageClass = "longhorn";
       # Wildcard: all *.local queries resolve to the Traefik LoadBalancer IP.

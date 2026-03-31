@@ -84,12 +84,6 @@
             default = 8000;
           };
 
-          storageClassName = mkOption {
-            description = mdDoc "The storage class for non-NFS volumes (e.g. Elasticsearch data)";
-            type = types.str;
-            default = "longhorn";
-          };
-
           nfs = {
             enable = mkOption {
               description = mdDoc "Enable NFS for YouTube library and cache volumes";
@@ -108,12 +102,6 @@
               type = types.str;
               default = "/mnt/media";
             };
-          };
-
-          tz = mkOption {
-            description = mdDoc "The timezone";
-            type = types.str;
-            default = "Etc/UTC";
           };
 
           pgid = mkOption {

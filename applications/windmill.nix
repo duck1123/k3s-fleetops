@@ -48,12 +48,6 @@
             default = 8000;
           };
 
-          storageClassName = mkOption {
-            description = mdDoc "Storage class for optional local data (currently not used)";
-            type = types.str;
-            default = "longhorn";
-          };
-
           database = {
             host = mkOption {
               description = mdDoc "PostgreSQL host (use your existing Postgres service)";
@@ -84,12 +78,6 @@
               type = types.str;
               default = "";
             };
-          };
-
-          tz = mkOption {
-            description = mdDoc "Timezone";
-            type = types.str;
-            default = "Etc/UTC";
           };
 
           replicas = mkOption {

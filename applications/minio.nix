@@ -52,12 +52,6 @@
             type = types.str;
             default = "CHANGEME";
           };
-
-          storageClassName = mkOption {
-            description = mdDoc "Storage class name for MinIO persistence";
-            type = types.str;
-            default = "longhorn";
-          };
         };
 
         defaultValues = cfg: {

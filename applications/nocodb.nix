@@ -60,12 +60,6 @@
             default = 8080;
           };
 
-          storageClassName = mkOption {
-            description = mdDoc "Storage class for data volume";
-            type = types.str;
-            default = "longhorn";
-          };
-
           auth.jwtSecret = mkOption {
             description = mdDoc "JWT secret for auth tokens (generate: openssl rand -hex 32)";
             type = types.str;

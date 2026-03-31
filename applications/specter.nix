@@ -23,11 +23,6 @@
           type = types.str;
           default = "satoshi";
         };
-        storageClassName = mkOption {
-          description = mdDoc "Storage class name for Specter persistence";
-          type = types.str;
-          default = "longhorn";
-        };
       };
 
       defaultValues =

@@ -141,12 +141,6 @@
             };
           };
 
-          storageClassName = mkOption {
-            description = mdDoc "The storage class";
-            type = types.str;
-            default = "longhorn";
-          };
-
           ingress.localIngress = {
             enable = mkOption {
               description = mdDoc "Enable a local-only ingress using Traefik";

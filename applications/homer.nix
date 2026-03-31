@@ -44,12 +44,6 @@
             default = "CHANGEME";
           };
         };
-
-        storageClassName = mkOption {
-          description = mdDoc "Storage class name for Homer persistence";
-          type = types.str;
-          default = "longhorn";
-        };
       };
 
       defaultValues = cfg: {

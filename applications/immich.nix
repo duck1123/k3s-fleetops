@@ -52,12 +52,6 @@
             default = "release";
           };
 
-          storageClassName = mkOption {
-            description = mdDoc "The storage class";
-            type = types.str;
-            default = "longhorn";
-          };
-
           database = {
             host = mkOption {
               description = mdDoc "The database host";

@@ -62,12 +62,6 @@
             default = "";
           };
 
-          storageClassName = mkOption {
-            description = mdDoc "Storage class name for RustFS persistence";
-            type = types.str;
-            default = "longhorn";
-          };
-
           mode = mkOption {
             description = mdDoc "Deployment mode: standalone (single pod) or distributed";
             type = types.enum [

@@ -12,14 +12,6 @@
       name = "kavita";
       uses-ingress = true;
 
-      extraOptions = {
-        storageClassName = mkOption {
-          description = mdDoc "Storage class name for Kavita persistence";
-          type = types.str;
-          default = "longhorn";
-        };
-      };
-
       extraResources = cfg: {
         deployments.kavita = {
           metadata = {

@@ -38,12 +38,6 @@
             default = 9696;
           };
 
-          storageClassName = mkOption {
-            description = mdDoc "The storage class";
-            type = types.str;
-            default = "longhorn";
-          };
-
           useProbes = mkOption {
             description = mdDoc "Enable readiness and liveness probes";
             type = types.bool;
@@ -62,12 +56,6 @@
               type = types.str;
               default = "gluetun.gluetun";
             };
-          };
-
-          tz = mkOption {
-            description = mdDoc "The timezone";
-            type = types.str;
-            default = "Etc/UTC";
           };
 
           pgid = mkOption {

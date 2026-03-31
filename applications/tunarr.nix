@@ -49,12 +49,6 @@
             };
           };
 
-          storageClassName = mkOption {
-            description = mdDoc "The storage class";
-            type = types.str;
-            default = "longhorn";
-          };
-
           nfs = {
             enable = mkOption {
               description = mdDoc "Enable NFS for TV and Movies (same base path as arr stack)";
@@ -92,12 +86,6 @@
                 default = "";
               };
             };
-          };
-
-          tz = mkOption {
-            description = mdDoc "The timezone for guide data and scheduling";
-            type = types.str;
-            default = "Etc/UTC";
           };
 
           logLevel = mkOption {

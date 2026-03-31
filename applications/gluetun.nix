@@ -48,12 +48,6 @@
           };
 
         extraOptions = {
-          storageClassName = mkOption {
-            description = mdDoc "The storage class";
-            type = types.str;
-            default = "longhorn";
-          };
-
           mullvadAccountNumber = mkOption {
             description = mdDoc "Mullvad account number";
             type = types.str;
@@ -70,12 +64,6 @@
             description = mdDoc "Mullvad server country (e.g., USA, Sweden)";
             type = types.nullOr types.str;
             default = null;
-          };
-
-          tz = mkOption {
-            description = mdDoc "The timezone";
-            type = types.str;
-            default = "Etc/UTC";
           };
 
           enableIPv6 = mkOption {

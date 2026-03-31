@@ -79,12 +79,6 @@
             default = 6060;
           };
 
-          storageClassName = mkOption {
-            description = mdDoc "The storage class";
-            type = types.str;
-            default = "longhorn";
-          };
-
           nfs = {
             enable = mkOption {
               description = mdDoc "Enable NFS for books volume";
@@ -105,39 +99,12 @@
             };
           };
 
-          tz = mkOption {
-            description = mdDoc "The timezone";
-            type = types.str;
-            default = "Etc/UTC";
-          };
-
           uid = mkOption {
             description = mdDoc "The user id";
             type = types.str;
             default = "1000";
           };
 
-          ingress.localIngress = {
-            enable = mkOption {
-              description = mdDoc "Enable a local-only ingress using Traefik";
-              type = types.bool;
-              default = false;
-            };
-
-            domain = mkOption {
-              description = mdDoc "The local domain to expose ${name} to (e.g., ${name}.local)";
-              type = types.str;
-              default = "${name}.local";
-            };
-
-            tls = {
-              enable = mkOption {
-                description = mdDoc "Enable TLS for local ingress";
-                type = types.bool;
-                default = false;
-              };
-            };
-          };
         };
 
         extraResources = cfg: {
@@ -282,31 +249,6 @@
                 ];
 
                 tls = [ { hosts = [ domain ]; } ];
-              };
-            };
-          }
-          // lib.optionalAttrs (cfg.ingress.localIngress.enable) {
-            # Optional local-only ingress using Traefik
-            "${name}-local" = {
-              spec = with cfg.ingress.localIngress; {
-                ingressClassName = "traefik";
-
-                rules = [
-                  {
-                    host = domain;
-                    http.paths = [
-                      {
-                        backend.service = {
-                          inherit name;
-                          port.name = "http";
-                        };
-                        path = "/";
-                        pathType = "ImplementationSpecific";
-                      }
-                    ];
-                  }
-                ];
-                tls = lib.optional tls.enable [ { hosts = [ domain ]; } ];
               };
             };
           };

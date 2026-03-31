@@ -22,12 +22,6 @@
           default = "720h";
         };
 
-        storageClassName = mkOption {
-          description = mdDoc "Storage class for the Loki data PVC";
-          type = types.str;
-          default = "longhorn";
-        };
-
         storageSize = mkOption {
           description = mdDoc "Size of the Loki data PVC";
           type = types.str;

@@ -21,14 +21,6 @@
 
       uses-ingress = true;
 
-      extraOptions = {
-        storageClassName = mkOption {
-          description = mdDoc "Storage class name for Calibre persistence";
-          type = types.str;
-          default = "longhorn";
-        };
-      };
-
       # https://github.com/k8s-at-home/library-charts/blob/main/charts/stable/common/values.yaml
       defaultValues = cfg: {
         ingress.main = with cfg.ingress; {

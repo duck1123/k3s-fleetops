@@ -37,12 +37,6 @@
             default = "redis:8-alpine";
           };
 
-          storageClassName = mkOption {
-            description = mdDoc "The storage class";
-            type = types.str;
-            default = "longhorn";
-          };
-
           password = mkOption {
             description = mdDoc "The password";
             type = types.str;

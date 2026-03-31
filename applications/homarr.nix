@@ -49,22 +49,10 @@
             default = 7575;
           };
 
-          storageClassName = mkOption {
-            description = mdDoc "The storage class for appdata";
-            type = types.str;
-            default = "longhorn";
-          };
-
           secretEncryptionKey = mkOption {
             description = mdDoc "64-character hex string for encryption (generate with: openssl rand -hex 32). Stored in SOPS secret.";
             type = types.str;
             default = "";
-          };
-
-          tz = mkOption {
-            description = mdDoc "The timezone";
-            type = types.str;
-            default = "Etc/UTC";
           };
 
           defaultColorScheme = mkOption {

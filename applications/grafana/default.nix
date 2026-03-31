@@ -134,12 +134,6 @@
             default = false;
           };
 
-          storageClassName = mkOption {
-            description = mdDoc "Storage class name for Grafana persistence";
-            type = types.str;
-            default = "longhorn";
-          };
-
           additionalDatasources = mkOption {
             description = mdDoc "Datasources to provision. List of datasource configuration objects.";
             type = types.listOf types.attrs;

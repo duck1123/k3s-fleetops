@@ -25,12 +25,6 @@
           default = "Etc/UTC";
         };
 
-        storageClassName = mkOption {
-          description = mdDoc "Storage class for the /config volume";
-          type = types.str;
-          default = "longhorn";
-        };
-
         configSize = mkOption {
           description = mdDoc "PVC size for Home Assistant configuration and state";
           type = types.str;
