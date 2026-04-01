@@ -79,12 +79,6 @@
               default = "CHANGEME";
             };
           };
-
-          storageClass = mkOption {
-            description = mdDoc "The storage class to use for persistence";
-            type = types.str;
-            default = "local-path";
-          };
         };
 
         defaultValues = cfg: {
@@ -138,7 +132,9 @@
             ];
           };
 
-          persistence = { inherit (cfg) storageClass; };
+          persistence = {
+            storageClass = cfg.storageClassName;
+          };
           postgresql.enabled = false;
           postgresql-ha.enabled = false;
           redis.enabled = false;

@@ -98,12 +98,6 @@
             default = [ ];
           };
 
-          storageClass = mkOption {
-            description = mdDoc "The storage class to use for persistence";
-            type = types.str;
-            default = "local-path";
-          };
-
           backup = {
             enable = mkOption {
               description = mdDoc "Enable automated database backups";
@@ -152,7 +146,7 @@
           );
 
           nodeSelector."kubernetes.io/hostname" = cfg.hostAffinity;
-          primary.persistence.storageClass = cfg.storageClass;
+          primary.persistence.storageClass = cfg.storageClassName;
         };
 
         extraResources = cfg: {
@@ -161,7 +155,7 @@
             "mariadb-backups".spec = {
               accessModes = [ "ReadWriteOnce" ];
               resources.requests.storage = cfg.backup.storageSize;
-              storageClassName = cfg.storageClass;
+              storageClassName = cfg.storageClassName;
             };
           };
 

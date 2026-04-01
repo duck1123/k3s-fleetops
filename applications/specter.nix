@@ -45,7 +45,9 @@
             ];
           };
 
-          persistence.storageClassName = "local-path";
+          persistence = {
+            inherit storageClassName;
+          };
 
           nodeConfig = builtins.toJSON rec {
             alias = "default";

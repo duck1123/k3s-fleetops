@@ -1,6 +1,10 @@
 { ... }:
+let
+  name = "postgresql";
+  password-secret = "${name}-password";
+in
 {
-  flake.nixidyApps.postgresql =
+  flake.nixidyApps.${name} =
     {
       config,
       lib,
@@ -10,7 +14,6 @@
     }:
     with lib;
     let
-      password-secret = "postgresql-password";
     in
     self.lib.mkArgoApp
       {
@@ -21,8 +24,8 @@
           pkgs
           ;
       }
-      rec {
-        name = "postgresql";
+      {
+        inherit name;
 
         sopsSecrets = cfg: {
           ${password-secret} = with cfg.auth; {
@@ -74,12 +77,6 @@
             description = mdDoc "The PostgreSQL image (should include pgvector for Immich)";
             type = types.str;
             default = "pgvector/pgvector:pg17";
-          };
-
-          storageClass = mkOption {
-            description = mdDoc "The storage class to use for persistence";
-            type = types.str;
-            default = "local-path";
           };
 
           persistenceSize = mkOption {
@@ -230,7 +227,7 @@
             persistence = {
               enabled = cfg.persistenceEnabled;
               size = cfg.persistenceSize;
-              storageClass = cfg.storageClass;
+              storageClass = cfg.storageClassName;
             };
 
             settings = {
@@ -239,7 +236,7 @@
             };
 
             storage = {
-              className = cfg.storageClass;
+              className = cfg.storageClassName;
               size = cfg.persistenceSize;
             };
           };
@@ -427,13 +424,9 @@
                 namespace = cfg.namespace;
               };
               spec = {
+                inherit (cfg) storageClassName;
                 accessModes = [ "ReadWriteOnce" ];
-                resources = {
-                  requests = {
-                    storage = cfg.backup.storageSize;
-                  };
-                };
-                storageClassName = cfg.storageClass;
+                resources.requests.storage = cfg.backup.storageSize;
               };
             };
           };
@@ -454,13 +447,9 @@
                       };
                     };
                     spec = {
+                      inherit (cfg) storageClassName;
                       accessModes = [ "ReadWriteOnce" ];
-                      resources = {
-                        requests = {
-                          storage = cfg.persistenceSize;
-                        };
-                      };
-                      storageClassName = cfg.storageClass;
+                      resources.requests.storage = cfg.persistenceSize;
                     };
                   }
                 ];
@@ -541,7 +530,6 @@
                           defaultMode = 365;
                         };
                       }
-                      # postgres-data is provided by volumeClaimTemplates, so we don't include it here
                     ];
                   };
                 };

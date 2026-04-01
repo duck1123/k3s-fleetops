@@ -158,10 +158,10 @@
           virtualHost = cfg.ingress.domain;
 
           persistentVolumeClaim = {
-            enabled = true;
-            inherit (cfg) storageClass;
-            size = cfg.pvcSize;
             accessModes = [ "ReadWriteOnce" ];
+            enabled = true;
+            size = cfg.pvcSize;
+            storageClass = cfg.storageClassName;
           };
 
           extraEnvVars = {

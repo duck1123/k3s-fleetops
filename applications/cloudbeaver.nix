@@ -21,14 +21,6 @@
 
       uses-ingress = true;
 
-      extraOptions = {
-        storageClass = mkOption {
-          description = mdDoc "The storage class to use for persistence";
-          type = types.str;
-          default = "local-path";
-        };
-      };
-
       defaultValues = cfg: {
         ingress = with cfg.ingress; {
           inherit ingressClassName;
@@ -46,8 +38,8 @@
         nodeSelector."kubernetes.io/hostname" = cfg.hostAffinity;
 
         persistence = {
-          inherit (cfg) storageClass;
           enabled = true;
+          storageClass = cfg.storageClassName;
         };
       };
     };

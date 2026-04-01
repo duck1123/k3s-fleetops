@@ -146,7 +146,7 @@ in
         clusterIssuer = "tailscale";
       };
 
-      # storageClass = "longhorn";
+      storageClassName = "longhorn";
     };
 
     cert-manager.enable = true;
@@ -161,7 +161,7 @@ in
         clusterIssuer = "tailscale";
       };
 
-      storageClass = "longhorn";
+      storageClassName = "longhorn";
     };
 
     dozzle = {
@@ -222,7 +222,7 @@ in
           ;
       };
 
-      storageClass = "longhorn";
+      storageClassName = "longhorn";
     };
 
     grafana = {
@@ -524,7 +524,7 @@ in
 
       enable = true;
       hostAffinity = "edgenix";
-      storageClass = "longhorn";
+      storageClassName = "longhorn";
 
       extraDatabases = [
         {
@@ -688,7 +688,7 @@ in
         servicePort = 80;
       };
       serviceDnsLoadBalancerIP = "192.168.0.242";
-      storageClass = "longhorn";
+      storageClassName = "longhorn";
       # Wildcard: all *.local queries resolve to the Traefik LoadBalancer IP.
       # Requires clients to use Pi-hole as their DNS server.
       customDnsEntries = [
@@ -709,7 +709,7 @@ in
 
       enable = true;
       hostAffinity = "edgenix";
-      storageClass = "longhorn";
+      storageClassName = "longhorn";
 
       extraDatabases =
         arrDatabases [
