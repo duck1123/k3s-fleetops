@@ -6,3 +6,9 @@ metadata:
 spec:
   ipAddressPools:
     - default-pool
+  nodeSelectors:
+    - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: NotIn
+          values:
+            - powerspecnix

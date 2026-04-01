@@ -38,6 +38,15 @@
             type = types.listOf types.str;
             default = [ ];
           };
+
+          excludeNodes = mkOption {
+            description = mdDoc ''
+              Hostnames to exclude from L2 announcer election. Useful to prevent WiFi-only nodes
+              from being elected, which would break ARP reachability for wired/other clients.
+            '';
+            type = types.listOf types.str;
+            default = [ ];
+          };
         };
       };
 
@@ -50,7 +59,7 @@
         cfg:
         let
           ns = cfg.namespace;
-          inherit (cfg.l2) poolName advertisementName addresses;
+          inherit (cfg.l2) poolName advertisementName addresses excludeNodes;
           poolYaml = ''
             apiVersion: metallb.io/v1beta1
             kind: IPAddressPool
@@ -61,6 +70,14 @@
               addresses:
             ${concatMapStringsSep "\n" (a: "            - ${a}") addresses}
           '';
+          nodeSelectorYaml = optionalString (excludeNodes != [ ]) ''
+              nodeSelectors:
+                - matchExpressions:
+                    - key: kubernetes.io/hostname
+                      operator: NotIn
+                      values:
+            ${concatMapStringsSep "\n" (n: "                - ${n}") excludeNodes}
+          '';
           l2Yaml = ''
             apiVersion: metallb.io/v1beta1
             kind: L2Advertisement
@@ -70,7 +87,7 @@
             spec:
               ipAddressPools:
                 - ${poolName}
-          '';
+            ${nodeSelectorYaml}'';
         in
         mkIf (addresses != [ ]) { yamls = [ (poolYaml + "---\n" + l2Yaml) ]; };
     };

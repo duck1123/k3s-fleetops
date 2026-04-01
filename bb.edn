@@ -12,6 +12,26 @@
   {:doc  "Register git hooks"
    :task (shell "git config core.hooksPath .githooks")}
 
+  update-argocd-manifest
+  {:doc  "Download latest stable ArgoCD install manifest to infra-manifests/argocd/install.yaml"
+   :task (do
+           (fs/create-dirs "infra-manifests/argocd")
+           (println "Fetching latest stable ArgoCD manifest...")
+           (shell "curl -fsSL https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml -o infra-manifests/argocd/install.yaml")
+           (println "Done. Commit infra-manifests/argocd/install.yaml to pin the version."))}
+
+  install-argocd
+  {:doc  "Install or upgrade ArgoCD into the cluster (safe to re-run)"
+   :task (do
+           (when-not (fs/exists? "infra-manifests/argocd/install.yaml")
+             (println "install.yaml not found, downloading...")
+             (fs/create-dirs "infra-manifests/argocd")
+             (shell "curl -fsSL https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml -o infra-manifests/argocd/install.yaml"))
+           (shell "kubectl apply --server-side --force-conflicts -k infra-manifests/argocd/")
+           (println "Waiting for argocd-server rollout...")
+           (shell "kubectl rollout status deployment/argocd-server -n argocd --timeout=120s")
+           (println "ArgoCD install complete"))}
+
   apply-master-application
   {:doc     "Install 00-master argo application"
    :task    (shell "kubectl apply -f target/infra-manifests/00-master.yaml")}
