@@ -1076,8 +1076,8 @@ in
 
     traefik = {
       enable = true;
-      # Pin to a fixed MetalLB IP so the Pi-hole wildcard DNS record stays stable.
       service.loadBalancerIP = "192.168.0.241";
+      service.hostPorts = true;
     };
 
     tube-archivist = {

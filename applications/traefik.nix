@@ -32,12 +32,22 @@
           type = types.str;
           default = "";
         };
+
+        service.hostPorts = mkOption {
+          description = mdDoc "Also bind web (80) and websecure (443) as hostPorts so the pod node's real IP is usable for external port forwarding, independent of MetalLB.";
+          type = types.bool;
+          default = false;
+        };
       };
 
       defaultValues = cfg: {
         service.spec.type = cfg.service.type;
         service.annotations = optionalAttrs (cfg.service.loadBalancerIP != "") {
           "metallb.universe.tf/loadBalancerIPs" = cfg.service.loadBalancerIP;
+        };
+        ports = optionalAttrs cfg.service.hostPorts {
+          web.hostPort = 80;
+          websecure.hostPort = 443;
         };
         # providers.kubernetesGateway.statusAddress.hostname = "localhost";
         additionalArguments = [
