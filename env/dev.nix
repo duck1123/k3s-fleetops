@@ -378,25 +378,6 @@ in
       storageClassName = "longhorn";
     };
 
-    jupyterhub = {
-      enable = false;
-      inherit (secrets.jupyterhub)
-        cookieSecret
-        cryptkeeperKeys
-        password
-        proxyToken
-        ;
-
-      ingress = {
-        domain = "jupyterhub.${tail-domain}";
-        clusterIssuer = "tailscale";
-        ingressClassName = "tailscale";
-        tls.enable = true;
-      };
-
-      postgresql = { inherit (secrets.jupyterhub.postgresql) adminPassword; };
-    };
-
     kavita = {
       enable = false;
 

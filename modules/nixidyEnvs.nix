@@ -20,12 +20,19 @@
         extraSpecialArgs = { inherit self crdImports; };
         modules = (builtins.attrValues self.nixidyApps) ++ [
           self.modules.generic.ageRecipients
-          self.modules.generic.preEncryptedSecretsDir
           ./secretManifest.nix
+          ./secretSpecs.nix
         ];
       };
       # For CI: list of { app, secretName, namespace, keys } (metadata only, not secret values).
-      devSecretManifest = devEnv.config.nixidy.secretManifest or [ ];
+      devSecretManifest = devEnv.dev.config.nixidy.secretManifest or [ ];
+      # For write-sops-secrets.sh: full specs including plaintext values.
+      # Exposed as a plain Nix value (not a derivation) so `nix eval` can output it to stdout
+      # without any store path being created for the plaintext.
+      devSecretSpecs = {
+        ageRecipients = devEnv.dev.config.ageRecipients or "";
+        secrets = devEnv.dev.config.nixidy.secretSpecs or [ ];
+      };
     in
     {
       nixidyEnvs = devEnv;
@@ -34,9 +41,16 @@
       packages.devSecretManifest = pkgs.runCommand "dev-secret-manifest.json" {
         manifest = builtins.toJSON devSecretManifest;
       } ''echo "$manifest" > $out '';
+      # Plain Nix value (not a package) for write-sops-secrets.sh.
+      # Use: nix eval --impure --json .#nixidySecretSpecs.x86_64-linux.dev
+      nixidySecretSpecs.dev = devSecretSpecs;
     };
 
   transposition.nixidyEnvs = {
+    adHoc = true;
+  };
+
+  transposition.nixidySecretSpecs = {
     adHoc = true;
   };
 }

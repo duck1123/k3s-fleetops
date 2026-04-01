@@ -33,7 +33,7 @@
       extraOptions ? { },
       # A function that takes the config and returns extra resources to deploy with the application
       extraResources ? (cfg: { }),
-      # A function that takes the config and returns secrets to create via createSecret (name -> stringData attrs)
+      # A function that takes the config and returns secrets to encrypt (name -> stringData attrs)
       sopsSecrets ? (cfg: { }),
       # Does this chart expose an ingress
       uses-ingress ? false,
@@ -57,32 +57,17 @@
       # Combined secrets from sopsSecrets parameter and cfg.sopsSecrets option (option overrides)
       combinedSopsSecrets = (sopsSecrets cfg) // cfg.sopsSecrets;
 
-      # Per-secret: if a pre-encrypted JSON exists on disk use it (stable ciphertext across GC),
-      # otherwise fall back to createSecret (generates fresh encryption).
-      # with-decrypted-secrets.sh extracts current manifests into NIXIFY_PRE_ENCRYPTED_SECRETS_DIR
-      # so unchanged secrets are always loaded from the committed ciphertext.
-      expandedSopsSecrets =
+      # Secret specs (with plaintext values) for write-sops-secrets.sh to encrypt outside Nix.
+      # Never passed to a derivation — accessed only via `nix eval` so values never enter the store.
+      secretSpecsList =
         if combinedSopsSecrets == { } then
-          { }
+          [ ]
         else
-          lib.mapAttrs (
-            secretName: data:
-            let
-              preEncDir = config.preEncryptedSecretsDir or "";
-              preEncFile = "${preEncDir}/${secretName}.json";
-            in
-            if preEncDir != "" && builtins.pathExists preEncFile then
-              builtins.fromJSON (builtins.readFile preEncFile)
-            else if self != null && pkgs != null then
-              self.lib.createSecret {
-                ageRecipients = config.ageRecipients;
-                namespace = cfg.namespace;
-                inherit pkgs secretName;
-                values = if data ? values then data.values else data;
-              }
-            else
-              { }
-          ) combinedSopsSecrets;
+          lib.mapAttrsToList (secretName: data: {
+            inherit secretName;
+            namespace = cfg.namespace;
+            values = if data ? values then data.values else data;
+          }) combinedSopsSecrets;
 
       # Inject hostAffinity nodeSelector into all deployment and statefulSet pod specs
       addHostAffinityToResources =
@@ -236,13 +221,11 @@
           description = "List of secrets needed by ${name}.";
         };
 
-        # Attrset of secrets to create via createSecret. Key = secret name, value = stringData
-        # attrs or { values = attrs }. createSecret is called with defaults: namespace =
-        # cfg.namespace, ageRecipients = config.ageRecipients. Pass self and pkgs to
-        # mkArgoApp when using this option.
+        # Attrset of secrets to encrypt. Key = secret name, value = stringData attrs (or { values = attrs }).
+        # Encryption happens outside Nix via scripts/write-sops-secrets.sh so plaintext never enters the store.
         sopsSecrets = mkOption {
           default = { };
-          description = mdDoc "Secrets to create via createSecret. Key = secret name, value = stringData attrs (or { values = attrs }).";
+          description = mdDoc "Secrets to encrypt. Key = secret name, value = stringData attrs (or { values = attrs }).";
           type = types.attrsOf types.anything;
         };
 
@@ -252,6 +235,15 @@
           type = types.listOf types.attrs;
           internal = true;
           description = "Secret manifest entries for this app (for CI).";
+        };
+
+        # Internal: full secret specs with plaintext values for write-sops-secrets.sh.
+        # Exposed via `nix eval` only — never built as a derivation, never in the Nix store.
+        sopsSecretsSpec = mkOption {
+          default = [ ];
+          type = types.listOf types.attrs;
+          internal = true;
+          description = "Full secret specs (secretName, namespace, values) for external sops encryption.";
         };
 
         storageClassName = mkOption {
@@ -281,12 +273,15 @@
 
       config = mkIf cfg.enable (mkMerge [
         (mkIf (combinedSopsSecrets != { }) {
-          services.${name}.sopsSecretsManifest = lib.mapAttrsToList (sn: data: {
-            app = name;
-            secretName = sn;
-            namespace = cfg.namespace;
-            keys = lib.attrNames (if data ? values then data.values else data);
-          }) combinedSopsSecrets;
+          services.${name} = {
+            sopsSecretsManifest = lib.mapAttrsToList (sn: data: {
+              app = name;
+              secretName = sn;
+              namespace = cfg.namespace;
+              keys = lib.attrNames (if data ? values then data.values else data);
+            }) combinedSopsSecrets;
+            sopsSecretsSpec = secretSpecsList;
+          };
         })
         {
           # This is the application config for nixidy
@@ -326,14 +321,13 @@
                   }
                 else
                   { };
-              # App's own resources take precedence over the auto-generated localIngress
+              # App's own resources take precedence over the auto-generated localIngress.
+              # sopsSecrets are intentionally excluded: encryption happens outside Nix via
+              # scripts/write-sops-secrets.sh so plaintext values never enter the Nix store.
               baseResources = lib.recursiveUpdate localIngressResources (
                 lib.recursiveUpdate (extraResources cfg) cfg.extraResources
               );
-              resourcesWithSops = baseResources // {
-                sopsSecrets = (baseResources.sopsSecrets or { }) // expandedSopsSecrets;
-              };
-              resources = addHostAffinityToResources resourcesWithSops cfg.hostAffinity;
+              resources = addHostAffinityToResources (builtins.removeAttrs baseResources [ "sopsSecrets" ]) cfg.hostAffinity;
             in
             mkMerge [
               {

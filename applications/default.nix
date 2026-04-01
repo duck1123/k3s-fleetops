@@ -30,7 +30,6 @@
     ./kite.nix
     ./lidarr.nix
     ./kyverno.nix
-    ./jupyterhub
     ./lldap.nix
     ./loki.nix
     ./longhorn.nix

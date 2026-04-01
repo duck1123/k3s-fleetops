@@ -111,6 +111,8 @@
                   activation-cmd (str drv-path "/activate")]
               #_(binding [*out* *err*] (println "path: " activation-cmd))
               (shell activation-cmd)
+              ;; Write SopsSecret YAML manifests outside Nix so plaintext never enters the store
+              (shell "./scripts/write-sops-secrets.sh")
               ;; Run post-processing after nixidy generates manifests
               (let [post-process-path (str/trim (:out (shell {:out :string} "nix-build --no-link --expr '(import <nixpkgs> {}).callPackage ./lib/postProcessManifests.nix {}'")))
                     post-process-cmd  (str post-process-path "/bin/post-process-manifests")]
