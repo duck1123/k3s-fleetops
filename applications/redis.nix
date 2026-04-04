@@ -82,7 +82,7 @@
                         command = [
                           "sh"
                           "-c"
-                          "redis-server --requirepass \"$REDIS_PASSWORD\" --appendonly yes"
+                          "redis-server --requirepass \"$REDIS_PASSWORD\" --appendonly yes --aof-load-corrupt-tail-max-size 527"
                         ];
                         env = [
                           {
