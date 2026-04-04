@@ -75,7 +75,7 @@ while IFS= read -r existing; do
 done < <(find "$MANIFESTS_DIR" -name "SopsSecret-*.yaml" 2>/dev/null)
 
 # ---------------------------------------------------------------------------
-# 5. Write each desired secret — reuse committed ciphertext or encrypt fresh
+# 5. Write each desired secret — skip if data unchanged, otherwise encrypt
 # ---------------------------------------------------------------------------
 while IFS= read -r spec; do
   secret_name="$(echo "$spec" | jq -r '.secretName')"
@@ -83,8 +83,18 @@ while IFS= read -r spec; do
   values="$(echo "$spec" | jq '.values')"
   output_file="$MANIFESTS_DIR/$namespace/SopsSecret-${secret_name}.yaml"
 
+  # Compute checksum of the plaintext values (order-independent, JSON normalized)
+  new_checksum="$(echo "$values" | jq -S '.' | sha256sum | cut -d' ' -f1)"
+
+  # Check if file exists and extract its checksum from the annotation
+  old_checksum=""
   if [[ -f "$output_file" ]]; then
-    echo "write-sops-secrets: reusing ciphertext for $secret_name"
+    old_checksum="$(grep -oP "checksum\.fleetops/plaintext: \K[a-f0-9]+" "$output_file" || true)"
+  fi
+
+  # Skip re-encryption if data hasn't changed
+  if [[ -n "$old_checksum" && "$old_checksum" == "$new_checksum" ]]; then
+    echo "write-sops-secrets: skipping unchanged secret: $secret_name"
     continue
   fi
 
@@ -98,6 +108,8 @@ kind: SopsSecret
 metadata:
   name: ${secret_name}
   namespace: ${namespace}
+  annotations:
+    checksum.fleetops/plaintext: ${new_checksum}
 spec:
   secretTemplates:
     - name: ${secret_name}
