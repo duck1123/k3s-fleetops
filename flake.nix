@@ -24,6 +24,14 @@
 
     make-shell.url = "github:nicknovitski/make-shell";
 
+    nix-csi = {
+      inputs = {
+        # flake-parts.follows = "flake-parts";
+        nixpkgs.follows = "nixpkgs";
+      };
+      url = "github:Lillecarl/nix-csi";
+    };
+
     nix-fetcher-data = {
       inputs = {
         flake-parts.follows = "flake-parts";

@@ -396,6 +396,8 @@ in
       };
     };
 
+    nix-csi.enable = true;
+
     nocodb =
       let
         storage-backend = "rustfs";

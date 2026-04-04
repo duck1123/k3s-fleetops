@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: proxy
+  namespace: nix-csi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: proxy
+      app.kubernetes.io/part-of: nix-csi
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/default-container: proxy
+        nix-csi/discard: "true"
+      labels:
+        app.kubernetes.io/name: proxy
+        app.kubernetes.io/part-of: nix-csi
+    spec:
+      containers:
+        - command:
+            - dinit
+            - --log-file
+            - /var/log/dinit.log
+            - --quiet
+            - proxy
+          image: ghcr.io/lillecarl/nix-csi/scratch:1.0.1
+          imagePullPolicy: Always
+          name: proxy
+          volumeMounts:
+            - mountPath: /nix
+              name: nix-store
+              subPath: nix
+            - mountPath: /etc/ssh
+              name: ssh-config
+            - mountPath: /etc/ssh-dynauth
+              name: ssh-dynauth
+            - mountPath: /etc/ssh-key
+              name: ssh-key
+      volumes:
+        - csi:
+            driver: nix.csi.store
+            readOnly: true
+            volumeAttributes:
+              aarch64-linux: /nix/store/gmshz8ss1rm31vxfy6z9g3vxjzmyw1h3-proxyEnv
+              x86_64-linux: /nix/store/qz4vaclm451gcl5nh7dxnwi8bhf15vh9-proxyEnv
+          name: nix-store
+        - configMap:
+            defaultMode: 292
+            name: ssh-config
+          name: ssh-config
+        - configMap:
+            defaultMode: 292
+            name: ssh-dynauth
+          name: ssh-dynauth
+        - name: ssh-key
+          secret:
+            defaultMode: 256
+            secretName: ssh-key

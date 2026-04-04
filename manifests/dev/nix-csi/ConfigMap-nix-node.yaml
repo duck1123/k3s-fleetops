@@ -1,0 +1,25 @@
+apiVersion: v1
+data:
+  logging.json: '{"formatters":{"standard":{"format":"%(levelname)s [%(name)s] %(message)s"}},"handlers":{"console":{"class":"logging.StreamHandler","formatter":"standard","stream":"ext://sys.stdout"}},"loggers":{"httpx":{"handlers":["console"],"level":"WARNING","propagate":false},"nix-csi":{"handlers":["console"],"level":"INFO","propagate":false}},"root":{"handlers":["console"],"level":"WARN"},"version":1}'
+  nix.conf: |+
+    # WARNING: this file is generated from the nix.* options in
+    # your NixOS configuration, typically
+    # /etc/nixos/configuration.nix.  Do not edit it!
+    allowed-users = *
+    builders-use-substitutes = true
+    experimental-features = nix-command flakes read-only-local-store
+    keep-outputs = true
+    narinfo-cache-negative-ttl = 0
+    narinfo-cache-positive-ttl = 0
+    store = daemon
+    substituters = https://cache.nixos.org https://nix-csi.cachix.org
+    system-features = nixos-test benchmark big-parallel
+    trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= nix-csi.cachix.org-1:i4w33gR4efO67jpz8U7g/MdvRQ6mQ3LEF9fB8tES60g=
+    trusted-users = root nix root
+    warn-dirty = false
+
+
+kind: ConfigMap
+metadata:
+  name: nix-node
+  namespace: nix-csi

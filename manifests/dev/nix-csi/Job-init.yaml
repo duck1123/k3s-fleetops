@@ -1,0 +1,36 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    kluctl.io/hook: pre-deploy
+    kluctl.io/hook-delete-policy: hook-succeeded
+    kluctl.io/hook-wait: "false"
+  name: init
+  namespace: nix-csi
+spec:
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: init
+        app.kubernetes.io/part-of: nix-csi
+    spec:
+      containers:
+        - command:
+            - init-secrets
+          image: ghcr.io/lillecarl/nix-csi/lix:2.94.0
+          imagePullPolicy: Always
+          name: init
+          volumeMounts:
+            - mountPath: /opt/bin
+              name: init-scripts
+            - mountPath: /etc/nix
+              name: nix-config
+      restartPolicy: OnFailure
+      serviceAccountName: nix-csi
+      volumes:
+        - configMap:
+            name: init-scripts
+          name: init-scripts
+        - configMap:
+            name: nix-builder
+          name: nix-config

@@ -1,0 +1,193 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: nix-node
+  namespace: nix-csi
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: csi
+      app.kubernetes.io/part-of: nix-csi
+  template:
+    metadata:
+      annotations:
+        configHash: ca2916487e3aeacb3636863fb2da2257
+        kubectl.kubernetes.io/default-container: nix-node
+        nix-csi/discard: "true"
+      labels:
+        app.kubernetes.io/name: csi
+        app.kubernetes.io/part-of: nix-csi
+    spec:
+      containers:
+        - args:
+            - --v=5
+            - --csi-address=/csi/csi.sock
+            - --kubelet-registration-path=/var/lib/kubelet/plugins/nix.csi.store/csi.sock
+          env:
+            - name: KUBE_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          image: registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.15.0
+          name: csi-node-driver-registrar
+          resources:
+            requests:
+              cpu: 10m
+              memory: 10Mi
+          volumeMounts:
+            - mountPath: /csi
+              name: csi-socket
+            - mountPath: /var/lib/kubelet
+              name: kubelet
+            - mountPath: /registration
+              name: registration
+        - args:
+            - --csi-address=/csi/csi.sock
+          image: registry.k8s.io/sig-storage/livenessprobe:v2.17.0
+          name: livenessprobe
+          resources:
+            requests:
+              cpu: 10m
+              memory: 10Mi
+          volumeMounts:
+            - mountPath: /csi
+              name: csi-socket
+            - mountPath: /registration
+              name: registration
+        - command:
+            - dinit
+            - --log-file
+            - /var/log/dinit.log
+            - --quiet
+            - csi
+          env:
+            - name: BUILDERS_ENABLED
+              value: "true"
+            - name: CACHE_ENABLED
+              value: "true"
+            - name: CSI_ENDPOINT
+              value: unix:///csi/csi.sock
+            - name: HOME
+              value: /nix/var/nix-csi/root
+            - name: KUBE_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: KUBE_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: KUBE_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: KUBE_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: KUBE_POD_UID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.uid
+            - name: NIX_BUILD_TIMEOUT
+              value: "300"
+            - name: RSYNC_CONCURRENCY
+              value: "1"
+            - name: USER
+              value: root
+          image: ghcr.io/lillecarl/nix-csi/scratch:1.0.1
+          name: nix-node
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - mountPath: /csi
+              name: csi-socket
+            - mountPath: /var/lib/kubelet
+              mountPropagation: Bidirectional
+              name: kubelet
+            - mountPath: /etc/nix
+              name: nix-config
+            - mountPath: /nix
+              mountPropagation: Bidirectional
+              name: nix-store
+              subPath: nix
+            - mountPath: /registration
+              name: registration
+            - mountPath: /etc/ssh
+              name: ssh-config
+            - mountPath: /etc/ssh-dynauth
+              name: ssh-dynauth
+            - mountPath: /etc/ssh-key
+              name: ssh-key
+      initContainers:
+        - env:
+            - name: amd64
+              value: /nix/store/ly4js16z81xvvmgwbgwi00n10cdh0adk-nodeEnv
+            - name: arm64
+              value: /nix/store/lbdl1ychnf1vri3pz015rh0wppqv7014-nodeEnv
+          image: ghcr.io/lillecarl/nix-csi/lix:2.94.0
+          imagePullPolicy: Always
+          name: initcopy
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - mountPath: /etc/nix
+              name: nix-config
+            - mountPath: /nix-volume
+              name: nix-store
+            - mountPath: /etc/ssh
+              name: ssh-config
+            - mountPath: /etc/ssh-dynauth
+              name: ssh-dynauth
+            - mountPath: /etc/ssh-key
+              name: ssh-key
+      priorityClassName: system-node-critical
+      serviceAccountName: nix-csi
+      subdomain: nix-builders
+      tolerations:
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/control-plane
+          operator: Exists
+      volumes:
+        - hostPath:
+            path: /var/lib/kubelet/plugins/nix.csi.store/
+            type: DirectoryOrCreate
+          name: csi-socket
+        - hostPath:
+            path: /var/lib/kubelet
+            type: Directory
+          name: kubelet
+        - configMap:
+            name: nix-node
+          name: nix-config
+        - hostPath:
+            path: /var/lib/nix-csi
+            type: DirectoryOrCreate
+          name: nix-store
+        - hostPath:
+            path: /var/lib/kubelet/plugins_registry
+          name: registration
+        - configMap:
+            defaultMode: 292
+            name: ssh-config
+          name: ssh-config
+        - configMap:
+            defaultMode: 292
+            name: ssh-dynauth
+          name: ssh-dynauth
+        - name: ssh-key
+          secret:
+            defaultMode: 256
+            secretName: ssh-key
+  updateStrategy:
+    rollingUpdate:
+      maxUnavailable: 1
+    type: RollingUpdate

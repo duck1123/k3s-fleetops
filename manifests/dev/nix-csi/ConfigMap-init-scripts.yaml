@@ -1,0 +1,31 @@
+apiVersion: v1
+data:
+  init-secrets: |
+    set -x
+    mkdir -p /tmp/{ssh-key,nix-key,ssh-auth}
+    if ! kubectl get secret ssh-key &>/dev/null || ! kubectl get configmap ssh-dynauth &>/dev/null; then
+      # Create ssh secret
+      ssh-keygen -t ed25519 -C "" -N "" -f /tmp/ssh-key/id_ed25519
+      kubectl delete --ignore-not-found secret ssh-key
+      kubectl create secret generic ssh-key --from-file=/tmp/ssh-key
+
+      # Create pubkey configmap
+      cp /tmp/ssh-key/id_ed25519.pub /tmp/ssh-auth/authorized_keys
+      echo "* $(cat /tmp/ssh-key/id_ed25519.pub)" > /tmp/ssh-auth/ssh_known_hosts
+      kubectl delete --ignore-not-found configmap ssh-dynauth
+      kubectl create configmap ssh-dynauth --from-file=/tmp/ssh-auth
+    fi
+
+    if ! kubectl get secret nix-key &>/dev/null; then
+      # create nix binary cache key
+      nix-store --generate-binary-cache-key \
+        nix-cache-1 \
+        /tmp/nix-key/nix_ed25519 \
+        /tmp/nix-key/nix_ed25519.pub
+      kubectl delete --ignore-not-found secret nix-key
+      kubectl create secret generic nix-key --from-file=/tmp/nix-key
+    fi
+kind: ConfigMap
+metadata:
+  name: init-scripts
+  namespace: nix-csi

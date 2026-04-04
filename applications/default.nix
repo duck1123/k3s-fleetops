@@ -31,6 +31,7 @@
     ./lidarr.nix
     ./kyverno.nix
     ./lldap.nix
+    ./nix-csi.nix
     ./loki.nix
     ./longhorn.nix
     ./mariadb.nix

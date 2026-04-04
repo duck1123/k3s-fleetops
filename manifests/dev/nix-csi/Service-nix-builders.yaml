@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nix-builders
+  namespace: nix-csi
+spec:
+  clusterIP: None
+  ports:
+    - name: ssh
+      port: 22
+  selector:
+    app.kubernetes.io/name: csi
+    app.kubernetes.io/part-of: nix-csi
