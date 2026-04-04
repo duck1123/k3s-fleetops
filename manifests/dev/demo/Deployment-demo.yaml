@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo
+  namespace: demo
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: demo
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: demo
+    spec:
+      containers:
+        - command:
+            - python3
+            - /scripts/server.py
+          env:
+            - name: PORT
+              value: "8080"
+            - name: JSON_DATA_FILE
+              value: /data/data.json
+          image: ghcr.io/lillecarl/nix-csi/scratch:1.0.1
+          name: demo
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /nix
+              name: nix
+            - mountPath: /scripts
+              name: scripts
+            - mountPath: /data
+              name: data
+      volumes:
+        - csi:
+            driver: nix.csi.store
+            volumeAttributes:
+              nixExpr: |
+                let
+                  pkgs = import (builtins.fetchTree {
+                    type = "github";
+                    owner = "nixos";
+                    repo = "nixpkgs";
+                    ref = "nixos-unstable";
+                  }) {};
+                in
+                pkgs.python3
+          name: nix
+        - configMap:
+            name: demo-server
+          name: scripts
+        - configMap:
+            name: demo-data
+          name: data

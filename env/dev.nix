@@ -98,6 +98,8 @@ in
       storageClassName = "longhorn";
     };
 
+    demo.enable = true;
+
     gluetun = {
       controlServer = { inherit (secrets.gluetun) password username; };
       enable = true;

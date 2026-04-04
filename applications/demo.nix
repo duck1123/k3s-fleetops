@@ -1,88 +1,177 @@
 { ... }:
 {
   flake.nixidyApps.demo =
-    { config, lib, ... }:
-    let
-      cfg = config.services.demo;
-      defaultNamespace = "demo";
-      labels = {
-        "app.kubernetes.io/name" = "nginx";
-      };
-      namespace = cfg.namespace;
-    in
-    with lib;
     {
-      options.services.demo = {
-        enable = mkEnableOption "Enable application";
-        namespace = mkOption {
-          description = mdDoc "The namespace to install into";
-          type = types.str;
-          default = defaultNamespace;
+      config,
+      lib,
+      pkgs,
+      self,
+      ...
+    }:
+    with lib;
+    let
+      name = "demo";
+      labels = { "app.kubernetes.io/name" = name; };
+
+      # ── Runtime ──────────────────────────────────────────────────────────────
+      # nix-csi evaluates this expression on the node and mounts the result at
+      # /nix so its bin directory is on PATH inside the scratch container.
+      # Swap pkgs.python3 for any other nixpkgs derivation to change the runtime.
+      serverExpr = ''
+        let
+          pkgs = import (builtins.fetchTree {
+            type = "github";
+            owner = "nixos";
+            repo = "nixpkgs";
+            ref = "nixos-unstable";
+          }) {};
+        in
+        pkgs.python3
+      '';
+
+      # ── Server script ─────────────────────────────────────────────────────────
+      # Stored in a ConfigMap so you can change server behaviour without touching
+      # the runtime expression above.  Edit freely — standard Python, no deps.
+      serverScript = ''
+        import http.server
+        import json
+        import os
+        import sys
+
+        DATA_FILE = os.environ.get("JSON_DATA_FILE", "/data/data.json")
+        PORT = int(os.environ.get("PORT", "8080"))
+
+
+        class Handler(http.server.BaseHTTPRequestHandler):
+            def log_message(self, fmt, *args):
+                sys.stderr.write(fmt % args + "\n")
+                sys.stderr.flush()
+
+            def do_GET(self):
+                try:
+                    with open(DATA_FILE) as f:
+                        body = f.read().encode()
+                except Exception as exc:
+                    body = json.dumps({"error": str(exc)}).encode()
+
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
+
+        print(f"json-server listening on :{PORT}", file=sys.stderr, flush=True)
+        http.server.HTTPServer(("", PORT), Handler).serve_forever()
+      '';
+    in
+    self.lib.mkArgoApp
+      {
+        inherit config lib self pkgs;
+      }
+      {
+        name = "demo";
+
+        extraOptions = {
+          # ── Data ───────────────────────────────────────────────────────────────
+          # Change this attrset (or override it in env/dev.nix) to serve different
+          # JSON.  The value is serialised to /data/data.json inside the pod.
+          jsonData = mkOption {
+            description = mdDoc "JSON object served at GET /";
+            type = types.attrs;
+            default = {
+              message = "Hello from nix-csi!";
+              runtime = "python3";
+            };
+          };
         };
-      };
 
-      config = mkIf cfg.enable {
-        applications.demo = {
-          inherit namespace;
-          createNamespace = true;
-          finalizer = "foreground";
-
-          resources = {
-            # Define config maps with config for nginx
+        extraResources =
+          cfg:
+          let
+            port = 8080;
+          in
+          {
             configMaps = {
-              nginx-config.data."nginx.conf" = ''
-                user nginx nginx;
-                error_log /dev/stdout info;
-                pid /dev/null;
-                events {}
-                http {
-                  access_log /dev/stdout;
-                  server {
-                    listen 80;
-                    index index.html;
-                    location / {
-                      root /var/lib/html;
-                    }
-                  }
-                }
-              '';
-
-              nginx-static.data."index.html" = ''
-                <html><body><h1>Hello from NGINX</h1></body></html>
-              '';
+              demo-data.data."data.json" = builtins.toJSON cfg.jsonData;
+              demo-server.data."server.py" = serverScript;
             };
 
-            # Define a deployment for running an nginx server
-            deployments.nginx.spec = {
+            deployments.${name}.spec = {
               selector.matchLabels = labels;
               template = {
                 metadata.labels = labels;
                 spec = {
-                  securityContext.fsGroup = 1000;
-                  containers.nginx = {
-                    image = "nginx:1.25.1";
-                    imagePullPolicy = "IfNotPresent";
-                    volumeMounts = {
-                      "/etc/nginx".name = "config";
-                      "/var/lib/html".name = "static";
-                    };
-                  };
-                  volumes = {
-                    config.configMap.name = "nginx-config";
-                    static.configMap.name = "nginx-static";
-                  };
+                  containers = [
+                    {
+                      inherit name;
+                      image = "ghcr.io/lillecarl/nix-csi/scratch:1.0.1";
+                      command = [ "python3" "/scripts/server.py" ];
+                      env = [
+                        {
+                          name = "PORT";
+                          value = toString port;
+                        }
+                        {
+                          name = "JSON_DATA_FILE";
+                          value = "/data/data.json";
+                        }
+                      ];
+                      ports = [
+                        {
+                          containerPort = port;
+                          name = "http";
+                          protocol = "TCP";
+                        }
+                      ];
+                      volumeMounts = [
+                        {
+                          name = "nix";
+                          mountPath = "/nix";
+                        }
+                        {
+                          name = "scripts";
+                          mountPath = "/scripts";
+                        }
+                        {
+                          name = "data";
+                          mountPath = "/data";
+                        }
+                      ];
+                    }
+                  ];
+                  volumes = [
+                    {
+                      name = "nix";
+                      csi = {
+                        driver = "nix.csi.store";
+                        volumeAttributes.nixExpr = serverExpr;
+                      };
+                    }
+                    {
+                      name = "scripts";
+                      configMap.name = "demo-server";
+                    }
+                    {
+                      name = "data";
+                      configMap.name = "demo-data";
+                    }
+                  ];
                 };
               };
             };
 
-            # Define service for nginx
-            services.nginx.spec = {
+            services.${name}.spec = {
               selector = labels;
-              ports.http.port = 80;
+              ports = [
+                {
+                  name = "http";
+                  port = 80;
+                  targetPort = port;
+                  protocol = "TCP";
+                }
+              ];
             };
           };
-          syncPolicy.finalSyncOpts = [ "CreateNamespace=true" ];
-        };
       };
-    };
 }
