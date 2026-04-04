@@ -272,7 +272,7 @@ in
     };
 
     lidarr = {
-      enable = false;
+      enable = true;
 
       ingress = {
         domain = "lidarr.${tail-domain}";
@@ -537,7 +537,7 @@ in
         password = secrets.postgresql.userPassword;
       };
 
-      enable = false;
+      enable = true;
       hostAffinity = "edgenix";
 
       ingress = {
@@ -550,7 +550,7 @@ in
     };
 
     qbittorrent = {
-      enable = false;
+      enable = true;
       hostAffinity = "nasnix";
 
       ingress = {
@@ -685,7 +685,7 @@ in
     sealed-secrets.enable = true;
 
     slskd = {
-      enable = false;
+      enable = true;
 
       ingress = {
         domain = "slskd.${tail-domain}";
@@ -757,7 +757,7 @@ in
     sops.enable = true;
 
     soularr = {
-      enable = false;
+      enable = true;
       hostAffinity = "edgenix";
 
       lidarr = {
