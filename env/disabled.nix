@@ -45,7 +45,61 @@ in
   };
 
   services = {
+    adventureworks.enable = false;
+
+    airflow = {
+      enable = false;
+
+      ingress = {
+        inherit clusterIssuer;
+        domain = "airflow.${base-domain}";
+      };
+    };
+
+    alice-bitcoin.enable = false;
+
+    alice-lnd =
+      let
+        user-env = "alice";
+      in
+      {
+        inherit user-env;
+        enable = false;
+        imageVersion = "v1.10.3";
+        ingress.domain = "lnd-${user-env}.dinsro.com";
+      };
+
     argocd.enable = true;
+    argo-events.enable = false;
+
+    argo-workflows = {
+      enable = false;
+
+      ingress = {
+        domain = "argo-workflows.${base-domain}";
+        ingressClassName = "traefik";
+      };
+    };
+
+    authentik = {
+      inherit (secrets.authentik) secret-key;
+      enable = false;
+
+      ingress = {
+        inherit clusterIssuer;
+        domain = "authentik.${base-domain}";
+        ingressClassName = "traefik";
+      };
+
+      postgresql = {
+        inherit (secrets.authentik.postgresql)
+          password
+          postgres-password
+          replicationPassword
+          ;
+        host = "postgreql.postgreql";
+      };
+    };
 
     booklore = {
       enable = true;
@@ -83,6 +137,18 @@ in
       uid = "0";
     };
 
+    calibre = {
+      enable = false;
+
+      ingress = {
+        domain = "calibre.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+
+      storageClassName = "longhorn";
+    };
+
     cert-manager.enable = true;
 
     cloudbeaver = {
@@ -96,6 +162,38 @@ in
       };
 
       storageClassName = "longhorn";
+    };
+
+    dozzle = {
+      enable = false;
+      hostAffinity = "nasnix";
+
+      ingress = {
+        domain = "dozzle.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+    };
+
+    ersatztv = {
+      enable = false;
+      # logLevel = "Debug";
+      hostAffinity = "edgenix";
+
+      ingress = {
+        domain = "ersatztv.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+
+      nfs = {
+        enable = true;
+        server = nas-host;
+        path = "${nas-base}/Videos";
+      };
+
+      enableGPU = true;
+      vaapiRenderDevice = "renderD129";
     };
 
     gluetun = {
@@ -171,9 +269,50 @@ in
     };
 
     prometheus = {
-      alertmanager.enabled = true;
       enable = true;
       hostAffinity = "edgenix";
+
+      # Additional scrape configs for monitoring other hosts
+      # Example format (uncomment and modify as needed):
+      additionalScrapeConfigs = [
+        # {
+        #   job_name = "node-exporter-remote";
+        #   static_configs = [
+        #     {
+        #       targets = [
+        #         "host1.${tail-domain}:9100"
+        #         "host2.${tail-domain}:9100"
+        #       ];
+        #       labels = {
+        #         instance = "remote-host";
+        #       };
+        #     }
+        #   ];
+        # }
+      ];
+
+      alertmanager = {
+        enabled = true;
+      };
+    };
+
+    harbor = {
+      domain = "harbor.${base-domain}";
+      enable = false;
+    };
+
+    homer = {
+      codeserver.ingress = {
+        domain = "codeserver.${tail-domain}";
+        enable = true;
+      };
+
+      enable = false;
+
+      ingress = {
+        domain = "homer.${tail-domain}";
+        ingressClassName = "tailscale";
+      };
     };
 
     homarr = {
@@ -239,6 +378,26 @@ in
       storageClassName = "longhorn";
     };
 
+    kavita = {
+      enable = false;
+
+      ingress = {
+        domain = "kavita.${tail-domain}";
+        clusterIssuer = "tailscale";
+        ingressClassName = "tailscale";
+        tls.enable = true;
+      };
+    };
+
+    keycloak = {
+      enable = false;
+      ingress = {
+        domain = "keycloak.dev.kronkltd.net";
+        adminDomain = "keycloak-admin.dev.kronkltd.net";
+        clusterIssuer = "letsencrypt-prod";
+      };
+    };
+
     kite = {
       inherit (secrets.kite) encryptKey jwtSecret;
       enable = true;
@@ -270,6 +429,8 @@ in
         path = "${nas-base}/Books";
       };
     };
+
+    kyverno.enable = false;
 
     lidarr = {
       enable = false;
@@ -310,6 +471,8 @@ in
       replicas = 1;
       storageClassName = "longhorn";
     };
+
+    lldap.enable = false;
 
     loki = {
       enable = true;
@@ -358,6 +521,11 @@ in
       ];
     };
 
+    marquez = {
+      domain = "marquez.${base-domain}";
+      enable = false;
+    };
+
     memos = {
       enable = true;
       hostAffinity = "edgenix";
@@ -376,11 +544,45 @@ in
       };
     };
 
+    metabase = {
+      enable = false;
+
+      ingress = {
+        domain = "metabase.${tail-domain}";
+        ingressClassName = "tailscale";
+      };
+    };
+
     metallb = {
       enable = true;
       l2.addresses = [ "192.168.0.240-192.168.0.250" ];
       l2.excludeNodes = [ "powerspecnix" ];
     };
+
+    mindsdb = {
+      enable = false;
+
+      ingress = {
+        domain = "mindsdb.${tail-domain}";
+        ingressClassName = "tailscale";
+      };
+    };
+
+    minio = {
+      enable = false;
+
+      ingress = {
+        api-domain = "api-minio.${tail-domain}";
+        domain = "minio.${tail-domain}";
+        clusterIssuer = "tailscale";
+        ingressClassName = "tailscale";
+        tls.enable = true;
+      };
+
+      values.defaultBuckets = "my-default-bucket";
+    };
+
+    mssql.enable = false;
 
     n8n = {
       enable = true;
@@ -682,6 +884,8 @@ in
       useProbes = false;
     };
 
+    satisfactory.enable = false;
+
     sealed-secrets.enable = true;
 
     slskd = {
@@ -783,6 +987,27 @@ in
       storageClassName = "longhorn";
     };
 
+    spark = {
+      enable = false;
+
+      ingress = {
+        domain = "spark.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+    };
+
+    specter = {
+      enable = false;
+
+      ingress = {
+        domain = "specter.${tail-domain}";
+        ingressClassName = "tailscale";
+      };
+
+      namespace = "specter";
+    };
+
     stashapp = {
       enable = true;
 
@@ -840,10 +1065,77 @@ in
       transcodegpuWorkers = 1;
     };
 
+    tempo = {
+      enable = false;
+      ingress = {
+        inherit clusterIssuer;
+        domain = "tempo.${tail-domain}";
+        ingressClassName = "tailscale";
+      };
+    };
+
     traefik = {
       enable = true;
       service.loadBalancerIP = "192.168.0.241";
       service.hostPorts = true;
+    };
+
+    tube-archivist = {
+      auth = {
+        inherit (secrets.tube-archivist.auth) username password;
+      };
+
+      elasticsearch.elasticPassword = secrets.tube-archivist.auth.password;
+      enable = false;
+      hostAffinity = "edgenix";
+
+      ingress = {
+        domain = "tube-archivist.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+
+      nfs = {
+        enable = true;
+        server = nas-host;
+        path = "${nas-base}";
+      };
+
+      redis = {
+        host = "redis.redis";
+        port = 6379;
+        password = secrets.redis.password;
+      };
+      storageClassName = "longhorn";
+      replicas = 1;
+    };
+
+    tunarr = {
+      enable = false;
+      enableGPU = true;
+      hostAffinity = "edgenix";
+      resetDatabase = false;
+
+      ingress = {
+        domain = "tunarr.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+
+      nfs = {
+        enable = false;
+        server = nas-host;
+        path = "${nas-base}";
+
+        config = {
+          enable = false;
+          path = "${nas-base}/tunarr";
+        };
+      };
+
+      replicas = 1;
+      storageClassName = "local-path";
+      vaapiRenderDevice = "renderD129";
     };
 
     whisparr = {
