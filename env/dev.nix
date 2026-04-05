@@ -551,6 +551,7 @@ in
       };
 
       replicas = 1;
+      vpn.enable = false;
     };
 
     qbittorrent = {

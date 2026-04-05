@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - command:
-            - python3
+            - /nix/bin/python3
             - /scripts/server.py
           env:
             - name: PORT

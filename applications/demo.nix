@@ -106,7 +106,11 @@
                     {
                       inherit name;
                       image = "ghcr.io/lillecarl/nix-csi/scratch:1.0.1";
-                      command = [ "python3" "/scripts/server.py" ];
+                      # nix-csi's deref_hardlink_tree copies the primary package to the volume
+                      # root, so bin/ lands at /nix/bin/ (mountPath). The scratch image PATH
+                      # (/nix/var/result/bin) points to the chroot symlink which resolves to an
+                      # absolute host path not reachable inside the container, so use the direct path.
+                      command = [ "/nix/bin/python3" "/scripts/server.py" ];
                       env = [
                         {
                           name = "PORT";
