@@ -1,0 +1,36 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded
+  name: affine-migration
+  namespace: affine
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      containers:
+        - command:
+            - sh
+            - -c
+            - node ./scripts/self-host-predeploy.js
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  key: DATABASE_URL
+                  name: affine-database-url
+            - name: REDIS_SERVER_HOST
+              value: redis.redis
+            - name: REDIS_SERVER_PORT
+              value: "6379"
+            - name: REDIS_SERVER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: REDIS_SERVER_PASSWORD
+                  name: affine-redis-password
+          image: ghcr.io/toeverything/affine:stable
+          imagePullPolicy: IfNotPresent
+          name: migration
+      restartPolicy: OnFailure

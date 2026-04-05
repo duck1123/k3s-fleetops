@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: affine
+  namespace: affine
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: affine
+      app.kubernetes.io/name: affine
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: affine
+        app.kubernetes.io/name: affine
+    spec:
+      containers:
+        - env:
+            - name: REDIS_SERVER_HOST
+              value: redis.redis
+            - name: REDIS_SERVER_PORT
+              value: "6379"
+            - name: AFFINE_INDEXER_ENABLED
+              value: "false"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  key: DATABASE_URL
+                  name: affine-database-url
+            - name: REDIS_SERVER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: REDIS_SERVER_PASSWORD
+                  name: affine-redis-password
+            - name: AFFINE_SERVER_EXTERNAL_URL
+              value: https://affine.bearded-snake.ts.net
+          image: ghcr.io/toeverything/affine:stable
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /
+              port: 3010
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 10
+          name: affine
+          ports:
+            - containerPort: 3010
+              name: http
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 6
+            httpGet:
+              path: /
+              port: 3010
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          volumeMounts:
+            - mountPath: /root/.affine/storage
+              name: storage
+            - mountPath: /root/.affine/config
+              name: affine-config
+      nodeSelector:
+        kubernetes.io/hostname: edgenix
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: affine-storage
+        - name: affine-config
+          persistentVolumeClaim:
+            claimName: affine-config

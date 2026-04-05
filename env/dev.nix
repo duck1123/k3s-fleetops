@@ -45,6 +45,35 @@ in
   };
 
   services = {
+    affine = {
+      enable = true;
+      hostAffinity = "edgenix";
+
+      database = {
+        host = "postgresql.postgresql";
+        port = 5432;
+        name = "affine";
+        username = "affine";
+        password = secrets.postgresql.userPassword;
+      };
+
+      redis = {
+        host = "redis.redis";
+        port = 6379;
+        password = secrets.redis.password;
+      };
+
+      serverExternalUrl = "https://affine.${tail-domain}";
+
+      ingress = {
+        domain = "affine.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+
+      storageClassName = "longhorn";
+    };
+
     argocd.enable = true;
 
     booklore = {
@@ -514,6 +543,11 @@ in
           {
             name = "gitea";
             username = "postgres";
+            password = secrets.postgresql.userPassword;
+          }
+          {
+            name = "affine";
+            username = "affine";
             password = secrets.postgresql.userPassword;
           }
           {

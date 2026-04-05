@@ -1,6 +1,7 @@
 { ... }:
 {
   imports = [
+    ./affine.nix
     ./adventureworks.nix
     ./airflow.nix
     ./alice-bitcoin.nix
