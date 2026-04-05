@@ -550,7 +550,7 @@ in
         clusterIssuer = "tailscale";
       };
 
-      replicas = 0;
+      replicas = 1;
     };
 
     qbittorrent = {
