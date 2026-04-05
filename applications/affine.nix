@@ -15,9 +15,7 @@
       redis-secret = "affine-redis-password";
       databaseUrl =
         cfg:
-        "postgresql://${cfg.database.username}:${cfg.database.password}@${cfg.database.host}:${
-          toString cfg.database.port
-        }/${cfg.database.name}";
+        "postgresql://${cfg.database.username}:${cfg.database.password}@${cfg.database.host}:${toString cfg.database.port}/${cfg.database.name}";
     in
     self.lib.mkArgoApp
       {
@@ -102,11 +100,13 @@
         };
 
         extraResources = cfg: {
-          # Migration job — runs self-host-predeploy.js before each sync
+          # Migration job — runs self-host-predeploy.js on each sync, after secrets are created (wave 1)
+          # Using Sync phase (not PreSync) so the secret exists before the job runs.
           jobs."${name}-migration" = {
             metadata.annotations = {
-              "argocd.argoproj.io/hook" = "PreSync";
+              "argocd.argoproj.io/hook" = "Sync";
               "argocd.argoproj.io/hook-delete-policy" = "BeforeHookCreation,HookSucceeded";
+              "argocd.argoproj.io/sync-wave" = "1";
             };
             spec = {
               backoffLimit = 3;
@@ -152,106 +152,109 @@
             };
           };
 
-          deployments.${name}.spec = {
-            replicas = 1;
-            selector.matchLabels = {
-              "app.kubernetes.io/instance" = name;
-              "app.kubernetes.io/name" = name;
-            };
-            template = {
-              metadata.labels = {
+          deployments.${name} = {
+            metadata.annotations."argocd.argoproj.io/sync-wave" = "2";
+            spec = {
+              replicas = 1;
+              selector.matchLabels = {
                 "app.kubernetes.io/instance" = name;
                 "app.kubernetes.io/name" = name;
               };
-              spec = {
-                containers = [
-                  {
-                    inherit name;
-                    image = cfg.image;
-                    imagePullPolicy = "IfNotPresent";
-                    ports = [
-                      {
-                        containerPort = 3010;
-                        name = "http";
-                        protocol = "TCP";
+              template = {
+                metadata.labels = {
+                  "app.kubernetes.io/instance" = name;
+                  "app.kubernetes.io/name" = name;
+                };
+                spec = {
+                  containers = [
+                    {
+                      inherit name;
+                      image = cfg.image;
+                      imagePullPolicy = "IfNotPresent";
+                      ports = [
+                        {
+                          containerPort = 3010;
+                          name = "http";
+                          protocol = "TCP";
+                        }
+                      ];
+                      env = [
+                        {
+                          name = "REDIS_SERVER_HOST";
+                          value = cfg.redis.host;
+                        }
+                        {
+                          name = "REDIS_SERVER_PORT";
+                          value = toString cfg.redis.port;
+                        }
+                        {
+                          name = "AFFINE_INDEXER_ENABLED";
+                          value = "false";
+                        }
+                      ]
+                      ++ optional (cfg.database.password != "") {
+                        name = "DATABASE_URL";
+                        valueFrom.secretKeyRef = {
+                          name = db-secret;
+                          key = "DATABASE_URL";
+                        };
                       }
-                    ];
-                    env = [
-                      {
-                        name = "REDIS_SERVER_HOST";
-                        value = cfg.redis.host;
+                      ++ optional (cfg.redis.password != "") {
+                        name = "REDIS_SERVER_PASSWORD";
+                        valueFrom.secretKeyRef = {
+                          name = redis-secret;
+                          key = "REDIS_SERVER_PASSWORD";
+                        };
                       }
-                      {
-                        name = "REDIS_SERVER_PORT";
-                        value = toString cfg.redis.port;
-                      }
-                      {
-                        name = "AFFINE_INDEXER_ENABLED";
-                        value = "false";
-                      }
-                    ]
-                    ++ optional (cfg.database.password != "") {
-                      name = "DATABASE_URL";
-                      valueFrom.secretKeyRef = {
-                        name = db-secret;
-                        key = "DATABASE_URL";
+                      ++ optional (cfg.serverExternalUrl != "") {
+                        name = "AFFINE_SERVER_EXTERNAL_URL";
+                        value = cfg.serverExternalUrl;
+                      };
+                      volumeMounts = [
+                        {
+                          mountPath = "/root/.affine/storage";
+                          name = "storage";
+                        }
+                        {
+                          mountPath = "/root/.affine/config";
+                          name = "affine-config";
+                        }
+                      ];
+                      readinessProbe = {
+                        httpGet = {
+                          path = "/";
+                          port = 3010;
+                        };
+                        initialDelaySeconds = 30;
+                        periodSeconds = 10;
+                        timeoutSeconds = 5;
+                        successThreshold = 1;
+                        failureThreshold = 6;
+                      };
+                      livenessProbe = {
+                        httpGet = {
+                          path = "/";
+                          port = 3010;
+                        };
+                        initialDelaySeconds = 60;
+                        periodSeconds = 30;
+                        timeoutSeconds = 10;
+                        successThreshold = 1;
+                        failureThreshold = 5;
                       };
                     }
-                    ++ optional (cfg.redis.password != "") {
-                      name = "REDIS_SERVER_PASSWORD";
-                      valueFrom.secretKeyRef = {
-                        name = redis-secret;
-                        key = "REDIS_SERVER_PASSWORD";
-                      };
+                  ];
+                  volumes = [
+                    {
+                      name = "storage";
+                      persistentVolumeClaim.claimName = "${name}-storage";
                     }
-                    ++ optional (cfg.serverExternalUrl != "") {
-                      name = "AFFINE_SERVER_EXTERNAL_URL";
-                      value = cfg.serverExternalUrl;
-                    };
-                    volumeMounts = [
-                      {
-                        mountPath = "/root/.affine/storage";
-                        name = "storage";
-                      }
-                      {
-                        mountPath = "/root/.affine/config";
-                        name = "affine-config";
-                      }
-                    ];
-                    readinessProbe = {
-                      httpGet = {
-                        path = "/";
-                        port = 3010;
-                      };
-                      initialDelaySeconds = 30;
-                      periodSeconds = 10;
-                      timeoutSeconds = 5;
-                      successThreshold = 1;
-                      failureThreshold = 6;
-                    };
-                    livenessProbe = {
-                      httpGet = {
-                        path = "/";
-                        port = 3010;
-                      };
-                      initialDelaySeconds = 60;
-                      periodSeconds = 30;
-                      timeoutSeconds = 10;
-                      successThreshold = 1;
-                      failureThreshold = 5;
-                    };
-                  }
-                ];
-                volumes = [
-                  {
-                    name = "storage";
-                    persistentVolumeClaim.claimName = "${name}-storage";
-                  }
-                  {
-                    name = "affine-config";
-                    persistentVolumeClaim.claimName = "${name}-config";
-                  }
-                ];
+                    {
+                      name = "affine-config";
+                      persistentVolumeClaim.claimName = "${name}-config";
+                    }
+                  ];
+                };
               };
             };
           };

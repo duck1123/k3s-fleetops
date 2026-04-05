@@ -11,7 +11,9 @@
     with lib;
     let
       name = "demo";
-      labels = { "app.kubernetes.io/name" = name; };
+      labels = {
+        "app.kubernetes.io/name" = name;
+      };
 
       # ── Runtime ──────────────────────────────────────────────────────────────
       # nix-csi evaluates this expression on the node and mounts the result at
@@ -67,7 +69,12 @@
     in
     self.lib.mkArgoApp
       {
-        inherit config lib self pkgs;
+        inherit
+          config
+          lib
+          self
+          pkgs
+          ;
       }
       {
         name = "demo";
@@ -137,7 +144,10 @@
                     {
                       inherit name;
                       image = "ghcr.io/lillecarl/nix-csi/scratch:1.0.1";
-                      command = [ "python3" "/scripts/server.py" ];
+                      command = [
+                        "python3"
+                        "/scripts/server.py"
+                      ];
                       env = [
                         {
                           name = "PORT";

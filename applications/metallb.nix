@@ -59,7 +59,12 @@
         cfg:
         let
           ns = cfg.namespace;
-          inherit (cfg.l2) poolName advertisementName addresses excludeNodes;
+          inherit (cfg.l2)
+            poolName
+            advertisementName
+            addresses
+            excludeNodes
+            ;
           poolYaml = ''
             apiVersion: metallb.io/v1beta1
             kind: IPAddressPool

@@ -327,7 +327,9 @@
               baseResources = lib.recursiveUpdate localIngressResources (
                 lib.recursiveUpdate (extraResources cfg) cfg.extraResources
               );
-              resources = addHostAffinityToResources (builtins.removeAttrs baseResources [ "sopsSecrets" ]) cfg.hostAffinity;
+              resources = addHostAffinityToResources (builtins.removeAttrs baseResources [
+                "sopsSecrets"
+              ]) cfg.hostAffinity;
             in
             mkMerge [
               {

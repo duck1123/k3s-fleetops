@@ -16,7 +16,12 @@
     in
     self.lib.mkArgoApp
       {
-        inherit config lib self pkgs;
+        inherit
+          config
+          lib
+          self
+          pkgs
+          ;
       }
       {
         name = "nix-csi";
