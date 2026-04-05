@@ -110,19 +110,19 @@
                         "sh"
                         "-c"
                         ''
-                          echo "=== /nix top-level ===" && ls -la /nix &&
-                          echo "=== /nix/bin ===" && ls -la /nix/bin 2>/dev/null || echo "(no /nix/bin)" &&
-                          echo "=== /nix/nix ===" && ls -la /nix/nix 2>/dev/null || echo "(no /nix/nix)" &&
-                          echo "=== /nix/nix/var ===" && ls -la /nix/nix/var 2>/dev/null || echo "(no /nix/nix/var)" &&
-                          echo "=== /nix/nix/var/result ===" && ls -la /nix/nix/var/result 2>/dev/null || echo "(no /nix/nix/var/result)" &&
-                          echo "=== /nix/nix/store ===" && ls /nix/nix/store 2>/dev/null | head -20 || echo "(no /nix/nix/store)" &&
-                          echo "=== all files 3 levels deep ===" && find /nix -maxdepth 3 2>/dev/null
+                          echo "=== / top-level ===" ; ls -la / ;
+                          echo "=== /bin ===" ; ls -la /bin 2>/dev/null || echo "(no /bin)" ;
+                          echo "=== /nix ===" ; ls -la /nix 2>/dev/null || echo "(no /nix)" ;
+                          echo "=== /nix/var ===" ; ls -la /nix/var 2>/dev/null || echo "(no /nix/var)" ;
+                          echo "=== /nix/var/result (symlink) ===" ; ls -la /nix/var/result 2>/dev/null || echo "(no /nix/var/result)" ;
+                          echo "=== /nix/var/result/bin ===" ; ls /nix/var/result/bin 2>/dev/null || echo "(no /nix/var/result/bin)" ;
+                          echo "=== /nix/store (first 10) ===" ; ls /nix/store 2>/dev/null | head -10 || echo "(no /nix/store)"
                         ''
                       ];
                       volumeMounts = [
                         {
                           name = "nix";
-                          mountPath = "/nix";
+                          mountPath = "/";
                         }
                       ];
                     }
@@ -131,11 +131,7 @@
                     {
                       inherit name;
                       image = "ghcr.io/lillecarl/nix-csi/scratch:1.0.1";
-                      # nix-csi's deref_hardlink_tree copies the primary package to the volume
-                      # root, so bin/ lands at /nix/bin/ (mountPath). The scratch image PATH
-                      # (/nix/var/result/bin) points to the chroot symlink which resolves to an
-                      # absolute host path not reachable inside the container, so use the direct path.
-                      command = [ "/nix/bin/python3" "/scripts/server.py" ];
+                      command = [ "python3" "/scripts/server.py" ];
                       env = [
                         {
                           name = "PORT";
@@ -156,7 +152,7 @@
                       volumeMounts = [
                         {
                           name = "nix";
-                          mountPath = "/nix";
+                          mountPath = "/";
                         }
                         {
                           name = "scripts";
