@@ -110,11 +110,11 @@
                         "sh"
                         "-c"
                         ''
-                          echo "=== / top-level ===" ; ls -la / ;
-                          echo "=== /bin ===" ; ls -la /bin 2>/dev/null || echo "(no /bin)" ;
-                          echo "=== /nix ===" ; ls -la /nix 2>/dev/null || echo "(no /nix)" ;
-                          echo "=== /nix/var ===" ; ls -la /nix/var 2>/dev/null || echo "(no /nix/var)" ;
-                          echo "=== /nix/var/result (symlink) ===" ; ls -la /nix/var/result 2>/dev/null || echo "(no /nix/var/result)" ;
+                          echo "=== /nix-csi (volume root) ===" ; ls -la /nix-csi ;
+                          echo "=== /nix-csi/nix ===" ; ls -la /nix-csi/nix 2>/dev/null || echo "(no nix/)" ;
+                          echo "=== /nix-csi/nix/var ===" ; ls -la /nix-csi/nix/var 2>/dev/null || echo "(no nix/var/)" ;
+                          echo "=== /nix-csi/nix/var/result ===" ; ls -la /nix-csi/nix/var/result 2>/dev/null || echo "(no result symlink)" ;
+                          echo "=== /nix (subPath nix) ===" ; ls -la /nix 2>/dev/null || echo "(no /nix)" ;
                           echo "=== /nix/var/result/bin ===" ; ls /nix/var/result/bin 2>/dev/null || echo "(no /nix/var/result/bin)" ;
                           echo "=== /nix/store (first 10) ===" ; ls /nix/store 2>/dev/null | head -10 || echo "(no /nix/store)"
                         ''
@@ -122,7 +122,12 @@
                       volumeMounts = [
                         {
                           name = "nix";
-                          mountPath = "/";
+                          mountPath = "/nix-csi";
+                        }
+                        {
+                          name = "nix";
+                          mountPath = "/nix";
+                          subPath = "nix";
                         }
                       ];
                     }
@@ -152,7 +157,8 @@
                       volumeMounts = [
                         {
                           name = "nix";
-                          mountPath = "/";
+                          mountPath = "/nix";
+                          subPath = "nix";
                         }
                         {
                           name = "scripts";
