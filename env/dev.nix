@@ -98,7 +98,14 @@ in
       storageClassName = "longhorn";
     };
 
-    demo.enable = true;
+    demo = {
+      enable = true;
+      ingress = {
+        domain = "demo.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+    };
 
     gluetun = {
       controlServer = { inherit (secrets.gluetun) password username; };

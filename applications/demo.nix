@@ -71,6 +71,7 @@
       }
       {
         name = "demo";
+        uses-ingress = true;
 
         extraOptions = {
           # ── Data ───────────────────────────────────────────────────────────────
@@ -190,6 +191,26 @@
                   ];
                 };
               };
+            };
+
+            ingresses.${name}.spec = with cfg.ingress; {
+              inherit ingressClassName;
+              rules = [
+                {
+                  host = domain;
+                  http.paths = [
+                    {
+                      path = "/";
+                      pathType = "ImplementationSpecific";
+                      backend.service = {
+                        inherit name;
+                        port.name = "http";
+                      };
+                    }
+                  ];
+                }
+              ];
+              tls = [ { hosts = [ domain ]; } ];
             };
 
             services.${name}.spec = {
