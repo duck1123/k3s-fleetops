@@ -102,6 +102,31 @@
               template = {
                 metadata.labels = labels;
                 spec = {
+                  initContainers = [
+                    {
+                      name = "nix-debug";
+                      image = "busybox:1.36";
+                      command = [
+                        "sh"
+                        "-c"
+                        ''
+                          echo "=== /nix top-level ===" && ls -la /nix &&
+                          echo "=== /nix/bin ===" && ls -la /nix/bin 2>/dev/null || echo "(no /nix/bin)" &&
+                          echo "=== /nix/nix ===" && ls -la /nix/nix 2>/dev/null || echo "(no /nix/nix)" &&
+                          echo "=== /nix/nix/var ===" && ls -la /nix/nix/var 2>/dev/null || echo "(no /nix/nix/var)" &&
+                          echo "=== /nix/nix/var/result ===" && ls -la /nix/nix/var/result 2>/dev/null || echo "(no /nix/nix/var/result)" &&
+                          echo "=== /nix/nix/store ===" && ls /nix/nix/store 2>/dev/null | head -20 || echo "(no /nix/nix/store)" &&
+                          echo "=== all files 3 levels deep ===" && find /nix -maxdepth 3 2>/dev/null
+                        ''
+                      ];
+                      volumeMounts = [
+                        {
+                          name = "nix";
+                          mountPath = "/nix";
+                        }
+                      ];
+                    }
+                  ];
                   containers = [
                     {
                       inherit name;
