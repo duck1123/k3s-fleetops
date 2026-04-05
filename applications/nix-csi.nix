@@ -58,6 +58,9 @@
             );
           in
           {
+            # Deploy nix-csi before other apps that use the CSI driver (wave 0).
+            # ArgoCD waits for wave -1 to be healthy before starting wave 0.
+            annotations."argocd.argoproj.io/sync-wave" = "-1";
             yamls = [ yaml ];
           };
       };
