@@ -77,7 +77,7 @@ in
     argocd.enable = true;
 
     booklore = {
-      enable = true;
+      enable = false;
       hostAffinity = "edgenix";
 
       database = {
@@ -421,7 +421,7 @@ in
     };
 
     n8n = {
-      enable = true;
+      enable = false;
 
       hostAffinity = "nasnix";
 
@@ -568,13 +568,11 @@ in
         ];
     };
 
-    promtail = {
-      enable = true;
-    };
+    promtail.enable = true;
 
     prowlarr = {
       database = {
-        enable = true;
+        enable = false;
         host = "postgresql.postgresql";
         port = 5432;
         name = "prowlarr-main";
@@ -596,7 +594,7 @@ in
     };
 
     qbittorrent = {
-      enable = true;
+      enable = false;
       hostAffinity = "nasnix";
 
       ingress = {
@@ -652,7 +650,7 @@ in
     };
 
     romm = {
-      enable = true;
+      enable = false;
 
       admin = {
         username = secrets.romm.admin.username;
@@ -803,7 +801,7 @@ in
     sops.enable = true;
 
     soularr = {
-      enable = true;
+      enable = false;
       hostAffinity = "edgenix";
 
       lidarr = {
@@ -857,7 +855,8 @@ in
       enable = true;
       healthcheckcpuWorkers = 0;
       healthcheckgpuWorkers = 1;
-      hostAffinity = "edgenix";
+      # hostAffinity = "edgenix";
+      hostAffinity = "powerspecnix";
 
       ingress = {
         domain = "tdarr.${tail-domain}";
@@ -881,7 +880,7 @@ in
       enableGPU = true;
       enableNvidiaGPU = false;
       # Edgenix has two cards; WX 3200 (VAAPI) is renderD129. Mount it as renderD128 so Tdarr's hardcoded path works.
-      vaapiRenderDevice = "renderD129";
+      # vaapiRenderDevice = "renderD129";
       libvaDriverName = "radeonsi";
       transcodegpuWorkers = 1;
     };
@@ -920,7 +919,7 @@ in
     };
 
     windmill = {
-      enable = true;
+      enable = false;
       hostAffinity = "edgenix";
       image = "ghcr.io/windmill-labs/windmill-full:latest";
 

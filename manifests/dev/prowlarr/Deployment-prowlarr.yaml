@@ -28,21 +28,6 @@ spec:
               value: "1000"
             - name: TZ
               value: Etc/UTC
-            - name: PROWLARR__POSTGRES__HOST
-              value: postgresql.postgresql
-            - name: PROWLARR__POSTGRES__PORT
-              value: "5432"
-            - name: PROWLARR__POSTGRES__MAINDB
-              value: prowlarr-main
-            - name: PROWLARR__POSTGRES__LOGDB
-              value: prowlarr-log
-            - name: PROWLARR__POSTGRES__USER
-              value: prowlarr
-            - name: PROWLARR__POSTGRES__PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: password
-                  name: prowlarr-database-password
           image: linuxserver/prowlarr:latest
           imagePullPolicy: IfNotPresent
           livenessProbe:
@@ -79,6 +64,3 @@ spec:
         - name: config
           persistentVolumeClaim:
             claimName: prowlarr-prowlarr-config
-        - name: prowlarr-database-password
-          secret:
-            secretName: prowlarr-database-password
