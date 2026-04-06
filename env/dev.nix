@@ -873,7 +873,7 @@ in
       puid = 1000;
       pgid = 1000;
 
-      replicas = 0;
+      replicas = 1;
       storageClassName = "longhorn";
       useProbes = false;
       vpn.enable = false;
