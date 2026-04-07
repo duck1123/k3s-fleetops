@@ -76,6 +76,25 @@ in
 
     argocd.enable = true;
 
+    audiobookshelf = {
+      enable = true;
+      hostAffinity = "edgenix";
+
+      ingress = {
+        domain = "audiobookshelf.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+
+      nfs = {
+        enable = true;
+        server = nas-host;
+        path = "${nas-base}/Audiobooks";
+      };
+
+      storageClassName = "longhorn";
+    };
+
     booklore = {
       enable = false;
       hostAffinity = "edgenix";

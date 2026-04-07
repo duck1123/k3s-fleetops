@@ -3,6 +3,7 @@
   imports = [
     ./affine.nix
     ./adventureworks.nix
+    ./audiobookshelf.nix
     ./airflow.nix
     ./alice-bitcoin.nix
     ./alice-lnd.nix
