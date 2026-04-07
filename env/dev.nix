@@ -415,6 +415,19 @@ in
       ];
     };
 
+    mealie = {
+      enable = true;
+      hostAffinity = "edgenix";
+
+      ingress = {
+        domain = "mealie.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+
+      storageClassName = "longhorn";
+    };
+
     memos = {
       enable = true;
       hostAffinity = "edgenix";

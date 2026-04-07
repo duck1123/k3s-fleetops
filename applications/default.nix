@@ -38,6 +38,7 @@
     ./longhorn.nix
     ./mariadb.nix
     ./marquez.nix
+    ./mealie.nix
     ./memos.nix
     ./rustfs.nix
     ./metabase.nix
