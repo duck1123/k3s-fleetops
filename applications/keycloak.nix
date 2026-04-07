@@ -14,7 +14,7 @@
 
       chart = self.lib.helmChart {
         inherit pkgs;
-        chartTgz = ../../chart-archives/keycloak-24.1.0.tgz;
+        chartTgz = ../chart-archives/keycloak-24.1.0.tgz;
         chartName = "keycloak";
       };
 

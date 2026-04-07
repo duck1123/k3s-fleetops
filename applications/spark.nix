@@ -15,7 +15,7 @@
       # https://artifacthub.io/packages/helm/bitnami/spark
       chart = self.lib.helmChart {
         inherit pkgs;
-        chartTgz = ../../chart-archives/spark-9.3.5.tgz;
+        chartTgz = ../chart-archives/spark-9.3.5.tgz;
         chartName = "spark";
       };
 

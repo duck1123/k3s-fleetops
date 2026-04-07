@@ -41,7 +41,7 @@
         # Run: helm pull oci://ghcr.io/immich-app/immich-charts/immich --version 0.10.3
         chart = self.lib.helmChart {
           inherit pkgs;
-          chartTgz = ../../chart-archives/immich-0.10.3.tgz;
+          chartTgz = ../chart-archives/immich-0.10.3.tgz;
           chartName = "immich";
         };
 
