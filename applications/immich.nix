@@ -37,12 +37,11 @@
         };
 
         # https://github.com/immich-app/immich-charts
-        # Chart is pulled via OCI and stored in chart-archives/
-        # Run: helm pull oci://ghcr.io/immich-app/immich-charts/immich --version 0.10.3
-        chart = self.lib.helmChart {
-          inherit pkgs;
-          chartTgz = ../chart-archives/immich-0.10.3.tgz;
-          chartName = "immich";
+        chart = lib.helm.downloadHelmChart {
+          repo = "oci://ghcr.io/immich-app/immich-charts";
+          chart = "immich";
+          version = "0.10.3";
+          chartHash = "sha256-+GGHO1w55A5/oe5gp/lweWXBMy7a/2VdoxlEdlsVnzk=";
         };
 
         extraOptions = {

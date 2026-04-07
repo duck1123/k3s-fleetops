@@ -4,7 +4,6 @@
     {
       config,
       lib,
-      pkgs,
       self,
       ...
     }:
@@ -13,10 +12,11 @@
       name = "spark";
 
       # https://artifacthub.io/packages/helm/bitnami/spark
-      chart = self.lib.helmChart {
-        inherit pkgs;
-        chartTgz = ../chart-archives/spark-9.3.5.tgz;
-        chartName = "spark";
+      chart = lib.helm.downloadHelmChart {
+        repo = "oci://registry-1.docker.io/bitnamicharts";
+        chart = "spark";
+        version = "9.3.5";
+        chartHash = "sha256-Cgyer2tZyOW8oW4NltpdjlcNmbJXMcJhfNf8mBfW68s=";
       };
 
       uses-ingress = true;

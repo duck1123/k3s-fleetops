@@ -4,7 +4,6 @@
     {
       config,
       lib,
-      pkgs,
       self,
       ...
     }:
@@ -12,10 +11,11 @@
     self.lib.mkArgoApp { inherit config lib; } {
       name = "keycloak";
 
-      chart = self.lib.helmChart {
-        inherit pkgs;
-        chartTgz = ../chart-archives/keycloak-24.1.0.tgz;
-        chartName = "keycloak";
+      chart = lib.helm.downloadHelmChart {
+        repo = "oci://registry-1.docker.io/bitnamicharts";
+        chart = "keycloak";
+        version = "24.1.0";
+        chartHash = "sha256-bgHZ5oUYVM65j2wwVWBavVs+opt0bf6QVZFqoEtC04A=";
       };
 
       uses-ingress = true;
