@@ -28,15 +28,15 @@
 
         sopsSecrets = cfg: {
           ${password-secret} = {
-            values = {
-              inherit (cfg.database) password username;
-            };
-            metadata.annotations."argocd.argoproj.io/sync-wave" = "-10";
+            inherit (cfg.database) password username;
           };
           ${redis-secret} = {
-            metadata.annotations."argocd.argoproj.io/sync-wave" = "-10";
-            values.password = cfg.redis.password;
+            password = cfg.redis.password;
           };
+        };
+
+        extraAppConfig = cfg: {
+          annotations."argocd.argoproj.io/sync-wave" = "2";
         };
 
         # https://github.com/immich-app/immich-charts
@@ -296,14 +296,14 @@
           };
 
           # Job to enable vector extension in PostgreSQL database
-          # Uses ArgoCD sync hook to run before Immich is deployed
+          # Uses ArgoCD sync hook to run after secrets are created but before Immich is deployed
           jobs = {
             "${name}-enable-vector-extension" = {
               metadata = {
                 annotations = {
-                  "argocd.argoproj.io/hook" = "PreSync";
+                  "argocd.argoproj.io/hook" = "Sync";
                   "argocd.argoproj.io/hook-delete-policy" = "BeforeHookCreation,HookSucceeded";
-                  "argocd.argoproj.io/sync-wave" = "-5";
+                  "argocd.argoproj.io/sync-wave" = "1";
                 };
               };
               spec = {
