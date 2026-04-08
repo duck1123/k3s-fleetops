@@ -573,6 +573,11 @@ in
         ]
         ++ [
           {
+            name = "immich";
+            username = "immich";
+            password = secrets.postgresql.userPassword;
+          }
+          {
             name = "gitea";
             username = "postgres";
             password = secrets.postgresql.userPassword;
