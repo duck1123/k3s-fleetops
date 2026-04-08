@@ -98,12 +98,27 @@ while IFS= read -r spec; do
   # Build stringData lines for the YAML
   string_data_lines="$(echo "$values" | jq -r 'to_entries[] | "        \(.key): \(.value | tostring)"')"
 
+  metadata_yaml=""
+  if echo "$spec" | jq -e '.metadata.annotations? != null' >/dev/null 2>&1; then
+    metadata_yaml="metadata:
+  annotations:
+"
+    metadata_yaml+="$(echo "$spec" | jq -c '.metadata.annotations' | python3 - <<'PY'
+import json, sys
+annotations = json.load(sys.stdin)
+for key, value in annotations.items():
+    print(f"    {key}: {json.dumps(value)}")
+PY
+)"
+    metadata_yaml+=$'\n'
+  fi
+
   plaintext_yaml="apiVersion: isindir.github.com/v1alpha3
 kind: SopsSecret
 metadata:
   name: ${secret_name}
   namespace: ${namespace}
-spec:
+${metadata_yaml}spec:
   secretTemplates:
     - name: ${secret_name}
       stringData:

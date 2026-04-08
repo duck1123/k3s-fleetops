@@ -28,11 +28,14 @@
 
         sopsSecrets = cfg: {
           ${password-secret} = {
-            password = cfg.database.password;
-            username = cfg.database.username;
+            values = {
+              inherit (cfg.database) password username;
+            };
+            metadata.annotations."argocd.argoproj.io/sync-wave" = "-10";
           };
           ${redis-secret} = {
-            password = cfg.redis.password;
+            metadata.annotations."argocd.argoproj.io/sync-wave" = "-10";
+            values.password = cfg.redis.password;
           };
         };
 
@@ -300,6 +303,7 @@
                 annotations = {
                   "argocd.argoproj.io/hook" = "PreSync";
                   "argocd.argoproj.io/hook-delete-policy" = "BeforeHookCreation,HookSucceeded";
+                  "argocd.argoproj.io/sync-wave" = "-5";
                 };
               };
               spec = {
