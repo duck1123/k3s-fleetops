@@ -119,46 +119,45 @@
                       inherit name;
                       image = cfg.image;
                       imagePullPolicy = "IfNotPresent";
-                      env =
-                        [
-                          {
-                            name = "TZ";
-                            value = cfg.tz;
-                          }
-                          {
-                            name = "BASE_URL";
-                            value = "https://${cfg.ingress.domain}";
-                          }
-                        ]
-                        ++ lib.optionals cfg.database.enable [
-                          {
-                            name = "DB_ENGINE";
-                            value = "postgres";
-                          }
-                          {
-                            name = "POSTGRES_SERVER";
-                            value = cfg.database.host;
-                          }
-                          {
-                            name = "POSTGRES_PORT";
-                            value = toString cfg.database.port;
-                          }
-                          {
-                            name = "POSTGRES_DB";
-                            value = cfg.database.name;
-                          }
-                          {
-                            name = "POSTGRES_USER";
-                            value = cfg.database.username;
-                          }
-                          {
-                            name = "POSTGRES_PASSWORD";
-                            valueFrom.secretKeyRef = {
-                              name = db-secret;
-                              key = "password";
-                            };
-                          }
-                        ];
+                      env = [
+                        {
+                          name = "TZ";
+                          value = cfg.tz;
+                        }
+                        {
+                          name = "BASE_URL";
+                          value = "https://${cfg.ingress.domain}";
+                        }
+                      ]
+                      ++ lib.optionals cfg.database.enable [
+                        {
+                          name = "DB_ENGINE";
+                          value = "postgres";
+                        }
+                        {
+                          name = "POSTGRES_SERVER";
+                          value = cfg.database.host;
+                        }
+                        {
+                          name = "POSTGRES_PORT";
+                          value = toString cfg.database.port;
+                        }
+                        {
+                          name = "POSTGRES_DB";
+                          value = cfg.database.name;
+                        }
+                        {
+                          name = "POSTGRES_USER";
+                          value = cfg.database.username;
+                        }
+                        {
+                          name = "POSTGRES_PASSWORD";
+                          valueFrom.secretKeyRef = {
+                            name = db-secret;
+                            key = "password";
+                          };
+                        }
+                      ];
                       ports = [
                         {
                           containerPort = cfg.service.port;
@@ -197,19 +196,18 @@
                     }
                   ];
 
-                  volumes =
-                    [
-                      {
-                        name = "data";
-                        persistentVolumeClaim.claimName = "${name}-${name}-data";
-                      }
-                    ]
-                    ++ lib.optionals (cfg.database.enable && cfg.database.password != "") [
-                      {
-                        name = db-secret;
-                        secret.secretName = db-secret;
-                      }
-                    ];
+                  volumes = [
+                    {
+                      name = "data";
+                      persistentVolumeClaim.claimName = "${name}-${name}-data";
+                    }
+                  ]
+                  ++ lib.optionals (cfg.database.enable && cfg.database.password != "") [
+                    {
+                      name = db-secret;
+                      secret.secretName = db-secret;
+                    }
+                  ];
                 };
               };
             };

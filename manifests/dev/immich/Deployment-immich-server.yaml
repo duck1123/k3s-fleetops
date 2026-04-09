@@ -93,6 +93,9 @@ spec:
           volumeMounts:
             - mountPath: /data
               name: data
+            - mountPath: /mnt/external-library
+              name: external-library
+              readOnly: true
       dnsPolicy: ClusterFirst
       enableServiceLinks: false
       hostIPC: false
@@ -103,3 +106,6 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: immich-immich-library
+        - name: external-library
+          persistentVolumeClaim:
+            claimName: immich-immich-external-library

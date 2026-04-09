@@ -234,13 +234,21 @@
                 accessMode = "ReadWriteOnce";
                 size = "1Gi";
               };
-            }
-            // (lib.optionalAttrs cfg.externalLibrary.enable {
+            };
+          };
+
+          server = lib.optionalAttrs cfg.externalLibrary.enable {
+            persistence = {
               external-library = {
                 existingClaim = "${name}-${name}-external-library";
-                globalMounts = [ { path = "/mnt/external-library"; readOnly = true; } ];
+                globalMounts = [
+                  {
+                    path = "/mnt/external-library";
+                    readOnly = true;
+                  }
+                ];
               };
-            });
+            };
           };
 
           ingress.main.enabled = false;
@@ -329,31 +337,30 @@
             });
 
           # Create PVC for NFS library volume when NFS is enabled
-          persistentVolumeClaims =
-            {
-              "${name}-${name}-library".spec =
-                if cfg.nfs.enable then
-                  {
-                    accessModes = [ "ReadWriteMany" ];
-                    resources.requests.storage = "1Gi";
-                    storageClassName = "";
-                    volumeName = "${name}-${name}-library-nfs";
-                  }
-                else
-                  {
-                    inherit (cfg) storageClassName;
-                    accessModes = [ "ReadWriteOnce" ];
-                    resources.requests.storage = "100Gi";
-                  };
-            }
-            // (lib.optionalAttrs cfg.externalLibrary.enable {
-              "${name}-${name}-external-library".spec = {
-                accessModes = [ "ReadOnlyMany" ];
-                resources.requests.storage = "1Gi";
-                storageClassName = "";
-                volumeName = "${name}-${name}-external-library-nfs";
-              };
-            });
+          persistentVolumeClaims = {
+            "${name}-${name}-library".spec =
+              if cfg.nfs.enable then
+                {
+                  accessModes = [ "ReadWriteMany" ];
+                  resources.requests.storage = "1Gi";
+                  storageClassName = "";
+                  volumeName = "${name}-${name}-library-nfs";
+                }
+              else
+                {
+                  inherit (cfg) storageClassName;
+                  accessModes = [ "ReadWriteOnce" ];
+                  resources.requests.storage = "100Gi";
+                };
+          }
+          // (lib.optionalAttrs cfg.externalLibrary.enable {
+            "${name}-${name}-external-library".spec = {
+              accessModes = [ "ReadOnlyMany" ];
+              resources.requests.storage = "1Gi";
+              storageClassName = "";
+              volumeName = "${name}-${name}-external-library-nfs";
+            };
+          });
 
           # Job to enable vector extension in PostgreSQL database
           # Uses ArgoCD sync hook to run after secrets are created but before Immich is deployed
