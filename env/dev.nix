@@ -872,8 +872,8 @@ in
     sops.enable = true;
 
     soularr = {
-      enable = false;
-      hostAffinity = "edgenix";
+      enable = true;
+      # hostAffinity = "edgenix";
 
       lidarr = {
         host = "lidarr.lidarr";
