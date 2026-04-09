@@ -131,6 +131,26 @@
               default = "/mnt/photos";
             };
           };
+
+          externalLibrary = {
+            enable = mkOption {
+              description = mdDoc "Mount an NFS share as an external library (read-only) at /mnt/external-library";
+              type = types.bool;
+              default = false;
+            };
+
+            server = mkOption {
+              description = mdDoc "NFS server hostname/IP for external library";
+              type = types.str;
+              default = "nasnix";
+            };
+
+            path = mkOption {
+              description = mdDoc "NFS server path for external library";
+              type = types.str;
+              default = "/mnt/photos";
+            };
+          };
         };
 
         defaultValues = cfg: {
@@ -187,18 +207,9 @@
 
             # Persistence configuration
             persistence = {
-              library =
-                if cfg.nfs.enable then
-                  {
-                    existingClaim = "${name}-${name}-library";
-                  }
-                else
-                  {
-                    enabled = true;
-                    storageClass = cfg.storageClassName;
-                    accessMode = "ReadWriteOnce";
-                    size = "100Gi";
-                  };
+              library = {
+                existingClaim = "${name}-${name}-library";
+              };
               upload = {
                 enabled = true;
                 storageClass = cfg.storageClassName;
@@ -223,7 +234,13 @@
                 accessMode = "ReadWriteOnce";
                 size = "1Gi";
               };
-            };
+            }
+            // (lib.optionalAttrs cfg.externalLibrary.enable {
+              external-library = {
+                existingClaim = "${name}-${name}-external-library";
+                globalMounts = [ { path = "/mnt/external-library"; readOnly = true; } ];
+              };
+            });
           };
 
           ingress.main.enabled = false;
@@ -258,42 +275,85 @@
             };
           };
 
-          # Create NFS PersistentVolume for library when NFS is enabled
-          persistentVolumes = lib.optionalAttrs cfg.nfs.enable {
-            "${name}-${name}-library-nfs" = {
-              apiVersion = "v1";
-              kind = "PersistentVolume";
-              metadata = {
-                name = "${name}-${name}-library-nfs";
-              };
-              spec = {
-                capacity = {
-                  storage = "1Ti";
+          # Create NFS PersistentVolumes when NFS options are enabled
+          persistentVolumes =
+            (lib.optionalAttrs cfg.nfs.enable {
+              "${name}-${name}-library-nfs" = {
+                apiVersion = "v1";
+                kind = "PersistentVolume";
+                metadata = {
+                  name = "${name}-${name}-library-nfs";
                 };
-                accessModes = [ "ReadWriteMany" ];
-                mountOptions = [
-                  "nolock"
-                  "soft"
-                  "timeo=30"
-                ];
-                nfs = {
-                  server = cfg.nfs.server;
-                  path = cfg.nfs.path;
+                spec = {
+                  capacity = {
+                    storage = "1Ti";
+                  };
+                  accessModes = [ "ReadWriteMany" ];
+                  mountOptions = [
+                    "nolock"
+                    "soft"
+                    "timeo=30"
+                  ];
+                  nfs = {
+                    server = cfg.nfs.server;
+                    path = cfg.nfs.path;
+                  };
+                  persistentVolumeReclaimPolicy = "Retain";
                 };
-                persistentVolumeReclaimPolicy = "Retain";
               };
-            };
-          };
+            })
+            // (lib.optionalAttrs cfg.externalLibrary.enable {
+              "${name}-${name}-external-library-nfs" = {
+                apiVersion = "v1";
+                kind = "PersistentVolume";
+                metadata = {
+                  name = "${name}-${name}-external-library-nfs";
+                };
+                spec = {
+                  capacity = {
+                    storage = "1Ti";
+                  };
+                  accessModes = [ "ReadOnlyMany" ];
+                  mountOptions = [
+                    "nolock"
+                    "soft"
+                    "timeo=30"
+                  ];
+                  nfs = {
+                    server = cfg.externalLibrary.server;
+                    path = cfg.externalLibrary.path;
+                  };
+                  persistentVolumeReclaimPolicy = "Retain";
+                };
+              };
+            });
 
           # Create PVC for NFS library volume when NFS is enabled
-          persistentVolumeClaims = lib.optionalAttrs cfg.nfs.enable {
-            "${name}-${name}-library".spec = {
-              accessModes = [ "ReadWriteMany" ];
-              resources.requests.storage = "1Gi";
-              storageClassName = "";
-              volumeName = "${name}-${name}-library-nfs";
-            };
-          };
+          persistentVolumeClaims =
+            {
+              "${name}-${name}-library".spec =
+                if cfg.nfs.enable then
+                  {
+                    accessModes = [ "ReadWriteMany" ];
+                    resources.requests.storage = "1Gi";
+                    storageClassName = "";
+                    volumeName = "${name}-${name}-library-nfs";
+                  }
+                else
+                  {
+                    inherit (cfg) storageClassName;
+                    accessModes = [ "ReadWriteOnce" ];
+                    resources.requests.storage = "100Gi";
+                  };
+            }
+            // (lib.optionalAttrs cfg.externalLibrary.enable {
+              "${name}-${name}-external-library".spec = {
+                accessModes = [ "ReadOnlyMany" ];
+                resources.requests.storage = "1Gi";
+                storageClassName = "";
+                volumeName = "${name}-${name}-external-library-nfs";
+              };
+            });
 
           # Job to enable vector extension in PostgreSQL database
           # Uses ArgoCD sync hook to run after secrets are created but before Immich is deployed

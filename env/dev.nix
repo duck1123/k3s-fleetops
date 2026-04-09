@@ -280,7 +280,9 @@ in
         clusterIssuer = "tailscale";
       };
 
-      nfs = {
+      nfs.enable = false;
+
+      externalLibrary = {
         enable = true;
         server = nas-host;
         path = "${nas-base}/Photos";
