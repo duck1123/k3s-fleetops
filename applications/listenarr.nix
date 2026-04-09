@@ -29,7 +29,7 @@
           image = mkOption {
             description = mdDoc "The docker image";
             type = types.str;
-            default = "ghcr.io/hotio/listenarr:latest";
+            default = "ghcr.io/listenarrs/listenarr:canary";
           };
 
           service.port = mkOption {
