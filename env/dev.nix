@@ -265,7 +265,7 @@ in
     };
 
     immich = {
-      enable = false;
+      enable = true;
 
       database = {
         inherit (secrets.immich.database) password username;
