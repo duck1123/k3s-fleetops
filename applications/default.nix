@@ -31,6 +31,7 @@
     ./komga.nix
     ./kite.nix
     ./lidarr.nix
+    ./listenarr.nix
     ./kyverno.nix
     ./lldap.nix
     ./nix-csi.nix

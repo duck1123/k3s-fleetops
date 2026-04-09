@@ -368,6 +368,39 @@ in
       storageClassName = "longhorn";
     };
 
+    listenarr = {
+      database = {
+        enable = true;
+        host = "postgresql.postgresql";
+        name = "listenarr";
+        password = secrets.postgresql.userPassword;
+        port = 5432;
+        username = "listenarr";
+      };
+
+      enable = true;
+
+      ingress = {
+        clusterIssuer = "tailscale";
+        domain = "listenarr.${tail-domain}";
+        ingressClassName = "tailscale";
+      };
+
+      nfs = {
+        enable = true;
+        server = nas-host;
+        path = "${nas-base}";
+      };
+
+      replicas = 1;
+      storageClassName = "longhorn";
+
+      vpn = {
+        enable = false;
+        sharedGluetunService = "gluetun.gluetun";
+      };
+    };
+
     loki = {
       enable = true;
       hostAffinity = "edgenix";
@@ -570,6 +603,7 @@ in
           { name = "radarr"; }
           { name = "lidarr"; }
           { name = "whisparr"; }
+          { name = "listenarr"; }
         ]
         ++ [
           {
