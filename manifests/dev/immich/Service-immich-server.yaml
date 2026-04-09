@@ -6,13 +6,14 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: server
     app.kubernetes.io/service: immich-server
-    app.kubernetes.io/version: v2.0.0
-    helm.sh/chart: immich-0.10.3
+    app.kubernetes.io/version: v2.6.3
+    helm.sh/chart: immich-0.11.1
   name: immich-server
   namespace: immich
 spec:
   ports:
-    - name: http
+    - appProtocol: kubernetes.io/ws
+      name: http
       port: 2283
       protocol: TCP
       targetPort: http

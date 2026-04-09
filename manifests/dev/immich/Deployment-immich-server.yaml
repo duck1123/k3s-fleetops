@@ -6,8 +6,8 @@ metadata:
     app.kubernetes.io/instance: immich
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: server
-    app.kubernetes.io/version: v2.0.0
-    helm.sh/chart: immich-0.10.3
+    app.kubernetes.io/version: v2.6.3
+    helm.sh/chart: immich-0.11.1
   name: immich-server
   namespace: immich
 spec:
@@ -59,7 +59,7 @@ spec:
                   name: immich-redis-password
             - name: REDIS_PORT
               value: "6379"
-          image: ghcr.io/immich-app/immich-server:v2.0.0
+          image: ghcr.io/immich-app/immich-server:v2.6.3
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3
