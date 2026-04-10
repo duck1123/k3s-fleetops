@@ -70,6 +70,20 @@
               type = types.str;
               default = "/mnt/media";
             };
+
+            audiobooks = {
+              enable = mkOption {
+                description = mdDoc "Mount NFS path for audiobooks";
+                type = types.bool;
+                default = false;
+              };
+
+              path = mkOption {
+                description = mdDoc "NFS path for audiobooks (e.g. /volume1/Audiobooks)";
+                type = types.str;
+                default = "/Audiobooks";
+              };
+            };
           };
 
           pgid = mkOption {
@@ -292,7 +306,13 @@
                             mountPath = "/podcasts";
                             name = "podcasts";
                           }
-                        ];
+                        ]
+                        ++ (lib.optionals (cfg.nfs.enable && cfg.nfs.audiobooks.enable) [
+                          {
+                            mountPath = "/audiobooks";
+                            name = "audiobooks";
+                          }
+                        ]);
                       }
                     ];
 
@@ -317,7 +337,13 @@
                         name = "podcasts";
                         persistentVolumeClaim.claimName = "${name}-${name}-podcasts";
                       }
-                    ];
+                    ]
+                    ++ (lib.optionals (cfg.nfs.enable && cfg.nfs.audiobooks.enable) [
+                      {
+                        name = "audiobooks";
+                        persistentVolumeClaim.claimName = "${name}-${name}-audiobooks";
+                      }
+                    ]);
                   };
                 };
               };
@@ -382,7 +408,15 @@
                   accessModes = [ "ReadWriteOnce" ];
                   resources.requests.storage = "100Gi";
                 };
-          };
+          }
+          // (lib.optionalAttrs (cfg.nfs.enable && cfg.nfs.audiobooks.enable) {
+            "${name}-${name}-audiobooks".spec = {
+              accessModes = [ "ReadWriteMany" ];
+              resources.requests.storage = "1Gi";
+              storageClassName = "";
+              volumeName = "${name}-${name}-audiobooks-nfs";
+            };
+          });
 
           services.${name}.spec = {
             ports = [
@@ -403,54 +437,80 @@
           };
 
           # Create NFS PersistentVolumes for downloads and podcasts when NFS is enabled
-          persistentVolumes = lib.optionalAttrs (cfg.nfs.enable) {
-            "${name}-${name}-downloads-nfs" = {
-              apiVersion = "v1";
-              kind = "PersistentVolume";
-              metadata = {
-                name = "${name}-${name}-downloads-nfs";
-              };
-              spec = {
-                capacity = {
-                  storage = "1Ti";
+          persistentVolumes =
+            lib.optionalAttrs (cfg.nfs.enable) {
+              "${name}-${name}-downloads-nfs" = {
+                apiVersion = "v1";
+                kind = "PersistentVolume";
+                metadata = {
+                  name = "${name}-${name}-downloads-nfs";
                 };
-                accessModes = [ "ReadWriteMany" ];
-                mountOptions = [
-                  "nolock"
-                  "soft"
-                  "timeo=30"
-                ];
-                nfs = {
-                  server = cfg.nfs.server;
-                  path = "${cfg.nfs.path}/Downloads";
+                spec = {
+                  capacity = {
+                    storage = "1Ti";
+                  };
+                  accessModes = [ "ReadWriteMany" ];
+                  mountOptions = [
+                    "nolock"
+                    "soft"
+                    "timeo=30"
+                  ];
+                  nfs = {
+                    server = cfg.nfs.server;
+                    path = "${cfg.nfs.path}/Downloads";
+                  };
+                  persistentVolumeReclaimPolicy = "Retain";
                 };
-                persistentVolumeReclaimPolicy = "Retain";
               };
-            };
-            "${name}-${name}-podcasts-nfs" = {
-              apiVersion = "v1";
-              kind = "PersistentVolume";
-              metadata = {
-                name = "${name}-${name}-podcasts-nfs";
-              };
-              spec = {
-                capacity = {
-                  storage = "1Ti";
+              "${name}-${name}-podcasts-nfs" = {
+                apiVersion = "v1";
+                kind = "PersistentVolume";
+                metadata = {
+                  name = "${name}-${name}-podcasts-nfs";
                 };
-                accessModes = [ "ReadWriteMany" ];
-                mountOptions = [
-                  "nolock"
-                  "soft"
-                  "timeo=30"
-                ];
-                nfs = {
-                  server = cfg.nfs.server;
-                  path = "${cfg.nfs.path}/Podcasts";
+                spec = {
+                  capacity = {
+                    storage = "1Ti";
+                  };
+                  accessModes = [ "ReadWriteMany" ];
+                  mountOptions = [
+                    "nolock"
+                    "soft"
+                    "timeo=30"
+                  ];
+                  nfs = {
+                    server = cfg.nfs.server;
+                    path = "${cfg.nfs.path}/Podcasts";
+                  };
+                  persistentVolumeReclaimPolicy = "Retain";
                 };
-                persistentVolumeReclaimPolicy = "Retain";
               };
-            };
-          };
+            }
+            // (lib.optionalAttrs (cfg.nfs.enable && cfg.nfs.audiobooks.enable) {
+              "${name}-${name}-audiobooks-nfs" = {
+                apiVersion = "v1";
+                kind = "PersistentVolume";
+                metadata = {
+                  name = "${name}-${name}-audiobooks-nfs";
+                };
+                spec = {
+                  capacity = {
+                    storage = "1Ti";
+                  };
+                  accessModes = [ "ReadWriteMany" ];
+                  mountOptions = [
+                    "nolock"
+                    "soft"
+                    "timeo=30"
+                  ];
+                  nfs = {
+                    server = cfg.nfs.server;
+                    path = cfg.nfs.audiobooks.path;
+                  };
+                  persistentVolumeReclaimPolicy = "Retain";
+                };
+              };
+            });
         };
       };
 }

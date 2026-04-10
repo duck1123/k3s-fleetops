@@ -392,6 +392,11 @@ in
         enable = true;
         server = nas-host;
         path = "${nas-base}";
+
+        audiobooks = {
+          enable = true;
+          path = "${nas-base}/Audiobooks";
+        };
       };
 
       replicas = 1;

@@ -75,6 +75,8 @@ spec:
               name: downloads
             - mountPath: /podcasts
               name: podcasts
+            - mountPath: /audiobooks
+              name: audiobooks
       initContainers: []
       serviceAccountName: default
       volumes:
@@ -90,3 +92,6 @@ spec:
         - name: podcasts
           persistentVolumeClaim:
             claimName: listenarr-listenarr-podcasts
+        - name: audiobooks
+          persistentVolumeClaim:
+            claimName: listenarr-listenarr-audiobooks
