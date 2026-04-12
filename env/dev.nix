@@ -590,7 +590,7 @@ in
         serviceName = "pihole-web";
         servicePort = 80;
       };
-      serviceDnsLoadBalancerIP = "192.168.0.242";
+      serviceDnsLoadBalancerIP = "192.168.0.243";
       storageClassName = "longhorn";
       # Wildcard: all *.local queries resolve to the Traefik LoadBalancer IP.
       # Requires clients to use Pi-hole as their DNS server.

@@ -11,7 +11,7 @@ metadata:
   namespace: pihole
 spec:
   externalTrafficPolicy: Local
-  loadBalancerIP: 192.168.0.242
+  loadBalancerIP: 192.168.0.243
   ports:
     - name: dns
       port: 53
