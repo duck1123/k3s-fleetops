@@ -69,6 +69,7 @@ in
         domain = "affine.${tail-domain}";
         ingressClassName = "tailscale";
         clusterIssuer = "tailscale";
+        localIngress.enable = true;
       };
 
       storageClassName = "longhorn";
@@ -84,6 +85,7 @@ in
         domain = "audiobookshelf.${tail-domain}";
         ingressClassName = "tailscale";
         clusterIssuer = "tailscale";
+        localIngress.enable = true;
       };
 
       nfs = {
@@ -141,6 +143,7 @@ in
         domain = "cloudbeaver.${tail-domain}";
         ingressClassName = "tailscale";
         clusterIssuer = "tailscale";
+        localIngress.enable = true;
       };
 
       storageClassName = "longhorn";
@@ -170,6 +173,7 @@ in
       ingress = {
         domain = "forgejo.${tail-domain}";
         ingressClassName = "tailscale";
+        localIngress.enable = true;
       };
 
       postgresql = {
@@ -193,6 +197,7 @@ in
         clusterIssuer = "tailscale";
         domain = "grafana.${tail-domain}";
         ingressClassName = "tailscale";
+        localIngress.enable = true;
       };
 
       additionalDatasources = [
@@ -241,6 +246,7 @@ in
         domain = "homarr.${tail-domain}";
         ingressClassName = "tailscale";
         clusterIssuer = "tailscale";
+        localIngress.enable = true;
       };
 
       secretEncryptionKey = secrets.homarr.secretEncryptionKey;
@@ -259,6 +265,7 @@ in
         ingressClassName = "tailscale";
         clusterIssuer = "tailscale";
         tls.enable = true;
+        localIngress.enable = true;
       };
 
       storageClassName = "longhorn";
@@ -278,6 +285,7 @@ in
         domain = "immich.${tail-domain}";
         ingressClassName = "tailscale";
         clusterIssuer = "tailscale";
+        localIngress.enable = true;
       };
 
       nfs.enable = false;
@@ -463,6 +471,7 @@ in
         domain = "mealie.${tail-domain}";
         ingressClassName = "tailscale";
         clusterIssuer = "tailscale";
+        localIngress.enable = true;
       };
 
       storageClassName = "longhorn";
@@ -483,6 +492,7 @@ in
       ingress = {
         domain = "memos.${tail-domain}";
         ingressClassName = "tailscale";
+        localIngress.enable = true;
       };
     };
 
@@ -521,6 +531,7 @@ in
           domain = "nocodb.${tail-domain}";
           ingressClassName = "tailscale";
           clusterIssuer = "tailscale";
+          localIngress.enable = true;
         };
 
         database = {
@@ -777,6 +788,7 @@ in
         ingressClassName = "tailscale";
         clusterIssuer = "tailscale";
         tls.enable = true;
+        localIngress.enable = true;
       };
 
       mode = "standalone";

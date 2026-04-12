@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: immich-local
+  namespace: immich
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: immich.local
+      http:
+        paths:
+          - backend:
+              service:
+                name: immich
+                port:
+                  name: http
+            path: /
+            pathType: ImplementationSpecific
+  tls: []

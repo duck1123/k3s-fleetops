@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: homarr-local
+  namespace: homarr
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: homarr.local
+      http:
+        paths:
+          - backend:
+              service:
+                name: homarr
+                port:
+                  name: http
+            path: /
+            pathType: ImplementationSpecific
+  tls: []

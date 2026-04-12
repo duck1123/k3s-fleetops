@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grafana-local
+  namespace: grafana
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: grafana.local
+      http:
+        paths:
+          - backend:
+              service:
+                name: grafana
+                port:
+                  name: http
+            path: /
+            pathType: ImplementationSpecific
+  tls: []

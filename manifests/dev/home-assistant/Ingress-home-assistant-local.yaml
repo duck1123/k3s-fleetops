@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: home-assistant-local
+  namespace: home-assistant
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: home-assistant.local
+      http:
+        paths:
+          - backend:
+              service:
+                name: home-assistant
+                port:
+                  name: http
+            path: /
+            pathType: ImplementationSpecific
+  tls: []

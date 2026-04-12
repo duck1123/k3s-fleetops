@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nocodb-local
+  namespace: nocodb
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: nocodb.local
+      http:
+        paths:
+          - backend:
+              service:
+                name: nocodb
+                port:
+                  name: http
+            path: /
+            pathType: ImplementationSpecific
+  tls: []
