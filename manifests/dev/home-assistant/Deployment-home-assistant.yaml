@@ -120,7 +120,7 @@ spec:
               echo "Installed AiDot integration $INSTALL_AIDOT_TAG"
           env:
             - name: INSTALL_AIDOT_TAG
-              value: v1.0.8
+              value: v1.1.1
           image: busybox:1.36
           imagePullPolicy: IfNotPresent
           name: install-aidot-integration

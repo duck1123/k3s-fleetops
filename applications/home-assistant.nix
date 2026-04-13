@@ -48,7 +48,7 @@
           tag = mkOption {
             description = mdDoc "Git tag to fetch from hass-AiDot releases (e.g. v1.0.8)";
             type = types.str;
-            default = "v1.0.8";
+            default = "v1.1.1";
           };
         };
       };
