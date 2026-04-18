@@ -13,6 +13,8 @@ spec:
     matchLabels:
       app.kubernetes.io/instance: nocodb
       app.kubernetes.io/name: nocodb
+  strategy:
+    type: Recreate
   template:
     metadata:
       labels:
