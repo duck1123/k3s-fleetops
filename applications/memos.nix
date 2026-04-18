@@ -33,8 +33,8 @@
         chart = lib.helm.downloadHelmChart {
           repo = "https://charts.gabe565.com";
           chart = "memos";
-          version = "0.15.1";
-          chartHash = "sha256-k9UU0fLgFgn/aogTD+PMxcQOnZ9g47vFXeyhnf2hqbQ=";
+          version = "0.17.0";
+          chartHash = "sha256-n71ue+gWD+gDb/nRep1//k2OgIE0bdguv8ze/8qm4tI=";
         };
 
         uses-ingress = true;

@@ -42,8 +42,8 @@ in
         chart = lib.helm.downloadHelmChart {
           repo = "https://groundhog2k.github.io/helm-charts/";
           chart = "postgres";
-          version = "1.5.8";
-          chartHash = "sha256-Ev3NhEPrTWoAfFDlkYw6N88lstU2OOUJ8SEWY10pxxw=";
+          version = "1.5.13";
+          chartHash = "sha256-ZsGpf9CtxHdQYfr/OnpXzEeoUfU3xQLGwLSVu5fDVdI=";
         };
 
         extraOptions = {

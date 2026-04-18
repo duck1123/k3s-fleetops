@@ -6,8 +6,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: memos
     app.kubernetes.io/service: memos
-    app.kubernetes.io/version: 0.22.4
-    helm.sh/chart: memos-0.15.1
+    app.kubernetes.io/version: 0.24.0
+    helm.sh/chart: memos-0.17.0
   name: memos
   namespace: memos
 spec:

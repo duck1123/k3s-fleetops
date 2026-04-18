@@ -7,8 +7,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: mariadb
     app.kubernetes.io/part-of: mariadb
-    app.kubernetes.io/version: 12.1.2
-    helm.sh/chart: mariadb-24.0.2
+    app.kubernetes.io/version: 12.2.2
+    helm.sh/chart: mariadb-25.0.8
   name: mariadb
   namespace: mariadb
 spec:
@@ -24,15 +24,15 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/configuration: 429dfaa1b5bc1cfff18b71fccd3ce074c3e0230795bb2d4189256153221b7447
+        checksum/configuration: 4a12d0e520bab021a0c4f4cd40f9388ef249f84bf28520f1089fdd194982b109
       labels:
         app.kubernetes.io/component: primary
         app.kubernetes.io/instance: mariadb
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: mariadb
         app.kubernetes.io/part-of: mariadb
-        app.kubernetes.io/version: 12.1.2
-        helm.sh/chart: mariadb-24.0.2
+        app.kubernetes.io/version: 12.2.2
+        helm.sh/chart: mariadb-25.0.8
     spec:
       affinity:
         podAntiAffinity:

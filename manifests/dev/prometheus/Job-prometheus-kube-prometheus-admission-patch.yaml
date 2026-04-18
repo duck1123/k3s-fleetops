@@ -11,8 +11,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kube-prometheus-stack-prometheus-operator
     app.kubernetes.io/part-of: kube-prometheus-stack
-    app.kubernetes.io/version: 69.3.0
-    chart: kube-prometheus-stack-69.3.0
+    app.kubernetes.io/version: 83.6.0
+    chart: kube-prometheus-stack-83.6.0
     heritage: Helm
     release: prometheus
   name: prometheus-kube-prometheus-admission-patch
@@ -27,8 +27,8 @@ spec:
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: kube-prometheus-stack-prometheus-operator
         app.kubernetes.io/part-of: kube-prometheus-stack
-        app.kubernetes.io/version: 69.3.0
-        chart: kube-prometheus-stack-69.3.0
+        app.kubernetes.io/version: 83.6.0
+        chart: kube-prometheus-stack-83.6.0
         heritage: Helm
         release: prometheus
       name: prometheus-kube-prometheus-admission-patch
@@ -40,7 +40,7 @@ spec:
             - --namespace=prometheus
             - --secret-name=prometheus-kube-prometheus-admission
             - --patch-failure-policy=
-          image: registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.5.1
+          image: ghcr.io/jkroepke/kube-webhook-certgen:1.8.1
           imagePullPolicy: IfNotPresent
           name: patch
           resources: {}

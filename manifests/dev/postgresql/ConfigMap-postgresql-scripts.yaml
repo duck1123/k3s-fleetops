@@ -14,14 +14,35 @@ data:
     if [ ! -z "$POSTGRES_DB" ] && [ ! -z "$USERDB_USER" ] && [ ! -z "$USERDB_PASSWORD" ]; then
       create_user
     fi
-  init.sh: "#!/bin/sh\necho \"Start initialization\"\necho \"Copy init-userdb script\"\ncp /initscripts/01-init-userdb.sh /scripts\nif [ -d /extrascripts ]; then\n  echo \"Copy extra scripts\"\n  cp /extrascripts/* /scripts\nfi\nif [ -d /customscripts ]; then\n  echo \"Copy custom scripts\"\n  cp /customscripts/* /scripts\nfi\nif [ -d /customconfig ]; then\n  echo \"Create postgres config\"\n  cat /customconfig/* >>/configs/postgresql.conf\nfi    \nif [ -d /extraconfigs ]; then\n  echo \"Add extra configs to postgres config\"\n  cat /extraconfigs/* >>/configs/postgresql.conf\nfi\necho \"Initialization done.\"\n"
+  init.sh: |
+    #!/bin/sh
+    echo "Start initialization"
+    echo "Copy init-userdb script"
+    cp /initscripts/01-init-userdb.sh /scripts
+    if [ -d /extrascripts ]; then
+      echo "Copy extra scripts"
+      cp /extrascripts/* /scripts
+    fi
+    if [ -d /customscripts ]; then
+      echo "Copy custom scripts"
+      cp /customscripts/* /scripts
+    fi
+    if [ -d /customconfig ]; then
+      echo "Create postgres config"
+      cat /customconfig/* >>/configs/postgresql.conf
+    fi
+    if [ -d /extraconfigs ]; then
+      echo "Add extra configs to postgres config"
+      cat /extraconfigs/* >>/configs/postgresql.conf
+    fi
+    echo "Initialization done."
 kind: ConfigMap
 metadata:
   labels:
     app.kubernetes.io/instance: postgresql
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: postgres
-    app.kubernetes.io/version: "17.6"
-    helm.sh/chart: postgres-1.5.8
+    app.kubernetes.io/version: "17.9"
+    helm.sh/chart: postgres-1.5.13
   name: postgresql-scripts
   namespace: postgresql

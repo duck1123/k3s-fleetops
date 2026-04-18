@@ -6,8 +6,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: mariadb
     app.kubernetes.io/part-of: mariadb
-    app.kubernetes.io/version: 12.1.2
-    helm.sh/chart: mariadb-24.0.2
+    app.kubernetes.io/version: 12.2.2
+    helm.sh/chart: mariadb-25.0.8
   name: mariadb
   namespace: mariadb
 spec:
@@ -22,8 +22,8 @@ spec:
       app.kubernetes.io/instance: mariadb
       app.kubernetes.io/managed-by: Helm
       app.kubernetes.io/name: mariadb
-      app.kubernetes.io/version: 12.1.2
-      helm.sh/chart: mariadb-24.0.2
+      app.kubernetes.io/version: 12.2.2
+      helm.sh/chart: mariadb-25.0.8
   policyTypes:
     - Ingress
     - Egress

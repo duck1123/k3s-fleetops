@@ -5,8 +5,8 @@ metadata:
     app.kubernetes.io/instance: memos
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: memos
-    app.kubernetes.io/version: 0.22.4
-    helm.sh/chart: memos-0.15.1
+    app.kubernetes.io/version: 0.24.0
+    helm.sh/chart: memos-0.17.0
   name: memos
   namespace: memos
 spec:
@@ -36,7 +36,7 @@ spec:
                   name: memos-database
             - name: MEMOS_PORT
               value: "5230"
-          image: ghcr.io/usememos/memos:0.22.4
+          image: ghcr.io/usememos/memos:0.24.0
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3

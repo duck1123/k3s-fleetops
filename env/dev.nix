@@ -713,7 +713,7 @@ in
 
       enable = true;
       hostAffinity = "edgenix";
-      image = "linuxserver/radarr:6.0.4.10291-ls295";
+      image = "linuxserver/radarr:6.1.1.10360-ls299";
 
       ingress = {
         domain = "radarr.${tail-domain}";

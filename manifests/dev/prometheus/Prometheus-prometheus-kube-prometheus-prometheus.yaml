@@ -6,8 +6,8 @@ metadata:
     app.kubernetes.io/instance: prometheus
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/part-of: kube-prometheus-stack
-    app.kubernetes.io/version: 69.3.0
-    chart: kube-prometheus-stack-69.3.0
+    app.kubernetes.io/version: 83.6.0
+    chart: kube-prometheus-stack-83.6.0
     heritage: Helm
     release: prometheus
   name: prometheus-kube-prometheus-prometheus
@@ -23,7 +23,7 @@ spec:
                   operator: In
                   values:
                     - prometheus
-                - key: prometheus
+                - key: app.kubernetes.io/instance
                   operator: In
                   values:
                     - prometheus-kube-prometheus-prometheus
@@ -38,9 +38,11 @@ spec:
         port: http-web
   automountServiceAccountToken: true
   enableAdminAPI: false
+  enableOTLPReceiver: false
   externalUrl: http://prometheus-kube-prometheus-prometheus.prometheus:9090
   hostNetwork: false
-  image: quay.io/prometheus/prometheus:v3.1.0
+  image: quay.io/prometheus/prometheus:v3.11.2
+  imagePullPolicy: IfNotPresent
   listenLocal: false
   logFormat: logfmt
   logLevel: info
@@ -94,5 +96,5 @@ spec:
         storageClassName: longhorn
   tsdb:
     outOfOrderTimeWindow: 0s
-  version: v3.1.0
+  version: v3.11.2
   walCompression: true

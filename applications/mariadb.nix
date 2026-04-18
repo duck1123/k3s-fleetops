@@ -38,8 +38,8 @@
         chart = lib.helm.downloadHelmChart {
           repo = "https://charts.bitnami.com/bitnami";
           chart = "mariadb";
-          version = "24.0.2";
-          chartHash = "sha256-JAoRQaBNPl5feMOBFHsCfrCgc3UoyKAIs+uo+H2IZio=";
+          version = "25.0.8";
+          chartHash = "sha256-wJPwfAEpeMopPXS14N6FvpxWTMSFqLMO43IT4rkdVj8=";
         };
 
         extraOptions = {
