@@ -1,5 +1,8 @@
-{ ... }:
+{ inputs, ... }:
 {
+  imports = [
+    inputs.flake-parts.flakeModules.flakeModules
+  ];
   # Export a flakeModule that dotfiles (or any other consumer) can import to get:
   #   - flake.lib option + utility functions (loadSecrets, fromYAML, toYAML, mkArgoApp, waitForGluetun)
   #   - flake.nixidyApps option + all application modules
