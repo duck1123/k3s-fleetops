@@ -12,6 +12,8 @@
   perSystem =
     { pkgs, system, ... }:
     let
+      secretsFile = builtins.getEnv "DECRYPTED_SECRET_FILE";
+      secretsAvailable = secretsFile != "" && builtins.pathExists secretsFile;
       crdImports = (import ../generators { inherit inputs system pkgs; }).crdImports;
       devEnv = inputs.nixidy.lib.mkEnvs {
         inherit pkgs;
@@ -34,7 +36,7 @@
         secrets = devEnv.dev.config.nixidy.secretSpecs or [ ];
       };
     in
-    {
+    if !secretsAvailable then { } else {
       nixidyEnvs = devEnv;
       # Package that outputs the secret manifest JSON (for CI script).
       # Use: nix build .#packages.x86_64-linux.devSecretManifest && cat result
