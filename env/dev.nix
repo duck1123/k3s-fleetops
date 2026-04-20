@@ -1036,8 +1036,8 @@ in
     };
 
     windmill = {
-      enable = false;
-      hostAffinity = "edgenix";
+      enable = true;
+      hostAffinity = "nixmini";
       image = "ghcr.io/windmill-labs/windmill-full:latest";
 
       ingress = {
