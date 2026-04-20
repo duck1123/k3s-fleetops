@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hivemq
+  namespace: hivemq
+spec:
+  ports:
+    - name: mqtt
+      port: 1883
+      protocol: TCP
+      targetPort: mqtt
+  selector:
+    app.kubernetes.io/instance: hivemq
+    app.kubernetes.io/name: hivemq
+  type: LoadBalancer

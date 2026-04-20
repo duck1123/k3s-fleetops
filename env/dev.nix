@@ -265,6 +265,16 @@ in
       hostAffinity = "edgenix";
     };
 
+    # MQTT (TCP 1883): use `kubectl get svc -n hivemq hivemq` EXTERNAL-IP for LAN clients; no HTTP ingress.
+    hivemq = {
+      enable = true;
+      hostAffinity = "nixmini";
+
+      serviceType = "LoadBalancer";
+      storageClassName = "longhorn";
+      # loadBalancerIP = "192.168.0.243";
+    };
+
     homarr = {
       enable = true;
       hostAffinity = "edgenix";

@@ -23,6 +23,7 @@
     ./gluetun.nix
     ./grafana
     ./harbor.nix
+    ./hivemq.nix
     ./homer.nix
     ./homarr.nix
     ./home-assistant.nix
