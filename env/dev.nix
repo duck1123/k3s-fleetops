@@ -167,7 +167,7 @@ in
     };
 
     fileflows = {
-      enable = true;
+      enable = false;
       hostAffinity = "nixmini";
 
       ingress = {
