@@ -5,9 +5,8 @@ metadata:
   namespace: fileflows
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   resources:
     requests:
-      storage: 1Gi
-  storageClassName: ""
-  volumeName: fileflows-fileflows-temp-nfs
+      storage: 50Gi
+  storageClassName: longhorn

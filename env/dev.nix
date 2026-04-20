@@ -179,7 +179,8 @@ in
       nfs = {
         enable = true;
         server = nas-host;
-        path = "${nas-base}";
+        path = nas-base;
+        enableVideos = true;
       };
 
       puid = 1000;
@@ -189,7 +190,6 @@ in
       storageClassName = "longhorn";
       useProbes = false;
       enableGPU = true;
-      # Intel iGPU: use "iris" for 8th gen+, "i965" for older
       libvaDriverName = "iris";
     };
 

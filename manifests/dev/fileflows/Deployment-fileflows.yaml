@@ -55,8 +55,12 @@ spec:
               name: config
             - mountPath: /temp
               name: temp
-            - mountPath: /media
-              name: media
+            - mountPath: /media/Movies
+              name: media-movies
+            - mountPath: /media/TV
+              name: media-tv
+            - mountPath: /media/Videos
+              name: media-videos
             - mountPath: /dev/dri
               name: dri
       nodeSelector:
@@ -76,9 +80,15 @@ spec:
         - name: temp
           persistentVolumeClaim:
             claimName: fileflows-fileflows-temp
-        - name: media
+        - name: media-movies
           persistentVolumeClaim:
-            claimName: fileflows-fileflows-media
+            claimName: fileflows-fileflows-media-movies
+        - name: media-tv
+          persistentVolumeClaim:
+            claimName: fileflows-fileflows-media-tv
+        - name: media-videos
+          persistentVolumeClaim:
+            claimName: fileflows-fileflows-media-videos
         - hostPath:
             path: /dev/dri
             type: Directory
