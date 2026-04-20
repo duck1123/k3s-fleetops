@@ -166,6 +166,33 @@ in
       storageClassName = "longhorn";
     };
 
+    fileflows = {
+      enable = true;
+      hostAffinity = "nixmini";
+
+      ingress = {
+        domain = "fileflows.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+
+      nfs = {
+        enable = true;
+        server = nas-host;
+        path = "${nas-base}";
+      };
+
+      puid = 1000;
+      pgid = 1000;
+
+      replicas = 1;
+      storageClassName = "longhorn";
+      useProbes = false;
+      enableGPU = true;
+      # Intel iGPU: use "iris" for 8th gen+, "i965" for older
+      libvaDriverName = "iris";
+    };
+
     forgejo = {
       admin = { inherit (secrets.forgejo.admin) password username; };
       enable = true;

@@ -18,6 +18,7 @@
     ./demo.nix
     ./dozzle.nix
     ./ersatztv.nix
+    ./fileflows.nix
     ./forgejo.nix
     ./gluetun.nix
     ./grafana
