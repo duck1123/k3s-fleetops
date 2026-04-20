@@ -94,6 +94,7 @@
               spec = {
                 automountServiceAccountToken = true;
                 serviceAccountName = "default";
+                securityContext.fsGroup = 10000;
 
                 containers = [
                   {

@@ -58,6 +58,8 @@ spec:
               name: data
       nodeSelector:
         kubernetes.io/hostname: nixmini
+      securityContext:
+        fsGroup: 10000
       serviceAccountName: default
       volumes:
         - name: data
