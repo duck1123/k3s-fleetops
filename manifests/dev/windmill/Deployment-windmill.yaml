@@ -32,6 +32,8 @@ spec:
               value: standalone
             - name: BASE_URL
               value: https://windmill.bearded-snake.ts.net
+            - name: WORKER_TAGS
+              value: native,deno,python3,bash,go,dependency,flow,hub
           image: ghcr.io/windmill-labs/windmill-full:latest
           imagePullPolicy: IfNotPresent
           livenessProbe:

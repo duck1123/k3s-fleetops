@@ -189,6 +189,10 @@
                               name = "BASE_URL";
                               value = "https://${cfg.ingress.domain}";
                             }
+                            {
+                              name = "WORKER_TAGS";
+                              value = "native,deno,python3,bash,go,dependency,flow,hub";
+                            }
                           ];
                           ports = [
                             {
