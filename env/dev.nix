@@ -463,6 +463,7 @@ in
 
     longhorn = {
       enable = true;
+      backupTarget = "nfs://${nas-host}:${nas-base}/LonghornBackups";
 
       ingress = {
         domain = "longhorn.${tail-domain}";

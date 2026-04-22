@@ -18,6 +18,30 @@
 
       uses-ingress = true;
 
+      extraOptions = {
+        backupTarget = mkOption {
+          description = mdDoc "NFS or S3 backup target URL (e.g. nfs://host:/path)";
+          type = types.str;
+          default = "";
+        };
+      };
+
+      extraAppConfig = cfg: lib.optionalAttrs (cfg.backupTarget != "") {
+        yamls = [
+          ''
+            apiVersion: longhorn.io/v1beta2
+            kind: BackupTarget
+            metadata:
+              name: default
+              namespace: longhorn-system
+            spec:
+              backupTargetURL: "${cfg.backupTarget}"
+              credentialSecret: ""
+              pollInterval: "300"
+          ''
+        ];
+      };
+
       defaultValues = cfg: {
         defaultSettings = {
           defaultReplicaCount = 1;
