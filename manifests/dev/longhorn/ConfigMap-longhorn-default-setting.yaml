@@ -4,6 +4,7 @@ data:
     default-replica-count: "1"
     priority-class: "longhorn-critical"
     disable-revision-counter: "{\"v1\":\"true\"}"
+    replica-file-sync-http-client-timeout: "120"
 kind: ConfigMap
 metadata:
   labels:

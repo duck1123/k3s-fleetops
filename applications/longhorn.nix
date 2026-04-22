@@ -19,7 +19,10 @@
       uses-ingress = true;
 
       defaultValues = cfg: {
-        defaultSettings.defaultReplicaCount = 1;
+        defaultSettings = {
+          defaultReplicaCount = 1;
+          replicaFileSyncHttpClientTimeout = 120;
+        };
 
         ingress = with cfg.ingress; {
           inherit ingressClassName;
