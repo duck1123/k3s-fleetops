@@ -956,6 +956,7 @@ in
 
     stashapp = {
       enable = true;
+      hostAffinity = "nixmini";
 
       ingress = {
         domain = "stashapp.${tail-domain}";
