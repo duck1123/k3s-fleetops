@@ -150,7 +150,7 @@ in
     };
 
     demo = {
-      enable = true;
+      enable = false;
       ingress = {
         domain = "demo.${tail-domain}";
         ingressClassName = "tailscale";
@@ -160,14 +160,14 @@ in
 
     gluetun = {
       controlServer = { inherit (secrets.gluetun) password username; };
-      enable = true;
+      enable = false;
       hostAffinity = "edgenix";
       mullvadAccountNumber = secrets.mullvad.id;
       storageClassName = "longhorn";
     };
 
     fileflows = {
-      enable = true;
+      enable = false;
       hostAffinity = "nixmini";
 
       ingress = {
@@ -195,7 +195,7 @@ in
 
     forgejo = {
       admin = { inherit (secrets.forgejo.admin) password username; };
-      enable = true;
+      enable = false;
 
       ingress = {
         domain = "forgejo.${tail-domain}";
@@ -267,7 +267,7 @@ in
 
     # MQTT (TCP 1883): use `kubectl get svc -n hivemq hivemq` EXTERNAL-IP for LAN clients; no HTTP ingress.
     hivemq = {
-      enable = true;
+      enable = false;
       hostAffinity = "nixmini";
 
       serviceType = "LoadBalancer";
@@ -291,7 +291,7 @@ in
     };
 
     home-assistant = {
-      enable = true;
+      enable = false;
       # hostAffinity = "edgenix";
 
       # https://github.com/AiDot-Development-Team/hass-AiDot
@@ -376,7 +376,7 @@ in
     };
 
     lidarr = {
-      enable = true;
+      enable = false;
 
       ingress = {
         domain = "lidarr.${tail-domain}";
@@ -425,7 +425,7 @@ in
         username = "listenarr";
       };
 
-      enable = true;
+      enable = false;
 
       ingress = {
         clusterIssuer = "tailscale";
@@ -501,7 +501,7 @@ in
     };
 
     mealie = {
-      enable = true;
+      enable = false;
       hostAffinity = "edgenix";
 
       ingress = {
@@ -515,7 +515,7 @@ in
     };
 
     memos = {
-      enable = true;
+      enable = false;
       hostAffinity = "edgenix";
 
       database = {
@@ -706,7 +706,7 @@ in
         password = secrets.postgresql.userPassword;
       };
 
-      enable = true;
+      enable = false;
       hostAffinity = "edgenix";
 
       ingress = {
@@ -856,7 +856,7 @@ in
     sealed-secrets.enable = true;
 
     slskd = {
-      enable = true;
+      enable = false;
 
       ingress = {
         domain = "slskd.${tail-domain}";
@@ -928,7 +928,7 @@ in
     sops.enable = true;
 
     soularr = {
-      enable = true;
+      enable = false;
       # hostAffinity = "edgenix";
 
       lidarr = {
