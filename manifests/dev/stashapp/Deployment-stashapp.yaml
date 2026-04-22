@@ -13,6 +13,8 @@ spec:
     matchLabels:
       app.kubernetes.io/instance: stashapp
       app.kubernetes.io/name: stashapp
+  strategy:
+    type: Recreate
   template:
     metadata:
       labels:
