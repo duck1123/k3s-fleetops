@@ -6,4 +6,4 @@ metadata:
 spec:
   backupTargetURL: nfs://192.168.0.124:/volume1/LonghornBackups
   credentialSecret: ""
-  pollInterval: "300"
+  pollInterval: 5m0s

@@ -37,7 +37,7 @@
             spec:
               backupTargetURL: "${cfg.backupTarget}"
               credentialSecret: ""
-              pollInterval: "300"
+              pollInterval: "5m0s"
           ''
         ];
       };
