@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: rustfs-data-nfs
+spec:
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 1Ti
+  claimRef:
+    name: rustfs-data
+    namespace: rustfs
+  mountOptions:
+    - nolock
+    - soft
+    - timeo=30
+  nfs:
+    path: /volume1/LonghornBackups
+    server: 192.168.0.124
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
