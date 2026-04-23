@@ -817,7 +817,7 @@ in
 
     rustfs = {
       accessKey = (secrets.rustfs or { }).accessKey or "";
-      enable = true;
+      enable = false;
       hostAffinity = "nasnix";
 
       ingress = {
@@ -830,8 +830,14 @@ in
       };
 
       mode = "standalone";
+
+      nfs = {
+        enable = true;
+        server = nas-host;
+        path = "${nas-base}/LonghornBackups";
+      };
+
       secretKey = (secrets.rustfs or { }).secretKey or "";
-      storageClassName = "longhorn";
     };
 
     sabnzbd = {

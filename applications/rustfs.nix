@@ -70,7 +70,51 @@
             ];
             default = "standalone";
           };
+
+          nfs = {
+            enable = mkOption {
+              description = mdDoc "Use NFS for data volume instead of a StorageClass";
+              type = types.bool;
+              default = false;
+            };
+
+            server = mkOption {
+              description = mdDoc "NFS server hostname/IP";
+              type = types.str;
+              default = "";
+            };
+
+            path = mkOption {
+              description = mdDoc "NFS export path";
+              type = types.str;
+              default = "";
+            };
+          };
         };
+
+        extraResources =
+          cfg:
+          lib.optionalAttrs cfg.nfs.enable {
+            persistentVolumes."rustfs-data-nfs".spec = {
+              capacity.storage = "1Ti";
+              accessModes = [ "ReadWriteOnce" ];
+              storageClassName = "";
+              claimRef = {
+                name = "rustfs-data";
+                namespace = "rustfs";
+              };
+              mountOptions = [
+                "nolock"
+                "soft"
+                "timeo=30"
+              ];
+              nfs = {
+                server = cfg.nfs.server;
+                path = cfg.nfs.path;
+              };
+              persistentVolumeReclaimPolicy = "Retain";
+            };
+          };
 
         defaultValues =
           cfg:
@@ -92,7 +136,7 @@
                   };
                 };
 
-            storageclass.name = cfg.storageClassName;
+            storageclass.name = if cfg.nfs.enable then "" else cfg.storageClassName;
 
             ingress = with cfg.ingress; {
               enabled = true;
