@@ -1,7 +1,7 @@
 { ... }:
 {
   perSystem =
-    { pkgs, lib, ... }:
+    { pkgs, ... }:
     let
       src = pkgs.fetchFromGitHub {
         owner = "barrydeen";
@@ -9,7 +9,7 @@
         # Pin to a specific commit for reproducibility.
         # To find the right hashes after changing rev:
         #   nix build .#nostrarchives-api  →  first failure shows the correct hash
-        rev = "main";
+        rev = "d616cdd09119bf3e1f1db50f8d7a823e7459dedf";
         hash = "sha256-EmeElAXv6LhBt9kZRzYx6LK4rLAY3vCIWt3YsCCIOA4=";
       };
 

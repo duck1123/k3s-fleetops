@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - command:
-            - nostrarchives-api
+            - nostr-api
           env:
             - name: LISTEN_ADDR
               value: 0.0.0.0:8000
@@ -89,6 +89,7 @@ spec:
                     type = "github";
                     owner = "barrydeen";
                     repo = "nostrarchives-api";
+                    rev = "d616cdd09119bf3e1f1db50f8d7a823e7459dedf";
                   };
                   api = pkgs.rustPlatform.buildRustPackage {
                     pname = "nostrarchives-api";

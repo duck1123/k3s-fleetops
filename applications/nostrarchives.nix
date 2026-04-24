@@ -46,6 +46,7 @@
             type = "github";
             owner = "barrydeen";
             repo = "nostrarchives-api";
+            rev = "d616cdd09119bf3e1f1db50f8d7a823e7459dedf";
           };
           api = pkgs.rustPlatform.buildRustPackage {
             pname = "nostrarchives-api";
@@ -200,7 +201,7 @@
                     {
                       inherit name;
                       image = "ghcr.io/lillecarl/nix-csi/scratch:1.0.1";
-                      command = [ "nostrarchives-api" ];
+                      command = [ "nostr-api" ];
                       env = envVars;
                       ports = [
                         {
