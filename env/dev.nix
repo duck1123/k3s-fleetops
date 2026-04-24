@@ -1063,6 +1063,17 @@ in
       service.hostPorts = false;
     };
 
+    uptime-kuma = {
+      enable = true;
+      storageClassName = "longhorn";
+
+      ingress = {
+        domain = "uptime-kuma.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+    };
+
     whisparr = {
       database = {
         enable = true;

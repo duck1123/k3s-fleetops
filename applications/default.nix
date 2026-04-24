@@ -81,6 +81,7 @@
     ./tunarr.nix
     ./tempo.nix
     ./traefik.nix
+    ./uptime-kuma.nix
     ./whisparr.nix
   ];
 }

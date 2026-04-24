@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: uptime-kuma
+  namespace: uptime-kuma
+spec:
+  ingressClassName: tailscale
+  rules:
+    - host: uptime-kuma.bearded-snake.ts.net
+      http:
+        paths:
+          - backend:
+              service:
+                name: uptime-kuma
+                port:
+                  name: http
+            path: /
+            pathType: ImplementationSpecific
+  tls:
+    - hosts:
+        - uptime-kuma.bearded-snake.ts.net
