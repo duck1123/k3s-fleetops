@@ -20,11 +20,39 @@
 
       extraOptions = {
         backupTarget = mkOption {
-          description = mdDoc "NFS or S3 backup target URL (e.g. nfs://host:/path)";
+          description = mdDoc "Backup target URL (e.g. s3://bucket@region/ or nfs://host:/path)";
           type = types.str;
           default = "";
         };
+
+        backupTargetCredential = {
+          accessKey = mkOption {
+            description = mdDoc "S3 access key for backup target";
+            type = types.str;
+            default = "";
+          };
+          secretKey = mkOption {
+            description = mdDoc "S3 secret key for backup target";
+            type = types.str;
+            default = "";
+          };
+          endpoint = mkOption {
+            description = mdDoc "S3-compatible endpoint URL (leave empty for AWS)";
+            type = types.str;
+            default = "";
+          };
+        };
       };
+
+      sopsSecrets = cfg:
+        let hasS3Creds = cfg.backupTargetCredential.accessKey != "";
+        in lib.optionalAttrs hasS3Creds {
+          longhorn-backup-target-secret = {
+            AWS_ACCESS_KEY_ID = cfg.backupTargetCredential.accessKey;
+            AWS_SECRET_ACCESS_KEY = cfg.backupTargetCredential.secretKey;
+            AWS_ENDPOINTS = cfg.backupTargetCredential.endpoint;
+          };
+        };
 
       extraAppConfig = cfg: lib.optionalAttrs (cfg.backupTarget != "") {
         yamls = [
@@ -46,6 +74,8 @@
         defaultSettings = {
           defaultReplicaCount = 1;
           replicaFileSyncHttpClientTimeout = 120;
+        } // lib.optionalAttrs (cfg.backupTargetCredential.accessKey != "") {
+          backupTargetCredentialSecret = "longhorn-backup-target-secret";
         };
 
         ingress = with cfg.ingress; {

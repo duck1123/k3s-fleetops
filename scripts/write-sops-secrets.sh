@@ -60,8 +60,8 @@ declare -A desired_files
 
 while IFS= read -r spec; do
   secret_name="$(echo "$spec" | jq -r '.secretName')"
-  namespace="$(echo "$spec" | jq -r '.namespace')"
-  desired_files["$MANIFESTS_DIR/$namespace/SopsSecret-${secret_name}.yaml"]=1
+  app="$(echo "$spec" | jq -r '.app // .namespace')"
+  desired_files["$MANIFESTS_DIR/$app/SopsSecret-${secret_name}.yaml"]=1
 done < <(echo "$SPECS_JSON" | jq -c '.secrets[]')
 
 # ---------------------------------------------------------------------------
@@ -79,9 +79,10 @@ done < <(find "$MANIFESTS_DIR" -name "SopsSecret-*.yaml" 2>/dev/null)
 # ---------------------------------------------------------------------------
 while IFS= read -r spec; do
   secret_name="$(echo "$spec" | jq -r '.secretName')"
+  app="$(echo "$spec" | jq -r '.app // .namespace')"
   namespace="$(echo "$spec" | jq -r '.namespace')"
   values="$(echo "$spec" | jq '.values')"
-  output_file="$MANIFESTS_DIR/$namespace/SopsSecret-${secret_name}.yaml"
+  output_file="$MANIFESTS_DIR/$app/SopsSecret-${secret_name}.yaml"
 
   # Check if file exists and compare plaintext values
   if [[ -f "$output_file" ]]; then

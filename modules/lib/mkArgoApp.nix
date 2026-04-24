@@ -65,6 +65,7 @@
         else
           lib.mapAttrsToList (secretName: data: {
             inherit secretName;
+            app = name;
             namespace = cfg.namespace;
             values = if data ? values then data.values else data;
           }) combinedSopsSecrets;
