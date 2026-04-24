@@ -37,6 +37,7 @@
     ./kyverno.nix
     ./lldap.nix
     ./nix-csi.nix
+    ./nostrarchives.nix
     ./loki.nix
     ./longhorn.nix
     ./mariadb.nix

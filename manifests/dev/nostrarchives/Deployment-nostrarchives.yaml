@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/instance: nostrarchives
+    app.kubernetes.io/name: nostrarchives
+  name: nostrarchives
+  namespace: nostrarchives
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: nostrarchives
+      app.kubernetes.io/name: nostrarchives
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: nostrarchives
+        app.kubernetes.io/name: nostrarchives
+    spec:
+      containers:
+        - env:
+            - name: LISTEN_ADDR
+              value: 0.0.0.0:8000
+            - name: WS_LISTEN_ADDR
+              value: 0.0.0.0:8001
+            - name: SCHEDULER_WS_LISTEN_ADDR
+              value: 0.0.0.0:8002
+            - name: INDEXER_WS_LISTEN_ADDR
+              value: 0.0.0.0:8003
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  key: DATABASE_URL
+                  name: nostrarchives-db
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  key: REDIS_URL
+                  name: nostrarchives-redis
+          image: registry.dev.kronkltd.net/library/nostrarchives-api:latest
+          imagePullPolicy: Always
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+          name: nostrarchives
+          ports:
+            - containerPort: 8000
+              name: http
+              protocol: TCP
+            - containerPort: 8001
+              name: ws-search
+              protocol: TCP
+            - containerPort: 8002
+              name: ws-scheduler
+              protocol: TCP
+            - containerPort: 8003
+              name: ws-indexer
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5

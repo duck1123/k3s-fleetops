@@ -562,6 +562,32 @@ in
 
     nix-csi.enable = true;
 
+    nostrarchives = {
+      enable = true;
+
+      database = {
+        host = "postgresql.postgresql";
+        port = 5432;
+        name = "nostrarchives";
+        username = "nostrarchives";
+        password = secrets.postgresql.userPassword;
+      };
+
+      redis = {
+        host = "redis.redis";
+        port = 6379;
+        password = secrets.redis.password;
+      };
+
+      ingress = {
+        domain = "nostrarchives.${tail-domain}";
+        ingressClassName = "tailscale";
+        clusterIssuer = "tailscale";
+      };
+
+      relayDomain = "nostrarchives-relay.${tail-domain}";
+    };
+
     nocodb =
       let
         storage-backend = "rustfs";
@@ -696,6 +722,11 @@ in
           {
             name = "romm";
             username = "postgres";
+            password = secrets.postgresql.userPassword;
+          }
+          {
+            name = "nostrarchives";
+            username = "nostrarchives";
             password = secrets.postgresql.userPassword;
           }
         ];
