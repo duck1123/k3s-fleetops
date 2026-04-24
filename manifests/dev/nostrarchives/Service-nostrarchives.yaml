@@ -24,4 +24,3 @@ spec:
   selector:
     app.kubernetes.io/instance: nostrarchives
     app.kubernetes.io/name: nostrarchives
-  type: ClusterIP

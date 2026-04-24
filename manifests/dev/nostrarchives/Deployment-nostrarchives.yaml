@@ -1,13 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  labels:
-    app.kubernetes.io/instance: nostrarchives
-    app.kubernetes.io/name: nostrarchives
   name: nostrarchives
   namespace: nostrarchives
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/instance: nostrarchives
@@ -19,7 +15,9 @@ spec:
         app.kubernetes.io/name: nostrarchives
     spec:
       containers:
-        - env:
+        - command:
+            - nostrarchives-api
+          env:
             - name: LISTEN_ADDR
               value: 0.0.0.0:8000
             - name: WS_LISTEN_ADDR
@@ -28,6 +26,8 @@ spec:
               value: 0.0.0.0:8002
             - name: INDEXER_WS_LISTEN_ADDR
               value: 0.0.0.0:8003
+            - name: SSL_CERT_FILE
+              value: /nix/var/result/etc/ssl/certs/ca-bundle.crt
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
@@ -38,14 +38,13 @@ spec:
                 secretKeyRef:
                   key: REDIS_URL
                   name: nostrarchives-redis
-          image: registry.dev.kronkltd.net/library/nostrarchives-api:latest
-          imagePullPolicy: Always
+          image: ghcr.io/lillecarl/nix-csi/scratch:1.0.1
           livenessProbe:
             failureThreshold: 3
             httpGet:
               path: /health
               port: 8000
-            initialDelaySeconds: 30
+            initialDelaySeconds: 600
             periodSeconds: 30
             timeoutSeconds: 5
           name: nostrarchives
@@ -63,10 +62,46 @@ spec:
               name: ws-indexer
               protocol: TCP
           readinessProbe:
-            failureThreshold: 3
+            failureThreshold: 6
             httpGet:
               path: /health
               port: 8000
-            initialDelaySeconds: 10
+            initialDelaySeconds: 60
             periodSeconds: 10
             timeoutSeconds: 5
+          volumeMounts:
+            - mountPath: /nix
+              name: nix
+              subPath: nix
+      volumes:
+        - csi:
+            driver: nix.csi.store
+            volumeAttributes:
+              nixExpr: |
+                let
+                  pkgs = import (builtins.fetchTree {
+                    type = "github";
+                    owner = "nixos";
+                    repo = "nixpkgs";
+                    ref = "nixos-unstable";
+                  }) {};
+                  src = builtins.fetchTree {
+                    type = "github";
+                    owner = "barrydeen";
+                    repo = "nostrarchives-api";
+                  };
+                  api = pkgs.rustPlatform.buildRustPackage {
+                    pname = "nostrarchives-api";
+                    version = "unstable";
+                    inherit src;
+                    cargoLock.lockFile = src + "/Cargo.lock";
+                    nativeBuildInputs = [ pkgs.pkg-config ];
+                    buildInputs = [ pkgs.openssl ];
+                    env.OPENSSL_NO_VENDOR = "1";
+                  };
+                in
+                pkgs.buildEnv {
+                  name = "nostrarchives-api-bundle";
+                  paths = [ api pkgs.cacert ];
+                }
+          name: nix
