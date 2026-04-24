@@ -64,7 +64,7 @@
               namespace: longhorn-system
             spec:
               backupTargetURL: "${cfg.backupTarget}"
-              credentialSecret: ""
+              credentialSecret: "${if cfg.backupTargetCredential.accessKey != "" then "longhorn-backup-target-secret" else ""}"
               pollInterval: "5m0s"
           ''
         ];
@@ -74,8 +74,6 @@
         defaultSettings = {
           defaultReplicaCount = 1;
           replicaFileSyncHttpClientTimeout = 120;
-        } // lib.optionalAttrs (cfg.backupTargetCredential.accessKey != "") {
-          backupTargetCredentialSecret = "longhorn-backup-target-secret";
         };
 
         ingress = with cfg.ingress; {
