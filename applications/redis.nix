@@ -54,6 +54,12 @@
             type = types.int;
             default = 1;
           };
+
+          repairAof = mkOption {
+            description = mdDoc "Deploy a one-shot job that runs redis-check-aof --fix on all incremental AOF files";
+            type = types.bool;
+            default = false;
+          };
         };
 
         extraResources = cfg: {
@@ -170,6 +176,42 @@
               };
 
               type = "ClusterIP";
+            };
+          };
+
+          jobs = lib.optionalAttrs cfg.repairAof {
+            "${name}-aof-repair" = {
+              spec = {
+                backoffLimit = 0;
+                ttlSecondsAfterFinished = 300;
+                template.spec = {
+                  restartPolicy = "Never";
+                  volumes = [
+                    {
+                      name = "data";
+                      persistentVolumeClaim.claimName = "${name}-${name}-data";
+                    }
+                  ];
+                  containers = [
+                    {
+                      name = "aof-repair";
+                      image = cfg.image;
+                      imagePullPolicy = "IfNotPresent";
+                      command = [
+                        "sh"
+                        "-c"
+                        "for f in /data/appendonlydir/*.incr.aof; do echo \"Fixing $f\"; yes | redis-check-aof --fix \"$f\"; done"
+                      ];
+                      volumeMounts = [
+                        {
+                          mountPath = "/data";
+                          name = "data";
+                        }
+                      ];
+                    }
+                  ];
+                };
+              };
             };
           };
 
