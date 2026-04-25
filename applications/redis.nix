@@ -48,6 +48,12 @@
             type = types.int;
             default = 6379;
           };
+
+          replicas = mkOption {
+            description = mdDoc "Number of Redis replicas";
+            type = types.int;
+            default = 1;
+          };
         };
 
         extraResources = cfg: {
@@ -59,7 +65,7 @@
               };
 
               spec = {
-                replicas = 1;
+                replicas = cfg.replicas;
                 selector.matchLabels = {
                   "app.kubernetes.io/instance" = name;
                   "app.kubernetes.io/name" = name;

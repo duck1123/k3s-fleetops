@@ -811,6 +811,7 @@ in
       enable = true;
       hostAffinity = "edgenix";
       password = secrets.redis.password;
+      replicas = 0;
     };
 
     romm = {
