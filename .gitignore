@@ -15,3 +15,4 @@ tls.key
 /target/
 /.cursor/
 /backups/
+.gitnexus
