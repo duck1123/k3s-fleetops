@@ -89,6 +89,133 @@
 
         extraResources = cfg: {
           deployments = {
+            "${name}-worker-native" = {
+              metadata.labels = {
+                "app.kubernetes.io/instance" = "${name}-worker-native";
+                "app.kubernetes.io/name" = "${name}-worker-native";
+              };
+
+              spec = {
+                replicas = 1;
+                selector.matchLabels = {
+                  "app.kubernetes.io/instance" = "${name}-worker-native";
+                  "app.kubernetes.io/name" = "${name}-worker-native";
+                };
+
+                template = {
+                  metadata.labels = {
+                    "app.kubernetes.io/instance" = "${name}-worker-native";
+                    "app.kubernetes.io/name" = "${name}-worker-native";
+                  };
+
+                  spec = {
+                    automountServiceAccountToken = true;
+                    serviceAccountName = "default";
+
+                    initContainers = lib.optionals (cfg.database.password != "") [
+                      {
+                        name = "build-database-url";
+                        image = "python:3-alpine";
+                        imagePullPolicy = "IfNotPresent";
+                        command = [
+                          "python3"
+                          "-c"
+                          ''
+                            import urllib.parse
+                            import os
+                            user = os.environ["PGUSER"]
+                            password = os.environ["PGPASSWORD"]
+                            host = os.environ["PGHOST"]
+                            port = os.environ["PGPORT"]
+                            db = os.environ["PGDATABASE"]
+                            enc = urllib.parse.quote(password, safe="")
+                            url = f"postgresql://{user}:{enc}@{host}:{port}/{db}?sslmode=disable"
+                            with open("/work/database_url", "w") as f:
+                                f.write(url)
+                          ''
+                        ];
+                        env = [
+                          {
+                            name = "PGUSER";
+                            value = cfg.database.username;
+                          }
+                          {
+                            name = "PGHOST";
+                            value = cfg.database.host;
+                          }
+                          {
+                            name = "PGPORT";
+                            value = toString cfg.database.port;
+                          }
+                          {
+                            name = "PGDATABASE";
+                            value = cfg.database.name;
+                          }
+                          {
+                            name = "PGPASSWORD";
+                            valueFrom.secretKeyRef = {
+                              name = db-password-secret;
+                              key = "password";
+                            };
+                          }
+                        ];
+                        volumeMounts = [
+                          {
+                            mountPath = "/work";
+                            name = shared-work-volume;
+                          }
+                        ];
+                      }
+                    ];
+
+                    containers = [
+                      (
+                        {
+                          name = "${name}-worker-native";
+                          image = cfg.image;
+                          imagePullPolicy = "IfNotPresent";
+                          env = [
+                            {
+                              name = "TZ";
+                              value = cfg.tz;
+                            }
+                            {
+                              name = "MODE";
+                              value = "worker";
+                            }
+                            {
+                              name = "WORKER_TAGS";
+                              value = "native";
+                            }
+                          ];
+                        }
+                        // lib.optionalAttrs (cfg.database.password != "") {
+                          command = [
+                            "/bin/sh"
+                            "-c"
+                            "export DATABASE_URL=$(cat /work/database_url) && exec windmill"
+                          ];
+                          volumeMounts = [
+                            {
+                              mountPath = "/work";
+                              name = shared-work-volume;
+                            }
+                          ];
+                        }
+                      )
+                    ];
+
+                    volumes = lib.optionals (cfg.database.password != "") [
+                      {
+                        name = shared-work-volume;
+                        emptyDir = { };
+                      }
+                    ];
+                  };
+                };
+              };
+            };
+
             ${name} = {
               metadata.labels = {
                 "app.kubernetes.io/instance" = name;
@@ -191,7 +318,7 @@
                             }
                             {
                               name = "WORKER_TAGS";
-                              value = "native,deno,python3,bash,go,dependency,flow,hub";
+                              value = "deno,python3,bash,go,dependency,flow,hub";
                             }
                           ];
                           ports = [

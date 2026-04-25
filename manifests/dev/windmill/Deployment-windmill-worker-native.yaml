@@ -2,63 +2,38 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app.kubernetes.io/instance: windmill
-    app.kubernetes.io/name: windmill
-    app.kubernetes.io/version: latest
-  name: windmill
+    app.kubernetes.io/instance: windmill-worker-native
+    app.kubernetes.io/name: windmill-worker-native
+  name: windmill-worker-native
   namespace: windmill
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/instance: windmill
-      app.kubernetes.io/name: windmill
+      app.kubernetes.io/instance: windmill-worker-native
+      app.kubernetes.io/name: windmill-worker-native
   template:
     metadata:
       labels:
-        app.kubernetes.io/instance: windmill
-        app.kubernetes.io/name: windmill
+        app.kubernetes.io/instance: windmill-worker-native
+        app.kubernetes.io/name: windmill-worker-native
     spec:
       automountServiceAccountToken: true
       containers:
         - command:
             - /bin/sh
             - -c
-            - export DATABASE_URL=$(cat /work/database_url) && exec windmill standalone
+            - export DATABASE_URL=$(cat /work/database_url) && exec windmill
           env:
             - name: TZ
               value: Etc/UTC
             - name: MODE
-              value: standalone
-            - name: BASE_URL
-              value: https://windmill.bearded-snake.ts.net
+              value: worker
             - name: WORKER_TAGS
-              value: deno,python3,bash,go,dependency,flow,hub
+              value: native
           image: ghcr.io/windmill-labs/windmill-full:latest
           imagePullPolicy: IfNotPresent
-          livenessProbe:
-            failureThreshold: 5
-            httpGet:
-              path: /healthz
-              port: 8000
-            initialDelaySeconds: 40
-            periodSeconds: 30
-            successThreshold: 1
-            timeoutSeconds: 5
-          name: windmill
-          ports:
-            - containerPort: 8000
-              name: http
-              protocol: TCP
-          readinessProbe:
-            failureThreshold: 5
-            httpGet:
-              path: /healthz
-              port: 8000
-            initialDelaySeconds: 20
-            periodSeconds: 10
-            successThreshold: 1
-            timeoutSeconds: 5
+          name: windmill-worker-native
           volumeMounts:
             - mountPath: /work
               name: windmill-db-url-work
