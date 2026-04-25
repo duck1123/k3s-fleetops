@@ -29,39 +29,8 @@
         else
           "redis://${cfg.redis.host}:${toString cfg.redis.port}";
 
-      # nix-csi evaluates this expression on the cluster node, builds the binary,
-      # and mounts the result at /nix/var/result inside the scratch container.
-      # The scratch image adds /nix/var/result/bin to PATH so the binary is
-      # reachable by name.  buildEnv bundles cacert alongside the binary so
-      # SSL_CERT_FILE=/nix/var/result/etc/ssl/certs/ca-bundle.crt works.
       nixExpr = ''
-        let
-          pkgs = import (builtins.fetchTree {
-            type = "github";
-            owner = "nixos";
-            repo = "nixpkgs";
-            ref = "nixos-unstable";
-          }) {};
-          src = builtins.fetchTree {
-            type = "github";
-            owner = "barrydeen";
-            repo = "nostrarchives-api";
-            rev = "d616cdd09119bf3e1f1db50f8d7a823e7459dedf";
-          };
-          api = pkgs.rustPlatform.buildRustPackage {
-            pname = "nostrarchives-api";
-            version = "unstable";
-            inherit src;
-            cargoLock.lockFile = src + "/Cargo.lock";
-            nativeBuildInputs = [ pkgs.pkg-config ];
-            buildInputs = [ pkgs.openssl ];
-            env.OPENSSL_NO_VENDOR = "1";
-          };
-        in
-        pkgs.buildEnv {
-          name = "nostrarchives-api-bundle";
-          paths = [ api pkgs.cacert ];
-        }
+        (builtins.getFlake "github:duck1123/k3s-fleetops").packages.x86_64-linux.nostrarchives-api-bundle
       '';
     in
     self.lib.mkArgoApp
