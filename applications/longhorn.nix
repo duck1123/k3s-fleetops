@@ -44,9 +44,12 @@
         };
       };
 
-      sopsSecrets = cfg:
-        let hasS3Creds = cfg.backupTargetCredential.accessKey != "";
-        in lib.optionalAttrs hasS3Creds {
+      sopsSecrets =
+        cfg:
+        let
+          hasS3Creds = cfg.backupTargetCredential.accessKey != "";
+        in
+        lib.optionalAttrs hasS3Creds {
           longhorn-backup-target-secret = {
             AWS_ACCESS_KEY_ID = cfg.backupTargetCredential.accessKey;
             AWS_SECRET_ACCESS_KEY = cfg.backupTargetCredential.secretKey;
@@ -54,21 +57,25 @@
           };
         };
 
-      extraAppConfig = cfg: lib.optionalAttrs (cfg.backupTarget != "") {
-        yamls = [
-          ''
-            apiVersion: longhorn.io/v1beta2
-            kind: BackupTarget
-            metadata:
-              name: default
-              namespace: longhorn-system
-            spec:
-              backupTargetURL: "${cfg.backupTarget}"
-              credentialSecret: "${if cfg.backupTargetCredential.accessKey != "" then "longhorn-backup-target-secret" else ""}"
-              pollInterval: "5m0s"
-          ''
-        ];
-      };
+      extraAppConfig =
+        cfg:
+        lib.optionalAttrs (cfg.backupTarget != "") {
+          yamls = [
+            ''
+              apiVersion: longhorn.io/v1beta2
+              kind: BackupTarget
+              metadata:
+                name: default
+                namespace: longhorn-system
+              spec:
+                backupTargetURL: "${cfg.backupTarget}"
+                credentialSecret: "${
+                  if cfg.backupTargetCredential.accessKey != "" then "longhorn-backup-target-secret" else ""
+                }"
+                pollInterval: "5m0s"
+            ''
+          ];
+        };
 
       defaultValues = cfg: {
         defaultSettings = {

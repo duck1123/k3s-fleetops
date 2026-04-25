@@ -118,47 +118,46 @@
         extraResources =
           cfg:
           let
-            envVars =
-              [
-                {
-                  name = "LISTEN_ADDR";
-                  value = "0.0.0.0:${toString cfg.service.port}";
-                }
-                {
-                  name = "WS_LISTEN_ADDR";
-                  value = "0.0.0.0:8001";
-                }
-                {
-                  name = "SCHEDULER_WS_LISTEN_ADDR";
-                  value = "0.0.0.0:8002";
-                }
-                {
-                  name = "INDEXER_WS_LISTEN_ADDR";
-                  value = "0.0.0.0:8003";
-                }
-                {
-                  name = "SSL_CERT_FILE";
-                  value = "/nix/var/result/etc/ssl/certs/ca-bundle.crt";
-                }
-              ]
-              ++ optionals (cfg.database.password != "") [
-                {
-                  name = "DATABASE_URL";
-                  valueFrom.secretKeyRef = {
-                    name = db-secret;
-                    key = "DATABASE_URL";
-                  };
-                }
-              ]
-              ++ optionals (cfg.redis.password != "") [
-                {
-                  name = "REDIS_URL";
-                  valueFrom.secretKeyRef = {
-                    name = redis-secret;
-                    key = "REDIS_URL";
-                  };
-                }
-              ];
+            envVars = [
+              {
+                name = "LISTEN_ADDR";
+                value = "0.0.0.0:${toString cfg.service.port}";
+              }
+              {
+                name = "WS_LISTEN_ADDR";
+                value = "0.0.0.0:8001";
+              }
+              {
+                name = "SCHEDULER_WS_LISTEN_ADDR";
+                value = "0.0.0.0:8002";
+              }
+              {
+                name = "INDEXER_WS_LISTEN_ADDR";
+                value = "0.0.0.0:8003";
+              }
+              {
+                name = "SSL_CERT_FILE";
+                value = "/nix/var/result/etc/ssl/certs/ca-bundle.crt";
+              }
+            ]
+            ++ optionals (cfg.database.password != "") [
+              {
+                name = "DATABASE_URL";
+                valueFrom.secretKeyRef = {
+                  name = db-secret;
+                  key = "DATABASE_URL";
+                };
+              }
+            ]
+            ++ optionals (cfg.redis.password != "") [
+              {
+                name = "REDIS_URL";
+                valueFrom.secretKeyRef = {
+                  name = redis-secret;
+                  key = "REDIS_URL";
+                };
+              }
+            ];
           in
           {
             deployments.${name}.spec = {
@@ -237,49 +236,48 @@
               };
             };
 
-            ingresses =
-              {
-                ${name}.spec = with cfg.ingress; {
-                  inherit ingressClassName;
-                  rules = [
-                    {
-                      host = domain;
-                      http.paths = [
-                        {
-                          path = "/";
-                          pathType = "ImplementationSpecific";
-                          backend.service = {
-                            inherit name;
-                            port.name = "http";
-                          };
-                        }
-                      ];
-                    }
-                  ];
-                  tls = [ { hosts = [ domain ]; } ];
-                };
-              }
-              // optionalAttrs (cfg.relayDomain != "") {
-                "${name}-relay".spec = {
-                  ingressClassName = cfg.ingress.ingressClassName;
-                  rules = [
-                    {
-                      host = cfg.relayDomain;
-                      http.paths = [
-                        {
-                          path = "/";
-                          pathType = "ImplementationSpecific";
-                          backend.service = {
-                            inherit name;
-                            port.name = "ws-search";
-                          };
-                        }
-                      ];
-                    }
-                  ];
-                  tls = [ { hosts = [ cfg.relayDomain ]; } ];
-                };
+            ingresses = {
+              ${name}.spec = with cfg.ingress; {
+                inherit ingressClassName;
+                rules = [
+                  {
+                    host = domain;
+                    http.paths = [
+                      {
+                        path = "/";
+                        pathType = "ImplementationSpecific";
+                        backend.service = {
+                          inherit name;
+                          port.name = "http";
+                        };
+                      }
+                    ];
+                  }
+                ];
+                tls = [ { hosts = [ domain ]; } ];
               };
+            }
+            // optionalAttrs (cfg.relayDomain != "") {
+              "${name}-relay".spec = {
+                ingressClassName = cfg.ingress.ingressClassName;
+                rules = [
+                  {
+                    host = cfg.relayDomain;
+                    http.paths = [
+                      {
+                        path = "/";
+                        pathType = "ImplementationSpecific";
+                        backend.service = {
+                          inherit name;
+                          port.name = "ws-search";
+                        };
+                      }
+                    ];
+                  }
+                ];
+                tls = [ { hosts = [ cfg.relayDomain ]; } ];
+              };
+            };
 
             services.${name}.spec = {
               selector = labels;

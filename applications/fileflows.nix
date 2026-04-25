@@ -109,31 +109,54 @@
         };
       };
 
-      extraResources = cfg:
+      extraResources =
+        cfg:
         let
           mediaMounts = lib.optionals cfg.nfs.enable (
             [
-              { mountPath = "/media/Movies"; name = "media-movies"; }
-              { mountPath = "/media/TV";     name = "media-tv"; }
+              {
+                mountPath = "/media/Movies";
+                name = "media-movies";
+              }
+              {
+                mountPath = "/media/TV";
+                name = "media-tv";
+              }
             ]
             ++ lib.optionals cfg.nfs.enableVideos [
-              { mountPath = "/media/Videos"; name = "media-videos"; }
+              {
+                mountPath = "/media/Videos";
+                name = "media-videos";
+              }
             ]
           );
 
           mediaVolumes = lib.optionals cfg.nfs.enable (
             [
-              { name = "media-movies"; persistentVolumeClaim.claimName = "${name}-${name}-media-movies"; }
-              { name = "media-tv";     persistentVolumeClaim.claimName = "${name}-${name}-media-tv"; }
+              {
+                name = "media-movies";
+                persistentVolumeClaim.claimName = "${name}-${name}-media-movies";
+              }
+              {
+                name = "media-tv";
+                persistentVolumeClaim.claimName = "${name}-${name}-media-tv";
+              }
             ]
             ++ lib.optionals cfg.nfs.enableVideos [
-              { name = "media-videos"; persistentVolumeClaim.claimName = "${name}-${name}-media-videos"; }
+              {
+                name = "media-videos";
+                persistentVolumeClaim.claimName = "${name}-${name}-media-videos";
+              }
             ]
           );
 
           nfsPVOptions = {
             accessModes = [ "ReadWriteMany" ];
-            mountOptions = [ "nolock" "soft" "timeo=30" ];
+            mountOptions = [
+              "nolock"
+              "soft"
+              "timeo=30"
+            ];
             persistentVolumeReclaimPolicy = "Retain";
             capacity.storage = "1Ti";
           };
@@ -259,9 +282,19 @@
                         ++ mediaMounts
                         ++ (lib.optionals cfg.enableGPU (
                           if cfg.vaapiRenderDevice != "" then
-                            [{ mountPath = "/dev/dri/renderD128"; name = "dri"; }]
+                            [
+                              {
+                                mountPath = "/dev/dri/renderD128";
+                                name = "dri";
+                              }
+                            ]
                           else
-                            [{ mountPath = "/dev/dri"; name = "dri"; }]
+                            [
+                              {
+                                mountPath = "/dev/dri";
+                                name = "dri";
+                              }
+                            ]
                         ));
 
                         securityContext = lib.optionalAttrs cfg.enableGPU {
@@ -286,15 +319,25 @@
                     ++ mediaVolumes
                     ++ (lib.optionals cfg.enableGPU (
                       if cfg.vaapiRenderDevice != "" then
-                        [{
-                          name = "dri";
-                          hostPath = { path = "/dev/dri/${cfg.vaapiRenderDevice}"; type = "CharDevice"; };
-                        }]
+                        [
+                          {
+                            name = "dri";
+                            hostPath = {
+                              path = "/dev/dri/${cfg.vaapiRenderDevice}";
+                              type = "CharDevice";
+                            };
+                          }
+                        ]
                       else
-                        [{
-                          name = "dri";
-                          hostPath = { path = "/dev/dri"; type = "Directory"; };
-                        }]
+                        [
+                          {
+                            name = "dri";
+                            hostPath = {
+                              path = "/dev/dri";
+                              type = "Directory";
+                            };
+                          }
+                        ]
                     ));
                   };
                 };
@@ -386,7 +429,10 @@
                 kind = "PersistentVolume";
                 metadata.name = "${name}-${name}-media-movies-nfs";
                 spec = nfsPVOptions // {
-                  nfs = { server = cfg.nfs.server; path = "${cfg.nfs.path}/Movies"; };
+                  nfs = {
+                    server = cfg.nfs.server;
+                    path = "${cfg.nfs.path}/Movies";
+                  };
                 };
               };
               "${name}-${name}-media-tv-nfs" = {
@@ -394,7 +440,10 @@
                 kind = "PersistentVolume";
                 metadata.name = "${name}-${name}-media-tv-nfs";
                 spec = nfsPVOptions // {
-                  nfs = { server = cfg.nfs.server; path = "${cfg.nfs.path}/TV"; };
+                  nfs = {
+                    server = cfg.nfs.server;
+                    path = "${cfg.nfs.path}/TV";
+                  };
                 };
               };
             }
@@ -404,7 +453,10 @@
                 kind = "PersistentVolume";
                 metadata.name = "${name}-${name}-media-videos-nfs";
                 spec = nfsPVOptions // {
-                  nfs = { server = cfg.nfs.server; path = "${cfg.nfs.path}/Videos"; };
+                  nfs = {
+                    server = cfg.nfs.server;
+                    path = "${cfg.nfs.path}/Videos";
+                  };
                 };
               };
             }

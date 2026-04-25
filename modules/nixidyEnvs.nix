@@ -36,17 +36,20 @@
         secrets = devEnv.dev.config.nixidy.secretSpecs or [ ];
       };
     in
-    if !secretsAvailable then { } else {
-      nixidyEnvs = devEnv;
-      # Package that outputs the secret manifest JSON (for CI script).
-      # Use: nix build .#packages.x86_64-linux.devSecretManifest && cat result
-      packages.devSecretManifest = pkgs.runCommand "dev-secret-manifest.json" {
-        manifest = builtins.toJSON devSecretManifest;
-      } ''echo "$manifest" > $out '';
-      # Plain Nix value (not a package) for write-sops-secrets.sh.
-      # Use: nix eval --impure --json .#nixidySecretSpecs.x86_64-linux.dev
-      nixidySecretSpecs.dev = devSecretSpecs;
-    };
+    if !secretsAvailable then
+      { }
+    else
+      {
+        nixidyEnvs = devEnv;
+        # Package that outputs the secret manifest JSON (for CI script).
+        # Use: nix build .#packages.x86_64-linux.devSecretManifest && cat result
+        packages.devSecretManifest = pkgs.runCommand "dev-secret-manifest.json" {
+          manifest = builtins.toJSON devSecretManifest;
+        } ''echo "$manifest" > $out '';
+        # Plain Nix value (not a package) for write-sops-secrets.sh.
+        # Use: nix eval --impure --json .#nixidySecretSpecs.x86_64-linux.dev
+        nixidySecretSpecs.dev = devSecretSpecs;
+      };
 
   transposition.nixidyEnvs = {
     adHoc = true;
