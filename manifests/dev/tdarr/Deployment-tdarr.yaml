@@ -49,7 +49,7 @@ spec:
             - name: transcodegpuWorkers
               value: "1"
             - name: LIBVA_DRIVER_NAME
-              value: radeonsi
+              value: iris
             - name: XDG_RUNTIME_DIR
               value: ""
             - name: LIBVA_DRIVERS_PATH
@@ -97,7 +97,7 @@ spec:
             - mountPath: /temp
               name: temp
       nodeSelector:
-        kubernetes.io/hostname: powerspecnix
+        kubernetes.io/hostname: nixmini
       securityContext:
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch

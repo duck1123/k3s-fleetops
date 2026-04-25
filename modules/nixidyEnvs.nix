@@ -24,6 +24,7 @@
           self.modules.generic.ageRecipients
           ./secretManifest.nix
           ./secretSpecs.nix
+          ./nodeProfiles.nix
         ];
       };
       # For CI: list of { app, secretName, namespace, keys } (metadata only, not secret values).

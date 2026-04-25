@@ -30,6 +30,16 @@ in
   # FIXME: naughty config
   ageRecipients = "age1n372e8dgautnjhecllf7uvvldw9g6vyx3kggj0kyduz5jr2upvysue242c";
 
+  nodeGpuProfiles = {
+    edgenix = {
+      libvaDriverName = "radeonsi";
+      # WX 3200 (VAAPI card) is the second GPU on this node, enumerated as renderD129
+      vaapiRenderDevice = "renderD129";
+    };
+    nixmini.libvaDriverName = "iris";
+    powerspecnix.libvaDriverName = "radeonsi";
+  };
+
   nixidy = {
     defaults.syncPolicy.autoSync = {
       enabled = true;
@@ -190,7 +200,6 @@ in
       storageClassName = "longhorn";
       useProbes = false;
       enableGPU = true;
-      libvaDriverName = "iris";
     };
 
     forgejo = {
@@ -1029,8 +1038,7 @@ in
       enable = true;
       healthcheckcpuWorkers = 0;
       healthcheckgpuWorkers = 1;
-      # hostAffinity = "edgenix";
-      hostAffinity = "powerspecnix";
+      hostAffinity = "nixmini";
 
       ingress = {
         domain = "tdarr.${tail-domain}";
@@ -1053,9 +1061,6 @@ in
       vpn.enable = false;
       enableGPU = true;
       enableNvidiaGPU = false;
-      # Edgenix has two cards; WX 3200 (VAAPI) is renderD129. Mount it as renderD128 so Tdarr's hardcoded path works.
-      # vaapiRenderDevice = "renderD129";
-      libvaDriverName = "radeonsi";
       transcodegpuWorkers = 1;
     };
 

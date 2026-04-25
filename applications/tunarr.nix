@@ -112,20 +112,6 @@
             default = false;
           };
 
-          # GID of the host's 'render' group for /dev/dri access (AMD/Intel VAAPI).
-          renderGroupGID = mkOption {
-            description = mdDoc "GID of the host render group for /dev/dri when enableGPU is true. Run 'getent group render' on the node (e.g. 303 on NixOS).";
-            type = types.int;
-            default = 303;
-          };
-
-          # Use a specific DRI render node (e.g. renderD129) as /dev/dri/renderD128 in the container. Set when your GPU is the second card on the node. Empty = mount whole /dev/dri.
-          vaapiRenderDevice = mkOption {
-            description = mdDoc "Host DRI render device name (e.g. renderD129) to mount as /dev/dri/renderD128 when enableGPU is true. Empty = mount entire /dev/dri.";
-            type = types.str;
-            default = "";
-          };
-
           # Set to true once to clear corrupted SQLite DB (e.g. "database disk image is malformed"); Tunarr will start fresh. Set back to false after the pod has started.
           resetDatabase = mkOption {
             description = mdDoc "If true, clear /config/tunarr before startup so Tunarr creates a new DB. Use once to recover from corruption, then set back to false.";

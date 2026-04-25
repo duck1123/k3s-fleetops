@@ -188,6 +188,24 @@
           default = null;
         };
 
+        libvaDriverName = mkOption {
+          description = mdDoc "LIBVA_DRIVER_NAME for VAAPI (e.g. iris for Intel, radeonsi for AMD). Auto-derived from hostAffinity via nodeGpuProfiles. Empty string = do not set.";
+          type = types.str;
+          default = "";
+        };
+
+        vaapiRenderDevice = mkOption {
+          description = mdDoc "Host DRI render device (e.g. renderD129) to mount as /dev/dri/renderD128. Auto-derived from hostAffinity. Empty = mount entire /dev/dri.";
+          type = types.str;
+          default = "";
+        };
+
+        renderGroupGID = mkOption {
+          description = mdDoc "GID of the host render group for /dev/dri access. Auto-derived from hostAffinity (default 303 on NixOS).";
+          type = types.int;
+          default = 303;
+        };
+
         ingress = mkOption {
           apply =
             val:
@@ -273,6 +291,18 @@
       ];
 
       config = mkIf cfg.enable (mkMerge [
+        (mkIf (cfg.hostAffinity != null) (
+          let
+            profile = config.nodeGpuProfiles.${cfg.hostAffinity} or { };
+          in
+          {
+            services.${name} = {
+              libvaDriverName = mkDefault (profile.libvaDriverName or "");
+              vaapiRenderDevice = mkDefault (profile.vaapiRenderDevice or "");
+              renderGroupGID = mkDefault (profile.renderGroupGID or 303);
+            };
+          }
+        ))
         (mkIf (combinedSopsSecrets != { }) {
           services.${name} = {
             sopsSecretsManifest = lib.mapAttrsToList (sn: data: {

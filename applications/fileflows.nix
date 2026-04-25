@@ -81,27 +81,6 @@
           default = false;
         };
 
-        # GID of the host's 'render' group for /dev/dri access. Run 'getent group render' on the node (e.g. 303 on NixOS).
-        renderGroupGID = mkOption {
-          description = mdDoc "GID of the host render group for /dev/dri device access when enableGPU is true.";
-          type = types.int;
-          default = 303;
-        };
-
-        # Intel: "iris" (8th gen+) or "i965" (older). AMD: "radeonsi".
-        libvaDriverName = mkOption {
-          description = mdDoc "LIBVA_DRIVER_NAME for VAAPI (e.g. iris for modern Intel, i965 for older Intel). Empty string = do not set.";
-          type = types.str;
-          default = "";
-        };
-
-        # Use a specific DRI render node when the GPU is not at the default renderD128 path.
-        vaapiRenderDevice = mkOption {
-          description = mdDoc "Host DRI render device name (e.g. renderD129) to mount as /dev/dri/renderD128. Empty = mount entire /dev/dri.";
-          type = types.str;
-          default = "";
-        };
-
         ingress.annotations = mkOption {
           description = mdDoc "Annotations for the Ingress resource";
           type = types.attrsOf types.str;

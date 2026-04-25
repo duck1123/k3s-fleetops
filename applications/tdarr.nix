@@ -136,28 +136,6 @@
           type = types.bool;
           default = false;
         };
-
-        # GID of the host's 'render' group for /dev/dri access (AMD/Intel VAAPI). Run 'getent group render' on the node (e.g. 303 on NixOS).
-        renderGroupGID = mkOption {
-          description = mdDoc "GID of the host render group for /dev/dri device access when enableGPU is true. Run 'getent group render' on the node to get the GID.";
-          type = types.int;
-          default = 303;
-        };
-
-        # VAAPI driver name for older AMD/Intel GPUs. Set when enableGPU is true and the default driver fails (e.g. "No VA display found").
-        # Older AMD pre-GCN: "r600". AMD GCN+: "radeonsi". Intel: "i965" or "iris".
-        libvaDriverName = mkOption {
-          description = mdDoc "LIBVA_DRIVER_NAME for VAAPI (e.g. r600 for older AMD, radeonsi for GCN+). Empty string = do not set.";
-          type = types.str;
-          default = "";
-        };
-
-        # Use a specific DRI render node (e.g. renderD129) as /dev/dri/renderD128 in the container. Tdarr hardcodes renderD128; if your GPU is renderD129 on the host (e.g. second GPU), set this so it is used. Empty = mount whole /dev/dri.
-        vaapiRenderDevice = mkOption {
-          description = mdDoc "Host DRI render device name (e.g. renderD129) to mount as /dev/dri/renderD128 when enableGPU is true. Set when your VAAPI GPU is not renderD128 on the node. Empty = mount entire /dev/dri.";
-          type = types.str;
-          default = "";
-        };
       };
 
       extraResources = cfg: {

@@ -68,13 +68,6 @@
           type = types.bool;
           default = false;
         };
-
-        # Use a specific DRI render node (e.g. renderD129) as /dev/dri/renderD128 in the container. Set when your VAAPI GPU is not renderD128 on the node. Empty = mount entire /dev/dri.
-        vaapiRenderDevice = mkOption {
-          description = mdDoc "Host DRI render device name (e.g. renderD129) to mount as /dev/dri/renderD128 when enableGPU is true. Empty = mount entire /dev/dri.";
-          type = types.str;
-          default = "";
-        };
       };
 
       extraResources = cfg: {
