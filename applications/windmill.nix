@@ -184,6 +184,10 @@
                               value = "worker";
                             }
                             {
+                              name = "WORKER_GROUP";
+                              value = "native";
+                            }
+                            {
                               name = "WORKER_TAGS";
                               value = "native";
                             }

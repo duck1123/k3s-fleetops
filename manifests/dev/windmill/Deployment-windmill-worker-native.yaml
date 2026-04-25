@@ -29,6 +29,8 @@ spec:
               value: Etc/UTC
             - name: MODE
               value: worker
+            - name: WORKER_GROUP
+              value: native
             - name: WORKER_TAGS
               value: native
           image: ghcr.io/windmill-labs/windmill-full:latest
