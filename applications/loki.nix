@@ -16,6 +16,12 @@
       chart = charts.grafana.loki;
 
       extraOptions = {
+        enableLogging = mkOption {
+          description = mdDoc "Enable Loki log aggregation service";
+          type = types.bool;
+          default = true;
+        };
+
         retention = mkOption {
           description = mdDoc "Log retention period (e.g. '720h' for 30 days, '168h' for 7 days)";
           type = types.str;

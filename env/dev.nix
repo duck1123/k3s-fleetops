@@ -1,4 +1,9 @@
-{ pkgs, self, ... }:
+{
+  lib,
+  pkgs,
+  self,
+  ...
+}:
 let
   secrets = self.lib.loadSecrets { inherit pkgs; };
   base-domain = "dev.kronkltd.net";
@@ -6,6 +11,9 @@ let
   clusterIssuer = "letsencrypt-prod";
   nas-host = "192.168.0.124";
   nas-base = "/volume1";
+
+  # Toggle to enable/disable all logging components
+  enableLogging = false;
 
   # Helper function to generate database entries for *arr applications
   # Takes a list of app configs and generates main + log databases
@@ -225,6 +233,7 @@ in
     };
 
     grafana = {
+      inherit enableLogging;
       adminPassword = secrets.grafana.password or "";
       enable = true;
       hostAffinity = "edgenix";
@@ -246,6 +255,8 @@ in
           editable = true;
           jsonData.httpMethod = "POST";
         }
+      ]
+      ++ lib.optionals enableLogging [
         {
           name = "Loki";
           type = "loki";
@@ -463,7 +474,8 @@ in
     };
 
     loki = {
-      enable = true;
+      inherit enableLogging;
+      enable = enableLogging;
       hostAffinity = "edgenix";
       retention = "720h"; # 30 days
       storageClassName = "longhorn";
@@ -741,7 +753,10 @@ in
         ];
     };
 
-    promtail.enable = true;
+    promtail = {
+      inherit enableLogging;
+      enable = enableLogging;
+    };
 
     prowlarr = {
       database = {

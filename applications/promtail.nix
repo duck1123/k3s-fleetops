@@ -16,6 +16,12 @@
       chart = charts.grafana.promtail;
 
       extraOptions = {
+        enableLogging = mkOption {
+          description = mdDoc "Enable Promtail log collection service";
+          type = types.bool;
+          default = true;
+        };
+
         lokiUrl = mkOption {
           description = mdDoc "Loki push API endpoint";
           type = types.str;

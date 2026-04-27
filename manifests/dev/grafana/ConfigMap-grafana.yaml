@@ -22,11 +22,6 @@ data:
       name: Prometheus
       type: prometheus
       url: http://prometheus-kube-prometheus-prometheus.prometheus:9090
-    - access: proxy
-      editable: true
-      name: Loki
-      type: loki
-      url: http://loki-gateway.loki.svc.cluster.local
   download_dashboards.sh: |
     #!/usr/bin/env sh
     set -euf

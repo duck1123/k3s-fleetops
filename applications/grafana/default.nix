@@ -49,15 +49,26 @@
             providers = cfg.additionalDashboardProviders;
           };
 
-          dashboards = lib.recursiveUpdate {
-            default.system-performance-nfs.json = builtins.readFile ./dashboards/system-performance.json;
-            default.node-overview.json = builtins.readFile ./dashboards/node-overview.json;
-            default.pod-logs.json = builtins.readFile ./dashboards/pod-logs.json;
-          } (cfg.additionalDashboards or { });
+          dashboards =
+            lib.recursiveUpdate
+              {
+                default.system-performance-nfs.json = builtins.readFile ./dashboards/system-performance.json;
+                default.node-overview.json = builtins.readFile ./dashboards/node-overview.json;
+              }
+              (
+                lib.optionalAttrs cfg.enableLogging {
+                  default.pod-logs.json = builtins.readFile ./dashboards/pod-logs.json;
+                }
+                // (cfg.additionalDashboards or { })
+              );
 
           datasources."datasources.yaml" = {
             apiVersion = 1;
-            datasources = cfg.additionalDatasources;
+            datasources =
+              if cfg.enableLogging then
+                cfg.additionalDatasources
+              else
+                builtins.filter (ds: ds.type != "loki") cfg.additionalDatasources;
           };
 
           ingress = with cfg.ingress; {
@@ -175,6 +186,12 @@
             example.default."my-dashboard.json" = builtins.readFile ./path/to/dashboard.json;
             type = types.attrsOf (types.attrsOf types.str);
             default = { };
+          };
+
+          enableLogging = mkOption {
+            description = mdDoc "Enable logging features (Loki datasource and log-related dashboards)";
+            type = types.bool;
+            default = true;
           };
         };
       };
