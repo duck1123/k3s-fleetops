@@ -584,7 +584,7 @@ in
     nix-csi.enable = true;
 
     nostrarchives = {
-      enable = true;
+      enable = false;
 
       database = {
         host = "postgresql.postgresql";
@@ -616,7 +616,7 @@ in
       {
         allowLocalExternalDatabases = true;
         auth.jwtSecret = (secrets.nocodb or { }).jwtSecret or "";
-        enable = true;
+        enable = false;
 
         ingress = {
           domain = "nocodb.${tail-domain}";
