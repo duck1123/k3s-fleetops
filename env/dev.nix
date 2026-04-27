@@ -64,7 +64,7 @@ in
 
   services = {
     affine = {
-      enable = true;
+      enable = false;
       hostAffinity = "edgenix";
 
       database = {
@@ -96,7 +96,7 @@ in
     argocd.enable = true;
 
     audiobookshelf = {
-      enable = true;
+      enable = false;
       hostAffinity = "edgenix";
 
       ingress = {
@@ -235,7 +235,7 @@ in
     grafana = {
       inherit enableLogging;
       adminPassword = secrets.grafana.password or "";
-      enable = true;
+      enable = false;
       hostAffinity = "edgenix";
 
       ingress = {
