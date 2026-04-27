@@ -686,8 +686,8 @@ in
       # Wildcard: all *.local queries resolve to the Traefik LoadBalancer IP.
       # Requires clients to use Pi-hole as their DNS server.
       customDnsEntries = [
-        "address=/.local/192.168.0.241"
-        "address=/.dev.kronkltd.net/192.168.0.241"
+        "address=/.local/192.168.0.242"
+        "address=/.dev.kronkltd.net/192.168.0.242"
       ];
     };
 
@@ -1081,7 +1081,7 @@ in
 
     traefik = {
       enable = true;
-      service.loadBalancerIP = "192.168.0.241";
+      service.loadBalancerIP = "192.168.0.242";
       service.hostPorts = false;
     };
 

@@ -58,8 +58,20 @@
             };
 
             resources = nixcsiEval.eval.config.kubernetes.generated;
+            pinIp = ip: r: r // {
+              metadata = r.metadata // {
+                annotations = (r.metadata.annotations or { }) // {
+                  "metallb.universe.tf/loadBalancerIPs" = ip;
+                };
+              };
+            };
+            patchedResources = map (r:
+              if r.kind == "Service" && r.metadata.name == "nix-cache-lb" then pinIp "192.168.0.241" r
+              else if r.kind == "Service" && r.metadata.name == "nix-proxy" then pinIp "192.168.0.240" r
+              else r
+            ) resources;
             yaml = builtins.unsafeDiscardStringContext (
-              builtins.concatStringsSep "\n---\n" (map builtins.toJSON resources)
+              builtins.concatStringsSep "\n---\n" (map builtins.toJSON patchedResources)
             );
           in
           {

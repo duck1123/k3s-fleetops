@@ -1,5 +1,6 @@
 {
 	"recommendations": [
-		"stateful.runme"
+		"stateful.runme",
+		"jnoortheen.nix-ide"
 	]
 }

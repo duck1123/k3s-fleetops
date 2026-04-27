@@ -1,6 +1,8 @@
 apiVersion: v1
 kind: Service
 metadata:
+  annotations:
+    metallb.universe.tf/loadBalancerIPs: 192.168.0.240
   name: nix-proxy
   namespace: nix-csi
 spec:
