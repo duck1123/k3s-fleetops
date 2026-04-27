@@ -130,104 +130,108 @@
           };
         };
 
-        defaultValues = cfg: {
-          admin = {
-            enabled = true;
-            existingSecret = password-secret;
-            passwordKey = "password";
-          };
-
-          ingress = with cfg.ingress; {
-            inherit ingressClassName;
-
-            enabled = true;
-            hosts = [ domain ];
-
-            annotations = optionalAttrs (clusterIssuer != "") {
-              "cert-manager.io/cluster-issuer" = clusterIssuer;
+        defaultValues =
+          cfg:
+          {
+            admin = {
+              enabled = true;
+              existingSecret = password-secret;
+              passwordKey = "password";
             };
 
-            tls = [
-              {
-                secretName = tls.secretName;
-                hosts = [ domain ];
-              }
-            ];
-          };
+            ingress = with cfg.ingress; {
+              inherit ingressClassName;
 
-          virtualHost = cfg.ingress.domain;
+              enabled = true;
+              hosts = [ domain ];
 
-          persistentVolumeClaim = {
-            accessModes = [ "ReadWriteOnce" ];
-            enabled = true;
-            size = cfg.pvcSize;
-            storageClass = cfg.storageClassName;
-          };
+              annotations = optionalAttrs (clusterIssuer != "") {
+                "cert-manager.io/cluster-issuer" = clusterIssuer;
+              };
 
-          extraEnvVars = {
-            TZ = cfg.timezone;
-            FTLCONF_dns_listeningMode = "all";
-          };
+              tls = [
+                {
+                  secretName = tls.secretName;
+                  hosts = [ domain ];
+                }
+              ];
+            };
 
-          DNS1 = cfg.dns1;
-          DNS2 = cfg.dns2;
+            virtualHost = cfg.ingress.domain;
 
-          dnsmasq.customDnsEntries = cfg.customDnsEntries;
+            persistentVolumeClaim = {
+              accessModes = [ "ReadWriteOnce" ];
+              enabled = true;
+              size = cfg.pvcSize;
+              storageClass = cfg.storageClassName;
+            };
 
-          serviceDns = {
-            type = cfg.serviceDnsType;
-            mixedService = cfg.serviceDnsMixedService;
+            extraEnvVars = {
+              TZ = cfg.timezone;
+              FTLCONF_dns_listeningMode = "all";
+            };
+
+            DNS1 = cfg.dns1;
+            DNS2 = cfg.dns2;
+
+            dnsmasq.customDnsEntries = cfg.customDnsEntries;
+
+            serviceDns = {
+              type = cfg.serviceDnsType;
+              mixedService = cfg.serviceDnsMixedService;
+            }
+            // optionalAttrs (cfg.serviceDnsLoadBalancerIP != null) {
+              loadBalancerIP = cfg.serviceDnsLoadBalancerIP;
+            };
+
+            serviceDhcp = {
+              enabled = cfg.serviceDhcpEnabled;
+            };
+
+            podDnsConfig = {
+              enabled = cfg.podDnsConfigEnabled;
+            };
+
+            capabilities = optionalAttrs (cfg.extraLinuxCapabilities != [ ]) {
+              add = cfg.extraLinuxCapabilities;
+            };
+
+            # Chart default probes call `/api/info/login` + `jq` (v5 API). Pi-hole v6 image often has no `jq` and a different API — probes never succeed.
+            # Use built-in httpGet on `/admin` (chart template); HTTP 2xx/3xx counts as healthy.
+            probes = {
+              liveness = {
+                type = "httpGet";
+                port = "http";
+                scheme = "HTTP";
+                enabled = true;
+                initialDelaySeconds = 90;
+                failureThreshold = 5;
+                timeoutSeconds = 5;
+              };
+              readiness = {
+                type = "httpGet";
+                port = "http";
+                scheme = "HTTP";
+                enabled = true;
+                initialDelaySeconds = 30;
+                failureThreshold = 6;
+                timeoutSeconds = 5;
+              };
+            };
+
+            resources = {
+              requests = {
+                cpu = "100m";
+                memory = "256Mi";
+              };
+              limits = {
+                cpu = "500m";
+                memory = "512Mi";
+              };
+            };
           }
-          // optionalAttrs (cfg.serviceDnsLoadBalancerIP != null) {
-            loadBalancerIP = cfg.serviceDnsLoadBalancerIP;
+          // optionalAttrs (cfg.hostAffinity != null) {
+            nodeSelector."kubernetes.io/hostname" = cfg.hostAffinity;
           };
-
-          serviceDhcp = {
-            enabled = cfg.serviceDhcpEnabled;
-          };
-
-          podDnsConfig = {
-            enabled = cfg.podDnsConfigEnabled;
-          };
-
-          capabilities = optionalAttrs (cfg.extraLinuxCapabilities != [ ]) {
-            add = cfg.extraLinuxCapabilities;
-          };
-
-          # Chart default probes call `/api/info/login` + `jq` (v5 API). Pi-hole v6 image often has no `jq` and a different API — probes never succeed.
-          # Use built-in httpGet on `/admin` (chart template); HTTP 2xx/3xx counts as healthy.
-          probes = {
-            liveness = {
-              type = "httpGet";
-              port = "http";
-              scheme = "HTTP";
-              enabled = true;
-              initialDelaySeconds = 90;
-              failureThreshold = 5;
-              timeoutSeconds = 5;
-            };
-            readiness = {
-              type = "httpGet";
-              port = "http";
-              scheme = "HTTP";
-              enabled = true;
-              initialDelaySeconds = 30;
-              failureThreshold = 6;
-              timeoutSeconds = 5;
-            };
-          };
-
-          resources = {
-            requests = {
-              cpu = "100m";
-              memory = "256Mi";
-            };
-            limits = {
-              cpu = "500m";
-              memory = "512Mi";
-            };
-          };
-        };
-
       };
 }
