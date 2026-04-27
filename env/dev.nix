@@ -281,7 +281,7 @@ in
 
     prometheus = {
       alertmanager.enabled = true;
-      enable = true;
+      enable = false;
       hostAffinity = "edgenix";
     };
 
