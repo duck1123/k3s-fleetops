@@ -45,9 +45,9 @@ spec:
             - name: healthcheckgpuWorkers
               value: "1"
             - name: transcodecpuWorkers
-              value: "1"
+              value: "0"
             - name: transcodegpuWorkers
-              value: "1"
+              value: "0"
             - name: LIBVA_DRIVER_NAME
               value: iris
             - name: XDG_RUNTIME_DIR
@@ -56,6 +56,10 @@ spec:
               value: /usr/lib/x86_64-linux-gnu/dri
             - name: LIBVA_MESSAGING
               value: "1"
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: all
+            - name: NVIDIA_DRIVER_CAPABILITIES
+              value: all
           image: ghcr.io/haveagitgat/tdarr:latest
           imagePullPolicy: IfNotPresent
           name: tdarr
@@ -66,7 +70,9 @@ spec:
             - containerPort: 8266
               name: server
               protocol: TCP
-          resources: {}
+          resources:
+            limits:
+              nvidia.com/gpu: "1"
           securityContext:
             capabilities:
               add:

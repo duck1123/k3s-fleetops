@@ -1064,7 +1064,7 @@ in
       nfs = {
         enable = true;
         server = nas-host;
-        path = "${nas-base}";
+        path = nas-base;
       };
 
       puid = 1000;
@@ -1075,8 +1075,9 @@ in
       useProbes = false;
       vpn.enable = false;
       enableGPU = true;
-      enableNvidiaGPU = false;
-      transcodegpuWorkers = 1;
+      enableNvidiaGPU = true;
+      transcodecpuWorkers = 0;
+      transcodegpuWorkers = 0;
     };
 
     traefik = {
