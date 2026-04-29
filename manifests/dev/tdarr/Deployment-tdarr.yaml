@@ -49,17 +49,13 @@ spec:
             - name: transcodegpuWorkers
               value: "0"
             - name: LIBVA_DRIVER_NAME
-              value: iris
+              value: radeonsi
             - name: XDG_RUNTIME_DIR
               value: ""
             - name: LIBVA_DRIVERS_PATH
               value: /usr/lib/x86_64-linux-gnu/dri
             - name: LIBVA_MESSAGING
               value: "1"
-            - name: NVIDIA_VISIBLE_DEVICES
-              value: all
-            - name: NVIDIA_DRIVER_CAPABILITIES
-              value: all
           image: ghcr.io/haveagitgat/tdarr:latest
           imagePullPolicy: IfNotPresent
           name: tdarr
@@ -70,9 +66,7 @@ spec:
             - containerPort: 8266
               name: server
               protocol: TCP
-          resources:
-            limits:
-              nvidia.com/gpu: "1"
+          resources: {}
           securityContext:
             capabilities:
               add:
@@ -87,7 +81,7 @@ spec:
               name: media-movies
             - mountPath: /media/TV
               name: media-tv
-            - mountPath: /dev/dri
+            - mountPath: /dev/dri/renderD128
               name: dri
       initContainers:
         - command:
@@ -103,7 +97,7 @@ spec:
             - mountPath: /temp
               name: temp
       nodeSelector:
-        kubernetes.io/hostname: nixmini
+        kubernetes.io/hostname: edgenix
       securityContext:
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
@@ -126,6 +120,6 @@ spec:
           persistentVolumeClaim:
             claimName: tdarr-tdarr-media-tv
         - hostPath:
-            path: /dev/dri
-            type: Directory
+            path: /dev/dri/renderD129
+            type: CharDevice
           name: dri

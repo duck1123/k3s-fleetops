@@ -1053,7 +1053,7 @@ in
       enable = true;
       healthcheckcpuWorkers = 0;
       healthcheckgpuWorkers = 1;
-      hostAffinity = "nixmini";
+      hostAffinity = "edgenix";
 
       ingress = {
         domain = "tdarr.${tail-domain}";
@@ -1075,7 +1075,7 @@ in
       useProbes = false;
       vpn.enable = false;
       enableGPU = true;
-      enableNvidiaGPU = true;
+      enableNvidiaGPU = false;
       transcodecpuWorkers = 0;
       transcodegpuWorkers = 0;
     };
