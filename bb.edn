@@ -36,10 +36,6 @@
   {:doc     "Install 00-master argo application"
    :task    (shell "kubectl apply -f target/infra-manifests/00-master.yaml")}
 
-  build-charts
-  {:doc  "Build nixidy charts"
-   :task (shell "nixidy build .#dev")}
-
   ci
   {:doc     "Run all build steps"
    :depends [switch-charts]}

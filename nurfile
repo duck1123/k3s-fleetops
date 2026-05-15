@@ -1,0 +1,2 @@
+# -*- mode: nushell -*-
+overlay use scripts/nur.nu

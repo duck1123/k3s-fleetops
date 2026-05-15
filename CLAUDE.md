@@ -18,16 +18,16 @@ bb tasks
 
 ```sh
 # Full pipeline: generate manifests, post-process, write to manifests/dev/, activate
-bb switch-charts
+nur switch-charts
 
 # CI shorthand — same as switch-charts (depends on it)
-bb ci
+nur ci
 
 # Generate manifests into manifests/dev/ without activating (no secrets needed)
 bb build-charts          # wraps: nixidy build .#dev
 
 # Post-process already-generated manifests (fixups for nixidy hardcoded behaviours)
-bb post-process-manifests
+nur post-process-manifests
 
 # Update vendored Helm chart archives from OCI registries
 bb update-charts
