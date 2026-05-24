@@ -30,6 +30,8 @@ spec:
                 secretKeyRef:
                   key: privateKey
                   name: gluetun-mullvad-wireguard
+            - name: WIREGUARD_ADDRESSES
+              value: 10.69.161.167/32,fc00:bbbb:bbbb:bb01::6:a1a6/128
             - name: FIREWALL
               value: "on"
             - name: FIREWALL_VPN_INPUT_PORTS

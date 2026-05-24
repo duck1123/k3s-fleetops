@@ -54,6 +54,12 @@
             default = "";
           };
 
+          wireguardAddresses = mkOption {
+            description = mdDoc "Comma-separated WireGuard addresses assigned to your key (e.g. 10.64.x.x/32,fc00:bbbb::.../128)";
+            type = types.str;
+            default = "";
+          };
+
           serverLocation = mkOption {
             description = mdDoc "Mullvad server location (e.g., us-was, se-sto)";
             type = types.str;
@@ -154,6 +160,10 @@
                               name = "${name}-mullvad-wireguard";
                               key = "privateKey";
                             };
+                          }
+                          {
+                            name = "WIREGUARD_ADDRESSES";
+                            value = cfg.wireguardAddresses;
                           }
                           (
                             if cfg.serverCountry != null && cfg.serverCountry != "" then
