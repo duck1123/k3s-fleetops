@@ -13,6 +13,8 @@ spec:
     matchLabels:
       app.kubernetes.io/instance: homarr
       app.kubernetes.io/name: homarr
+  strategy:
+    type: Recreate
   template:
     metadata:
       labels:

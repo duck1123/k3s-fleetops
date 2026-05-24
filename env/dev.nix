@@ -199,8 +199,8 @@ in
 
     gluetun = {
       controlServer = { inherit (secrets.gluetun) password username; };
-      enable = false;
-      hostAffinity = "edgenix";
+      enable = true;
+      # hostAffinity = "edgenix";
       mullvadAccountNumber = secrets.mullvad.id;
       storageClassName = "longhorn";
     };
