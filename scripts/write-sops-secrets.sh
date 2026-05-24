@@ -96,8 +96,11 @@ while IFS= read -r spec; do
 
   echo "write-sops-secrets: encrypting $secret_name"
 
-  # Build stringData lines for the YAML
-  string_data_lines="$(echo "$values" | jq -r 'to_entries[] | "        \(.key): \(.value | tostring)"')"
+  # Build stringData lines for the YAML.
+  # Use @json to produce a properly-quoted YAML double-quoted scalar for every
+  # value. This ensures SOPS encrypts as type:str (not type:int for numeric-
+  # looking secrets like account numbers) and handles embedded quotes/newlines.
+  string_data_lines="$(echo "$values" | jq -r 'to_entries[] | "        \(.key): \(.value | tostring | @json)"')"
 
   metadata_yaml=""
   if echo "$spec" | jq -e '.metadata.annotations? != null' >/dev/null 2>&1; then
