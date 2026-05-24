@@ -16,3 +16,4 @@ tls.key
 /.cursor/
 /backups/
 .gitnexus
+/secrets.yaml
