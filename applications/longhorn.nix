@@ -95,6 +95,7 @@
         persistence = {
           defaultClass = false;
           defaultClassReplicaCount = 1;
+          reclaimPolicy = "Retain";
         };
 
         preUpgradeChecker.jobEnabled = false;
