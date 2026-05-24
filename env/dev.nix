@@ -201,7 +201,7 @@ in
       controlServer = { inherit (secrets.gluetun) password username; };
       enable = true;
       # hostAffinity = "edgenix";
-      mullvadAccountNumber = secrets.mullvad.id;
+      wireguardPrivateKey = secrets.mullvad.wireguardKey;
       storageClassName = "longhorn";
     };
 

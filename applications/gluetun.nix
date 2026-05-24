@@ -25,8 +25,8 @@
         sopsSecrets =
           cfg:
           {
-            "${name}-mullvad-account" = {
-              accountNumber = cfg.mullvadAccountNumber;
+            "${name}-mullvad-wireguard" = {
+              privateKey = cfg.wireguardPrivateKey;
             };
           }
           // lib.optionalAttrs (cfg.controlServer.username != "" || cfg.controlServer.password != "") {
@@ -48,8 +48,8 @@
           };
 
         extraOptions = {
-          mullvadAccountNumber = mkOption {
-            description = mdDoc "Mullvad account number";
+          wireguardPrivateKey = mkOption {
+            description = mdDoc "WireGuard private key for Mullvad (generate at mullvad.net/en/account/wireguard-config)";
             type = types.str;
             default = "";
           };
@@ -100,15 +100,6 @@
               default = "";
             };
           };
-
-          openvpnAdditionalArgs = mkOption {
-            description = mdDoc "Additional OpenVPN arguments (e.g., '--tls-timeout 120' to increase TLS handshake timeout)";
-            type = types.listOf types.str;
-            default = [
-              "--tls-timeout"
-              "120"
-            ];
-          };
         };
 
         extraResources = cfg: {
@@ -155,42 +146,13 @@
                           }
                           {
                             name = "VPN_TYPE";
-                            value = "openvpn";
+                            value = "wireguard";
                           }
                           {
-                            name = "OPENVPN_IPV6";
-                            value = if cfg.enableIPv6 then "true" else "off";
-                          }
-                          (
-                            if !cfg.enableIPv6 then
-                              {
-                                name = "SERVER_ADDRESS_IPV6";
-                                value = "off";
-                              }
-                            else
-                              null
-                          )
-                          (
-                            if !cfg.enableIPv6 then
-                              {
-                                name = "MULLVAD_SERVER_IPV6";
-                                value = "off";
-                              }
-                            else
-                              null
-                          )
-                          {
-                            name = "MULLVAD_ACCOUNT_NUMBER";
+                            name = "WIREGUARD_PRIVATE_KEY";
                             valueFrom.secretKeyRef = {
-                              name = "${name}-mullvad-account";
-                              key = "accountNumber";
-                            };
-                          }
-                          {
-                            name = "OPENVPN_USER";
-                            valueFrom.secretKeyRef = {
-                              name = "${name}-mullvad-account";
-                              key = "accountNumber";
+                              name = "${name}-mullvad-wireguard";
+                              key = "privateKey";
                             };
                           }
                           (
@@ -295,15 +257,6 @@
                             else
                               null
                           )
-                          (
-                            if cfg.openvpnAdditionalArgs != [ ] then
-                              {
-                                name = "OPENVPN_ADDITIONAL_ARGS";
-                                value = lib.concatStringsSep " " cfg.openvpnAdditionalArgs;
-                              }
-                            else
-                              null
-                          )
                         ];
                         ports = [
                           {
@@ -324,7 +277,7 @@
                         ];
                         readinessProbe = {
                           httpGet = {
-                            path = "/v1/openvpn/status";
+                            path = "/v1/vpn/status";
                             port = 8000;
                           };
                           initialDelaySeconds = 30;
@@ -335,7 +288,7 @@
                         };
                         startupProbe = {
                           httpGet = {
-                            path = "/v1/openvpn/status";
+                            path = "/v1/vpn/status";
                             port = 8000;
                           };
                           initialDelaySeconds = 10;
@@ -380,26 +333,6 @@
                     };
 
                     dnsPolicy = "None";
-
-                    # Init container to clear cached server data if IPv6 is disabled
-                    # This prevents IPv6 addresses from being used even if cached
-                    initContainers = lib.optionals (!cfg.enableIPv6) [
-                      {
-                        name = "clear-ipv6-cache";
-                        image = "busybox:latest";
-                        command = [
-                          "sh"
-                          "-c"
-                          "if [ -f /gluetun/servers.json ]; then echo 'Clearing cached server data to ensure IPv4-only selection...'; rm -f /gluetun/servers.json; fi"
-                        ];
-                        volumeMounts = [
-                          {
-                            mountPath = "/gluetun";
-                            name = "gluetun";
-                          }
-                        ];
-                      }
-                    ];
 
                     serviceAccountName = "default";
 

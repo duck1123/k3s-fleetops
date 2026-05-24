@@ -24,23 +24,12 @@ spec:
             - name: VPN_SERVICE_PROVIDER
               value: mullvad
             - name: VPN_TYPE
-              value: openvpn
-            - name: OPENVPN_IPV6
-              value: "off"
-            - name: SERVER_ADDRESS_IPV6
-              value: "off"
-            - name: MULLVAD_SERVER_IPV6
-              value: "off"
-            - name: MULLVAD_ACCOUNT_NUMBER
+              value: wireguard
+            - name: WIREGUARD_PRIVATE_KEY
               valueFrom:
                 secretKeyRef:
-                  key: accountNumber
-                  name: gluetun-mullvad-account
-            - name: OPENVPN_USER
-              valueFrom:
-                secretKeyRef:
-                  key: accountNumber
-                  name: gluetun-mullvad-account
+                  key: privateKey
+                  name: gluetun-mullvad-wireguard
             - name: FIREWALL
               value: "on"
             - name: FIREWALL_VPN_INPUT_PORTS
@@ -81,8 +70,6 @@ spec:
                 secretKeyRef:
                   key: password
                   name: gluetun-control-server
-            - name: OPENVPN_ADDITIONAL_ARGS
-              value: --tls-timeout 120
           image: qmcgaw/gluetun:latest
           imagePullPolicy: IfNotPresent
           livenessProbe:
@@ -107,7 +94,7 @@ spec:
           readinessProbe:
             failureThreshold: 3
             httpGet:
-              path: /v1/openvpn/status
+              path: /v1/vpn/status
               port: 8000
             initialDelaySeconds: 30
             periodSeconds: 10
@@ -123,7 +110,7 @@ spec:
           startupProbe:
             failureThreshold: 30
             httpGet:
-              path: /v1/openvpn/status
+              path: /v1/vpn/status
               port: 8000
             initialDelaySeconds: 10
             periodSeconds: 5
@@ -141,16 +128,6 @@ spec:
           - name: edns0
         searches: []
       dnsPolicy: None
-      initContainers:
-        - command:
-            - sh
-            - -c
-            - if [ -f /gluetun/servers.json ]; then echo 'Clearing cached server data to ensure IPv4-only selection...'; rm -f /gluetun/servers.json; fi
-          image: busybox:latest
-          name: clear-ipv6-cache
-          volumeMounts:
-            - mountPath: /gluetun
-              name: gluetun
       serviceAccountName: default
       volumes:
         - name: gluetun
