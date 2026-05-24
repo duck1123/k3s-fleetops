@@ -1,12 +1,14 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
   name: homarr-local
   namespace: homarr
 spec:
   ingressClassName: traefik
   rules:
-    - host: homarr.local
+    - host: homarr.home.kronkltd.net
       http:
         paths:
           - backend:
@@ -16,4 +18,7 @@ spec:
                   name: http
             path: /
             pathType: ImplementationSpecific
-  tls: []
+  tls:
+    - hosts:
+        - homarr.home.kronkltd.net
+      secretName: homarr-local-tls

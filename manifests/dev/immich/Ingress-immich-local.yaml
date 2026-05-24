@@ -1,12 +1,14 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
   name: immich-local
   namespace: immich
 spec:
   ingressClassName: traefik
   rules:
-    - host: immich.local
+    - host: immich.home.kronkltd.net
       http:
         paths:
           - backend:
@@ -16,4 +18,7 @@ spec:
                   name: http
             path: /
             pathType: ImplementationSpecific
-  tls: []
+  tls:
+    - hosts:
+        - immich.home.kronkltd.net
+      secretName: immich-local-tls

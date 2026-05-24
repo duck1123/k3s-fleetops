@@ -135,7 +135,7 @@
         tls = tls-options;
 
         localIngress = {
-          enable = mkEnableOption "Enable a local-only Traefik ingress for LAN access (requires *.local wildcard DNS → Traefik IP)";
+          enable = mkEnableOption "Enable a local-only Traefik ingress for LAN access (requires wildcard DNS → Traefik IP)";
 
           domain = mkOption {
             description = mdDoc "Local domain to expose ${name} on (e.g. ${name}.local)";
@@ -159,6 +159,12 @@
           };
 
           tls.enable = mkEnableOption "Enable TLS on the local ingress";
+
+          clusterIssuer = mkOption {
+            description = mdDoc "cert-manager ClusterIssuer name for TLS certificate issuance. When set, adds the cert-manager annotation and a named TLS secret to the ingress.";
+            type = str;
+            default = "";
+          };
         };
       };
       basic-options = {
@@ -330,24 +336,34 @@
                       if builtins.isInt p then { number = p; } else { name = p; };
                   in
                   {
-                    ingresses."${name}-local".spec = with cfg.ingress.localIngress; {
-                      ingressClassName = "traefik";
-                      rules = [
-                        {
-                          host = domain;
-                          http.paths = [
-                            {
-                              backend.service = {
-                                name = svcName;
-                                port = svcPort;
-                              };
-                              path = "/";
-                              pathType = "ImplementationSpecific";
-                            }
-                          ];
-                        }
-                      ];
-                      tls = lib.optional tls.enable [ { hosts = [ domain ]; } ];
+                    ingresses."${name}-local" = with cfg.ingress.localIngress; {
+                      metadata.annotations = lib.optionalAttrs (clusterIssuer != "") {
+                        "cert-manager.io/cluster-issuer" = clusterIssuer;
+                      };
+                      spec = {
+                        ingressClassName = "traefik";
+                        rules = [
+                          {
+                            host = domain;
+                            http.paths = [
+                              {
+                                backend.service = {
+                                  name = svcName;
+                                  port = svcPort;
+                                };
+                                path = "/";
+                                pathType = "ImplementationSpecific";
+                              }
+                            ];
+                          }
+                        ];
+                        tls = lib.optionals tls.enable [
+                          {
+                            hosts = [ domain ];
+                            secretName = lib.optionalString (clusterIssuer != "") "${name}-local-tls";
+                          }
+                        ];
+                      };
                     };
                   }
                 else

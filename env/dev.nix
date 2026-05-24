@@ -7,6 +7,7 @@
 let
   secrets = self.lib.loadSecrets { inherit pkgs; };
   base-domain = "dev.kronkltd.net";
+  home-domain = "home.kronkltd.net";
   tail-domain = "bearded-snake.ts.net";
   clusterIssuer = "letsencrypt-prod";
   nas-host = "192.168.0.124";
@@ -87,7 +88,12 @@ in
         domain = "affine.${tail-domain}";
         ingressClassName = "tailscale";
         clusterIssuer = "tailscale";
-        localIngress.enable = true;
+        localIngress = {
+          enable = true;
+          domain = "affine.${home-domain}";
+          clusterIssuer = clusterIssuer;
+          tls.enable = true;
+        };
       };
 
       storageClassName = "longhorn";
@@ -103,7 +109,12 @@ in
         domain = "audiobookshelf.${tail-domain}";
         ingressClassName = "tailscale";
         clusterIssuer = "tailscale";
-        localIngress.enable = true;
+        localIngress = {
+          enable = true;
+          domain = "audiobookshelf.${home-domain}";
+          clusterIssuer = clusterIssuer;
+          tls.enable = true;
+        };
       };
 
       nfs = {
@@ -136,8 +147,9 @@ in
         # Optional: Enable local-only ingress using Traefik
         localIngress = {
           enable = true;
-          domain = "booklore.local";
-          tls.enable = false; # Set to true if you have cert-manager configured for local domains
+          domain = "booklore.${home-domain}";
+          clusterIssuer = clusterIssuer;
+          tls.enable = true;
         };
       };
 
@@ -151,7 +163,11 @@ in
       uid = "0";
     };
 
-    cert-manager.enable = true;
+    cert-manager = {
+      enable = true;
+      cloudflare.token = secrets.cloudflare.token;
+      email = "duck@kronkltd.net";
+    };
 
     cloudbeaver = {
       enable = true;
@@ -161,7 +177,12 @@ in
         domain = "cloudbeaver.${tail-domain}";
         ingressClassName = "tailscale";
         clusterIssuer = "tailscale";
-        localIngress.enable = true;
+        localIngress = {
+          enable = true;
+          domain = "cloudbeaver.${home-domain}";
+          clusterIssuer = clusterIssuer;
+          tls.enable = true;
+        };
       };
 
       storageClassName = "longhorn";
@@ -217,7 +238,12 @@ in
       ingress = {
         domain = "forgejo.${tail-domain}";
         ingressClassName = "tailscale";
-        localIngress.enable = true;
+        localIngress = {
+          enable = true;
+          domain = "forgejo.${home-domain}";
+          clusterIssuer = clusterIssuer;
+          tls.enable = true;
+        };
       };
 
       postgresql = {
@@ -242,7 +268,12 @@ in
         clusterIssuer = "tailscale";
         domain = "grafana.${tail-domain}";
         ingressClassName = "tailscale";
-        localIngress.enable = true;
+        localIngress = {
+          enable = true;
+          domain = "grafana.${home-domain}";
+          clusterIssuer = clusterIssuer;
+          tls.enable = true;
+        };
       };
 
       additionalDatasources = [
@@ -303,7 +334,12 @@ in
         domain = "homarr.${tail-domain}";
         ingressClassName = "tailscale";
         clusterIssuer = "tailscale";
-        localIngress.enable = true;
+        localIngress = {
+          enable = true;
+          domain = "homarr.${home-domain}";
+          clusterIssuer = clusterIssuer;
+          tls.enable = true;
+        };
       };
 
       secretEncryptionKey = secrets.homarr.secretEncryptionKey;
@@ -322,7 +358,12 @@ in
         ingressClassName = "tailscale";
         clusterIssuer = "tailscale";
         tls.enable = true;
-        localIngress.enable = true;
+        localIngress = {
+          enable = true;
+          domain = "home-assistant.${home-domain}";
+          clusterIssuer = clusterIssuer;
+          tls.enable = true;
+        };
       };
 
       storageClassName = "longhorn";
@@ -342,7 +383,12 @@ in
         domain = "immich.${tail-domain}";
         ingressClassName = "tailscale";
         clusterIssuer = "tailscale";
-        localIngress.enable = true;
+        localIngress = {
+          enable = true;
+          domain = "immich.${home-domain}";
+          clusterIssuer = clusterIssuer;
+          tls.enable = true;
+        };
       };
 
       nfs.enable = false;
@@ -384,7 +430,12 @@ in
         domain = "komga.${tail-domain}";
         clusterIssuer = "tailscale";
         ingressClassName = "tailscale";
-        localIngress.enable = true;
+        localIngress = {
+          enable = true;
+          domain = "komga.${home-domain}";
+          clusterIssuer = clusterIssuer;
+          tls.enable = true;
+        };
         tls.enable = true;
       };
 
@@ -536,7 +587,12 @@ in
         domain = "mealie.${tail-domain}";
         ingressClassName = "tailscale";
         clusterIssuer = "tailscale";
-        localIngress.enable = true;
+        localIngress = {
+          enable = true;
+          domain = "mealie.${home-domain}";
+          clusterIssuer = clusterIssuer;
+          tls.enable = true;
+        };
       };
 
       storageClassName = "longhorn";
@@ -557,7 +613,12 @@ in
       ingress = {
         domain = "memos.${tail-domain}";
         ingressClassName = "tailscale";
-        localIngress.enable = true;
+        localIngress = {
+          enable = true;
+          domain = "memos.${home-domain}";
+          clusterIssuer = clusterIssuer;
+          tls.enable = true;
+        };
       };
     };
 
@@ -622,7 +683,12 @@ in
           domain = "nocodb.${tail-domain}";
           ingressClassName = "tailscale";
           clusterIssuer = "tailscale";
-          localIngress.enable = true;
+          localIngress = {
+            enable = true;
+            domain = "nocodb.${home-domain}";
+            clusterIssuer = clusterIssuer;
+            tls.enable = true;
+          };
         };
 
         database = {
@@ -678,15 +744,15 @@ in
 
       ingress.localIngress = {
         enable = true;
+        domain = "pihole.${home-domain}";
+        clusterIssuer = clusterIssuer;
+        tls.enable = true;
         serviceName = "pihole-web";
         servicePort = 80;
       };
       serviceDnsLoadBalancerIP = "192.168.0.243";
       storageClassName = "longhorn";
-      # Wildcard: all *.local queries resolve to the Traefik LoadBalancer IP.
-      # Requires clients to use Pi-hole as their DNS server.
       customDnsEntries = [
-        "address=/.local/192.168.0.242"
         "address=/.dev.kronkltd.net/192.168.0.242"
       ];
     };
@@ -864,8 +930,9 @@ in
         # Optional: Enable local-only ingress using Traefik
         localIngress = {
           enable = true;
-          domain = "romm.local";
-          tls.enable = false; # Set to true if you have cert-manager configured for local domains
+          domain = "romm.${home-domain}";
+          clusterIssuer = clusterIssuer;
+          tls.enable = true;
         };
       };
 
@@ -889,7 +956,12 @@ in
         ingressClassName = "tailscale";
         clusterIssuer = "tailscale";
         tls.enable = true;
-        localIngress.enable = true;
+        localIngress = {
+          enable = true;
+          domain = "rustfs.${home-domain}";
+          clusterIssuer = clusterIssuer;
+          tls.enable = true;
+        };
       };
 
       mode = "standalone";

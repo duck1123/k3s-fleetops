@@ -1,12 +1,14 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
   name: pihole-local
   namespace: pihole
 spec:
   ingressClassName: traefik
   rules:
-    - host: pihole.local
+    - host: pihole.home.kronkltd.net
       http:
         paths:
           - backend:
@@ -16,4 +18,7 @@ spec:
                   number: 80
             path: /
             pathType: ImplementationSpecific
-  tls: []
+  tls:
+    - hosts:
+        - pihole.home.kronkltd.net
+      secretName: pihole-local-tls

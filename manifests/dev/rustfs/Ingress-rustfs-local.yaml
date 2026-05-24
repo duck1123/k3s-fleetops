@@ -1,12 +1,14 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
   name: rustfs-local
   namespace: rustfs
 spec:
   ingressClassName: traefik
   rules:
-    - host: rustfs.local
+    - host: rustfs.home.kronkltd.net
       http:
         paths:
           - backend:
@@ -16,4 +18,7 @@ spec:
                   name: http
             path: /
             pathType: ImplementationSpecific
-  tls: []
+  tls:
+    - hosts:
+        - rustfs.home.kronkltd.net
+      secretName: rustfs-local-tls
