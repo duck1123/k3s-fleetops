@@ -467,7 +467,7 @@
                     ];
                   }
                 ];
-                tls = lib.optional tls.enable [ { hosts = [ domain ]; } ];
+                tls = lib.optional tls.enable { hosts = [ domain ]; };
               };
             };
           };

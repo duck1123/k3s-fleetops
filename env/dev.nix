@@ -65,8 +65,8 @@ in
 
   services = {
     affine = {
-      enable = false;
-      hostAffinity = "edgenix";
+      enable = true;
+      # hostAffinity = "edgenix";
 
       database = {
         host = "postgresql.postgresql";
@@ -102,8 +102,8 @@ in
     argocd.enable = true;
 
     audiobookshelf = {
-      enable = false;
-      hostAffinity = "edgenix";
+      enable = true;
+      # hostAffinity = "edgenix";
 
       ingress = {
         domain = "audiobookshelf.${tail-domain}";
@@ -233,7 +233,7 @@ in
 
     forgejo = {
       admin = { inherit (secrets.forgejo.admin) password username; };
-      enable = false;
+      enable = true;
 
       ingress = {
         domain = "forgejo.${tail-domain}";
@@ -328,7 +328,7 @@ in
 
     homarr = {
       enable = true;
-      hostAffinity = "edgenix";
+      # hostAffinity = "edgenix";
 
       ingress = {
         domain = "homarr.${tail-domain}";
@@ -347,7 +347,7 @@ in
     };
 
     home-assistant = {
-      enable = false;
+      enable = true;
       # hostAffinity = "edgenix";
 
       # https://github.com/AiDot-Development-Team/hass-AiDot
@@ -447,7 +447,7 @@ in
     };
 
     lidarr = {
-      enable = false;
+      enable = true;
 
       ingress = {
         domain = "lidarr.${tail-domain}";
@@ -496,7 +496,7 @@ in
         username = "listenarr";
       };
 
-      enable = false;
+      enable = true;
 
       ingress = {
         clusterIssuer = "tailscale";
@@ -580,8 +580,8 @@ in
     };
 
     mealie = {
-      enable = false;
-      hostAffinity = "edgenix";
+      enable = true;
+      # hostAffinity = "edgenix";
 
       ingress = {
         domain = "mealie.${tail-domain}";
@@ -906,7 +906,7 @@ in
     };
 
     romm = {
-      enable = false;
+      enable = true;
 
       admin = {
         username = secrets.romm.admin.username;
@@ -998,26 +998,14 @@ in
     sealed-secrets.enable = true;
 
     slskd = {
-      enable = false;
+      apiKey = (secrets.slskd or { }).apiKey or "";
+      enable = true;
+      # hostAffinity = "edgenix";
 
       ingress = {
         domain = "slskd.${tail-domain}";
         ingressClassName = "tailscale";
         clusterIssuer = "tailscale";
-      };
-
-      hostAffinity = "edgenix";
-
-      webAuth = {
-        username = (secrets.slskd or { }).username or "";
-        password = (secrets.slskd or { }).password or "";
-      };
-
-      apiKey = (secrets.slskd or { }).apiKey or "";
-
-      vpn = {
-        enable = true;
-        sharedGluetunService = "gluetun.gluetun";
       };
 
       nfs = {
@@ -1026,15 +1014,26 @@ in
         path = "${nas-base}/slskd_downloads";
       };
 
+      replicas = 1;
+
       shares = {
         enable = true;
         server = nas-host;
         path = "${nas-base}/Music";
       };
 
-      replicas = 1;
       storageClassName = "longhorn";
       useProbes = false;
+
+      vpn = {
+        enable = true;
+        sharedGluetunService = "gluetun.gluetun";
+      };
+
+      webAuth = {
+        username = (secrets.slskd or { }).username or "";
+        password = (secrets.slskd or { }).password or "";
+      };
     };
 
     sonarr = {
@@ -1070,7 +1069,7 @@ in
     sops.enable = true;
 
     soularr = {
-      enable = false;
+      enable = true;
       # hostAffinity = "edgenix";
 
       lidarr = {
@@ -1179,7 +1178,7 @@ in
         password = secrets.postgresql.userPassword;
       };
 
-      enable = false;
+      enable = true;
 
       ingress = {
         domain = "whisparr.${tail-domain}";

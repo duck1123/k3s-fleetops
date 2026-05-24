@@ -61,8 +61,6 @@ spec:
           volumeMounts:
             - mountPath: /appdata
               name: appdata
-      nodeSelector:
-        kubernetes.io/hostname: edgenix
       serviceAccountName: default
       volumes:
         - name: appdata
