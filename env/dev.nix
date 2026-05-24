@@ -65,7 +65,7 @@ in
 
   services = {
     affine = {
-      enable = true;
+      enable = false;
       # hostAffinity = "edgenix";
 
       database = {
@@ -234,7 +234,7 @@ in
 
     forgejo = {
       admin = { inherit (secrets.forgejo.admin) password username; };
-      enable = true;
+      enable = false;
 
       ingress = {
         domain = "forgejo.${tail-domain}";
@@ -1179,7 +1179,7 @@ in
         password = secrets.postgresql.userPassword;
       };
 
-      enable = true;
+      enable = false;
 
       ingress = {
         domain = "whisparr.${tail-domain}";
