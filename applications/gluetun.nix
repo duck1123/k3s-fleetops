@@ -243,6 +243,10 @@
                             name = "HTTP_CONTROL_SERVER_LISTENING_ADDRESS";
                             value = "0.0.0.0:8000";
                           }
+                          {
+                            name = "HEALTH_SERVER_ADDRESS";
+                            value = ":9999";
+                          }
                           (
                             if cfg.controlServer.username != "" then
                               {
@@ -287,10 +291,10 @@
                         ];
                         readinessProbe = {
                           httpGet = {
-                            path = "/v1/vpn/status";
-                            port = 8000;
+                            path = "/";
+                            port = 9999;
                           };
-                          initialDelaySeconds = 30;
+                          initialDelaySeconds = 15;
                           periodSeconds = 10;
                           timeoutSeconds = 5;
                           successThreshold = 1;
@@ -298,10 +302,10 @@
                         };
                         startupProbe = {
                           httpGet = {
-                            path = "/v1/vpn/status";
-                            port = 8000;
+                            path = "/";
+                            port = 9999;
                           };
-                          initialDelaySeconds = 10;
+                          initialDelaySeconds = 5;
                           periodSeconds = 5;
                           timeoutSeconds = 3;
                           successThreshold = 1;
