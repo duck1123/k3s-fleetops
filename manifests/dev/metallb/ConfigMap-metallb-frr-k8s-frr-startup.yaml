@@ -40,8 +40,8 @@ data:
     # Check /etc/pam.d/frr if you intend to use "vtysh"!
     #
     vtysh_enable=yes
-    zebra_options="  -A 127.0.0.1 -s 90000000 --limit-fds 100000"
-    bgpd_options="   -A 127.0.0.1 -p 0 --limit-fds 100000"
+    zebra_options="  -A 127.0.0.1 -K 120 -s 90000000 --limit-fds 100000"
+    bgpd_options="   -A 127.0.0.1  -p 0 --limit-fds 100000"
     ospfd_options="  -A 127.0.0.1"
     ospf6d_options=" -A ::1"
     ripd_options="   -A 127.0.0.1"
@@ -88,17 +88,17 @@ data:
     frr defaults traditional
     hostname Router
     line vty
-    log file /etc/frr/frr.log informational
+    log stdout informational
   vtysh.conf: |
     service integrated-vtysh-config
 kind: ConfigMap
 metadata:
   labels:
-    app.kubernetes.io/component: speaker
+    app.kubernetes.io/component: frr-k8s
     app.kubernetes.io/instance: metallb
     app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/name: metallb
-    app.kubernetes.io/version: v0.15.3
-    helm.sh/chart: metallb-0.15.3
-  name: metallb-frr-startup
+    app.kubernetes.io/name: frr-k8s
+    app.kubernetes.io/version: v0.0.25
+    helm.sh/chart: frr-k8s-0.0.25
+  name: metallb-frr-k8s-frr-startup
   namespace: metallb-system

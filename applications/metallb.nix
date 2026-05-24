@@ -53,6 +53,7 @@
       defaultValues = cfg: {
         prometheus.scrapeAnnotations = false;
         prometheus.rbacPrometheus = false;
+        frr-k8s.prometheus.serviceMonitor.enabled = false;
       };
 
       extraAppConfig =

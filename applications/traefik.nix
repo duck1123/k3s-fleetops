@@ -59,6 +59,6 @@
         ];
       };
 
-      extraConfig = cfg: { nixidy.resourceImports = [ (toString crdImports.traefik) ]; };
+      extraConfig = cfg: { nixidy.applicationImports = [ (toString crdImports.traefik) ]; };
     };
 }

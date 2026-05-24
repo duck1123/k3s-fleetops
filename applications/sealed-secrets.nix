@@ -43,7 +43,7 @@
       };
 
       config = mkIf cfg.enable {
-        nixidy.resourceImports = [ (toString crdImports."sealed-secrets") ];
+        nixidy.applicationImports = [ (toString crdImports."sealed-secrets") ];
 
         applications.sealed-secrets = {
           inherit namespace;

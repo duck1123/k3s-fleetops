@@ -35,7 +35,7 @@
         ];
       };
 
-      extraConfig = cfg: { nixidy.resourceImports = [ (toString crdImports.sops) ]; };
+      extraConfig = cfg: { nixidy.applicationImports = [ (toString crdImports.sops) ]; };
 
       extraResources = cfg: {
         deployments = {
