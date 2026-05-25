@@ -4,9 +4,9 @@ metadata:
   name: homarr
   namespace: homarr
 spec:
-  ingressClassName: tailscale
+  ingressClassName: traefik
   rules:
-    - host: homarr.bearded-snake.ts.net
+    - host: homarr.home.kronkltd.net
       http:
         paths:
           - backend:
@@ -18,4 +18,4 @@ spec:
             pathType: ImplementationSpecific
   tls:
     - hosts:
-        - homarr.bearded-snake.ts.net
+        - homarr.home.kronkltd.net

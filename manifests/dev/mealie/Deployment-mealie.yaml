@@ -27,7 +27,7 @@ spec:
             - name: TZ
               value: Etc/UTC
             - name: BASE_URL
-              value: https://mealie.bearded-snake.ts.net
+              value: https://mealie.home.kronkltd.net
           image: ghcr.io/mealie-recipes/mealie:v3.18.0
           imagePullPolicy: IfNotPresent
           livenessProbe:

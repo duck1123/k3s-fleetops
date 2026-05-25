@@ -4,9 +4,9 @@ metadata:
   name: windmill
   namespace: windmill
 spec:
-  ingressClassName: tailscale
+  ingressClassName: traefik
   rules:
-    - host: windmill.bearded-snake.ts.net
+    - host: windmill.home.kronkltd.net
       http:
         paths:
           - backend:
@@ -18,4 +18,4 @@ spec:
             pathType: ImplementationSpecific
   tls:
     - hosts:
-        - windmill.bearded-snake.ts.net
+        - windmill.home.kronkltd.net

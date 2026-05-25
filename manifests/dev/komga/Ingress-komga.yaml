@@ -4,9 +4,9 @@ metadata:
   name: komga
   namespace: komga
 spec:
-  ingressClassName: tailscale
+  ingressClassName: traefik
   rules:
-    - host: komga.bearded-snake.ts.net
+    - host: komga.home.kronkltd.net
       http:
         paths:
           - backend:
@@ -18,4 +18,4 @@ spec:
             pathType: ImplementationSpecific
   tls:
     - hosts:
-        - komga.bearded-snake.ts.net
+        - komga.home.kronkltd.net

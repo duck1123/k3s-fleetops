@@ -2,13 +2,13 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
-    cert-manager.io/cluster-issuer: tailscale
+    cert-manager.io/cluster-issuer: letsencrypt-prod
   name: immich
   namespace: immich
 spec:
-  ingressClassName: tailscale
+  ingressClassName: traefik
   rules:
-    - host: immich.bearded-snake.ts.net
+    - host: immich.home.kronkltd.net
       http:
         paths:
           - backend:
@@ -20,4 +20,4 @@ spec:
             pathType: ImplementationSpecific
   tls:
     - hosts:
-        - immich.bearded-snake.ts.net
+        - immich.home.kronkltd.net

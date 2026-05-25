@@ -4,9 +4,9 @@ metadata:
   name: uptime-kuma
   namespace: uptime-kuma
 spec:
-  ingressClassName: tailscale
+  ingressClassName: traefik
   rules:
-    - host: uptime-kuma.bearded-snake.ts.net
+    - host: uptime-kuma.home.kronkltd.net
       http:
         paths:
           - backend:
@@ -18,4 +18,4 @@ spec:
             pathType: ImplementationSpecific
   tls:
     - hosts:
-        - uptime-kuma.bearded-snake.ts.net
+        - uptime-kuma.home.kronkltd.net

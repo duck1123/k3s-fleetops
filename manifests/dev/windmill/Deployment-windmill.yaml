@@ -31,7 +31,7 @@ spec:
             - name: MODE
               value: standalone
             - name: BASE_URL
-              value: https://windmill.bearded-snake.ts.net
+              value: https://windmill.home.kronkltd.net
             - name: WORKER_TAGS
               value: deno,python3,bash,go,dependency,flow,hub
           image: ghcr.io/windmill-labs/windmill-full:latest

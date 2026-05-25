@@ -106,15 +106,10 @@ in
       # hostAffinity = "edgenix";
 
       ingress = {
-        domain = "audiobookshelf.${tail-domain}";
-        ingressClassName = "tailscale";
-        clusterIssuer = "tailscale";
-        localIngress = {
-          enable = true;
-          domain = "audiobookshelf.${home-domain}";
-          clusterIssuer = clusterIssuer;
-          tls.enable = true;
-        };
+        domain = "audiobookshelf.${home-domain}";
+        ingressClassName = "traefik";
+        clusterIssuer = clusterIssuer;
+        tls.enable = true;
       };
 
       nfs = {
@@ -332,15 +327,10 @@ in
       # hostAffinity = "edgenix";
 
       ingress = {
-        domain = "homarr.${tail-domain}";
-        ingressClassName = "tailscale";
-        clusterIssuer = "tailscale";
-        localIngress = {
-          enable = true;
-          domain = "homarr.${home-domain}";
-          clusterIssuer = clusterIssuer;
-          tls.enable = true;
-        };
+        domain = "homarr.${home-domain}";
+        ingressClassName = "traefik";
+        clusterIssuer = clusterIssuer;
+        tls.enable = true;
       };
 
       secretEncryptionKey = secrets.homarr.secretEncryptionKey;
@@ -355,16 +345,10 @@ in
       installAidot.enable = true;
 
       ingress = {
-        domain = "home-assistant.${tail-domain}";
-        ingressClassName = "tailscale";
-        clusterIssuer = "tailscale";
+        domain = "home-assistant.${home-domain}";
+        ingressClassName = "traefik";
+        clusterIssuer = clusterIssuer;
         tls.enable = true;
-        localIngress = {
-          enable = true;
-          domain = "home-assistant.${home-domain}";
-          clusterIssuer = clusterIssuer;
-          tls.enable = true;
-        };
       };
 
       storageClassName = "longhorn";
@@ -381,15 +365,10 @@ in
       };
 
       ingress = {
-        domain = "immich.${tail-domain}";
-        ingressClassName = "tailscale";
-        clusterIssuer = "tailscale";
-        localIngress = {
-          enable = true;
-          domain = "immich.${home-domain}";
-          clusterIssuer = clusterIssuer;
-          tls.enable = true;
-        };
+        domain = "immich.${home-domain}";
+        ingressClassName = "traefik";
+        clusterIssuer = clusterIssuer;
+        tls.enable = true;
       };
 
       nfs.enable = false;
@@ -428,15 +407,9 @@ in
       enable = true;
 
       ingress = {
-        domain = "komga.${tail-domain}";
-        clusterIssuer = "tailscale";
-        ingressClassName = "tailscale";
-        localIngress = {
-          enable = true;
-          domain = "komga.${home-domain}";
-          clusterIssuer = clusterIssuer;
-          tls.enable = true;
-        };
+        domain = "komga.${home-domain}";
+        clusterIssuer = clusterIssuer;
+        ingressClassName = "traefik";
         tls.enable = true;
       };
 
@@ -451,9 +424,10 @@ in
       enable = true;
 
       ingress = {
-        domain = "lidarr.${tail-domain}";
-        ingressClassName = "tailscale";
-        clusterIssuer = "tailscale";
+        domain = "lidarr.${home-domain}";
+        ingressClassName = "traefik";
+        clusterIssuer = clusterIssuer;
+        tls.enable = true;
       };
 
       vpn = {
@@ -585,15 +559,10 @@ in
       # hostAffinity = "edgenix";
 
       ingress = {
-        domain = "mealie.${tail-domain}";
-        ingressClassName = "tailscale";
-        clusterIssuer = "tailscale";
-        localIngress = {
-          enable = true;
-          domain = "mealie.${home-domain}";
-          clusterIssuer = clusterIssuer;
-          tls.enable = true;
-        };
+        domain = "mealie.${home-domain}";
+        ingressClassName = "traefik";
+        clusterIssuer = clusterIssuer;
+        tls.enable = true;
       };
 
       storageClassName = "longhorn";
@@ -925,16 +894,10 @@ in
       };
 
       ingress = {
-        domain = "romm.${tail-domain}";
-        ingressClassName = "tailscale";
-        clusterIssuer = "tailscale";
-        # Optional: Enable local-only ingress using Traefik
-        localIngress = {
-          enable = true;
-          domain = "romm.${home-domain}";
-          clusterIssuer = clusterIssuer;
-          tls.enable = true;
-        };
+        domain = "romm.${home-domain}";
+        ingressClassName = "traefik";
+        clusterIssuer = clusterIssuer;
+        tls.enable = true;
       };
 
       nfs = {
@@ -1163,9 +1126,10 @@ in
       storageClassName = "longhorn";
 
       ingress = {
-        domain = "uptime-kuma.${tail-domain}";
-        ingressClassName = "tailscale";
-        clusterIssuer = "tailscale";
+        domain = "uptime-kuma.${home-domain}";
+        ingressClassName = "traefik";
+        clusterIssuer = clusterIssuer;
+        tls.enable = true;
       };
     };
 
@@ -1202,9 +1166,10 @@ in
       image = "ghcr.io/windmill-labs/windmill-full:latest";
 
       ingress = {
-        domain = "windmill.${tail-domain}";
-        ingressClassName = "tailscale";
-        clusterIssuer = "tailscale";
+        domain = "windmill.${home-domain}";
+        ingressClassName = "traefik";
+        clusterIssuer = clusterIssuer;
+        tls.enable = true;
       };
 
       database = {

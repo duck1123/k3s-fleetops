@@ -4,9 +4,9 @@ metadata:
   name: lidarr
   namespace: lidarr
 spec:
-  ingressClassName: tailscale
+  ingressClassName: traefik
   rules:
-    - host: lidarr.bearded-snake.ts.net
+    - host: lidarr.home.kronkltd.net
       http:
         paths:
           - backend:
@@ -18,4 +18,4 @@ spec:
             pathType: ImplementationSpecific
   tls:
     - hosts:
-        - lidarr.bearded-snake.ts.net
+        - lidarr.home.kronkltd.net
