@@ -11,6 +11,8 @@ spec:
     matchLabels:
       app.kubernetes.io/instance: romm
       app.kubernetes.io/name: romm
+  strategy:
+    type: Recreate
   template:
     metadata:
       labels:

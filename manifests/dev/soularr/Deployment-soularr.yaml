@@ -12,6 +12,8 @@ spec:
     matchLabels:
       app.kubernetes.io/instance: soularr
       app.kubernetes.io/name: soularr
+  strategy:
+    type: Recreate
   template:
     metadata:
       labels:

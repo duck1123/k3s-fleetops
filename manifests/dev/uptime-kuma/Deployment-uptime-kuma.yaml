@@ -11,6 +11,8 @@ spec:
     matchLabels:
       app.kubernetes.io/instance: uptime-kuma
       app.kubernetes.io/name: uptime-kuma
+  strategy:
+    type: Recreate
   template:
     metadata:
       labels:

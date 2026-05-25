@@ -156,6 +156,7 @@
             metadata.annotations."argocd.argoproj.io/sync-wave" = "2";
             spec = {
               replicas = 1;
+              strategy.type = "Recreate";
               selector.matchLabels = {
                 "app.kubernetes.io/instance" = name;
                 "app.kubernetes.io/name" = name;

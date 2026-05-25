@@ -146,6 +146,7 @@
 
             spec = {
               replicas = cfg.replicas;
+              strategy.type = "Recreate";
               selector.matchLabels = {
                 "app.kubernetes.io/instance" = name;
                 "app.kubernetes.io/name" = name;

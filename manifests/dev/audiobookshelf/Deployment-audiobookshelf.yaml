@@ -13,6 +13,8 @@ spec:
     matchLabels:
       app.kubernetes.io/instance: audiobookshelf
       app.kubernetes.io/name: audiobookshelf
+  strategy:
+    type: Recreate
   template:
     metadata:
       labels:

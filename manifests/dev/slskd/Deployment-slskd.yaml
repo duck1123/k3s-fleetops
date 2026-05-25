@@ -12,6 +12,8 @@ spec:
     matchLabels:
       app.kubernetes.io/instance: slskd
       app.kubernetes.io/name: slskd
+  strategy:
+    type: Recreate
   template:
     metadata:
       labels:
