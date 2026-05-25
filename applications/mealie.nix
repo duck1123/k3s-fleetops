@@ -235,7 +235,12 @@
                 }
               ];
 
-              tls = [ { hosts = [ domain ]; secretName = "${name}-tls"; } ];
+              tls = [
+                {
+                  hosts = [ domain ];
+                  secretName = "${name}-tls";
+                }
+              ];
             };
           };
 

@@ -159,47 +159,27 @@
           valkey.enabled = false;
 
           # Environment variables for all Immich components
-          controllers = {
-            main = {
-              containers = {
-                main = {
-                  env = {
-                    DB_HOSTNAME = cfg.database.host;
-                    DB_PORT = "${toString cfg.database.port}";
-                    DB_USERNAME = {
-                      valueFrom = {
-                        secretKeyRef = {
-                          name = password-secret;
-                          key = "username";
-                        };
-                      };
-                    };
-                    DB_PASSWORD = {
-                      valueFrom = {
-                        secretKeyRef = {
-                          name = password-secret;
-                          key = "password";
-                        };
-                      };
-                    };
-                    DB_DATABASE_NAME = cfg.database.name;
-
-                    # Redis configuration - override default valkey hostname
-                    REDIS_HOSTNAME = cfg.redis.host;
-                    REDIS_PORT = "${toString cfg.redis.port}";
-                    REDIS_PASSWORD = {
-                      valueFrom = {
-                        secretKeyRef = {
-                          name = redis-secret;
-                          key = "password";
-                        };
-                      };
-                    };
-                    REDIS_DBINDEX = "${toString cfg.redis.dbIndex}";
-                  };
-                };
-              };
+          controllers.main.containers.main.env = {
+            DB_HOSTNAME = cfg.database.host;
+            DB_PORT = "${toString cfg.database.port}";
+            DB_USERNAME.valueFrom.secretKeyRef = {
+              name = password-secret;
+              key = "username";
             };
+            DB_PASSWORD.valueFrom.secretKeyRef = {
+              name = password-secret;
+              key = "password";
+            };
+            DB_DATABASE_NAME = cfg.database.name;
+
+            # Redis configuration - override default valkey hostname
+            REDIS_HOSTNAME = cfg.redis.host;
+            REDIS_PORT = "${toString cfg.redis.port}";
+            REDIS_PASSWORD.valueFrom.secretKeyRef = {
+              name = redis-secret;
+              key = "password";
+            };
+            REDIS_DBINDEX = "${toString cfg.redis.dbIndex}";
           };
 
           immich = {
@@ -207,9 +187,7 @@
 
             # Persistence configuration
             persistence = {
-              library = {
-                existingClaim = "${name}-${name}-library";
-              };
+              library.existingClaim = "${name}-${name}-library";
               upload = {
                 enabled = true;
                 storageClass = cfg.storageClassName;
@@ -238,16 +216,14 @@
           };
 
           server = lib.optionalAttrs cfg.externalLibrary.enable {
-            persistence = {
-              external-library = {
-                existingClaim = "${name}-${name}-external-library";
-                globalMounts = [
-                  {
-                    path = "/mnt/external-library";
-                    readOnly = true;
-                  }
-                ];
-              };
+            persistence.external-library = {
+              existingClaim = "${name}-${name}-external-library";
+              globalMounts = [
+                {
+                  path = "/mnt/external-library";
+                  readOnly = true;
+                }
+              ];
             };
           };
 
@@ -289,14 +265,10 @@
               "${name}-${name}-library-nfs" = {
                 apiVersion = "v1";
                 kind = "PersistentVolume";
-                metadata = {
-                  name = "${name}-${name}-library-nfs";
-                };
+                metadata.name = "${name}-${name}-library-nfs";
                 spec = {
-                  capacity = {
-                    storage = "1Ti";
-                  };
                   accessModes = [ "ReadWriteMany" ];
+                  capacity.storage = "1Ti";
                   mountOptions = [
                     "nolock"
                     "soft"
@@ -314,14 +286,10 @@
               "${name}-${name}-external-library-nfs" = {
                 apiVersion = "v1";
                 kind = "PersistentVolume";
-                metadata = {
-                  name = "${name}-${name}-external-library-nfs";
-                };
+                metadata.name = "${name}-${name}-external-library-nfs";
                 spec = {
-                  capacity = {
-                    storage = "1Ti";
-                  };
                   accessModes = [ "ReadOnlyMany" ];
+                  capacity.storage = "1Ti";
                   mountOptions = [
                     "nolock"
                     "soft"
@@ -366,50 +334,44 @@
           # Uses ArgoCD sync hook to run after secrets are created but before Immich is deployed
           jobs = {
             "${name}-enable-vector-extension" = {
-              metadata = {
-                annotations = {
-                  "argocd.argoproj.io/hook" = "Sync";
-                  "argocd.argoproj.io/hook-delete-policy" = "BeforeHookCreation,HookSucceeded";
-                  "argocd.argoproj.io/sync-wave" = "1";
-                };
+              metadata.annotations = {
+                "argocd.argoproj.io/hook" = "Sync";
+                "argocd.argoproj.io/hook-delete-policy" = "BeforeHookCreation,HookSucceeded";
+                "argocd.argoproj.io/sync-wave" = "1";
               };
               spec = {
                 backoffLimit = 3;
-                template = {
-                  spec = {
-                    restartPolicy = "OnFailure";
-                    containers = [
-                      {
-                        name = "enable-vector-extension";
-                        image = "docker.io/postgres:17.9";
-                        imagePullPolicy = "IfNotPresent";
-                        command = [ "psql" ];
-                        args = [
-                          "-h"
-                          cfg.database.host
-                          "-p"
-                          "${toString cfg.database.port}"
-                          "-U"
-                          cfg.database.username
-                          "-d"
-                          cfg.database.name
-                          "-c"
-                          "CREATE EXTENSION IF NOT EXISTS vector;"
-                        ];
-                        env = [
-                          {
-                            name = "PGPASSWORD";
-                            valueFrom = {
-                              secretKeyRef = {
-                                name = password-secret;
-                                key = "password";
-                              };
-                            };
-                          }
-                        ];
-                      }
-                    ];
-                  };
+                template.spec = {
+                  restartPolicy = "OnFailure";
+                  containers = [
+                    {
+                      name = "enable-vector-extension";
+                      image = "docker.io/postgres:17.9";
+                      imagePullPolicy = "IfNotPresent";
+                      command = [ "psql" ];
+                      args = [
+                        "-h"
+                        cfg.database.host
+                        "-p"
+                        "${toString cfg.database.port}"
+                        "-U"
+                        cfg.database.username
+                        "-d"
+                        cfg.database.name
+                        "-c"
+                        "CREATE EXTENSION IF NOT EXISTS vector;"
+                      ];
+                      env = [
+                        {
+                          name = "PGPASSWORD";
+                          valueFrom.secretKeyRef = {
+                            name = password-secret;
+                            key = "password";
+                          };
+                        }
+                      ];
+                    }
+                  ];
                 };
               };
             };

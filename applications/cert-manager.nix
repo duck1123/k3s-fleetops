@@ -29,29 +29,33 @@
         };
       };
 
-      sopsSecrets = cfg: optionalAttrs (cfg.cloudflare.token != "") {
-        cloudflare-api-token = {
-          api-token = cfg.cloudflare.token;
-        };
-      };
-
-      extraResources = cfg: optionalAttrs (cfg.cloudflare.token != "" && cfg.email != "") {
-        clusterIssuers.letsencrypt-prod.spec = {
-          acme = {
-            email = cfg.email;
-            server = "https://acme-v02.api.letsencrypt.org/directory";
-            privateKeySecretRef.name = "letsencrypt-prod-key";
-            solvers = [
-              {
-                dns01.cloudflare.apiTokenSecretRef = {
-                  name = "cloudflare-api-token";
-                  key = "api-token";
-                };
-              }
-            ];
+      sopsSecrets =
+        cfg:
+        optionalAttrs (cfg.cloudflare.token != "") {
+          cloudflare-api-token = {
+            api-token = cfg.cloudflare.token;
           };
         };
-      };
+
+      extraResources =
+        cfg:
+        optionalAttrs (cfg.cloudflare.token != "" && cfg.email != "") {
+          clusterIssuers.letsencrypt-prod.spec = {
+            acme = {
+              email = cfg.email;
+              server = "https://acme-v02.api.letsencrypt.org/directory";
+              privateKeySecretRef.name = "letsencrypt-prod-key";
+              solvers = [
+                {
+                  dns01.cloudflare.apiTokenSecretRef = {
+                    name = "cloudflare-api-token";
+                    key = "api-token";
+                  };
+                }
+              ];
+            };
+          };
+        };
 
       extraConfig = cfg: { nixidy.applicationImports = [ (toString crdImports."cert-manager") ]; };
     };

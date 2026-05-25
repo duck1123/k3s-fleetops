@@ -10,7 +10,12 @@
   # };
 
   perSystem =
-    { pkgs, system, lib, ... }:
+    {
+      pkgs,
+      system,
+      lib,
+      ...
+    }:
     let
       secretsFile = builtins.getEnv "DECRYPTED_SECRET_FILE";
       secretsAvailable = secretsFile != "" && builtins.pathExists secretsFile;
