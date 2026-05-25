@@ -7,7 +7,7 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: server
     app.kubernetes.io/version: v2.6.3
-    helm.sh/chart: immich-0.11.1
+    helm.sh/chart: immich-0.12.0
   name: immich-server
   namespace: immich
 spec:
@@ -27,7 +27,7 @@ spec:
         app.kubernetes.io/instance: immich
         app.kubernetes.io/name: server
     spec:
-      automountServiceAccountToken: true
+      automountServiceAccountToken: false
       containers:
         - env:
             - name: DB_DATABASE_NAME
@@ -101,7 +101,7 @@ spec:
       hostIPC: false
       hostNetwork: false
       hostPID: false
-      serviceAccountName: default
+      serviceAccountName: immich-server
       volumes:
         - name: data
           persistentVolumeClaim:
