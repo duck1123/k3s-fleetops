@@ -29,7 +29,7 @@
           image = mkOption {
             description = mdDoc "The docker image";
             type = types.str;
-            default = "ghcr.io/mealie-recipes/mealie:latest";
+            default = "ghcr.io/mealie-recipes/mealie:v3.18.0";
           };
 
           service.port = mkOption {
@@ -94,7 +94,7 @@
             metadata.labels = {
               "app.kubernetes.io/instance" = name;
               "app.kubernetes.io/name" = name;
-              "app.kubernetes.io/version" = "latest";
+              "app.kubernetes.io/version" = "v3.18.0";
             };
 
             spec = {
