@@ -46,7 +46,7 @@
               with a newer build than the image ships.
             '';
             type = types.str;
-            default = "ghcr.io/rommapp/romm:4.7.0";
+            default = "ghcr.io/rommapp/romm:4.8.1";
           };
 
           admin = {

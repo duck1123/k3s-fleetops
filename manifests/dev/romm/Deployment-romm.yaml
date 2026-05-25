@@ -79,7 +79,7 @@ spec:
               value: "5000"
             - name: GUNICORN_HOST
               value: 127.0.0.1
-          image: ghcr.io/rommapp/romm:4.7.0
+          image: ghcr.io/rommapp/romm:4.8.1
           imagePullPolicy: IfNotPresent
           name: romm
           ports:
