@@ -393,6 +393,25 @@
                         }
                       ];
                     }
+                    {
+                      # The Synology NFS export applies Windows ACLs that can deny
+                      # read access to uid=1000 (romm, the nginx worker user) even
+                      # when POSIX permissions show 777. Running chmod as root via
+                      # NFS resets the ACLs to match POSIX, restoring access.
+                      name = "fix-library-permissions";
+                      image = "busybox:latest";
+                      command = [
+                        "sh"
+                        "-c"
+                        "chmod -R a+r /romm/library/ && echo 'Library permissions fixed'"
+                      ];
+                      volumeMounts = [
+                        {
+                          mountPath = "/romm/library";
+                          name = "library";
+                        }
+                      ];
+                    }
                   ];
                 };
               };

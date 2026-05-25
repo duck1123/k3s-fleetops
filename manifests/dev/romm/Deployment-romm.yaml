@@ -115,6 +115,15 @@ spec:
           volumeMounts:
             - mountPath: /romm/config
               name: config
+        - command:
+            - sh
+            - -c
+            - chmod -R a+r /romm/library/ && echo 'Library permissions fixed'
+          image: busybox:latest
+          name: fix-library-permissions
+          volumeMounts:
+            - mountPath: /romm/library
+              name: library
       serviceAccountName: default
       volumes:
         - name: data
