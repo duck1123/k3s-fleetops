@@ -14,7 +14,7 @@
           "-c"
           ''
             echo "Waiting for gluetun VPN connection..."
-            until curl -sf http://${gluetunService}:8000/v1/openvpn/status | grep -q '"status":"running"'; do
+            until curl -sf http://${gluetunService}:8000/v1/vpn/status | grep -q '"running"'; do
               sleep 5
             done
             echo "VPN connection established"
