@@ -279,7 +279,7 @@
                 }
               ];
 
-              tls = [ { hosts = [ domain ]; } ];
+              tls = [ { hosts = [ domain ]; secretName = "${name}-tls"; } ];
             };
           };
 

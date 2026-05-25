@@ -21,3 +21,4 @@ spec:
   tls:
     - hosts:
         - immich.home.kronkltd.net
+      secretName: immich-tls
