@@ -1,6 +1,8 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
   name: uptime-kuma
   namespace: uptime-kuma
 spec:
@@ -19,3 +21,4 @@ spec:
   tls:
     - hosts:
         - uptime-kuma.home.kronkltd.net
+      secretName: uptime-kuma-tls

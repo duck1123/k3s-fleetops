@@ -1,6 +1,8 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
   name: lidarr
   namespace: lidarr
 spec:
@@ -19,3 +21,4 @@ spec:
   tls:
     - hosts:
         - lidarr.home.kronkltd.net
+      secretName: lidarr-tls

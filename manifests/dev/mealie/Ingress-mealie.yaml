@@ -1,6 +1,8 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
   name: mealie
   namespace: mealie
 spec:
@@ -19,3 +21,4 @@ spec:
   tls:
     - hosts:
         - mealie.home.kronkltd.net
+      secretName: mealie-tls

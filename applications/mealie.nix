@@ -214,26 +214,29 @@
             };
           };
 
-          ingresses.${name}.spec = with cfg.ingress; {
-            inherit ingressClassName;
+          ingresses.${name} = with cfg.ingress; {
+            metadata.annotations."cert-manager.io/cluster-issuer" = clusterIssuer;
+            spec = {
+              inherit ingressClassName;
 
-            rules = [
-              {
-                host = domain;
-                http.paths = [
-                  {
-                    backend.service = {
-                      inherit name;
-                      port.name = "http";
-                    };
-                    path = "/";
-                    pathType = "ImplementationSpecific";
-                  }
-                ];
-              }
-            ];
+              rules = [
+                {
+                  host = domain;
+                  http.paths = [
+                    {
+                      backend.service = {
+                        inherit name;
+                        port.name = "http";
+                      };
+                      path = "/";
+                      pathType = "ImplementationSpecific";
+                    }
+                  ];
+                }
+              ];
 
-            tls = [ { hosts = [ domain ]; } ];
+              tls = [ { hosts = [ domain ]; secretName = "${name}-tls"; } ];
+            };
           };
 
           persistentVolumeClaims."${name}-${name}-data".spec = {

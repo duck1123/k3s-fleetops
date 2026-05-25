@@ -161,6 +161,7 @@
 
           ingresses = {
             ${name} = {
+              metadata.annotations."cert-manager.io/cluster-issuer" = cfg.ingress.clusterIssuer;
               spec = with cfg.ingress; {
                 inherit ingressClassName;
 
@@ -182,7 +183,7 @@
                   }
                 ];
 
-                tls = [ { hosts = [ domain ]; } ];
+                tls = [ { hosts = [ domain ]; secretName = "${name}-tls"; } ];
               };
             };
           };

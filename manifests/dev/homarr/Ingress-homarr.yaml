@@ -1,6 +1,8 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
   name: homarr
   namespace: homarr
 spec:
@@ -19,3 +21,4 @@ spec:
   tls:
     - hosts:
         - homarr.home.kronkltd.net
+      secretName: homarr-tls

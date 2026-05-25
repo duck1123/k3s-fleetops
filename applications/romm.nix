@@ -444,6 +444,7 @@
 
           ingresses = {
             ${name} = with cfg.ingress; {
+              metadata.annotations."cert-manager.io/cluster-issuer" = clusterIssuer;
               spec = {
                 inherit ingressClassName;
 
@@ -462,32 +463,7 @@
                     ];
                   }
                 ];
-                tls = [ { hosts = [ domain ]; } ];
-              };
-            };
-          }
-          // lib.optionalAttrs (cfg.ingress.localIngress.enable) {
-            # Optional local-only ingress using Traefik
-            "${name}-local" = {
-              spec = with cfg.ingress.localIngress; {
-                ingressClassName = "traefik";
-
-                rules = [
-                  {
-                    host = domain;
-                    http.paths = [
-                      {
-                        backend.service = {
-                          inherit name;
-                          port.name = "http";
-                        };
-                        path = "/";
-                        pathType = "ImplementationSpecific";
-                      }
-                    ];
-                  }
-                ];
-                tls = lib.optional tls.enable { hosts = [ domain ]; };
+                tls = [ { hosts = [ domain ]; secretName = "${name}-tls"; } ];
               };
             };
           };
