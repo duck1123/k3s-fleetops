@@ -46,6 +46,9 @@
           };
           host = ingress.domain;
           ingress = with cfg.ingress; {
+            annotations = optionalAttrs (clusterIssuer != "") {
+              "cert-manager.io/cluster-issuer" = clusterIssuer;
+            };
             className = ingressClassName;
             enabled = enable;
             hosts = [

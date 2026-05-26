@@ -1,6 +1,8 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
   name: sonarr
   namespace: sonarr
 spec:
@@ -19,3 +21,4 @@ spec:
   tls:
     - hosts:
         - sonarr.home.kronkltd.net
+      secretName: sonarr.home.kronkltd.net-tls

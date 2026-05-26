@@ -84,6 +84,9 @@
         };
 
         ingress = with cfg.ingress; {
+          annotations = optionalAttrs (clusterIssuer != "") {
+            "cert-manager.io/cluster-issuer" = clusterIssuer;
+          };
           inherit ingressClassName;
           enabled = true;
           host = domain;
