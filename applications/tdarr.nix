@@ -429,7 +429,11 @@
         };
 
         ingresses.${name} = with cfg.ingress; {
-          metadata = lib.optionalAttrs (annotations != { }) { inherit annotations; };
+          metadata.annotations =
+            lib.optionalAttrs (clusterIssuer != "") {
+              "cert-manager.io/cluster-issuer" = clusterIssuer;
+            }
+            // annotations;
           spec = {
             inherit ingressClassName;
 
@@ -443,14 +447,18 @@
                       port.name = "http";
                     };
                     path = "/";
-                    # Tailscale only supports Prefix path type
                     pathType = "Prefix";
                   }
                 ];
               }
             ];
 
-            tls = [ { hosts = [ domain ]; } ];
+            tls = [
+              {
+                hosts = [ domain ];
+                secretName = "${domain}-tls";
+              }
+            ];
           };
         };
 
