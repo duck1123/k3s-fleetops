@@ -889,6 +889,12 @@ in
         tls.enable = true;
       };
 
+      metadata.igdb = {
+        enable = true;
+        clientId = secrets.romm.metadata.igdb.clientId;
+        clientSecret = secrets.romm.metadata.igdb.clientSecret;
+      };
+
       nfs = {
         enable = true;
         server = nas-host;

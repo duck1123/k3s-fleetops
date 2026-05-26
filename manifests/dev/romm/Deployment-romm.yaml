@@ -79,6 +79,16 @@ spec:
               value: "5000"
             - name: GUNICORN_HOST
               value: 127.0.0.1
+            - name: IGDB_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  key: igdbClientId
+                  name: romm-metadata-secrets
+            - name: IGDB_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  key: igdbClientSecret
+                  name: romm-metadata-secrets
           image: ghcr.io/rommapp/romm:4.8.1
           imagePullPolicy: IfNotPresent
           name: romm

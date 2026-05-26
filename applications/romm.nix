@@ -12,6 +12,7 @@
     let
       password-secret = "romm-database-password";
       admin-secret = "romm-admin-password";
+      metadata-secret = "romm-metadata-secrets";
     in
     self.lib.mkArgoApp
       {
@@ -26,16 +27,43 @@
         name = "romm";
         uses-ingress = true;
 
-        sopsSecrets = cfg: {
-          ${password-secret} = {
-            password = cfg.database.password;
-          };
-          ${admin-secret} = {
-            username = cfg.admin.username;
-            password = cfg.admin.password;
-            authSecretKey = cfg.authSecretKey;
-          };
-        };
+        sopsSecrets =
+          cfg:
+          {
+            ${password-secret} = {
+              password = cfg.database.password;
+            };
+            ${admin-secret} = {
+              username = cfg.admin.username;
+              password = cfg.admin.password;
+              authSecretKey = cfg.authSecretKey;
+            };
+          }
+          //
+            lib.optionalAttrs
+              (
+                cfg.metadata.igdb.enable
+                || cfg.metadata.mobygames.enable
+                || cfg.metadata.steamgriddb.enable
+                || cfg.metadata.screenscraper.enable
+              )
+              {
+                ${metadata-secret} =
+                  lib.optionalAttrs cfg.metadata.igdb.enable {
+                    igdbClientId = cfg.metadata.igdb.clientId;
+                    igdbClientSecret = cfg.metadata.igdb.clientSecret;
+                  }
+                  // lib.optionalAttrs cfg.metadata.mobygames.enable {
+                    mobygamesApiKey = cfg.metadata.mobygames.apiKey;
+                  }
+                  // lib.optionalAttrs cfg.metadata.steamgriddb.enable {
+                    steamgriddbApiKey = cfg.metadata.steamgriddb.apiKey;
+                  }
+                  // lib.optionalAttrs cfg.metadata.screenscraper.enable {
+                    screenscrapeUser = cfg.metadata.screenscraper.username;
+                    screenscrapePassword = cfg.metadata.screenscraper.password;
+                  };
+              };
 
         extraOptions = {
           image = mkOption {
@@ -138,6 +166,83 @@
               description = mdDoc "The service port";
               type = types.int;
               default = 5000;
+            };
+          };
+
+          metadata = {
+            igdb = {
+              enable = mkOption {
+                description = mdDoc ''
+                  Enable IGDB metadata source.
+                  Requires a Twitch Developer app: https://dev.twitch.tv/console
+                  Create an app with OAuth redirect URL https://id.twitch.tv/oauth2/token, then copy the Client ID and generate a Client Secret.
+                '';
+                type = types.bool;
+                default = false;
+              };
+              clientId = mkOption {
+                description = mdDoc "IGDB/Twitch OAuth Client ID";
+                type = types.str;
+                default = "";
+              };
+              clientSecret = mkOption {
+                description = mdDoc "IGDB/Twitch OAuth Client Secret";
+                type = types.str;
+                default = "";
+              };
+            };
+
+            mobygames = {
+              enable = mkOption {
+                description = mdDoc ''
+                  Enable MobyGames metadata source.
+                  API key available at https://www.mobygames.com/info/api/ (free tier has rate limits).
+                '';
+                type = types.bool;
+                default = false;
+              };
+              apiKey = mkOption {
+                description = mdDoc "MobyGames API key";
+                type = types.str;
+                default = "";
+              };
+            };
+
+            steamgriddb = {
+              enable = mkOption {
+                description = mdDoc ''
+                  Enable SteamGridDB artwork source (box art, banners, icons, logos).
+                  API key available at https://www.steamgriddb.com/profile/preferences/api (free account required).
+                '';
+                type = types.bool;
+                default = false;
+              };
+              apiKey = mkOption {
+                description = mdDoc "SteamGridDB API key";
+                type = types.str;
+                default = "";
+              };
+            };
+
+            screenscraper = {
+              enable = mkOption {
+                description = mdDoc ''
+                  Enable ScreenScraper metadata source (covers, screenshots, videos, ratings).
+                  Free account at https://www.screenscraper.fr/ — no API key, just username/password.
+                '';
+                type = types.bool;
+                default = false;
+              };
+              username = mkOption {
+                description = mdDoc "ScreenScraper username";
+                type = types.str;
+                default = "";
+              };
+              password = mkOption {
+                description = mdDoc "ScreenScraper password";
+                type = types.str;
+                default = "";
+              };
             };
           };
 
@@ -308,6 +413,56 @@
                         #   name = "REDIS_PORT";
                         #   value = "6379";
                         # }
+                      ]
+                      ++ lib.optionals cfg.metadata.igdb.enable [
+                        {
+                          name = "IGDB_CLIENT_ID";
+                          valueFrom.secretKeyRef = {
+                            name = metadata-secret;
+                            key = "igdbClientId";
+                          };
+                        }
+                        {
+                          name = "IGDB_CLIENT_SECRET";
+                          valueFrom.secretKeyRef = {
+                            name = metadata-secret;
+                            key = "igdbClientSecret";
+                          };
+                        }
+                      ]
+                      ++ lib.optionals cfg.metadata.mobygames.enable [
+                        {
+                          name = "MOBYGAMES_API_KEY";
+                          valueFrom.secretKeyRef = {
+                            name = metadata-secret;
+                            key = "mobygamesApiKey";
+                          };
+                        }
+                      ]
+                      ++ lib.optionals cfg.metadata.steamgriddb.enable [
+                        {
+                          name = "STEAMGRIDDB_API_KEY";
+                          valueFrom.secretKeyRef = {
+                            name = metadata-secret;
+                            key = "steamgriddbApiKey";
+                          };
+                        }
+                      ]
+                      ++ lib.optionals cfg.metadata.screenscraper.enable [
+                        {
+                          name = "SCREENSCRAPER_USER";
+                          valueFrom.secretKeyRef = {
+                            name = metadata-secret;
+                            key = "screenscrapeUser";
+                          };
+                        }
+                        {
+                          name = "SCREENSCRAPER_PASSWORD";
+                          valueFrom.secretKeyRef = {
+                            name = metadata-secret;
+                            key = "screenscrapePassword";
+                          };
+                        }
                       ];
 
                       ports = [
