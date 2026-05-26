@@ -27,3 +27,4 @@ spec:
   tls:
     - hosts:
         - kite.home.kronkltd.net
+      secretName: kite.home.kronkltd.net-tls

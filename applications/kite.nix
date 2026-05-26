@@ -62,7 +62,12 @@
                 ];
               }
             ];
-            tls = [ { hosts = [ domain ]; } ];
+            tls = [
+              {
+                hosts = [ domain ];
+                secretName = "${domain}-tls";
+              }
+            ];
           };
           nodeSelector."kubernetes.io/hostname" = cfg.hostAffinity;
         };
