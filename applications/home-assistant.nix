@@ -41,14 +41,14 @@
           ];
         };
 
-        # https://github.com/AiDot-Development-Team/hass-AiDot
+        # https://github.com/toxuin/hass-AiDot (community fork — upstream AiDot-Development-Team is unmaintained)
         installAidot = {
           enable = mkEnableOption "Install the AiDot custom integration (hass-AiDot) under /config/custom_components/aidot on each pod start (skips if already at the configured tag)";
 
           tag = mkOption {
-            description = mdDoc "Git tag to fetch from hass-AiDot releases (e.g. v1.0.8)";
+            description = mdDoc "Git tag to fetch from toxuin/hass-AiDot releases (e.g. v1.2.0)";
             type = types.str;
-            default = "v1.1.3";
+            default = "v1.2.0";
           };
         };
       };
@@ -154,7 +154,7 @@
                         mkdir -p /config/custom_components /tmp/aidot-dl
                         cd /tmp/aidot-dl
                         rm -rf ./*
-                        wget -q -O aidot.tgz "https://github.com/AiDot-Development-Team/hass-AiDot/archive/refs/tags/$INSTALL_AIDOT_TAG.tar.gz"
+                        wget -q -O aidot.tgz "https://github.com/toxuin/hass-AiDot/archive/refs/tags/$INSTALL_AIDOT_TAG.tar.gz"
                         tar -xzf aidot.tgz
                         DIR=$(echo hass-AiDot-*)
                         if [ ! -d "$DIR/custom_components/aidot" ]; then
