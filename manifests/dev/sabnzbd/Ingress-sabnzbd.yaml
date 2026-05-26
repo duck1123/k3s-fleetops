@@ -4,9 +4,9 @@ metadata:
   name: sabnzbd
   namespace: sabnzbd
 spec:
-  ingressClassName: tailscale
+  ingressClassName: traefik
   rules:
-    - host: sabnzbd.bearded-snake.ts.net
+    - host: sabnzbd.home.kronkltd.net
       http:
         paths:
           - backend:
@@ -18,4 +18,4 @@ spec:
             pathType: ImplementationSpecific
   tls:
     - hosts:
-        - sabnzbd.bearded-snake.ts.net
+        - sabnzbd.home.kronkltd.net

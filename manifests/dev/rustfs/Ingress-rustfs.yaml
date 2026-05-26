@@ -2,7 +2,12 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
-    cert-manager.io/cluster-issuer: tailscale
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/service.sticky.cookie: "true"
+    traefik.ingress.kubernetes.io/service.sticky.cookie.httponly: "true"
+    traefik.ingress.kubernetes.io/service.sticky.cookie.name: rustfs
+    traefik.ingress.kubernetes.io/service.sticky.cookie.samesite: none
+    traefik.ingress.kubernetes.io/service.sticky.cookie.secure: "true"
   labels:
     app.kubernetes.io/instance: rustfs
     app.kubernetes.io/managed-by: Helm
@@ -12,9 +17,9 @@ metadata:
   name: rustfs
   namespace: rustfs
 spec:
-  ingressClassName: tailscale
+  ingressClassName: traefik
   rules:
-    - host: rustfs.bearded-snake.ts.net
+    - host: rustfs.home.kronkltd.net
       http:
         paths:
           - backend:
@@ -26,5 +31,5 @@ spec:
             pathType: Prefix
   tls:
     - hosts:
-        - rustfs.bearded-snake.ts.net
+        - rustfs.home.kronkltd.net
       secretName: rustfs-tls

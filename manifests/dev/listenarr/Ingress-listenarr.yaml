@@ -4,9 +4,9 @@ metadata:
   name: listenarr
   namespace: listenarr
 spec:
-  ingressClassName: tailscale
+  ingressClassName: traefik
   rules:
-    - host: listenarr.bearded-snake.ts.net
+    - host: listenarr.home.kronkltd.net
       http:
         paths:
           - backend:
@@ -18,4 +18,4 @@ spec:
             pathType: ImplementationSpecific
   tls:
     - hosts:
-        - listenarr.bearded-snake.ts.net
+        - listenarr.home.kronkltd.net

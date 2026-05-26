@@ -10,9 +10,9 @@ metadata:
   name: kite
   namespace: kite
 spec:
-  ingressClassName: tailscale
+  ingressClassName: traefik
   rules:
-    - host: kite.bearded-snake.ts.net
+    - host: kite.home.kronkltd.net
       http:
         paths:
           - backend:
@@ -24,4 +24,4 @@ spec:
             pathType: ImplementationSpecific
   tls:
     - hosts:
-        - kite.bearded-snake.ts.net
+        - kite.home.kronkltd.net

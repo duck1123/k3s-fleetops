@@ -40,7 +40,7 @@ spec:
             - name: FTLCONF_webserver_port
               value: "80"
             - name: VIRTUAL_HOST
-              value: pihole.bearded-snake.ts.net
+              value: pihole.home.kronkltd.net
             - name: FTLCONF_misc_etc_dnsmasq_d
               value: "true"
             - name: FTLCONF_webserver_api_password

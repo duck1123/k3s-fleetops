@@ -2,7 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
-    cert-manager.io/cluster-issuer: tailscale
+    cert-manager.io/cluster-issuer: letsencrypt-prod
     ingress.kubernetes.io/force-ssl-redirect: "true"
   labels:
     app.kubernetes.io/component: cloudbeaver
@@ -14,9 +14,9 @@ metadata:
   name: cloudbeaver
   namespace: cloudbeaver
 spec:
-  ingressClassName: tailscale
+  ingressClassName: traefik
   rules:
-    - host: cloudbeaver.bearded-snake.ts.net
+    - host: cloudbeaver.home.kronkltd.net
       http:
         paths:
           - backend:
@@ -28,5 +28,5 @@ spec:
             pathType: ImplementationSpecific
   tls:
     - hosts:
-        - cloudbeaver.bearded-snake.ts.net
-      secretName: cloudbeaver.bearded-snake.ts.net-tls
+        - cloudbeaver.home.kronkltd.net
+      secretName: cloudbeaver.home.kronkltd.net-tls

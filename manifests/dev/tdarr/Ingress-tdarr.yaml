@@ -4,9 +4,9 @@ metadata:
   name: tdarr
   namespace: tdarr
 spec:
-  ingressClassName: tailscale
+  ingressClassName: traefik
   rules:
-    - host: tdarr.bearded-snake.ts.net
+    - host: tdarr.home.kronkltd.net
       http:
         paths:
           - backend:
@@ -18,4 +18,4 @@ spec:
             pathType: Prefix
   tls:
     - hosts:
-        - tdarr.bearded-snake.ts.net
+        - tdarr.home.kronkltd.net

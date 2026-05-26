@@ -169,15 +169,10 @@ in
       hostAffinity = "edgenix";
 
       ingress = {
-        domain = "cloudbeaver.${tail-domain}";
-        ingressClassName = "tailscale";
-        clusterIssuer = "tailscale";
-        localIngress = {
-          enable = true;
-          domain = "cloudbeaver.${home-domain}";
-          clusterIssuer = clusterIssuer;
-          tls.enable = true;
-        };
+        clusterIssuer = clusterIssuer;
+        domain = "cloudbeaver.${home-domain}";
+        ingressClassName = "traefik";
+        tls.enable = true;
       };
 
       storageClassName = "longhorn";
@@ -396,9 +391,9 @@ in
       storageClassName = "longhorn";
 
       ingress = {
-        domain = "kite.${tail-domain}";
-        clusterIssuer = "tailscale";
-        ingressClassName = "tailscale";
+        domain = "kite.${home-domain}";
+        clusterIssuer = clusterIssuer;
+        ingressClassName = "traefik";
         tls.enable = true;
       };
     };
@@ -474,9 +469,10 @@ in
       enable = true;
 
       ingress = {
-        clusterIssuer = "tailscale";
-        domain = "listenarr.${tail-domain}";
-        ingressClassName = "tailscale";
+        clusterIssuer = clusterIssuer;
+        domain = "listenarr.${home-domain}";
+        ingressClassName = "traefik";
+        tls.enable = true;
       };
 
       nfs = {
@@ -519,8 +515,9 @@ in
       };
 
       ingress = {
-        domain = "longhorn.${tail-domain}";
-        ingressClassName = "tailscale";
+        clusterIssuer = clusterIssuer;
+        domain = "longhorn.${home-domain}";
+        ingressClassName = "traefik";
         tls.enable = true;
       };
     };
@@ -706,19 +703,10 @@ in
       hostAffinity = "nasnix";
 
       ingress = {
-        domain = "pihole.${tail-domain}";
-        ingressClassName = "tailscale";
-        clusterIssuer = "tailscale";
-        tls.enable = true;
-      };
-
-      ingress.localIngress = {
-        enable = true;
-        domain = "pihole.${home-domain}";
         clusterIssuer = clusterIssuer;
+        domain = "pihole.${home-domain}";
+        ingressClassName = "traefik";
         tls.enable = true;
-        serviceName = "pihole-web";
-        servicePort = 80;
       };
       serviceDnsLoadBalancerIP = "192.168.0.243";
       storageClassName = "longhorn";
@@ -851,9 +839,10 @@ in
       image = "linuxserver/radarr:6.1.1.10360-ls299";
 
       ingress = {
-        domain = "radarr.${tail-domain}";
-        ingressClassName = "tailscale";
-        clusterIssuer = "tailscale";
+        clusterIssuer = clusterIssuer;
+        domain = "radarr.${home-domain}";
+        ingressClassName = "traefik";
+        tls.enable = true;
       };
 
       nfs = {
@@ -915,17 +904,11 @@ in
       hostAffinity = "nasnix";
 
       ingress = {
-        domain = "rustfs.${tail-domain}";
-        api-domain = "api-rustfs.${tail-domain}";
-        ingressClassName = "tailscale";
-        clusterIssuer = "tailscale";
+        api-domain = "api-rustfs.${home-domain}";
+        clusterIssuer = clusterIssuer;
+        domain = "rustfs.${home-domain}";
+        ingressClassName = "traefik";
         tls.enable = true;
-        localIngress = {
-          enable = true;
-          domain = "rustfs.${home-domain}";
-          clusterIssuer = clusterIssuer;
-          tls.enable = true;
-        };
       };
 
       mode = "standalone";
@@ -944,9 +927,10 @@ in
       hostAffinity = "edgenix";
 
       ingress = {
-        domain = "sabnzbd.${tail-domain}";
-        ingressClassName = "tailscale";
-        clusterIssuer = "tailscale";
+        clusterIssuer = clusterIssuer;
+        domain = "sabnzbd.${home-domain}";
+        ingressClassName = "traefik";
+        tls.enable = true;
       };
 
       nfs = {
@@ -967,9 +951,10 @@ in
       # hostAffinity = "edgenix";
 
       ingress = {
-        domain = "slskd.${tail-domain}";
-        ingressClassName = "tailscale";
-        clusterIssuer = "tailscale";
+        clusterIssuer = clusterIssuer;
+        domain = "slskd.${home-domain}";
+        ingressClassName = "traefik";
+        tls.enable = true;
       };
 
       nfs = {
@@ -1015,9 +1000,10 @@ in
       hostAffinity = "edgenix";
 
       ingress = {
-        domain = "sonarr.${tail-domain}";
-        ingressClassName = "tailscale";
-        clusterIssuer = "tailscale";
+        clusterIssuer = clusterIssuer;
+        domain = "sonarr.${home-domain}";
+        ingressClassName = "traefik";
+        tls.enable = true;
       };
 
       nfs = {
@@ -1064,9 +1050,10 @@ in
       hostAffinity = "nixmini";
 
       ingress = {
-        domain = "stashapp.${tail-domain}";
-        ingressClassName = "tailscale";
-        clusterIssuer = "tailscale";
+        clusterIssuer = clusterIssuer;
+        domain = "stashapp.${home-domain}";
+        ingressClassName = "traefik";
+        tls.enable = true;
       };
 
       nfs = {
@@ -1091,9 +1078,10 @@ in
       hostAffinity = "edgenix";
 
       ingress = {
-        domain = "tdarr.${tail-domain}";
-        ingressClassName = "tailscale";
-        clusterIssuer = "tailscale";
+        clusterIssuer = clusterIssuer;
+        domain = "tdarr.${home-domain}";
+        ingressClassName = "traefik";
+        tls.enable = true;
       };
 
       nfs = {

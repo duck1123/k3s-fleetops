@@ -11,9 +11,9 @@ metadata:
   name: longhorn-ingress
   namespace: longhorn-system
 spec:
-  ingressClassName: tailscale
+  ingressClassName: traefik
   rules:
-    - host: longhorn.bearded-snake.ts.net
+    - host: longhorn.home.kronkltd.net
       http:
         paths:
           - backend:
@@ -25,5 +25,5 @@ spec:
             pathType: ImplementationSpecific
   tls:
     - hosts:
-        - longhorn.bearded-snake.ts.net
+        - longhorn.home.kronkltd.net
       secretName: longhorn.local-tls
