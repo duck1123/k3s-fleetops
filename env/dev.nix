@@ -644,7 +644,7 @@ in
       {
         allowLocalExternalDatabases = true;
         auth.jwtSecret = (secrets.nocodb or { }).jwtSecret or "";
-        enable = false;
+        enable = true;
 
         ingress = {
           domain = "nocodb.${tail-domain}";
