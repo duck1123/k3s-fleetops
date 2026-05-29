@@ -91,6 +91,20 @@
         extraAppConfig = cfg:
           lib.mkIf (cfg.subnetRoutes != [ ]) {
             yamls = [
+              # ProxyClass puts the Connector pod into the host network namespace so it can
+              # reach MetalLB L2 VIPs (192.168.0.240-250), which are ARP-based and unreachable
+              # from inside the pod overlay network.
+              ''
+                apiVersion: tailscale.com/v1alpha1
+                kind: ProxyClass
+                metadata:
+                  name: host-network
+                  namespace: tailscale
+                spec:
+                  statefulSet:
+                    pod:
+                      hostNetwork: true
+              ''
               ''
                 apiVersion: tailscale.com/v1alpha1
                 kind: Connector
@@ -98,6 +112,7 @@
                   name: ${cfg.connectorHostname}
                 spec:
                   hostname: ${cfg.connectorHostname}
+                  proxyClass: host-network
                   subnetRouter:
                     advertiseRoutes:
                 ${lib.concatMapStringsSep "\n" (r: "                  - \"${r}\"") cfg.subnetRoutes}
