@@ -712,6 +712,7 @@ in
       storageClassName = "longhorn";
       customDnsEntries = [
         "address=/.dev.kronkltd.net/192.168.0.242"
+        "address=/.home.kronkltd.net/192.168.0.242"
       ];
     };
 
@@ -1075,6 +1076,7 @@ in
     tailscale = {
       enable = true;
       oauth = { inherit (secrets.tailscale) authKey clientId clientSecret; };
+      subnetRoutes = [ "192.168.0.0/24" ];
     };
 
     tdarr = {

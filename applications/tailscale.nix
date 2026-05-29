@@ -60,7 +60,52 @@
               default = "";
             };
           };
+
+          subnetRoutes = mkOption {
+            description = mdDoc ''
+              CIDR ranges the Tailscale Connector will advertise as subnet routes into the Tailnet.
+              When non-empty, a `Connector` CRD is created that advertises these subnets so
+              Tailscale clients can reach LAN IPs (e.g. MetalLB VIPs) without being on the local network.
+              Approve the routes in the Tailscale admin console after first deploy.
+            '';
+            type = types.listOf types.str;
+            default = [ ];
+          };
+
+          connectorHostname = mkOption {
+            description = mdDoc "Tailscale machine name for the subnet-router Connector node.";
+            type = types.str;
+            default = "k3s-subnet-router";
+          };
+
+          connectorTags = mkOption {
+            description = mdDoc ''
+              ACL tags applied to the Connector node. Must match the tags permitted by your
+              OAuth client in the Tailscale admin console (e.g. `tag:k8s-connector`).
+            '';
+            type = types.listOf types.str;
+            default = [ "tag:k8s" ];
+          };
         };
+
+        extraAppConfig = cfg:
+          lib.mkIf (cfg.subnetRoutes != [ ]) {
+            yamls = [
+              ''
+                apiVersion: tailscale.com/v1alpha1
+                kind: Connector
+                metadata:
+                  name: ${cfg.connectorHostname}
+                spec:
+                  hostname: ${cfg.connectorHostname}
+                  subnetRouter:
+                    advertiseRoutes:
+                ${lib.concatMapStringsSep "\n" (r: "                  - \"${r}\"") cfg.subnetRoutes}
+                  tags:
+                ${lib.concatMapStringsSep "\n" (t: "                  - ${t}") cfg.connectorTags}
+              ''
+            ];
+          };
 
       };
 }

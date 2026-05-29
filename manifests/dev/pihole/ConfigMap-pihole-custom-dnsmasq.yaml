@@ -3,6 +3,7 @@ data:
   02-custom.conf: |
     addn-hosts=/etc/addn-hosts
     address=/.dev.kronkltd.net/192.168.0.242
+    address=/.home.kronkltd.net/192.168.0.242
     dhcp-option=6,192.168.0.243
   05-pihole-custom-cname.conf: ""
   addn-hosts: ""
