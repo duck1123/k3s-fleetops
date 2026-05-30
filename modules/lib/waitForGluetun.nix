@@ -2,7 +2,9 @@
 {
   flake.lib.waitForGluetun =
     { ... }:
-    # Creates an init container that waits for gluetun to be ready
+    # Creates an init container that waits for gluetun to be ready.
+    # Polls the proxy port (8888) rather than the auth-protected control API (8000)
+    # because gluetun blocks proxy traffic until the VPN tunnel is established.
     # Parameters:
     #   gluetunService: The service name for gluetun (e.g., "gluetun.gluetun")
     gluetunService: [
@@ -13,24 +15,15 @@
         args = [
           "-c"
           ''
-            echo "Waiting for gluetun VPN connection..."
-            until curl -sf http://${gluetunService}:8000/v1/vpn/status | grep -q '"running"'; do
+            echo "Waiting for gluetun VPN proxy..."
+            until curl -sf --connect-timeout 5 --max-time 15 \
+                --proxy http://${gluetunService}:8888 \
+                --proxy-connect-timeout 5 \
+                "http://1.1.1.1" > /dev/null 2>&1; do
+              echo "Proxy not ready, retrying in 5s..."
               sleep 5
             done
-            echo "VPN connection established"
-            # Wait for proxy to initialize
-            sleep 10
-            # Simple proxy connectivity test
-            if curl -sf --connect-timeout 5 --max-time 10 \
-               --proxy http://${gluetunService}:8888 \
-               --proxy-connect-timeout 5 \
-               "http://1.1.1.1" > /dev/null 2>&1; then
-              echo "Proxy ready"
-              exit 0
-            fi
-            # If test fails, continue anyway - applications will retry
-            echo "Proxy test failed, continuing anyway"
-            exit 0
+            echo "Gluetun proxy ready"
           ''
         ];
       }
