@@ -4,7 +4,7 @@ metadata:
   labels:
     app.kubernetes.io/instance: mealie
     app.kubernetes.io/name: mealie
-    app.kubernetes.io/version: v3.18.0
+    app.kubernetes.io/version: v3.19.2
   name: mealie
   namespace: mealie
 spec:
@@ -28,6 +28,21 @@ spec:
               value: Etc/UTC
             - name: BASE_URL
               value: https://mealie.home.kronkltd.net
+            - name: DB_ENGINE
+              value: postgres
+            - name: POSTGRES_SERVER
+              value: postgresql.postgresql
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_DB
+              value: mealie
+            - name: POSTGRES_USER
+              value: mealie
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: mealie-database-password
           image: ghcr.io/mealie-recipes/mealie:v3.19.2
           imagePullPolicy: IfNotPresent
           livenessProbe:
@@ -61,3 +76,6 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: mealie-mealie-data
+        - name: mealie-database-password
+          secret:
+            secretName: mealie-database-password

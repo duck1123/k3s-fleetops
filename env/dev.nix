@@ -554,6 +554,15 @@ in
     mealie = {
       enable = true;
       # hostAffinity = "edgenix";
+      image = "ghcr.io/mealie-recipes/mealie:v3.19.2";
+
+      database = {
+        enable = true;
+        host = "postgresql.postgresql";
+        name = "mealie";
+        username = "mealie";
+        password = secrets.mealie.databasePassword;
+      };
 
       ingress = {
         domain = "mealie.${home-domain}";

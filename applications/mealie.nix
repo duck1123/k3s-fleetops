@@ -94,7 +94,7 @@
             metadata.labels = {
               "app.kubernetes.io/instance" = name;
               "app.kubernetes.io/name" = name;
-              "app.kubernetes.io/version" = "v3.18.0";
+              "app.kubernetes.io/version" = "v3.19.2";
             };
 
             spec = {
