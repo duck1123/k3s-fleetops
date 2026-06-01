@@ -28,7 +28,7 @@ spec:
               value: Etc/UTC
             - name: BASE_URL
               value: https://mealie.home.kronkltd.net
-          image: ghcr.io/mealie-recipes/mealie:v3.18.0
+          image: ghcr.io/mealie-recipes/mealie:v3.19.2
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3

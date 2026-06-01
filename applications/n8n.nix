@@ -28,8 +28,8 @@
         chart = lib.helm.downloadHelmChart {
           repo = "https://community-charts.github.io/helm-charts";
           chart = "n8n";
-          version = "1.16.33";
-          chartHash = "sha256-fmbF78bCn+X+7SvFtSTtHbDVxaP6my/QGSBbN7OIdeM=";
+          version = "1.16.44";
+          chartHash = "sha256-Enan/9xRS+uYvWPtQnrtjSL7R9geNrrdmtCVIwFLyIY=";
         };
 
         uses-ingress = true;

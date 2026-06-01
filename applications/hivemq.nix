@@ -19,7 +19,7 @@
         image = mkOption {
           description = mdDoc "HiveMQ Community Edition image (e.g. hivemq/hivemq-ce:2025.5)";
           type = types.str;
-          default = "hivemq/hivemq-ce:2025.5";
+          default = "hivemq/hivemq-ce:2026.5";
         };
 
         mqttPort = mkOption {

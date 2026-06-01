@@ -34,8 +34,8 @@
         chart = helm.downloadHelmChart {
           repo = "https://charts.bitnami.com/bitnami";
           chart = "minio";
-          version = "17.0.6";
-          chartHash = "sha256-njyO/PNrABMYShQ4Ix0VIMXvqOrPszoDT/s5jag49fQ=";
+          version = "17.0.21";
+          chartHash = "sha256-bv1Mb/Gxu97ncIqS2/81vJC/svStdOWLocXxwbnd+hU=";
         };
 
         uses-ingress = true;

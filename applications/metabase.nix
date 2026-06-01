@@ -15,8 +15,8 @@
       chart = lib.helm.downloadHelmChart {
         repo = "https://pmint93.github.io/helm-charts";
         chart = "metabase";
-        version = "2.21.0";
-        chartHash = "sha256-p+QN2hABMF+hmeb/dn7Smms3FZQVzZIEvVzQrxI+XRk=";
+        version = "2.26.0";
+        chartHash = "sha256-0+++k414/FfrF9w1QlBOTVZzQpggzbUAgk3duR164w0=";
       };
 
       uses-ingress = true;

@@ -29,7 +29,7 @@
           image = mkOption {
             description = mdDoc "The docker image";
             type = types.str;
-            default = "ghcr.io/mealie-recipes/mealie:v3.18.0";
+            default = "ghcr.io/mealie-recipes/mealie:v3.19.2";
           };
 
           service.port = mkOption {

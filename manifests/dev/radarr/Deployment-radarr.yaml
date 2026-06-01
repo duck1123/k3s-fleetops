@@ -43,7 +43,7 @@ spec:
                 secretKeyRef:
                   key: password
                   name: radarr-database-password
-          image: linuxserver/radarr:6.1.1.10360-ls299
+          image: linuxserver/radarr:6.1.1.10360-ls304
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3

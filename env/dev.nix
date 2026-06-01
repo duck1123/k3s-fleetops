@@ -837,7 +837,7 @@ in
 
       enable = true;
       hostAffinity = "edgenix";
-      image = "linuxserver/radarr:6.1.1.10360-ls299";
+      image = "linuxserver/radarr:6.1.1.10360-ls304";
 
       ingress = {
         clusterIssuer = clusterIssuer;
@@ -1003,7 +1003,7 @@ in
       };
 
       enable = true;
-      image = "linuxserver/sonarr:version-4.0.17.2952";
+      image = "linuxserver/sonarr:4.0.17.2952-ls312";
       hostAffinity = "edgenix";
 
       ingress = {

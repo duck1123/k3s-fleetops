@@ -18,7 +18,7 @@
             labels = {
               "app.kubernetes.io/instance" = name;
               "app.kubernetes.io/name" = name;
-              "app.kubernetes.io/version" = "0.8.7";
+              "app.kubernetes.io/version" = "v0.9.0.2";
             };
           };
           spec = {
@@ -33,7 +33,7 @@
                 labels = {
                   "app.kubernetes.io/instance" = name;
                   "app.kubernetes.io/name" = name;
-                  # "app.kubernetes.io/version" = "0.8.7";
+                  # "app.kubernetes.io/version" = "v0.9.0.2";
                 };
               };
 
@@ -43,7 +43,7 @@
                 containers = [
                   {
                     inherit name;
-                    image = "linuxserver/kavita:0.8.7";
+                    image = "linuxserver/kavita:v0.9.0.2-ls110";
                     imagePullPolicy = "IfNotPresent";
                     env = [
                       {

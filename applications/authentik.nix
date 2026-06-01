@@ -38,8 +38,8 @@
         chart = lib.helm.downloadHelmChart {
           repo = "https://charts.goauthentik.io/";
           chart = "authentik";
-          version = "2025.6.3";
-          chartHash = "sha256-KDAuA7Wmn1Q+OOUyZh2uD1FwTFlWOm5yOkKQDbZFKUg=";
+          version = "2026.5.2";
+          chartHash = "sha256-yu47IF7hriUKh7eeVc9lEjEcgeteHVOgbyOVFy7hRuo=";
         };
 
         uses-ingress = true;
