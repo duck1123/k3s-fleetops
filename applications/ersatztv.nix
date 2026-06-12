@@ -352,6 +352,7 @@
               accessModes = [ "ReadWriteMany" ];
               mountOptions = [
                 "nolock"
+                "noexec"
                 "soft"
                 "timeo=30"
               ];

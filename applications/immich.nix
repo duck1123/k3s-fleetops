@@ -276,6 +276,7 @@
                   capacity.storage = "1Ti";
                   mountOptions = [
                     "nolock"
+                    "noexec"
                     "soft"
                     "timeo=30"
                   ];
@@ -297,6 +298,7 @@
                   capacity.storage = "1Ti";
                   mountOptions = [
                     "nolock"
+                    "noexec"
                     "soft"
                     "timeo=30"
                   ];

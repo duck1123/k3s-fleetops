@@ -12,6 +12,7 @@ spec:
     namespace: rustfs
   mountOptions:
     - nolock
+    - noexec
     - soft
     - timeo=30
   nfs:

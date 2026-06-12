@@ -549,6 +549,7 @@
               accessModes = [ "ReadWriteMany" ];
               mountOptions = [
                 "nolock"
+                "noexec"
                 "soft"
                 "timeo=30"
               ];
@@ -572,6 +573,7 @@
               accessModes = [ "ReadWriteMany" ];
               mountOptions = [
                 "nolock"
+                "noexec"
                 "soft"
                 "timeo=30"
               ];
@@ -595,6 +597,7 @@
               accessModes = [ "ReadWriteMany" ];
               mountOptions = [
                 "nolock"
+                "noexec"
                 "soft"
                 "timeo=30"
               ];

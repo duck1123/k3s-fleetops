@@ -355,6 +355,7 @@
                 capacity.storage = "1Ti";
                 mountOptions = [
                   "nolock"
+                  "noexec"
                   "soft"
                   "timeo=30"
                 ];

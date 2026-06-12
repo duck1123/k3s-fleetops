@@ -105,6 +105,7 @@
               };
               mountOptions = [
                 "nolock"
+                "noexec"
                 "soft"
                 "timeo=30"
               ];
