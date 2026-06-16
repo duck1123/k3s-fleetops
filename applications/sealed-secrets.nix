@@ -10,12 +10,12 @@
     let
       cfg = config.services.sealed-secrets;
 
-      # https://artifacthub.io/packages/helm/bitnami-labs/sealed-secrets
+      # https://artifacthub.io/packages/helm/bitnami/sealed-secrets
       chart = lib.helm.downloadHelmChart {
-        repo = "https://bitnami-labs.github.io/sealed-secrets";
+        repo = "oci://registry-1.docker.io/bitnamicharts";
         chart = "sealed-secrets";
-        version = "2.18.6";
-        chartHash = "sha256-UU9mdf65anGaqkCv31oLRFVbfKxoX/un29PAgfAJS8k=";
+        version = "2.5.19";
+        chartHash = "sha256-KSF9ZHnMUi1NPkuybBhyj/RMcx0J9zh2SU5QNLPd9B4=";
       };
 
       defaultNamespace = "sealed-secrets";

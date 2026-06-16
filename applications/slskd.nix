@@ -364,7 +364,7 @@
             "${name}-${name}-config".spec = {
               inherit (cfg) storageClassName;
               accessModes = [ "ReadWriteOnce" ];
-              resources.requests.storage = "5Gi";
+              resources.requests.storage = "20Gi";
             };
             "${name}-${name}-downloads".spec =
               if cfg.nfs.enable then
