@@ -368,6 +368,8 @@ in
 
       nfs.enable = false;
 
+      nodeAffinity.excludeNodes = [ "powerspecnix" ];
+
       externalLibrary = {
         enable = true;
         server = nas-host;

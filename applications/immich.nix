@@ -132,6 +132,12 @@
             };
           };
 
+          nodeAffinity.excludeNodes = mkOption {
+            default = [ ];
+            description = mdDoc "Hostnames that Immich pods must not be scheduled on";
+            type = types.listOf types.str;
+          };
+
           externalLibrary = {
             enable = mkOption {
               description = mdDoc "Mount an NFS share as an external library (read-only) at /mnt/external-library";
@@ -157,6 +163,20 @@
           # Disable built-in Redis (Valkey)
           # Note: postgresql subchart was removed in 0.10.0, must be deployed separately
           valkey.enabled = false;
+
+          controllers.main.pod = lib.optionalAttrs (cfg.nodeAffinity.excludeNodes != [ ]) {
+            affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms = [
+              {
+                matchExpressions = [
+                  {
+                    key = "kubernetes.io/hostname";
+                    operator = "NotIn";
+                    values = cfg.nodeAffinity.excludeNodes;
+                  }
+                ];
+              }
+            ];
+          };
 
           # Environment variables for all Immich components
           controllers.main.containers.main.env = {
