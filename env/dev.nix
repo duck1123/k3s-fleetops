@@ -368,7 +368,7 @@ in
 
       nfs.enable = false;
 
-      nodeAffinity.excludeNodes = [ "powerspecnix" ];
+      hostAffinity = "nixmini";
 
       externalLibrary = {
         enable = true;

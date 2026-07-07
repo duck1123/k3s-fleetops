@@ -27,15 +27,6 @@ spec:
         app.kubernetes.io/instance: immich
         app.kubernetes.io/name: machine-learning
     spec:
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-              - matchExpressions:
-                  - key: kubernetes.io/hostname
-                    operator: NotIn
-                    values:
-                      - powerspecnix
       automountServiceAccountToken: false
       containers:
         - env:
@@ -113,6 +104,8 @@ spec:
       hostIPC: false
       hostNetwork: false
       hostPID: false
+      nodeSelector:
+        kubernetes.io/hostname: nixmini
       serviceAccountName: immich-machine-learning
       volumes:
         - emptyDir: {}
