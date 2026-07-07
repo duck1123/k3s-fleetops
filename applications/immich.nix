@@ -235,7 +235,12 @@
             };
           };
 
-          server = lib.optionalAttrs cfg.externalLibrary.enable {
+          server = {
+            # Single-replica deployment backed by a ReadWriteOnce volume: RollingUpdate
+            # can deadlock (new pod can't attach the volume until the old one releases it).
+            controllers.main.strategy = "Recreate";
+          }
+          // lib.optionalAttrs cfg.externalLibrary.enable {
             persistence.external-library = {
               existingClaim = "${name}-${name}-external-library";
               globalMounts = [
