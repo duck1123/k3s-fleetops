@@ -51,7 +51,7 @@ spec:
             - name: transcodegpuWorkers
               value: "0"
             - name: LIBVA_DRIVER_NAME
-              value: radeonsi
+              value: iris
             - name: XDG_RUNTIME_DIR
               value: ""
             - name: LIBVA_DRIVERS_PATH
@@ -83,7 +83,7 @@ spec:
               name: media-movies
             - mountPath: /media/TV
               name: media-tv
-            - mountPath: /dev/dri/renderD128
+            - mountPath: /dev/dri
               name: dri
       initContainers:
         - command:
@@ -99,7 +99,7 @@ spec:
             - mountPath: /temp
               name: temp
       nodeSelector:
-        kubernetes.io/hostname: edgenix
+        kubernetes.io/hostname: nixmini
       securityContext:
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
@@ -122,6 +122,6 @@ spec:
           persistentVolumeClaim:
             claimName: tdarr-tdarr-media-tv
         - hostPath:
-            path: /dev/dri/renderD129
-            type: CharDevice
+            path: /dev/dri
+            type: Directory
           name: dri

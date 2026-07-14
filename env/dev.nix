@@ -1097,7 +1097,7 @@ in
       enable = true;
       healthcheckcpuWorkers = 0;
       healthcheckgpuWorkers = 1;
-      hostAffinity = "edgenix";
+      hostAffinity = "nixmini";
 
       ingress = {
         clusterIssuer = clusterIssuer;
