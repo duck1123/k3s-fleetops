@@ -58,7 +58,7 @@ spec:
               value: /usr/lib/x86_64-linux-gnu/dri
             - name: LIBVA_MESSAGING
               value: "1"
-          image: ghcr.io/haveagitgat/tdarr:latest
+          image: ghcr.io/haveagitgat/tdarr:2.81.01
           imagePullPolicy: IfNotPresent
           name: tdarr
           ports:
