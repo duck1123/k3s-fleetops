@@ -47,7 +47,7 @@
 
         nfs = {
           enable = mkOption {
-            description = mdDoc "Enable NFS for media and temp volumes";
+            description = mdDoc "Enable NFS for media volumes";
             type = types.bool;
             default = false;
           };
@@ -468,20 +468,11 @@
             accessModes = [ "ReadWriteOnce" ];
             resources.requests.storage = "10Gi";
           };
-          "${name}-${name}-temp".spec =
-            if cfg.nfs.enable then
-              {
-                accessModes = [ "ReadWriteMany" ];
-                resources.requests.storage = "1Gi";
-                storageClassName = "";
-                volumeName = "${name}-${name}-temp-nfs";
-              }
-            else
-              {
-                inherit (cfg) storageClassName;
-                accessModes = [ "ReadWriteOnce" ];
-                resources.requests.storage = "50Gi";
-              };
+          "${name}-${name}-temp".spec = {
+            inherit (cfg) storageClassName;
+            accessModes = [ "ReadWriteOnce" ];
+            resources.requests.storage = "50Gi";
+          };
           "${name}-${name}-media-movies".spec =
             if cfg.nfs.enable then
               {
@@ -534,32 +525,8 @@
           type = "ClusterIP";
         };
 
-        # Create NFS PersistentVolumes for temp and media when NFS is enabled
+        # Create NFS PersistentVolumes for media when NFS is enabled
         persistentVolumes = lib.optionalAttrs (cfg.nfs.enable) {
-          "${name}-${name}-temp-nfs" = {
-            apiVersion = "v1";
-            kind = "PersistentVolume";
-            metadata = {
-              name = "${name}-${name}-temp-nfs";
-            };
-            spec = {
-              capacity = {
-                storage = "1Ti";
-              };
-              accessModes = [ "ReadWriteMany" ];
-              mountOptions = [
-                "nolock"
-                "noexec"
-                "soft"
-                "timeo=30"
-              ];
-              nfs = {
-                server = cfg.nfs.server;
-                path = "${cfg.nfs.path}/tdarr-temp";
-              };
-              persistentVolumeReclaimPolicy = "Retain";
-            };
-          };
           "${name}-${name}-media-movies-nfs" = {
             apiVersion = "v1";
             kind = "PersistentVolume";
