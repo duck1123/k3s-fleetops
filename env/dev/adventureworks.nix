@@ -1,0 +1,4 @@
+{ ... }:
+{
+  services.adventureworks.enable = false;
+}

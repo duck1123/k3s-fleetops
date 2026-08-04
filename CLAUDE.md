@@ -90,7 +90,8 @@ ArgoCD is bootstrapped manually (see README), then self-manages via the `00-mast
 | Path | Purpose |
 |------|---------|
 | `applications/` | One `.nix` file per service (e.g. `sonarr.nix`), each using `self.lib.mkArgoApp`; complex apps may use a subdir with `default.nix` |
-| `env/dev.nix` | Single dev environment config: enables/disables services, sets domains, loads secrets |
+| `env/dev.nix` | Assembles the dev environment: imports every module under `env/dev/`, loads secrets, sets `ageRecipients`/`nixidy` target config |
+| `env/dev/` | One module per service (e.g. `env/dev/sonarr.nix`) setting `services.<name>`; `env/dev/options.nix` declares shared `devDefaults.*` options (domains, clusterIssuer, NAS host/path, enableLogging). Services not currently deployed are configured here too with `enable = false`, ready to flip on |
 | `modules/lib/` | Shared Nix library functions (`mkArgoApp`, `loadSecrets`, `createSecret`, etc.) |
 | `modules/flake/` | Flake-parts modules wiring everything together |
 | `generators/` | CRD option modules (imported at eval time via `crdImports`) |
@@ -104,7 +105,7 @@ ArgoCD is bootstrapped manually (see README), then self-manages via the `00-mast
 
 1. Create `applications/<name>.nix` using `self.lib.mkArgoApp` (see `applications/sonarr.nix` as a full example; some complex apps use a subdirectory `applications/<name>/default.nix` instead).
 2. Add the import to `applications/default.nix`.
-3. Enable and configure the service in `env/dev.nix` under `services.<name>`.
+3. Create `env/dev/<name>.nix` setting `services.<name>` (use `enable = false` if it shouldn't deploy yet), and add it to the `imports` list in `env/dev.nix`. Use `config.devDefaults.*` for shared domains/clusterIssuer/NAS values, and the `secrets`/`arrDatabases` module args (injected via `_module.args` in `env/dev.nix`) where needed.
 4. Run `nur switch-charts` to regenerate and apply manifests.
 
 ### Apps Without a Dockerfile (nix-csi)
