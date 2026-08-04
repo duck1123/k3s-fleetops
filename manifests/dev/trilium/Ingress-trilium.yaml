@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  name: trilium
+  namespace: trilium
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: trilium.home.kronkltd.net
+      http:
+        paths:
+          - backend:
+              service:
+                name: trilium
+                port:
+                  name: http
+            path: /
+            pathType: ImplementationSpecific
+  tls:
+    - hosts:
+        - trilium.home.kronkltd.net
+      secretName: trilium-tls

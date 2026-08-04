@@ -76,6 +76,7 @@
     ./sqlpad.nix
     ./tailscale.nix
     ./tdarr.nix
+    ./trilium.nix
     ./windmill.nix
     ./tube-archivist.nix
     ./tunarr.nix

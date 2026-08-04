@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/instance: trilium
+    app.kubernetes.io/name: trilium
+  name: trilium
+  namespace: trilium
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: trilium
+      app.kubernetes.io/name: trilium
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: trilium
+        app.kubernetes.io/name: trilium
+    spec:
+      automountServiceAccountToken: true
+      containers:
+        - env:
+            - name: TZ
+              value: Etc/UTC
+          image: triliumnext/trilium:v0.104.1
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            successThreshold: 1
+            tcpSocket:
+              port: 8080
+            timeoutSeconds: 5
+          name: trilium
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            successThreshold: 1
+            tcpSocket:
+              port: 8080
+            timeoutSeconds: 5
+          volumeMounts:
+            - mountPath: /home/node/trilium-data
+              name: data
+      serviceAccountName: default
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: trilium-trilium-data
