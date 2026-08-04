@@ -197,7 +197,7 @@ in
     };
 
     fileflows = {
-      enable = false;
+      enable = true;
       hostAffinity = "nixmini";
 
       ingress = {
@@ -818,7 +818,7 @@ in
     };
 
     qbittorrent = {
-      enable = false;
+      enable = true;
       hostAffinity = "nasnix";
 
       ingress = {
@@ -918,7 +918,7 @@ in
 
     rustfs = {
       accessKey = (secrets.rustfs or { }).accessKey or "";
-      enable = true;
+      enable = false;
       hostAffinity = "nasnix";
 
       ingress = {

@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: fileflows
+  namespace: fileflows
+spec:
+  ingressClassName: tailscale
+  rules:
+    - host: fileflows.bearded-snake.ts.net
+      http:
+        paths:
+          - backend:
+              service:
+                name: fileflows
+                port:
+                  name: http
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - fileflows.bearded-snake.ts.net
