@@ -62,6 +62,10 @@
               spec = {
                 automountServiceAccountToken = true;
                 serviceAccountName = "default";
+                # Kubernetes injects <SERVICE_NAME>_PORT env vars into every pod; since the
+                # Service is named "trilium" this collides with Trilium's own TRILIUM_PORT
+                # env var (which expects a plain int, not the injected tcp:// URI).
+                enableServiceLinks = false;
 
                 containers = [
                   {

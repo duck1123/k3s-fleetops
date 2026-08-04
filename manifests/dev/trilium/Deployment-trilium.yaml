@@ -51,6 +51,7 @@ spec:
           volumeMounts:
             - mountPath: /home/node/trilium-data
               name: data
+      enableServiceLinks: false
       serviceAccountName: default
       volumes:
         - name: data
