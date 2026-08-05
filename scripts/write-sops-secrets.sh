@@ -13,6 +13,17 @@
 #   rm manifests/dev/<namespace>/SopsSecret-<name>.yaml
 #   bb switch-charts
 #
+# nixidy's activation step (`activate`) rsyncs its build output over
+# manifests/dev with --delete, and it has no idea SopsSecret files exist (they
+# aren't part of the Nix build — see mkArgoApp stripping sopsSecrets from
+# resources). So by the time this script runs after activation, every
+# SopsSecret-*.yaml in manifests/dev has already been wiped. Comparing against
+# that live (post-delete) directory would always look "missing" and force a
+# re-encrypt of everything. SOPS_SECRETS_REFERENCE_DIR lets the caller (see
+# `nur switch-charts`) point us at a pre-activation snapshot to diff/restore
+# from instead; it defaults to MANIFESTS_DIR for standalone use, where nothing
+# has deleted it out from under us.
+#
 # Usage (standalone — handles its own decryption):
 #   ./scripts/write-sops-secrets.sh
 #
@@ -23,6 +34,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 MANIFESTS_DIR="$REPO_ROOT/manifests/dev"
+REFERENCE_DIR="${SOPS_SECRETS_REFERENCE_DIR:-$MANIFESTS_DIR}"
 SYSTEM="${SYSTEM:-x86_64-linux}"
 
 # ---------------------------------------------------------------------------
@@ -83,13 +95,18 @@ while IFS= read -r spec; do
   namespace="$(echo "$spec" | jq -r '.namespace')"
   values="$(echo "$spec" | jq '.values')"
   output_file="$MANIFESTS_DIR/$app/SopsSecret-${secret_name}.yaml"
+  reference_file="$REFERENCE_DIR/$app/SopsSecret-${secret_name}.yaml"
 
-  # Check if file exists and compare plaintext values
-  if [[ -f "$output_file" ]]; then
-    # Decrypt existing file and compare values
-    existing_plaintext="$(sops --decrypt --input-type yaml --output-type json "$output_file" | jq '.spec.secretTemplates[0].stringData')"
+  # Check if a prior copy exists and compare plaintext values. Restore it
+  # verbatim (reusing its ciphertext) rather than skipping outright — the
+  # activation rsync may have already deleted output_file, so "unchanged"
+  # still needs to put the file back.
+  if [[ -f "$reference_file" ]]; then
+    existing_plaintext="$(sops --decrypt --input-type yaml --output-type json "$reference_file" | jq '.spec.secretTemplates[0].stringData')"
     if [[ "$existing_plaintext" == "$values" ]]; then
-      echo "write-sops-secrets: skipping unchanged secret: $secret_name"
+      echo "write-sops-secrets: reusing unchanged secret: $secret_name"
+      mkdir -p "$(dirname "$output_file")"
+      cp "$reference_file" "$output_file"
       continue
     fi
   fi

@@ -61,8 +61,19 @@ export def "nur switch-charts" [--show-trace] {
       ...$trace_args
     | str trim
   )
+  # nixidy's activate step rsyncs its build output over manifests/dev with
+  # --delete; it doesn't know SopsSecret files exist, so it wipes them all on
+  # every run. Snapshot them first so write-sops-secrets.sh can tell which
+  # ones actually changed instead of re-encrypting everything unconditionally.
+  let secrets_backup = (^mktemp -d | str trim)
+  if ("manifests/dev" | path exists) {
+    cp --recursive manifests/dev $"($secrets_backup)/dev"
+  }
   run-external $"($drv_path)/activate"
-  ^./scripts/write-sops-secrets.sh
+  with-env {SOPS_SECRETS_REFERENCE_DIR: $"($secrets_backup)/dev"} {
+    ./scripts/write-sops-secrets.sh
+  }
+  rm --recursive --force $secrets_backup
   nur post-process-manifests
 }
 
