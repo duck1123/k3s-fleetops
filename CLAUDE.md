@@ -26,9 +26,6 @@ nur ci
 # Post-process already-generated manifests (fixups for nixidy hardcoded behaviours)
 nur post-process-manifests
 
-# Update vendored Helm chart archives from OCI registries
-nur update-charts
-
 # Nix code formatting
 nur format
 ```
@@ -97,7 +94,6 @@ ArgoCD is bootstrapped manually (see README), then self-manages via the `00-mast
 | `generators/` | CRD option modules (imported at eval time via `crdImports`) |
 | `manifests/dev/` | **Generated output** — do not edit manually |
 | `infra-manifests/` | Legacy edn-based manifests (`00-master.edn`); used by `nur argocd apply-master` |
-| `chart-archives/` | Vendored Helm chart `.tgz` files (managed by `nur update-charts`) |
 | `src/k3s_fleetops/` | Legacy Babashka Clojure source (`postgres.clj`); superseded by `scripts/nur.nu` |
 | `secrets.enc.yaml` | Sops-encrypted secrets (age key at `~/.config/sops/age/keys.txt`) |
 
@@ -121,7 +117,7 @@ When an upstream project has no Dockerfile, use the nix-csi CSI driver (already 
 
 `modules/lib/mkArgoApp.nix` is the central abstraction. It accepts:
 - `name` — sets the ArgoCD application name and Kubernetes namespace
-- `chart` — optional Helm chart (from `nixhelm` or `chart-archives/`)
+- `chart` — optional Helm chart (from `nixhelm`)
 - `extraOptions` — NixOS-style module options exposed under `config.services.<name>`
 - `extraResources` — raw Kubernetes resources (deployments, services, ingresses, PVCs, etc.)
 - `sopsSecrets` — secrets to encrypt and inject as Kubernetes Secrets

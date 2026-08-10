@@ -82,12 +82,6 @@ export def "nur ci" [] {
   nur switch-charts
 }
 
-# Update vendored Helm chart archives from OCI registries
-export def "nur update-charts" [] {
-  cd chart-archives
-  ^sh pull-charts.sh
-}
-
 # Format all .nix files using nixfmt
 export def "nur format" [] {
   ^find . -name '*.nix' | lines | each { |f| ^nixfmt $f; null } | ignore
