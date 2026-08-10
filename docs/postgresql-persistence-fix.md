@@ -5,7 +5,7 @@ PostgreSQL was using `emptyDir` volumes instead of PersistentVolumeClaims, causi
 
 ## Solution
 1. **Enable persistence in Helm values** - Updated `applications/postgresql/default.nix` to explicitly enable persistence
-2. **Regenerate manifests** - Run `bb ci` to apply changes
+2. **Regenerate manifests** - Run `nur switch` to apply changes
 3. **Migrate existing data** - If data exists, back it up before applying changes
 
 ## Backup Strategy

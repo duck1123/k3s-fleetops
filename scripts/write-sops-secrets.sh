@@ -11,7 +11,7 @@
 #
 # To force re-encryption of a changed secret value, delete its manifest:
 #   rm manifests/dev/<namespace>/SopsSecret-<name>.yaml
-#   bb switch-charts
+#   nur switch
 #
 # nixidy's activation step (`activate`) rsyncs its build output over
 # manifests/dev with --delete, and it has no idea SopsSecret files exist (they
@@ -20,7 +20,7 @@
 # SopsSecret-*.yaml in manifests/dev has already been wiped. Comparing against
 # that live (post-delete) directory would always look "missing" and force a
 # re-encrypt of everything. SOPS_SECRETS_REFERENCE_DIR lets the caller (see
-# `nur switch-charts`) point us at a pre-activation snapshot to diff/restore
+# `nur switch`) point us at a pre-activation snapshot to diff/restore
 # from instead; it defaults to MANIFESTS_DIR for standalone use, where nothing
 # has deleted it out from under us.
 #

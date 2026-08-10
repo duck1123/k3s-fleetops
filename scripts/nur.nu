@@ -44,23 +44,27 @@ def pg-databases [pod: string, password: string] {
 # Post-process already-generated manifests (fixups for nixidy hardcoded behaviours)
 export def "nur post-process-manifests" [] {
   let script_path = (
-    ^nix-build --no-link --expr '(import <nixpkgs> {}).callPackage ./lib/postProcessManifests.nix {}'
+    ^nom-build --no-link --expr '(import <nixpkgs> {}).callPackage ./lib/postProcessManifests.nix {}'
     | str trim
   )
   run-external $"($script_path)/bin/post-process-manifests"
 }
 
-# Full pipeline: generate manifests, post-process, write to manifests/dev/, activate
-export def "nur switch-charts" [--show-trace] {
+# Build the nixidy activation package without applying it (like `nixos-rebuild build`)
+export def "nur build" [--show-trace] {
   let trace_args = if $show_trace { ["--show-trace"] } else { [] }
-  let drv_path = (
+  (
     ^./scripts/with-decrypted-secrets.sh
-      nix run nixpkgs#nix-output-monitor -- build
+      nom build
       .#nixidyEnvs.x86_64-linux.dev.activationPackage
       --impure --no-link --print-out-paths
       ...$trace_args
     | str trim
   )
+}
+
+# Activate a built activation package's output (rsyncs manifests/dev, writes sops secrets, post-processes)
+def switch-activation-package [drv_path: string] {
   # nixidy's activate step rsyncs its build output over manifests/dev with
   # --delete; it doesn't know SopsSecret files exist, so it wipes them all on
   # every run. Snapshot them first so write-sops-secrets.sh can tell which
@@ -77,9 +81,15 @@ export def "nur switch-charts" [--show-trace] {
   nur post-process-manifests
 }
 
-# CI shorthand — same as switch-charts
+# Full pipeline: build, then switch (generate manifests, post-process, write to manifests/dev/, activate)
+export def "nur switch" [--show-trace] {
+  let drv_path = if $show_trace { nur build --show-trace } else { nur build }
+  switch-activation-package $drv_path
+}
+
+# CI shorthand — same as switch
 export def "nur ci" [] {
-  nur switch-charts
+  nur switch
 }
 
 # Format all .nix files using nixfmt
@@ -138,7 +148,7 @@ export def "nur argocd install" [] {
 
 # Register 00-master app with ArgoCD (triggers full sync)
 export def "nur argocd apply-master" [] {
-  ^kubectl apply -f target/infra-manifests/00-master.yaml
+  (^jet -i edn -o yaml < infra-manifests/00-master.edn | ^kubectl apply -f -)
 }
 
 # ─── Port-forwarding ─────────────────────────────────────────────────────────
@@ -458,11 +468,4 @@ export def "nur sealed-secrets apply-label" [] {
 # Delete the sealed-secrets controller pod (forces key reload)
 export def "nur sealed-secrets delete-controller" [] {
   ^kubectl -n sealed-secrets delete pod -l name=sealed-secrets-controller
-}
-
-# ─── Misc ────────────────────────────────────────────────────────────────────
-
-# Generate a random keyfile (keepass.keyx)
-export def "nur generate-key-file" [] {
-  ^openssl rand -out keepass.keyx 256
 }

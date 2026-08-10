@@ -17,10 +17,13 @@ nur --help
 ### Build & Deploy
 
 ```sh
-# Full pipeline: generate manifests, post-process, write to manifests/dev/, activate
-nur switch-charts
+# Build the nixidy activation package without applying it (like `nixos-rebuild build`)
+nur build
 
-# CI shorthand — same as switch-charts
+# Full pipeline: build, then switch — generate manifests, post-process, write to manifests/dev/, activate
+nur switch
+
+# CI shorthand — same as switch
 nur ci
 
 # Post-process already-generated manifests (fixups for nixidy hardcoded behaviours)
@@ -93,8 +96,7 @@ ArgoCD is bootstrapped manually (see README), then self-manages via the `00-mast
 | `modules/flake/` | Flake-parts modules wiring everything together |
 | `generators/` | CRD option modules (imported at eval time via `crdImports`) |
 | `manifests/dev/` | **Generated output** — do not edit manually |
-| `infra-manifests/` | Legacy edn-based manifests (`00-master.edn`); used by `nur argocd apply-master` |
-| `src/k3s_fleetops/` | Legacy Babashka Clojure source (`postgres.clj`); superseded by `scripts/nur.nu` |
+| `infra-manifests/` | Bootstrap-only edn manifests (`00-master.edn`, `argocd/install.yaml`); `nur argocd apply-master`/`nur argocd install` consume these directly (via `jet`) |
 | `secrets.enc.yaml` | Sops-encrypted secrets (age key at `~/.config/sops/age/keys.txt`) |
 
 ### Adding or Modifying an Application
@@ -102,7 +104,7 @@ ArgoCD is bootstrapped manually (see README), then self-manages via the `00-mast
 1. Create `applications/<name>.nix` using `self.lib.mkArgoApp` (see `applications/sonarr.nix` as a full example; some complex apps use a subdirectory `applications/<name>/default.nix` instead).
 2. Add the import to `applications/default.nix`.
 3. Create `env/dev/<name>.nix` setting `services.<name>` (use `enable = false` if it shouldn't deploy yet), and add it to the `imports` list in `env/dev.nix`. Use `config.devDefaults.*` for shared domains/clusterIssuer/NAS values, and the `secrets`/`arrDatabases` module args (injected via `_module.args` in `env/dev.nix`) where needed.
-4. Run `nur switch-charts` to regenerate and apply manifests.
+4. Run `nur switch` to regenerate and apply manifests.
 
 ### Apps Without a Dockerfile (nix-csi)
 
@@ -125,7 +127,7 @@ When an upstream project has no Dockerfile, use the nix-csi CSI driver (already 
 
 ### Secrets at Build Time
 
-`env/dev.nix` calls `self.lib.loadSecrets` which reads `$DECRYPTED_SECRET_FILE` (set by `with-decrypted-secrets.sh`). The `nur switch-charts` task calls that wrapper script internally — callers just run `nur switch-charts` or `nur ci` directly.
+`env/dev.nix` calls `self.lib.loadSecrets` which reads `$DECRYPTED_SECRET_FILE` (set by `with-decrypted-secrets.sh`). The `nur switch` task calls that wrapper script internally — callers just run `nur switch` directly.
 
 ### Nix Flake Inputs
 
@@ -133,7 +135,7 @@ Key inputs: `nixidy` (GitOps manifest generator), `nixhelm` (Helm chart derivati
 
 ## Dev Environment
 
-Enter the Nix dev shell for all required tools (kubectl, helm, argocd, sops, age, babashka, kubeseal, etc.):
+Enter the Nix dev shell for all required tools (kubectl, helm, argocd, sops, age, kubeseal, etc.):
 
 ```sh
 nix develop

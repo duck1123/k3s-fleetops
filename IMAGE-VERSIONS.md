@@ -10,7 +10,7 @@ This document records all explicitly pinned container images and Helm chart vers
 
 1. Find the `default = "image:tag"` line in `applications/<name>.nix` (or the `image = "..."` override in `env/dev.nix`).
 2. Replace the tag with the new version.
-3. Run `nur switch-charts` to regenerate and apply manifests.
+3. Run `nur switch` to regenerate and apply manifests.
 
 No hash is needed — container images pull directly at runtime.
 
@@ -28,7 +28,7 @@ helm pull --repo "REPO_URL" CHART_NAME --version NEW_VERSION --untar -d /tmp/hel
 nix hash path --sri /tmp/helm-dl/CHART_NAME
 
 # 3. Update version and chartHash in applications/<name>.nix
-# 4. Run nur switch-charts
+# 4. Run nur switch
 ```
 
 For **OCI charts** (repo starts with `oci://`), the pull command is:

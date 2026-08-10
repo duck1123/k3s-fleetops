@@ -3,7 +3,6 @@
 # run the given command, then remove the temp file. No decrypted file is left on disk.
 #
 # Usage:
-#   ./scripts/with-decrypted-secrets.sh bb switch-charts
 #   ./scripts/with-decrypted-secrets.sh nix build .#nixidyEnvs.x86_64-linux.dev.activationPackage --impure --no-link --print-out-paths
 #
 # Optional: SECRETS_ENC_FILE=path/to/enc.yaml to use a different encrypted file (default: secrets.enc.yaml).

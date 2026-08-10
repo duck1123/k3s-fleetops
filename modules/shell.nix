@@ -15,15 +15,12 @@
             age
             argo-workflows
             argocd
-            babashka
-            clojure
-            docker
             gum
             jet
-            keepassxc
             kubectl
             kubernetes-helm
             kubeseal
+            nix-output-monitor
             openssl
             sops
             ssh-to-age

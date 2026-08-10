@@ -1,14 +1,7 @@
 #!/bin/sh
 
-# Clean
-bb clean
+# Regenerate manifests from Nix config
+nur switch
 
-# Build charts
-bb switch-charts
-
-# Run the build command
-bb build
-
-# Add any changes in the target/ directory
+# Add any changes in manifests/
 git add manifests/
-git add target/
