@@ -1,9 +1,9 @@
 { config, ... }:
 {
   services.tunarr = {
-    enable = false;
+    enable = true;
     enableGPU = true;
-    hostAffinity = "edgenix";
+    # hostAffinity = "edgenix";
     resetDatabase = false;
 
     ingress = {
