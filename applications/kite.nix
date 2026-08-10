@@ -11,12 +11,12 @@
     self.lib.mkArgoApp { inherit config lib; } {
       name = "kite";
 
-      # https://github.com/zxh326/kite
+      # https://github.com/kite-org/kite (formerly zxh326/kite)
       chart = helm.downloadHelmChart {
         repo = "https://zxh326.github.io/kite";
         chart = "kite";
-        version = "0.5.0";
-        chartHash = "sha256-60x7ce2xqNoZqtOZc+pDBNa1Vosbm+ZFxl0i9sHQSzo=";
+        version = "0.14.1";
+        chartHash = "sha256-esxcmhoBhhxjByM3KftrYFlD8h2a0fwT933ZRz8DuyE=";
       };
 
       uses-ingress = true;
@@ -38,9 +38,10 @@
       defaultValues =
         cfg: with cfg; {
           inherit encryptKey jwtSecret;
-          db.sqlite.persistence = {
+          deploymentStrategy.type = "Recreate";
+          db.sqlite.persistence.pvc = {
+            enabled = true;
             accessModes = [ "ReadWriteOnce" ];
-            pvc.enabled = true;
             size = "1Gi";
             storageClass = cfg.storageClassName;
           };

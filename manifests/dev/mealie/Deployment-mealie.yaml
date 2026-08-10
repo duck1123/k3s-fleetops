@@ -43,7 +43,7 @@ spec:
                 secretKeyRef:
                   key: password
                   name: mealie-database-password
-          image: ghcr.io/mealie-recipes/mealie:v3.19.2
+          image: ghcr.io/mealie-recipes/mealie:v3.22.0
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3

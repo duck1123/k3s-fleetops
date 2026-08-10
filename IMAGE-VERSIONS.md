@@ -50,12 +50,12 @@ These images have explicit version tags and require manual checks.
 | Service | File | Image | Current Tag | Check URL |
 |---------|------|-------|-------------|-----------|
 | nocodb | applications/nocodb.nix | nocodb/nocodb | 2026.08.0 | https://hub.docker.com/r/nocodb/nocodb/tags |
-| radarr | env/dev/radarr.nix | linuxserver/radarr | 6.1.1.10360-ls304 | https://hub.docker.com/r/linuxserver/radarr/tags |
+| radarr | env/dev/radarr.nix | linuxserver/radarr | 6.3.0.10514-ls313 | https://hub.docker.com/r/linuxserver/radarr/tags |
 | sonarr | env/dev/sonarr.nix | linuxserver/sonarr | 4.0.19.2979-ls321 | https://hub.docker.com/r/linuxserver/sonarr/tags |
 | tdarr | env/dev/tdarr.nix | ghcr.io/haveagitgat/tdarr | 2.86.01 | https://github.com/HaveAGitGat/Tdarr (GHCR tags are authoritative; GitHub Releases page is stale) |
 | kavita | applications/kavita.nix | linuxserver/kavita | v0.9.0.2-ls110 | https://hub.docker.com/r/linuxserver/kavita/tags |
-| mealie | applications/mealie.nix, env/dev/mealie.nix | ghcr.io/mealie-recipes/mealie | v3.19.2 | https://github.com/mealie-recipes/mealie/releases |
-| romm | applications/romm.nix | ghcr.io/rommapp/romm | 4.8.1 | https://github.com/rommapp/romm/releases |
+| mealie | applications/mealie.nix, env/dev/mealie.nix | ghcr.io/mealie-recipes/mealie | v3.22.0 | https://github.com/mealie-recipes/mealie/releases |
+| romm | applications/romm.nix | ghcr.io/rommapp/romm | 5.1.0 | https://github.com/rommapp/romm/releases |
 | hivemq | applications/hivemq.nix | hivemq/hivemq-ce | 2026.5 | https://hub.docker.com/r/hivemq/hivemq-ce/tags |
 | specter | applications/specter.nix | lncm/specter-desktop | v2.1.1 | https://github.com/lncm/docker-specter-desktop/releases |
 | postgres init | applications/immich.nix | docker.io/postgres | 17.10 | https://hub.docker.com/_/postgres/tags |
@@ -79,7 +79,10 @@ Charts with explicit version pins and SHA-256 hashes.
 | Service | File | Repo | Version | ArtifactHub / Source |
 |---------|------|------|---------|----------------------|
 | authentik | applications/authentik.nix | https://charts.goauthentik.io/ | 2026.5.2 | https://artifacthub.io/packages/helm/goauthentik/authentik |
+| cloudbeaver | applications/cloudbeaver.nix | https://avistotelecom.github.io/charts/ | 1.1.7 | https://artifacthub.io/packages/helm/avisto/cloudbeaver |
 | immich | applications/immich.nix | oci://ghcr.io/immich-app/immich-charts | 0.12.0 | https://artifacthub.io/packages/helm/immich/immich |
+| kite | applications/kite.nix | https://zxh326.github.io/kite | 0.14.1 | https://github.com/kite-org/kite (image repo moved zxh326→kite-org; Helm repo URL still resolves as-is) |
+| mariadb | applications/mariadb.nix | oci://registry-1.docker.io/bitnamicharts (classic charts.bitnami.com repo 403s now) | 27.0.4 | https://artifacthub.io/packages/helm/bitnami/mariadb — free-tier image is `bitnami/mariadb:latest` only, no immutable tag; chart appVersion label (13.0.1, an RC) is cosmetic since we pin `image` ourselves |
 | memos | applications/memos.nix | https://charts.gabe565.com | 0.17.0 | https://artifacthub.io/packages/helm/gabe565/memos |
 | metabase | applications/metabase.nix | https://pmint93.github.io/helm-charts | 2.26.0 | https://artifacthub.io/packages/helm/pmint93/metabase |
 | minio | applications/minio.nix | https://charts.bitnami.com/bitnami | 17.0.21 | https://artifacthub.io/packages/helm/bitnami/minio |
@@ -109,12 +112,6 @@ These have newer versions available but involve major or breaking changes. Revie
 | argo-workflows | applications/argo-workflows.nix | 11.1.10 | unclear | Bitnami renumbered (OCI: ~1.1.x); verify repo migration |
 | rustfs | applications/rustfs.nix | 0.0.90 | 0.6.0 | Large jump; still beta software |
 | immich (chart) | applications/immich.nix | 0.12.0 | 0.13.1 | **Build-blocked, not just review**: chart ≥0.13 pulls in bjw-s-labs common-library schema validation that fetches `raw.githubusercontent.com` during `helm template`, which fails under Nix's sandboxed/offline build. Needs a workaround (e.g. schema-validation skip flag) before it can be bumped at all |
-| mariadb (chart) | applications/mariadb.nix | 25.0.8 | 27.0.4 | Major version jump (25→27); repo now silently redirects through `oci://registry-1.docker.io/bitnamicharts/mariadb` (same migration sealed-secrets went through). Also: free-tier Bitnami image is `bitnami/mariadb:latest` only (no immutable tag available), a reproducibility risk independent of the chart bump |
-| cloudbeaver (chart) | applications/cloudbeaver.nix | 1.0.10 | 1.1.7 | Minor line bump (1.0→1.1), appVersion 26.1.2; review changelog |
-| kite (chart) | applications/kite.nix | 0.5.0 | 0.14.1 | Large version gap (0.5→0.14); upstream org may have moved zxh326/kite → kite-org/kite (old repo/pages URL still resolves) — verify before bumping |
-| radarr (image) | env/dev/radarr.nix | 6.1.1.10360-ls304 | 6.3.0.10514-ls313 | Minor-line jump 6.1→6.3; check Radarr release notes |
-| mealie (image) | applications/mealie.nix, env/dev/mealie.nix | v3.19.2 | v3.22.0 | Moderate jump, no breaking changes flagged but unreviewed |
-| romm (image) | applications/romm.nix | 4.8.1 | 5.1.0 | Major version bump (4→5), new emulator streaming features — review release notes |
 
 ### Unchecked (internal or niche charts)
 

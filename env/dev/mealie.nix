@@ -3,7 +3,7 @@
   services.mealie = {
     enable = true;
     # hostAffinity = "edgenix";
-    image = "ghcr.io/mealie-recipes/mealie:v3.19.2";
+    image = "ghcr.io/mealie-recipes/mealie:v3.22.0";
 
     database = {
       enable = true;

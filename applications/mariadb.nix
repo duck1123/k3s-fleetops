@@ -36,10 +36,10 @@
 
         # https://artifacthub.io/packages/helm/bitnami/mariadb
         chart = lib.helm.downloadHelmChart {
-          repo = "https://charts.bitnami.com/bitnami";
+          repo = "oci://registry-1.docker.io/bitnamicharts";
           chart = "mariadb";
-          version = "25.0.8";
-          chartHash = "sha256-wJPwfAEpeMopPXS14N6FvpxWTMSFqLMO43IT4rkdVj8=";
+          version = "27.0.4";
+          chartHash = "sha256-CwUmp5f57WqdPLR2/K5MkSMf+YFve20m23+MY348EYs=";
         };
 
         extraOptions = {

@@ -12,7 +12,7 @@
 
     enable = true;
     hostAffinity = "edgenix";
-    image = "linuxserver/radarr:6.1.1.10360-ls304";
+    image = "linuxserver/radarr:6.3.0.10514-ls313";
 
     ingress = {
       clusterIssuer = config.devDefaults.clusterIssuer;
