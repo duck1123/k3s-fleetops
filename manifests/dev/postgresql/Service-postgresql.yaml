@@ -5,8 +5,8 @@ metadata:
     app.kubernetes.io/instance: postgresql
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: postgres
-    app.kubernetes.io/version: "18.3"
-    helm.sh/chart: postgres-1.6.2
+    app.kubernetes.io/version: "18.4"
+    helm.sh/chart: postgres-1.6.7
   name: postgresql
   namespace: postgresql
 spec:

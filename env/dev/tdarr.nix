@@ -2,7 +2,7 @@
 {
   services.tdarr = {
     enable = true;
-    image = "ghcr.io/haveagitgat/tdarr:2.81.01";
+    image = "ghcr.io/haveagitgat/tdarr:2.86.01";
     healthcheckcpuWorkers = 0;
     healthcheckgpuWorkers = 1;
     hostAffinity = "nixmini";

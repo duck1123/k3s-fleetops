@@ -11,7 +11,7 @@
     };
 
     enable = true;
-    image = "linuxserver/sonarr:4.0.17.2952-ls312";
+    image = "linuxserver/sonarr:4.0.19.2979-ls321";
     hostAffinity = "edgenix";
 
     ingress = {

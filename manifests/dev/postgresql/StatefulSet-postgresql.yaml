@@ -5,8 +5,8 @@ metadata:
     app.kubernetes.io/instance: postgresql
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: postgres
-    app.kubernetes.io/version: "18.3"
-    helm.sh/chart: postgres-1.6.2
+    app.kubernetes.io/version: "18.4"
+    helm.sh/chart: postgres-1.6.7
   name: postgresql
   namespace: postgresql
 spec:
@@ -22,7 +22,7 @@ spec:
       annotations:
         checksum/customconfig: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
         checksum/customscripts: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
-        checksum/scripts: aab088b39294a5e94122771a16b2c660281c4369ccbc3c8827cb37e10701ed2e
+        checksum/scripts: 888733ae7c59b608a9dd0e8956eefdc0a16a023ee920648b43332424fa968cc3
         checksum/secureconfig: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
       labels:
         app.kubernetes.io/instance: postgresql

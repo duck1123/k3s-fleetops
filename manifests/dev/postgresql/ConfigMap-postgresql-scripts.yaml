@@ -4,10 +4,10 @@ data:
     #!/bin/sh
     create_user()
     {
-    psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -v USERDBNAME="$POSTGRES_DB" -v USERDBUSER="$USERDB_USER" -v USERDBPASSWORD="'$USERDB_PASSWORD'" <<-EOSQL
-      CREATE USER :USERDBUSER WITH PASSWORD :USERDBPASSWORD;
-      GRANT ALL PRIVILEGES ON DATABASE :USERDBNAME TO :USERDBUSER;
-      ALTER DATABASE :USERDBNAME OWNER TO :USERDBUSER;
+    psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -v USERDBNAME="$POSTGRES_DB" -v USERDBUSER="$USERDB_USER" -v USERDBPASSWORD="$USERDB_PASSWORD" <<-EOSQL
+      CREATE USER :"USERDBUSER" WITH PASSWORD :'USERDBPASSWORD';
+      GRANT ALL PRIVILEGES ON DATABASE :"USERDBNAME" TO :"USERDBUSER";
+      ALTER DATABASE :"USERDBNAME" OWNER TO :"USERDBUSER";
     EOSQL
     }
     set -e
@@ -42,7 +42,7 @@ metadata:
     app.kubernetes.io/instance: postgresql
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: postgres
-    app.kubernetes.io/version: "18.3"
-    helm.sh/chart: postgres-1.6.2
+    app.kubernetes.io/version: "18.4"
+    helm.sh/chart: postgres-1.6.7
   name: postgresql-scripts
   namespace: postgresql

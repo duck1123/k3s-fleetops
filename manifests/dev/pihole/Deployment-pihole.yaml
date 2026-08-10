@@ -4,7 +4,7 @@ metadata:
   labels:
     app: pihole
     app.kubernetes.io/name: pihole
-    chart: pihole-2.35.0
+    chart: pihole-2.38.0
     heritage: Helm
     release: pihole
   name: pihole
@@ -26,7 +26,7 @@ spec:
       annotations:
         checksum.config.adlists: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546
         checksum.config.blacklist: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546
-        checksum.config.dnsmasqConfig: 2b23cb2ffe3bcb7a5f8c14c8cc4af843dfd3bdb38280302b9d7ff93b9d90c98
+        checksum.config.dnsmasqConfig: 3eb9df23500f1c57ddbbd4799415e9507cc6dd86e8a019024132d9e0d6bac37
         checksum.config.regex: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546
         checksum.config.staticDhcpConfig: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546
         checksum.config.whitelist: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546
@@ -54,7 +54,7 @@ spec:
               value: America/Detroit
             - name: FTLCONF_dns_upstreams
               value: 1.1.1.1;1.0.0.1
-          image: pihole/pihole:2025.11.1
+          image: pihole/pihole:2026.07.2
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5

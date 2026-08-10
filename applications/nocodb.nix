@@ -51,7 +51,7 @@
           image = mkOption {
             description = mdDoc "NocoDB Docker image";
             type = types.str;
-            default = "nocodb/nocodb:2026.05.2";
+            default = "nocodb/nocodb:2026.08.0";
           };
 
           service.port = mkOption {

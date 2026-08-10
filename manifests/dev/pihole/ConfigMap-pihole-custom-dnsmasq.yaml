@@ -11,7 +11,7 @@ kind: ConfigMap
 metadata:
   labels:
     app: pihole
-    chart: pihole-2.35.0
+    chart: pihole-2.38.0
     heritage: Helm
     release: pihole
   name: pihole-custom-dnsmasq
