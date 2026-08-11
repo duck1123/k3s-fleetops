@@ -1,0 +1,35 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/service.sticky.cookie: "true"
+    traefik.ingress.kubernetes.io/service.sticky.cookie.httponly: "true"
+    traefik.ingress.kubernetes.io/service.sticky.cookie.name: rustfs
+    traefik.ingress.kubernetes.io/service.sticky.cookie.samesite: none
+    traefik.ingress.kubernetes.io/service.sticky.cookie.secure: "true"
+  labels:
+    app.kubernetes.io/instance: rustfs
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: rustfs
+    app.kubernetes.io/version: 1.0.0-alpha.90
+    helm.sh/chart: rustfs-0.0.90
+  name: rustfs
+  namespace: rustfs
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: rustfs.home.kronkltd.net
+      http:
+        paths:
+          - backend:
+              service:
+                name: rustfs-svc
+                port:
+                  name: console
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - rustfs.home.kronkltd.net
+      secretName: rustfs-tls

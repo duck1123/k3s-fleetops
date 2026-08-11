@@ -2,7 +2,7 @@
 {
   services.rustfs = {
     accessKey = (secrets.rustfs or { }).accessKey or "";
-    enable = false;
+    enable = true;
     hostAffinity = "nasnix";
 
     ingress = {
