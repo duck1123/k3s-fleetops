@@ -10,6 +10,7 @@
     ./argocd.nix
     ./argo-events.nix
     ./argo-workflows.nix
+    ./attic.nix
     ./authentik.nix
     ./booklore.nix
     ./calibre.nix

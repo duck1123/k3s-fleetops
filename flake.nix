@@ -2,6 +2,11 @@
   description = "My ArgoCD configuration with nixidy.";
 
   inputs = {
+    attic = {
+      inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:zhaofengli/attic";
+    };
+
     clj-nix = {
       inputs = {
         nix-fetcher-data.follows = "nix-fetcher-data";

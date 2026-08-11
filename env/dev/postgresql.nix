@@ -25,6 +25,11 @@
       ]
       ++ [
         {
+          name = "attic";
+          username = "attic";
+          password = secrets.postgresql.userPassword;
+        }
+        {
           name = "immich";
           username = "immich";
           password = secrets.postgresql.userPassword;
