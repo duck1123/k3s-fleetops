@@ -90,6 +90,17 @@
               default = "";
             };
           };
+
+          uid = mkOption {
+            description = mdDoc ''
+              uid/gid to run the rustfs pod as (podSecurityContext.runAsUser/runAsGroup/fsGroup).
+              Chart default is 10001. When backed by NFS, this needs to match a uid the NFS
+              server actually grants write access to (e.g. the NAS account's uid), since NFS
+              permission checks happen server-side regardless of "no mapping" squash settings.
+            '';
+            type = types.int;
+            default = 10001;
+          };
         };
 
         extraResources =
@@ -138,6 +149,12 @@
                 };
 
             storageclass.name = if cfg.nfs.enable then "" else cfg.storageClassName;
+
+            podSecurityContext = {
+              fsGroup = cfg.uid;
+              runAsUser = cfg.uid;
+              runAsGroup = cfg.uid;
+            };
 
             ingress = with cfg.ingress; {
               enabled = true;

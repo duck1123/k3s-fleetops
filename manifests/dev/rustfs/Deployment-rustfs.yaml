@@ -100,9 +100,9 @@ spec:
       nodeSelector:
         kubernetes.io/hostname: nasnix
       securityContext:
-        fsGroup: 10001
-        runAsGroup: 10001
-        runAsUser: 10001
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsUser: 1000
       volumes:
         - name: logs
           persistentVolumeClaim:
