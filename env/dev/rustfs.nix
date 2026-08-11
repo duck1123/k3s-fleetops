@@ -18,7 +18,7 @@
     nfs = {
       enable = true;
       server = config.devDefaults.nasHost;
-      path = "${config.devDefaults.nasBase}/LonghornBackups";
+      path = "${config.devDefaults.nasBase}/RustFS";
     };
 
     secretKey = (secrets.rustfs or { }).secretKey or "";
