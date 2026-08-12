@@ -42,6 +42,11 @@
         allowed-hosts = ["${cfg.ingress.domain}"]
         api-endpoint = "https://${cfg.ingress.domain}/"
 
+        # url intentionally omitted: falls back to $ATTIC_SERVER_DATABASE_URL.
+        # The [database] header must still be present or serde fails with
+        # "missing field `database`" instead of applying the per-field default.
+        [database]
+
         [storage]
         type = "s3"
         region = "${cfg.storage.region}"
