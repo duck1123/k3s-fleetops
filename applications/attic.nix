@@ -52,6 +52,17 @@
         region = "${cfg.storage.region}"
         bucket = "${cfg.storage.bucket}"
         endpoint = "${cfg.storage.endpoint}"
+
+        # Upstream defaults from server/src/config-template.toml — these fields
+        # have no serde defaults of their own, unlike [database]'s url.
+        [chunking]
+        nar-size-threshold = 65536
+        min-size = 16384
+        avg-size = 65536
+        max-size = 262144
+
+        [compression]
+        type = "zstd"
       '';
     in
     self.lib.mkArgoApp
