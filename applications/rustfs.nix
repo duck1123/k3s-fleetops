@@ -176,7 +176,16 @@
               tls = {
                 enabled = tls.enable;
                 certManager.enabled = false;
-                existingSecret.enabled = false;
+                # cert-manager already manages this Secret via the Ingress's
+                # cert-manager.io/cluster-issuer annotation. Point the chart at
+                # it as an "existing secret" so it doesn't also render its own
+                # placeholder Secret (templates/secret-tls.yaml) with dummy
+                # tls.crt/tls.key values that ArgoCD would reapply over the
+                # real cert-manager-issued data on every sync.
+                existingSecret = {
+                  enabled = true;
+                  name = "rustfs-tls";
+                };
               };
             };
           }
