@@ -133,7 +133,7 @@
             endpoint = mkOption {
               description = mdDoc "S3-compatible endpoint URL";
               type = types.str;
-              default = "http://rustfs.rustfs:9000";
+              default = "http://rustfs-svc.rustfs:9000";
             };
 
             accessKey = mkOption {
