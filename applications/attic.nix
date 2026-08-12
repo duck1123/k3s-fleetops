@@ -39,7 +39,7 @@
 
       serverConfig = cfg: ''
         listen = "[::]:${toString cfg.service.port}"
-        allowed-hosts = ["${cfg.ingress.domain}"]
+        allowed-hosts = ["${cfg.ingress.domain}", "localhost:${toString cfg.service.port}", "${name}.${name}:${toString cfg.service.port}"]
         api-endpoint = "https://${cfg.ingress.domain}/"
 
         # url intentionally omitted: falls back to $ATTIC_SERVER_DATABASE_URL.
