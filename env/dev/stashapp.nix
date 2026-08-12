@@ -17,7 +17,7 @@
       path = "${config.devDefaults.nasBase}/Videos";
     };
 
-    replicas = 1;
+    replicas = 0; # TEMPORARY: paused for data-recovery investigation on pvc-9d446279 (corrupted replica, see incident notes). Restore to 1 once resolved.
     enableGPU = true;
   };
 }
