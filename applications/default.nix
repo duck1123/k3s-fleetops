@@ -16,7 +16,9 @@
     ./calibre.nix
     ./cert-manager.nix
     ./cloudbeaver.nix
+    ./cloudflared.nix
     ./demo.nix
+    ./duck1123
     ./dozzle.nix
     ./ersatztv.nix
     ./fileflows.nix

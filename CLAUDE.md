@@ -103,7 +103,7 @@ ArgoCD is bootstrapped manually (see README), then self-manages via the `00-mast
 
 1. Create `applications/<name>.nix` using `self.lib.mkArgoApp` (see `applications/sonarr.nix` as a full example; some complex apps use a subdirectory `applications/<name>/default.nix` instead).
 2. Add the import to `applications/default.nix`.
-3. Create `env/dev/<name>.nix` setting `services.<name>` (use `enable = false` if it shouldn't deploy yet), and add it to the `imports` list in `env/dev.nix`. Use `config.devDefaults.*` for shared domains/clusterIssuer/NAS values, and the `secrets`/`arrDatabases` module args (injected via `_module.args` in `env/dev.nix`) where needed.
+3. Create `env/dev/<name>.nix` setting `services.<name>` (use `enable = false` if it shouldn't deploy yet). No import edit needed here — `env/dev.nix` auto-imports every file under `env/dev/` via `import-tree`. Use `config.devDefaults.*` for shared domains/clusterIssuer/NAS values, and the `secrets`/`arrDatabases` module args (injected via `_module.args` in `env/dev.nix`) where needed.
 4. Run `nur switch` to regenerate and apply manifests.
 
 ### Apps Without a Dockerfile (nix-csi)
@@ -114,6 +114,15 @@ When an upstream project has no Dockerfile, use the nix-csi CSI driver (already 
 - Add a `csi` volume with `driver: nix.csi.store` and a `nixExpr` attribute containing a Nix expression that evaluates to the package derivation
 - Mount the volume at `/nix` with `subPath: nix` — this makes `/nix/var/result/bin` available on PATH inside the container
 - See `applications/demo.nix` for a working example and `applications/nostrarchives.nix` for a Rust app pattern
+
+### Internet-Facing Apps (Cloudflare Tunnel)
+
+Every ingress in this repo (`uses-ingress = true` via `mkArgoApp`) is LAN/Tailscale-only — Traefik+MetalLB or the Tailscale operator, neither reachable from the public internet. For an app that needs a real public hostname (e.g. `duck1123.com`), use the `cloudflared` app (`applications/cloudflared.nix`) instead of a k8s `Ingress`:
+
+- `cloudflared` is a shared, standalone deployment (own namespace, nix-csi runtime bundling `pkgs.cloudflared` + `pkgs.cacert`) that dials outbound to Cloudflare using a tunnel token (`services.cloudflared.tunnelToken`, sourced from `secrets.cloudflared.tunnelToken` in `secrets.enc.yaml`). No inbound firewall rule or router port-forward is needed.
+- Hostname → service routing is **not** configured in Nix — it's set in the Cloudflare Zero Trust dashboard's tunnel "Public Hostname" tab, pointed at the target app's cluster-internal Service DNS name (e.g. `duck1123.duck1123.svc.cluster.local:8080`).
+- The target app itself needs no `uses-ingress`, no `Ingress` resource, and no cert-manager involvement — just a plain `ClusterIP` `Service`. TLS terminates at Cloudflare's edge. See `applications/duck1123/default.nix` for a full example (static nix-csi-served site behind the tunnel).
+- To add another public hostname on the same tunnel: add its "Public Hostname" route in the Cloudflare dashboard pointing at the new app's Service — no repo changes needed to `cloudflared.nix` itself.
 
 ### `mkArgoApp` Pattern
 

@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: duck1123
+  namespace: duck1123
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: duck1123
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: duck1123
+    spec:
+      containers:
+        - command:
+            - python3
+            - -m
+            - http.server
+            - "8080"
+            - --directory
+            - /site
+          image: ghcr.io/lillecarl/nix-csi/scratch:1.0.1
+          name: duck1123
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /nix
+              name: nix
+              subPath: nix
+            - mountPath: /site
+              name: site
+      volumes:
+        - csi:
+            driver: nix.csi.store
+            volumeAttributes:
+              nixExpr: |
+                let
+                  pkgs = import (builtins.fetchTree {
+                    type = "github";
+                    owner = "nixos";
+                    repo = "nixpkgs";
+                    ref = "nixos-unstable";
+                  }) {};
+                in
+                pkgs.python3
+          name: nix
+        - configMap:
+            name: duck1123-site
+          name: site

@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  name: duck1123
+  namespace: argocd
+spec:
+  destination:
+    namespace: duck1123
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: ./manifests/dev/duck1123
+    repoURL: https://github.com/duck1123/k3s-fleetops.git
+    targetRevision: master
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
