@@ -11,7 +11,7 @@ spec:
   template:
     metadata:
       annotations:
-        configHash: ca2916487e3aeacb3636863fb2da2257
+        configHash: 4c92372465d3e15a8bb432e1681cff47
         kubectl.kubernetes.io/default-container: nix-node
         nix-csi/discard: "true"
       labels:

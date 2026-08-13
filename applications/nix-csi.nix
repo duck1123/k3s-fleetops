@@ -44,6 +44,10 @@
         extraAppConfig =
           cfg:
           let
+            atticSettings = {
+              substituters = [ "https://attic.home.kronkltd.net/nixos" ];
+              trusted-public-keys = [ "nixos:6s8iAyKEnH2z4spigUdDmt1VwiAwrvPA9vQNUd9if1k=" ];
+            };
             nixcsiEval = nixcsi.kubenixInstance {
               module.imports = [
                 # Override curPkgs to avoid builtins.currentSystem (unavailable in pure eval)
@@ -52,6 +56,12 @@
                   nix-csi = {
                     authorizedKeys = cfg.authorizedKeys;
                     cache.storageClassName = cfg.cache.storageClassName;
+                    # Bootstrap components (cache-init-env, proxy-env, etc.) aren't
+                    # published to nix-csi.cachix.org for every commit — our own
+                    # cache closes that gap so cold-starts don't depend on upstream CI.
+                    cache.nixConfig.settings = atticSettings;
+                    node.nixConfig.settings = atticSettings;
+                    builders.nixConfig.settings = atticSettings;
                   };
                 }
               ];
