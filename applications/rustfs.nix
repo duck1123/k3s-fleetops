@@ -105,7 +105,7 @@
 
         extraResources =
           cfg:
-          lib.optionalAttrs cfg.nfs.enable {
+          (lib.optionalAttrs cfg.nfs.enable {
             persistentVolumes."rustfs-data-nfs".spec = {
               capacity.storage = "1Ti";
               accessModes = [ "ReadWriteOnce" ];
@@ -125,6 +125,41 @@
                 path = cfg.nfs.path;
               };
               persistentVolumeReclaimPolicy = "Retain";
+            };
+          })
+          // {
+            # The chart's own Ingress template hardcodes its backend to the
+            # "console" port for every host in ingress.hosts, so there's no
+            # way to expose the S3 API (the "endpoint" port) through it. Any
+            # S3 client outside the cluster (e.g. atticd's presigned URLs)
+            # needs this reachable from somewhere other than the in-cluster
+            # rustfs-svc ClusterIP, so wire it up by hand.
+            ingresses.rustfs-api = {
+              metadata.annotations."cert-manager.io/cluster-issuer" = cfg.ingress.clusterIssuer;
+              spec = {
+                ingressClassName = cfg.ingress.ingressClassName;
+                rules = [
+                  {
+                    host = cfg.ingress.api-domain;
+                    http.paths = [
+                      {
+                        path = "/";
+                        pathType = "Prefix";
+                        backend.service = {
+                          name = "rustfs-svc";
+                          port.name = "endpoint";
+                        };
+                      }
+                    ];
+                  }
+                ];
+                tls = [
+                  {
+                    hosts = [ cfg.ingress.api-domain ];
+                    secretName = "rustfs-api-tls";
+                  }
+                ];
+              };
             };
           };
 
