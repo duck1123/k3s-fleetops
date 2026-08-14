@@ -102,6 +102,30 @@ export def "nur apply-git-hooks" [] {
   ^git config core.hooksPath .githooks
 }
 
+# ─── Static site previews ──────────────────────────────────────────────────
+
+# Convention: a previewable app is an npm/Vite project at applications/<name>-site/
+# (see applications/duck1123-site/), built into a flake package
+# (modules/pkgs/<name>-site.nix) and served via nix-csi in
+# applications/<name>/default.nix. `nur preview <name>` runs it with Vite's own
+# dev server — no cluster/nix-csi involved — so any future app dropped in under
+# that same applications/<name>-site/ layout gets a local preview for free.
+
+# Run an npm/Vite site app's local dev server (installs deps on first run)
+export def "nur preview" [
+  name: string   # App name, e.g. "duck1123" for applications/duck1123-site/
+] {
+  let dir = $"applications/($name)-site"
+  if not ($dir | path exists) {
+    error make {msg: $"No ($dir) found. Expected an npm/Vite project there — see applications/duck1123-site/ for the pattern."}
+  }
+  if not ($"($dir)/node_modules" | path exists) {
+    print $"Installing dependencies in ($dir)..."
+    ^npm --prefix $dir install
+  }
+  ^npm --prefix $dir run dev
+}
+
 # ─── Secrets ─────────────────────────────────────────────────────────────────
 
 # Edit encrypted secrets in-place (no plaintext file written)

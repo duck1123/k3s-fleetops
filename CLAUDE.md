@@ -31,6 +31,9 @@ nur post-process-manifests
 
 # Nix code formatting
 nur format
+
+# Run an npm/Vite site app's local dev server — see applications/duck1123-site/
+nur preview <name>
 ```
 
 ### Secrets
@@ -123,6 +126,14 @@ Every ingress in this repo (`uses-ingress = true` via `mkArgoApp`) is LAN/Tailsc
 - Hostname → service routing is **not** configured in Nix — it's set in the Cloudflare Zero Trust dashboard's tunnel "Public Hostname" tab, pointed at the target app's cluster-internal Service DNS name (e.g. `duck1123.duck1123.svc.cluster.local:8080`).
 - The target app itself needs no `uses-ingress`, no `Ingress` resource, and no cert-manager involvement — just a plain `ClusterIP` `Service`. TLS terminates at Cloudflare's edge. See `applications/duck1123/default.nix` for a full example (static nix-csi-served site behind the tunnel).
 - To add another public hostname on the same tunnel: add its "Public Hostname" route in the Cloudflare dashboard pointing at the new app's Service — no repo changes needed to `cloudflared.nix` itself.
+
+#### Static sites (npm/Vite + nix-csi + flake package)
+
+`duck1123` is the reference pattern for a static frontend with no Dockerfile, following the `applications/<name>-site/` convention:
+
+- `applications/<name>-site/` — a real npm/Vite project (see `applications/duck1123-site/`). Run it locally with `nur preview <name>` (Vite dev server, no cluster involved).
+- `modules/pkgs/<name>-site.nix` — a `perSystem` flake module exposing `packages.<name>-site` via `pkgs.buildNpmPackage` (see `modules/pkgs/duck1123-site.nix`); `modules/` is auto-imported so dropping the file in is enough, no manual registration.
+- `applications/<name>/default.nix` — nix-csi's `nixExpr` fetches `(builtins.getFlake "github:duck1123/k3s-fleetops").packages.x86_64-linux.<name>-site` (same self-referential-flake pattern as `applications/nostrarchives.nix`) and `symlinkJoin`s it with `pkgs.python3` so the mounted `/nix/var/result` has both the built static files and a Python interpreter to serve them. **This means the built site always reflects the last-pushed commit, not local uncommitted changes** — push before expecting nix-csi to pick up new content.
 
 ### `mkArgoApp` Pattern
 
