@@ -16,8 +16,15 @@
       };
 
       # ── Runtime ──────────────────────────────────────────────────────────────
-      # nix-csi evaluates this expression on the node and mounts the result at
-      # /nix so its bin directory is on PATH inside the scratch container.
+      # The site itself (pubkey, relays, NIP-05 well-known file) lives as a real
+      # npm/Vite project at applications/duck1123-site/, built via the
+      # `duck1123-site` flake package (modules/pkgs/duck1123-site.nix). nix-csi
+      # fetches this repo's own flake by GitHub reference to get that package —
+      # meaning site changes need to be pushed before nix-csi will pick them up,
+      # same as applications/nostrarchives.nix's nixExpr. It's symlinkJoin'd with
+      # pkgs.python3 so /nix/var/result has both a `bin/python3` to run
+      # server.py *and* the built static files (index.html, assets/,
+      # .well-known/) at its root for that same server to serve.
       nixExpr = ''
         let
           pkgs = import (builtins.fetchTree {
@@ -26,31 +33,18 @@
             repo = "nixpkgs";
             ref = "nixos-unstable";
           }) {};
+          site = (builtins.getFlake "github:duck1123/k3s-fleetops").packages.x86_64-linux.duck1123-site;
         in
-        pkgs.python3
+        pkgs.symlinkJoin {
+          name = "duck1123-runtime";
+          paths = [
+            pkgs.python3
+            site
+          ];
+        }
       '';
 
-      # ── Site ─────────────────────────────────────────────────────────────────
-      # Hand-written ES modules, no bundler/build step — nostr-tools is imported
-      # at runtime from a pinned ESM CDN URL inside nostr.js. Every file here is
-      # plain and can be edited freely without touching the Nix build, except
-      # config.js which is generated below from `cfg.pubkey`/`cfg.relays`.
-      siteFiles = {
-        "index.html" = builtins.readFile ./site/index.html;
-        "style.css" = builtins.readFile ./site/style.css;
-        "nostr.js" = builtins.readFile ./site/nostr.js;
-        "auth.js" = builtins.readFile ./site/auth.js;
-        "comments.js" = builtins.readFile ./site/comments.js;
-        "main.js" = builtins.readFile ./site/main.js;
-      };
-
-      configJs =
-        cfg: ''
-          export const CONFIG = {
-            pubkey: ${builtins.toJSON cfg.pubkey},
-            relays: ${builtins.toJSON cfg.relays},
-          };
-        '';
+      serverScript = builtins.readFile ./server.py;
     in
     self.lib.mkArgoApp
       {
@@ -64,34 +58,13 @@
       {
         inherit name;
 
-        extraOptions = {
-          pubkey = mkOption {
-            description = mdDoc "Hex nostr pubkey whose profile/notes this site displays";
-            type = types.str;
-            default = "47b38f4d3721390d5b6bef78dae3f3e3888ecdbf1844fbb33b88721d366d5c88";
-          };
-
-          relays = mkOption {
-            description = mdDoc "Relay URLs the site queries for profile/notes and publishes replies to";
-            type = types.listOf types.str;
-            default = [
-              "wss://relay.damus.io"
-              "wss://nos.lol"
-              "wss://relay.nostr.band"
-              "wss://relay.primal.net"
-            ];
-          };
-        };
-
         extraResources =
           cfg:
           let
             port = 8080;
           in
           {
-            configMaps.duck1123-site.data = siteFiles // {
-              "config.js" = configJs cfg;
-            };
+            configMaps.duck1123-server.data."server.py" = serverScript;
 
             deployments.${name}.spec = {
               selector.matchLabels = labels;
@@ -104,11 +77,13 @@
                       image = "ghcr.io/lillecarl/nix-csi/scratch:1.0.1";
                       command = [
                         "python3"
-                        "-m"
-                        "http.server"
-                        (toString port)
-                        "--directory"
-                        "/site"
+                        "/scripts/server.py"
+                      ];
+                      env = [
+                        {
+                          name = "PORT";
+                          value = toString port;
+                        }
                       ];
                       ports = [
                         {
@@ -124,8 +99,8 @@
                           subPath = "nix";
                         }
                         {
-                          name = "site";
-                          mountPath = "/site";
+                          name = "scripts";
+                          mountPath = "/scripts";
                         }
                       ];
                     }
@@ -139,8 +114,8 @@
                       };
                     }
                     {
-                      name = "site";
-                      configMap.name = "duck1123-site";
+                      name = "scripts";
+                      configMap.name = "duck1123-server";
                     }
                   ];
                 };

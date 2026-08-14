@@ -1,3 +1,4 @@
+import "./style.css";
 import { CONFIG } from "./config.js";
 import { createPool, fetchProfile, fetchNotes, fetchReplies } from "./nostr.js";
 import { hasExtension, login } from "./auth.js";

@@ -1,4 +1,4 @@
-import { SimplePool } from "https://esm.sh/nostr-tools@2.10.4";
+import { SimplePool } from "nostr-tools";
 
 export function createPool() {
   return new SimplePool();

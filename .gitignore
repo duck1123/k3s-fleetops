@@ -17,3 +17,5 @@ tls.key
 /backups/
 .gitnexus
 /secrets.yaml
+node_modules/
+dist/

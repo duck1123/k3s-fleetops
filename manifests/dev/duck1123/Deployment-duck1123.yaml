@@ -15,11 +15,10 @@ spec:
       containers:
         - command:
             - python3
-            - -m
-            - http.server
-            - "8080"
-            - --directory
-            - /site
+            - /scripts/server.py
+          env:
+            - name: PORT
+              value: "8080"
           image: ghcr.io/lillecarl/nix-csi/scratch:1.0.1
           name: duck1123
           ports:
@@ -30,8 +29,8 @@ spec:
             - mountPath: /nix
               name: nix
               subPath: nix
-            - mountPath: /site
-              name: site
+            - mountPath: /scripts
+              name: scripts
       volumes:
         - csi:
             driver: nix.csi.store
@@ -44,9 +43,16 @@ spec:
                     repo = "nixpkgs";
                     ref = "nixos-unstable";
                   }) {};
+                  site = (builtins.getFlake "github:duck1123/k3s-fleetops").packages.x86_64-linux.duck1123-site;
                 in
-                pkgs.python3
+                pkgs.symlinkJoin {
+                  name = "duck1123-runtime";
+                  paths = [
+                    pkgs.python3
+                    site
+                  ];
+                }
           name: nix
         - configMap:
-            name: duck1123-site
-          name: site
+            name: duck1123-server
+          name: scripts
