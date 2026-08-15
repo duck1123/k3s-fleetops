@@ -51,6 +51,11 @@
         };
         # providers.kubernetesGateway.statusAddress.hostname = "localhost";
         additionalArguments = [
+          # Restrict the Kubernetes Ingress provider to ingressClassName=traefik so
+          # it doesn't also match ingresses meant for other controllers (e.g. the
+          # Tailscale operator's ingressClassName=tailscale) and terminate TLS for
+          # them with its own default self-signed cert.
+          "--providers.kubernetesingress.ingressclass=traefik"
           "--entryPoints.web.forwardedHeaders.insecure=true"
           "--entryPoints.web.proxyProtocol.insecure=true"
           "--entryPoints.web.transport.respondingTimeouts.readTimeout=600s"
