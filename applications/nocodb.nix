@@ -444,29 +444,32 @@
             };
           };
 
-          ingresses.${name}.spec = with cfg.ingress; {
-            inherit ingressClassName;
-            rules = [
-              {
-                host = domain;
-                http.paths = [
-                  {
-                    backend.service = {
-                      inherit name;
-                      port.name = "http";
-                    };
-                    path = "/";
-                    pathType = "ImplementationSpecific";
-                  }
-                ];
-              }
-            ];
-            tls = [
-              {
-                hosts = [ domain ];
-                secretName = tls.secretName;
-              }
-            ];
+          ingresses.${name} = with cfg.ingress; {
+            metadata.annotations."cert-manager.io/cluster-issuer" = clusterIssuer;
+            spec = {
+              inherit ingressClassName;
+              rules = [
+                {
+                  host = domain;
+                  http.paths = [
+                    {
+                      backend.service = {
+                        inherit name;
+                        port.name = "http";
+                      };
+                      path = "/";
+                      pathType = "ImplementationSpecific";
+                    }
+                  ];
+                }
+              ];
+              tls = [
+                {
+                  hosts = [ domain ];
+                  secretName = tls.secretName;
+                }
+              ];
+            };
           };
 
           persistentVolumeClaims."${name}-data".spec = {

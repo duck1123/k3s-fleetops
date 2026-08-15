@@ -1,12 +1,14 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
   name: nocodb
   namespace: nocodb
 spec:
-  ingressClassName: tailscale
+  ingressClassName: traefik
   rules:
-    - host: nocodb.bearded-snake.ts.net
+    - host: nocodb.home.kronkltd.net
       http:
         paths:
           - backend:
@@ -18,5 +20,5 @@ spec:
             pathType: ImplementationSpecific
   tls:
     - hosts:
-        - nocodb.bearded-snake.ts.net
+        - nocodb.home.kronkltd.net
       secretName: nocodb-tls

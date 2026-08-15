@@ -5,9 +5,9 @@
     hostAffinity = "nixmini";
 
     ingress = {
-      domain = "fileflows.${config.devDefaults.tailDomain}";
-      ingressClassName = "tailscale";
-      clusterIssuer = "tailscale";
+      domain = "fileflows.${config.devDefaults.homeDomain}";
+      ingressClassName = "traefik";
+      clusterIssuer = config.devDefaults.clusterIssuer;
     };
 
     nfs = {

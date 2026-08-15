@@ -7,9 +7,9 @@
     resetDatabase = false;
 
     ingress = {
-      domain = "tunarr.${config.devDefaults.tailDomain}";
-      ingressClassName = "tailscale";
-      clusterIssuer = "tailscale";
+      domain = "tunarr.${config.devDefaults.homeDomain}";
+      ingressClassName = "traefik";
+      clusterIssuer = config.devDefaults.clusterIssuer;
     };
 
     nfs = {

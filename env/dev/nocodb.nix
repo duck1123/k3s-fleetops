@@ -10,15 +10,9 @@
       enable = true;
 
       ingress = {
-        domain = "nocodb.${config.devDefaults.tailDomain}";
-        ingressClassName = "tailscale";
-        clusterIssuer = "tailscale";
-        localIngress = {
-          enable = true;
-          domain = "nocodb.${config.devDefaults.homeDomain}";
-          clusterIssuer = config.devDefaults.clusterIssuer;
-          tls.enable = true;
-        };
+        domain = "nocodb.${config.devDefaults.homeDomain}";
+        ingressClassName = "traefik";
+        clusterIssuer = config.devDefaults.clusterIssuer;
       };
 
       database = {
@@ -57,6 +51,6 @@
             secretKey = (secrets.nocodb.minio or { }).rootPassword or "";
           };
 
-      publicUrl = "https://nocodb.${config.devDefaults.tailDomain}";
+      publicUrl = "https://nocodb.${config.devDefaults.homeDomain}";
     };
 }
