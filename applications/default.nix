@@ -23,6 +23,7 @@
     ./ersatztv.nix
     ./fileflows.nix
     ./forgejo.nix
+    ./garage.nix
     ./gluetun.nix
     ./grafana
     ./harbor.nix
