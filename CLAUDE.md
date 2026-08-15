@@ -107,7 +107,8 @@ ArgoCD is bootstrapped manually (see README), then self-manages via the `00-mast
 1. Create `applications/<name>.nix` using `self.lib.mkArgoApp` (see `applications/sonarr.nix` as a full example; some complex apps use a subdirectory `applications/<name>/default.nix` instead).
 2. Add the import to `applications/default.nix`.
 3. Create `env/dev/<name>.nix` setting `services.<name>` (use `enable = false` if it shouldn't deploy yet). No import edit needed here — `env/dev.nix` auto-imports every file under `env/dev/` via `import-tree`. Use `config.devDefaults.*` for shared domains/clusterIssuer/NAS values, and the `secrets`/`arrDatabases` module args (injected via `_module.args` in `env/dev.nix`) where needed.
-4. Run `nur switch` to regenerate and apply manifests.
+4. `git add` the new files. Flakes only evaluate git-tracked files — an untracked `applications/<name>.nix` or `env/dev/<name>.nix` fails `nix build`/`nur build`/`nur switch` with "Path ... is not tracked by Git", not a silent no-op, but it's easy to lose time on if you forget this step before building.
+5. Run `nur switch` to regenerate and apply manifests.
 
 ### Apps Without a Dockerfile (nix-csi)
 
