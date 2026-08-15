@@ -5,9 +5,9 @@
     hostAffinity = "nasnix";
 
     ingress = {
-      domain = "qbittorrent.${config.devDefaults.tailDomain}";
-      ingressClassName = "tailscale";
-      clusterIssuer = "tailscale";
+      domain = "qbittorrent.${config.devDefaults.homeDomain}";
+      ingressClassName = "traefik";
+      clusterIssuer = config.devDefaults.clusterIssuer;
     };
 
     nfs = {

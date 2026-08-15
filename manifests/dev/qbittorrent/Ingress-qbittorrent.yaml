@@ -1,12 +1,14 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
   name: qbittorrent
   namespace: qbittorrent
 spec:
-  ingressClassName: tailscale
+  ingressClassName: traefik
   rules:
-    - host: qbittorrent.bearded-snake.ts.net
+    - host: qbittorrent.home.kronkltd.net
       http:
         paths:
           - backend:
@@ -18,4 +20,5 @@ spec:
             pathType: ImplementationSpecific
   tls:
     - hosts:
-        - qbittorrent.bearded-snake.ts.net
+        - qbittorrent.home.kronkltd.net
+      secretName: qbittorrent-tls

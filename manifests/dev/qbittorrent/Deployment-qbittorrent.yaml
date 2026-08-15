@@ -171,7 +171,7 @@ spec:
                   key: password
                   name: qbittorrent-webui-credentials
             - name: WEBUI_DOMAIN
-              value: qbittorrent.bearded-snake.ts.net
+              value: qbittorrent.home.kronkltd.net
           image: python:3-alpine
           name: configure-auth
           volumeMounts:
