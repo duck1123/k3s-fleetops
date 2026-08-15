@@ -322,7 +322,44 @@
                             }
                           ];
                         }
-                      ]);
+                      ])
+                      ++ [
+                        {
+                          name = "configure-downloads-path";
+                          image = "busybox:latest";
+                          command = [
+                            "sh"
+                            "-c"
+                            ''
+                              mkdir -p /config/qBittorrent
+                              CONFIG_FILE="/config/qBittorrent/qBittorrent.conf"
+
+                              if [ ! -f "$CONFIG_FILE" ]; then
+                                cat > "$CONFIG_FILE" <<'EOF'
+                              [Preferences]
+                              Downloads\SavePath=/downloads/complete/
+                              Downloads\TempPath=/downloads/incomplete/
+                              Downloads\TempPathEnabled=true
+                              EOF
+                              else
+                                grep -q '^\[Preferences\]' "$CONFIG_FILE" || echo '[Preferences]' >> "$CONFIG_FILE"
+                                sed -i 's#^Downloads\\SavePath=.*#Downloads\\SavePath=/downloads/complete/#' "$CONFIG_FILE"
+                                grep -q '^Downloads\\SavePath=' "$CONFIG_FILE" || echo 'Downloads\SavePath=/downloads/complete/' >> "$CONFIG_FILE"
+                                sed -i 's#^Downloads\\TempPath=.*#Downloads\\TempPath=/downloads/incomplete/#' "$CONFIG_FILE"
+                                grep -q '^Downloads\\TempPath=' "$CONFIG_FILE" || echo 'Downloads\TempPath=/downloads/incomplete/' >> "$CONFIG_FILE"
+                                sed -i 's#^Downloads\\TempPathEnabled=.*#Downloads\\TempPathEnabled=true#' "$CONFIG_FILE"
+                                grep -q '^Downloads\\TempPathEnabled=' "$CONFIG_FILE" || echo 'Downloads\TempPathEnabled=true' >> "$CONFIG_FILE"
+                              fi
+                            ''
+                          ];
+                          volumeMounts = [
+                            {
+                              mountPath = "/config";
+                              name = "config";
+                            }
+                          ];
+                        }
+                      ];
                     containers = [
                       {
                         inherit name;
