@@ -11,13 +11,19 @@
       name = "argocd";
 
       extraResources = cfg: {
-        configMaps.argocd-cm.data = {
-          "exec.enabled" = "true";
-          "exec.shells" = "bash,sh";
-          "kustomize.buildOptions" = "--enable-helm";
-          "ui.bannercontent" = "Ignore This Notice!";
-          "ui.bannerurl" = "https://duck1123.com/";
-          "url" = "https://argocd.dev.kronkltd.net";
+        configMaps.argocd-cm = {
+          metadata.labels = {
+            "app.kubernetes.io/name" = "argocd-cm";
+            "app.kubernetes.io/part-of" = "argocd";
+          };
+          data = {
+            "exec.enabled" = "true";
+            "exec.shells" = "bash,sh";
+            "kustomize.buildOptions" = "--enable-helm";
+            "ui.bannercontent" = "Ignore This Notice!";
+            "ui.bannerurl" = "https://duck1123.com/";
+            "url" = "https://argocd.dev.kronkltd.net";
+          };
         };
         secrets = {
           bitnamicharts = {
