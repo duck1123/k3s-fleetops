@@ -54,6 +54,12 @@
             default = "release";
           };
 
+          replicas = mkOption {
+            description = mdDoc "Number of immich-server replicas";
+            type = types.int;
+            default = 1;
+          };
+
           database = {
             host = mkOption {
               description = mdDoc "The database host";
@@ -224,6 +230,7 @@
             # Single-replica deployment backed by a ReadWriteOnce volume: RollingUpdate
             # can deadlock (new pod can't attach the volume until the old one releases it).
             controllers.main.strategy = "Recreate";
+            controllers.main.replicas = cfg.replicas;
           }
           // lib.optionalAttrs cfg.externalLibrary.enable {
             persistence.external-library = {

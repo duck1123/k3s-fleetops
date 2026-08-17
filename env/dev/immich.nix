@@ -19,6 +19,12 @@
 
     nfs.enable = false;
 
+    # Scaled to 0: Longhorn CSI stuck in a mkfs retry loop on the library
+    # volume ("Staging target path ... is no longer valid" / blkid reports
+    # no filesystem). Stopping the loop here to inspect the volume safely
+    # before letting it retry again. See k3s-fleetops incident memory.
+    replicas = 0;
+
     hostAffinity = "nixmini";
 
     externalLibrary = {
