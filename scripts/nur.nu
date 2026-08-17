@@ -51,14 +51,16 @@ export def "nur post-process-manifests" [] {
 }
 
 # Build the nixidy activation package without applying it (like `nixos-rebuild build`)
-export def "nur build" [--show-trace] {
+export def "nur build" [--show-trace, --fallback] {
   let trace_args = if $show_trace { ["--show-trace"] } else { [] }
+  let fallback_args = if $fallback { ["--fallback"] } else { [] }
   (
     ^./scripts/with-decrypted-secrets.sh
       nom build
       .#nixidyEnvs.x86_64-linux.dev.activationPackage
       --impure --no-link --print-out-paths
       ...$trace_args
+      ...$fallback_args
     | str trim
   )
 }
@@ -82,8 +84,8 @@ def switch-activation-package [drv_path: string] {
 }
 
 # Full pipeline: build, then switch (generate manifests, post-process, write to manifests/dev/, activate)
-export def "nur switch" [--show-trace] {
-  let drv_path = if $show_trace { nur build --show-trace } else { nur build }
+export def "nur switch" [--show-trace, --fallback] {
+  let drv_path = nur build --show-trace=$show_trace --fallback=$fallback
   switch-activation-package $drv_path
 }
 
