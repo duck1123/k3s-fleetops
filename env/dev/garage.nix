@@ -1,7 +1,7 @@
 { config, secrets, ... }:
 {
   services.garage = {
-    enable = true;
+    enable = false;
 
     adminToken = (secrets.garage or { }).adminToken or "";
     rpcSecret = (secrets.garage or { }).rpcSecret or "";
