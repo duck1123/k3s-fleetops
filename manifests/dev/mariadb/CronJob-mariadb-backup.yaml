@@ -1,0 +1,65 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  labels:
+    app.kubernetes.io/component: backup
+    app.kubernetes.io/name: mariadb
+  name: mariadb-backup
+  namespace: mariadb
+spec:
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - command:
+                - /bin/bash
+                - -c
+                - |
+                  set -e
+                  BACKUP_DIR="/backups"
+                  TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+                  BACKUP_FILE="$BACKUP_DIR/mariadb-backup-$TIMESTAMP.sql.gz"
+
+                  echo "Starting backup at $(date)"
+
+                  # Create backup
+                  mysqldump \
+                    -h mariadb.mariadb \
+                    -u root \
+                    -p"$MARIADB_ROOT_PASSWORD" \
+                    --all-databases \
+                    --single-transaction \
+                    --quick \
+                    --lock-tables=false \
+                    | gzip > "$BACKUP_FILE"
+
+                  echo "Backup completed: $BACKUP_FILE"
+                  echo "Backup size: $(du -h "$BACKUP_FILE" | cut -f1)"
+
+                  # Clean up old backups (keep last 30 days)
+                  find "$BACKUP_DIR" -name "mariadb-backup-*.sql.gz" -type f -mtime +30 -delete
+
+                  echo "Cleanup completed. Remaining backups:"
+                  ls -lh "$BACKUP_DIR"/*.sql.gz 2>/dev/null || echo "No backups found"
+
+                  echo "Backup job completed at $(date)"
+              env:
+                - name: MARIADB_ROOT_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      key: mariadb-root-password
+                      name: mariadb-password
+              image: bitnami/mariadb:latest
+              name: backup
+              volumeMounts:
+                - mountPath: /backups
+                  name: backup-storage
+          restartPolicy: OnFailure
+          volumes:
+            - name: backup-storage
+              persistentVolumeClaim:
+                claimName: mariadb-backups
+  schedule: 0 2 * * *
+  successfulJobsHistoryLimit: 3

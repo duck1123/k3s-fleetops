@@ -1,0 +1,43 @@
+apiVersion: v1
+data:
+  restore.sh: |
+    #!/bin/bash
+    # MariaDB Restore Script
+    # Usage: restore.sh <backup-file.sql.gz>
+
+    set -e
+
+    if [ -z "$1" ]; then
+      echo "Usage: $0 <backup-file.sql.gz>"
+      echo "Available backups:"
+      ls -lh /backups/*.sql.gz 2>/dev/null || echo "No backups found"
+      exit 1
+    fi
+
+    BACKUP_FILE="$1"
+
+    if [ ! -f "$BACKUP_FILE" ]; then
+      echo "Error: Backup file not found: $BACKUP_FILE"
+      exit 1
+    fi
+
+    echo "Starting restore from: $BACKUP_FILE"
+    echo "This will replace all existing databases!"
+    read -p "Are you sure? (yes/no): " confirm
+
+    if [ "$confirm" != "yes" ]; then
+      echo "Restore cancelled"
+      exit 0
+    fi
+
+    echo "Restoring database..."
+    gunzip -c "$BACKUP_FILE" | mysql \
+      -h mariadb.mariadb \
+      -u root \
+      -p"$MARIADB_ROOT_PASSWORD"
+
+    echo "Restore completed successfully!"
+kind: ConfigMap
+metadata:
+  name: mariadb-restore-script
+  namespace: mariadb

@@ -11,7 +11,7 @@
         ;
     };
 
-    enable = false;
+    enable = true;
     hostAffinity = "edgenix";
     storageClassName = "longhorn";
 
