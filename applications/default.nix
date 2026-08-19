@@ -22,6 +22,7 @@
     ./dozzle.nix
     ./ersatztv.nix
     ./fileflows.nix
+    ./flaresolverr.nix
     ./forgejo.nix
     ./garage.nix
     ./gluetun.nix
