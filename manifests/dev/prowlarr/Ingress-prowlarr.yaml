@@ -1,12 +1,14 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
   name: prowlarr
   namespace: prowlarr
 spec:
-  ingressClassName: tailscale
+  ingressClassName: traefik
   rules:
-    - host: prowlarr.bearded-snake.ts.net
+    - host: prowlarr.home.kronkltd.net
       http:
         paths:
           - backend:
@@ -18,4 +20,5 @@ spec:
             pathType: ImplementationSpecific
   tls:
     - hosts:
-        - prowlarr.bearded-snake.ts.net
+        - prowlarr.home.kronkltd.net
+      secretName: prowlarr.home.kronkltd.net-tls

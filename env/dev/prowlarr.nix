@@ -15,9 +15,10 @@
     image = "linuxserver/prowlarr:2.5.2.5491-ls156";
 
     ingress = {
-      domain = "prowlarr.${config.devDefaults.tailDomain}";
-      ingressClassName = "tailscale";
-      clusterIssuer = "tailscale";
+      clusterIssuer = config.devDefaults.clusterIssuer;
+      domain = "prowlarr.${config.devDefaults.homeDomain}";
+      ingressClassName = "traefik";
+      tls.enable = true;
     };
 
     replicas = 1;
