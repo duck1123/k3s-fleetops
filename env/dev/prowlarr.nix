@@ -2,7 +2,7 @@
 {
   services.prowlarr = {
     database = {
-      enable = false;
+      enable = true;
       host = "postgresql.postgresql";
       port = 5432;
       name = "prowlarr-main";
@@ -10,8 +10,9 @@
       password = secrets.postgresql.userPassword;
     };
 
-    enable = false;
+    enable = true;
     hostAffinity = "edgenix";
+    image = "linuxserver/prowlarr:2.5.2.5491-ls156";
 
     ingress = {
       domain = "prowlarr.${config.devDefaults.tailDomain}";
