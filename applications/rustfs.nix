@@ -101,6 +101,35 @@
             type = types.int;
             default = 10001;
           };
+
+          logRetention = {
+            keepFiles = mkOption {
+              description = mdDoc ''
+                Number of rotated log files to keep in /logs before the oldest are deleted
+                (RUSTFS_OBS_LOG_KEEP_FILES). Chart/binary default is 30, but its log cleaner
+                has been observed to stop enforcing this under a large backlog, filling the
+                logs PVC and crash-looping the pod - kept lower here as a safety margin.
+              '';
+              type = types.int;
+              default = 14;
+            };
+
+            rotationTime = mkOption {
+              description = mdDoc "Log rotation interval (RUSTFS_OBS_LOG_ROTATION_TIME).";
+              type = types.enum [
+                "minute"
+                "hour"
+                "day"
+              ];
+              default = "hour";
+            };
+
+            rotationSizeMb = mkOption {
+              description = mdDoc "Rotate the current log file once it exceeds this size in MB (RUSTFS_OBS_LOG_ROTATION_SIZE_MB).";
+              type = types.int;
+              default = 100;
+            };
+          };
         };
 
         extraResources =
@@ -184,6 +213,12 @@
                 };
 
             storageclass.name = if cfg.nfs.enable then "" else cfg.storageClassName;
+
+            config.rustfs.log_rotation = {
+              keep_files = cfg.logRetention.keepFiles;
+              time = cfg.logRetention.rotationTime;
+              size = cfg.logRetention.rotationSizeMb;
+            };
 
             podSecurityContext = {
               fsGroup = cfg.uid;
