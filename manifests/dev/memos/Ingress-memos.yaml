@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: memos
+  namespace: memos
+spec:
+  ingressClassName: tailscale
+  rules:
+    - host: memos.bearded-snake.ts.net
+      http:
+        paths:
+          - backend:
+              service:
+                name: memos
+                port:
+                  name: http
+            path: /
+            pathType: ImplementationSpecific
+  tls:
+    - hosts:
+        - memos.bearded-snake.ts.net
+      secretName: memos-tls
