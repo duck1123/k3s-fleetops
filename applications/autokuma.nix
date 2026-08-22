@@ -167,17 +167,28 @@
                         };
                       }
                     ];
-                    readinessProbe = {
+                    # AutoKuma's healthcheck port only opens once its startup sync against
+                    # Kuma (reconciling every existing monitor, since AUTOKUMA__ON_DELETE=delete)
+                    # has completed, which can take well over the old liveness budget
+                    # (120s + 3*30s = 210s) and got the container killed mid-sync every
+                    # time, before it ever bound port 8090. A startupProbe gives that first
+                    # sync a much bigger window; liveness/readiness only start counting once
+                    # it succeeds once.
+                    startupProbe = {
                       tcpSocket.port = cfg.healthcheckPort;
                       initialDelaySeconds = 10;
+                      periodSeconds = 10;
+                      timeoutSeconds = 5;
+                      failureThreshold = 60; # 10s + 60*10s = ~10min budget for first sync
+                    };
+                    readinessProbe = {
+                      tcpSocket.port = cfg.healthcheckPort;
                       periodSeconds = 10;
                       timeoutSeconds = 5;
                       failureThreshold = 6;
                     };
                     livenessProbe = {
                       tcpSocket.port = cfg.healthcheckPort;
-                      # Allow time for the first nix-csi build (Rust binary fetch/build can be slow)
-                      initialDelaySeconds = 120;
                       periodSeconds = 30;
                       timeoutSeconds = 5;
                       failureThreshold = 3;
