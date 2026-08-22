@@ -82,31 +82,37 @@
         extraResources =
           cfg: with cfg; {
             ingresses = with cfg.ingress; {
-              memos.spec = {
-                inherit (cfg.ingress) ingressClassName;
-                rules = [
-                  {
-                    host = domain;
-                    http = {
-                      paths = [
-                        {
-                          path = "/";
-                          pathType = "ImplementationSpecific";
-                          backend.service = {
-                            inherit name;
-                            port.name = "http";
-                          };
-                        }
-                      ];
-                    };
-                  }
-                ];
-                tls = [
-                  {
-                    hosts = [ domain ];
-                    secretName = tls.secretName;
-                  }
-                ];
+              memos = {
+                metadata.annotations = optionalAttrs (clusterIssuer != "") {
+                  "cert-manager.io/cluster-issuer" = clusterIssuer;
+                };
+
+                spec = {
+                  inherit (cfg.ingress) ingressClassName;
+                  rules = [
+                    {
+                      host = domain;
+                      http = {
+                        paths = [
+                          {
+                            path = "/";
+                            pathType = "ImplementationSpecific";
+                            backend.service = {
+                              inherit name;
+                              port.name = "http";
+                            };
+                          }
+                        ];
+                      };
+                    }
+                  ];
+                  tls = [
+                    {
+                      hosts = [ domain ];
+                      secretName = tls.secretName;
+                    }
+                  ];
+                };
               };
             };
           };
