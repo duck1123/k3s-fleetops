@@ -24,7 +24,7 @@ spec:
         - image: louislam/uptime-kuma:2.5.0
           imagePullPolicy: IfNotPresent
           livenessProbe:
-            failureThreshold: 3
+            failureThreshold: 60
             initialDelaySeconds: 30
             periodSeconds: 10
             tcpSocket:

@@ -65,7 +65,7 @@
                     ];
 
                     livenessProbe = {
-                      failureThreshold = 3;
+                      failureThreshold = 60;
                       initialDelaySeconds = 30;
                       periodSeconds = 10;
                       tcpSocket.port = cfg.service.port;
