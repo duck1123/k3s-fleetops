@@ -1,6 +1,7 @@
 apiVersion: v1
 data:
   memos.json: '{"name":"memos","type":"http","url":"https://memos.home.kronkltd.net"}'
+  rustfs.json: '{"name":"rustfs","type":"http","url":"https://rustfs.home.kronkltd.net/health"}'
 kind: ConfigMap
 metadata:
   name: autokuma-monitors

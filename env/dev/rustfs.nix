@@ -13,6 +13,14 @@
       tls.enable = true;
     };
 
+    # "/" requires auth and correctly 403s when healthy -- not a usable
+    # unauthenticated health check. "/health" returns a plain 200 on both
+    # the console and S3 API ports without needing credentials.
+    monitoring.autokuma = {
+      enable = true;
+      url = "https://rustfs.${config.devDefaults.homeDomain}/health";
+    };
+
     mode = "standalone";
 
     # Matches duck's NAS account uid/gid so NFS writes are actually authorized
