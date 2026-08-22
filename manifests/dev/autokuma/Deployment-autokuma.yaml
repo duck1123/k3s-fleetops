@@ -62,7 +62,13 @@ spec:
                     ref = "nixos-unstable";
                   }) {};
                 in
-                pkgs.autokuma
+                pkgs.symlinkJoin {
+                  name = "autokuma-bundle";
+                  paths = [
+                    pkgs.autokuma
+                    pkgs.cacert
+                  ];
+                }
           name: nix
         - configMap:
             name: autokuma-monitors

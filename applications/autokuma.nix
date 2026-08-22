@@ -22,6 +22,11 @@
       # autokuma is packaged upstream in nixpkgs (pkgs.autokuma) and its build
       # bundles the kuma-cli binary (`kuma`) alongside it — no packaging needed
       # here, just fetch a pinned nixpkgs at runtime like the other nix-csi apps.
+      # plain pkgs.autokuma has no CA store of its own, but SSL_CERT_FILE below
+      # points into this package's output regardless — bundle cacert (symlinkJoin)
+      # so that path actually exists, same as cloudflared.nix. Without it, the
+      # HTTP client hangs on connect() forever trying to load a missing cert
+      # bundle, even against a plain http:// URL — silent, no log output at all.
       nixExpr = ''
         let
           pkgs = import (builtins.fetchTree {
@@ -31,7 +36,13 @@
             ref = "nixos-unstable";
           }) {};
         in
-        pkgs.autokuma
+        pkgs.symlinkJoin {
+          name = "autokuma-bundle";
+          paths = [
+            pkgs.autokuma
+            pkgs.cacert
+          ];
+        }
       '';
 
       # Every mkArgoApp-based service exposes `monitoring.autokuma.*` (see
