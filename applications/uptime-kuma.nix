@@ -16,7 +16,7 @@
         image = mkOption {
           description = mdDoc "The docker image";
           type = types.str;
-          default = "louislam/uptime-kuma:1";
+          default = "louislam/uptime-kuma:2.5.0";
         };
 
         service.port = mkOption {
