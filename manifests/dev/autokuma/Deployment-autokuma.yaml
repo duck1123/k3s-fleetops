@@ -29,6 +29,8 @@ spec:
               value: "false"
             - name: AUTOKUMA__STATIC_MONITORS
               value: /data/monitors
+            - name: AUTOKUMA__FILES__FOLLOW_SYMLINKS
+              value: "true"
             - name: AUTOKUMA__ON_DELETE
               value: delete
             - name: SSL_CERT_FILE

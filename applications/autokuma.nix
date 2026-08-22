@@ -153,6 +153,17 @@
                         value = "/data/monitors";
                       }
                       {
+                        # ConfigMap volumes mount every key as a symlink (via the
+                        # ..data indirection, for atomic updates) rather than a
+                        # plain regular file. AutoKuma's file source walks
+                        # static_monitors with WalkDir::follow_links(false) by
+                        # default and only keeps entries where is_file() is true,
+                        # so it silently sees zero monitors here otherwise -- no
+                        # error, no log line, just nothing to sync, ever.
+                        name = "AUTOKUMA__FILES__FOLLOW_SYMLINKS";
+                        value = "true";
+                      }
+                      {
                         name = "AUTOKUMA__ON_DELETE";
                         value = "delete";
                       }
