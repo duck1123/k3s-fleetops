@@ -1,39 +1,25 @@
-{ config, secrets, ... }:
+{ config, ... }:
 {
   services.booklore = {
     enable = false;
     hostAffinity = "edgenix";
 
-    database = {
-      host = "mariadb.mariadb";
-      password = secrets.booklore.database.password;
-      port = 3306;
-      name = "booklore";
-      username = "booklore";
-    };
+    databaseTarget = "mariadb";
 
     gid = "0";
 
-    ingress = {
-      domain = "booklore.${config.devDefaults.tailDomain}";
-      ingressClassName = "tailscale";
-      clusterIssuer = "tailscale";
-      # Optional: Enable local-only ingress using Traefik
-      localIngress = {
-        enable = true;
-        domain = "booklore.${config.devDefaults.homeDomain}";
-        clusterIssuer = config.devDefaults.clusterIssuer;
-        tls.enable = true;
-      };
-    };
-
-    nfs = {
+    ingressProvider = "tailscale";
+    ingress.localIngress = {
       enable = true;
-      server = config.devDefaults.nasHost;
-      path = "${config.devDefaults.nasBase}/Books";
+      domain = "booklore.${config.devDefaults.homeDomain}";
+      clusterIssuer = config.devDefaults.clusterIssuer;
+      tls.enable = true;
     };
 
-    storageClassName = "longhorn";
+    nfsTarget = "nas";
+    nfsSubPath = "Books";
+    nfs.enable = true;
+
     uid = "0";
   };
 }

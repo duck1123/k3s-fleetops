@@ -37,6 +37,10 @@
       sopsSecrets ? (cfg: { }),
       # Does this chart expose an ingress
       uses-ingress ? false,
+      # Does this app have a centralized NFS mount (services.<name>.nfs.*)
+      uses-nfs ? false,
+      # Does this app have a centralized external database (services.<name>.database.*)
+      uses-database ? false,
     }:
     with lib;
     let
@@ -167,6 +171,54 @@
           };
         };
       };
+      nfs-options = {
+        enable = mkEnableOption "an NFS mount for ${name}";
+
+        server = mkOption {
+          description = mdDoc "NFS server hostname/IP.";
+          type = str;
+          default = "";
+        };
+
+        path = mkOption {
+          description = mdDoc "NFS server path.";
+          type = str;
+          default = "";
+        };
+      };
+      database-options = {
+        enable = mkEnableOption "an external database for ${name}";
+
+        host = mkOption {
+          description = mdDoc "Database host.";
+          type = str;
+          default = "";
+        };
+
+        port = mkOption {
+          description = mdDoc "Database port.";
+          type = types.port;
+          default = 0;
+        };
+
+        name = mkOption {
+          description = mdDoc "Database name.";
+          type = str;
+          default = name;
+        };
+
+        username = mkOption {
+          description = mdDoc "Database username.";
+          type = str;
+          default = name;
+        };
+
+        password = mkOption {
+          description = mdDoc "Database password.";
+          type = str;
+          default = "";
+        };
+      };
       basic-options = {
         chart = mkOption {
           type = nullOr path;
@@ -191,6 +243,30 @@
         hostAffinity = mkOption {
           description = mdDoc "The host to assign the node to";
           type = nullOr types.str;
+          default = null;
+        };
+
+        ingressProvider = mkOption {
+          description = mdDoc "Name of a config.ingressProviders entry supplying default ingress.{ingressClassName,clusterIssuer,domain} for ${name}.";
+          type = nullOr str;
+          default = null;
+        };
+
+        nfsTarget = mkOption {
+          description = mdDoc "Name of a config.nfsTargets entry supplying default nfs.{server,path} for ${name}.";
+          type = nullOr str;
+          default = "nas";
+        };
+
+        nfsSubPath = mkOption {
+          description = mdDoc "Path appended to the nfsTarget's basePath to form nfs.path.";
+          type = types.str;
+          default = "";
+        };
+
+        databaseTarget = mkOption {
+          description = mdDoc "Name of a config.databaseProviders entry supplying default database.{host,port,username,password} for ${name}.";
+          type = nullOr str;
           default = null;
         };
 
@@ -321,6 +397,36 @@
           type = types.attrsOf types.anything;
           default = { };
         };
+      }
+      // lib.optionalAttrs uses-nfs {
+        nfs = mkOption {
+          default = { };
+          description = "NFS Options";
+          type = submodule (
+            let
+              extra-nfs = extraOptions.nfs or { };
+              options = recursiveUpdate nfs-options extra-nfs;
+            in
+            {
+              inherit options;
+            }
+          );
+        };
+      }
+      // lib.optionalAttrs uses-database {
+        database = mkOption {
+          default = { };
+          description = "Database Options";
+          type = submodule (
+            let
+              extra-database = extraOptions.database or { };
+              options = recursiveUpdate database-options extra-database;
+            in
+            {
+              inherit options;
+            }
+          );
+        };
       };
     in
     {
@@ -329,7 +435,7 @@
         extraOptions
       ];
 
-      config = mkIf cfg.enable (mkMerge [
+      config = mkIf cfg.enable (mkMerge ([
         (mkIf (cfg.hostAffinity != null) (
           let
             profile = config.nodeGpuProfiles.${cfg.hostAffinity} or { };
@@ -342,6 +448,46 @@
             };
           }
         ))
+      ]
+      ++ lib.optional uses-ingress (mkIf (cfg.ingressProvider != null) (
+        let
+          profile = config.ingressProviders.${cfg.ingressProvider} or { };
+        in
+        {
+          services.${name}.ingress = {
+            ingressClassName = mkDefault (profile.ingressClassName or "traefik");
+            clusterIssuer = mkDefault (profile.clusterIssuer or "letsEncrypt-prod");
+            domain = mkDefault "${name}.${profile.domain or "local"}";
+          };
+        }
+      ))
+      ++ lib.optional uses-nfs (mkIf (cfg.nfsTarget != null) (
+        let
+          t = config.nfsTargets.${cfg.nfsTarget} or { };
+        in
+        {
+          services.${name}.nfs = {
+            server = mkDefault (t.server or "");
+            path = mkDefault (
+              if cfg.nfsSubPath != "" then "${t.basePath or ""}/${cfg.nfsSubPath}" else t.basePath or ""
+            );
+          };
+        }
+      ))
+      ++ lib.optional uses-database (mkIf (cfg.databaseTarget != null) (
+        let
+          t = config.databaseProviders.${cfg.databaseTarget} or { };
+        in
+        {
+          services.${name}.database = {
+            host = mkDefault (t.host or "");
+            port = mkDefault (t.port or 0);
+            username = mkDefault ((t.usernameFor or (n: n)) name);
+            password = mkDefault ((t.passwordFor or (_: "")) name);
+          };
+        }
+      ))
+      ++ [
         (mkIf (combinedSopsSecrets != { }) {
           services.${name} = {
             sopsSecretsManifest = lib.mapAttrsToList (sn: data: {
@@ -432,7 +578,7 @@
             ];
         }
         (extraConfig cfg)
-      ]);
+      ]));
     };
 
 }

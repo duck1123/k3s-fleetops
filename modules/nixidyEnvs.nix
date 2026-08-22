@@ -30,6 +30,9 @@
           ./secretManifest.nix
           ./secretSpecs.nix
           ./nodeProfiles.nix
+          ./ingressProviders.nix
+          ./nfsTargets.nix
+          ./databaseProviders.nix
         ];
       };
       # For CI: list of { app, secretName, namespace, keys } (metadata only, not secret values).

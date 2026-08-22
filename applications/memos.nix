@@ -38,36 +38,7 @@
         };
 
         uses-ingress = true;
-
-        extraOptions = {
-          database = {
-            host = mkOption {
-              description = mdDoc "PostgreSQL service host (cluster DNS)";
-              type = types.str;
-              default = "postgresql.postgresql";
-            };
-            port = mkOption {
-              description = mdDoc "PostgreSQL port";
-              type = types.int;
-              default = 5432;
-            };
-            name = mkOption {
-              description = mdDoc "Database name";
-              type = types.str;
-              default = "memos";
-            };
-            username = mkOption {
-              description = mdDoc "Database user";
-              type = types.str;
-              default = "postgres";
-            };
-            password = mkOption {
-              description = mdDoc "Database password (embedded in DSN with URL-encoding for special characters)";
-              type = types.str;
-              default = "";
-            };
-          };
-        };
+        uses-database = true;
 
         sopsSecrets =
           cfg:

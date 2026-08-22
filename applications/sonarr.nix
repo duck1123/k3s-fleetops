@@ -24,6 +24,8 @@
       rec {
         name = "sonarr";
         uses-ingress = true;
+        uses-nfs = true;
+        uses-database = true;
 
         extraOptions = {
           image = mkOption {
@@ -52,26 +54,6 @@
             };
           };
 
-          nfs = {
-            enable = mkOption {
-              description = mdDoc "Enable NFS for downloads volume";
-              type = types.bool;
-              default = false;
-            };
-
-            server = mkOption {
-              description = mdDoc "NFS server hostname/IP";
-              type = types.str;
-              default = "nasnix";
-            };
-
-            path = mkOption {
-              description = mdDoc "NFS server path";
-              type = types.str;
-              default = "/mnt/media";
-            };
-          };
-
           pgid = mkOption {
             description = mdDoc "The group ID";
             type = types.int;
@@ -94,44 +76,6 @@
             description = mdDoc "Enable readiness and liveness probes";
             type = types.bool;
             default = true;
-          };
-
-          database = {
-            enable = mkOption {
-              description = mdDoc "Enable PostgreSQL database";
-              type = types.bool;
-              default = false;
-            };
-
-            host = mkOption {
-              description = mdDoc "PostgreSQL database host";
-              type = types.str;
-              default = "postgresql.postgresql";
-            };
-
-            port = mkOption {
-              description = mdDoc "PostgreSQL database port";
-              type = types.int;
-              default = 5432;
-            };
-
-            name = mkOption {
-              description = mdDoc "PostgreSQL database name";
-              type = types.str;
-              default = "sonarr";
-            };
-
-            username = mkOption {
-              description = mdDoc "PostgreSQL database username";
-              type = types.str;
-              default = "sonarr";
-            };
-
-            password = mkOption {
-              description = mdDoc "PostgreSQL database password";
-              type = types.str;
-              default = "";
-            };
           };
         };
 

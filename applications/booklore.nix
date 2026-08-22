@@ -21,6 +21,8 @@
       rec {
         name = "booklore";
         uses-ingress = true;
+        uses-nfs = true;
+        uses-database = true;
 
         sopsSecrets = cfg: {
           "booklore-database-password" = {
@@ -29,38 +31,6 @@
         };
 
         extraOptions = {
-          database = {
-            host = mkOption {
-              description = mdDoc "The database host";
-              type = types.str;
-              default = "mariadb";
-            };
-
-            name = mkOption {
-              description = mdDoc "The database name";
-              type = types.str;
-              default = "booklore";
-            };
-
-            password = mkOption {
-              description = mdDoc "The database password";
-              type = types.str;
-              default = "CHANGEME";
-            };
-
-            port = mkOption {
-              description = mdDoc "The database port";
-              type = types.int;
-              default = 3306;
-            };
-
-            username = mkOption {
-              description = mdDoc "The database username";
-              type = types.str;
-              default = "booklore";
-            };
-          };
-
           gid = mkOption {
             description = mdDoc "The group id";
             type = types.str;
@@ -77,26 +47,6 @@
             description = mdDoc "The service port";
             type = types.int;
             default = 6060;
-          };
-
-          nfs = {
-            enable = mkOption {
-              description = mdDoc "Enable NFS for books volume";
-              type = types.bool;
-              default = false;
-            };
-
-            server = mkOption {
-              description = mdDoc "NFS server hostname/IP";
-              type = types.str;
-              default = "nasnix";
-            };
-
-            path = mkOption {
-              description = mdDoc "NFS server path";
-              type = types.str;
-              default = "/mnt/books";
-            };
           };
 
           uid = mkOption {

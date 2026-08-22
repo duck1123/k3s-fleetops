@@ -11,6 +11,7 @@
     self.lib.mkArgoApp { inherit config lib; } rec {
       name = "audiobookshelf";
       uses-ingress = true;
+      uses-nfs = true;
 
       extraOptions = {
         image = mkOption {
@@ -23,26 +24,6 @@
           description = mdDoc "The service port";
           type = types.int;
           default = 80;
-        };
-
-        nfs = {
-          enable = mkOption {
-            description = mdDoc "Enable NFS for audiobooks volume";
-            type = types.bool;
-            default = false;
-          };
-
-          server = mkOption {
-            description = mdDoc "NFS server hostname/IP";
-            type = types.str;
-            default = "nasnix";
-          };
-
-          path = mkOption {
-            description = mdDoc "NFS server path to Audiobooks share";
-            type = types.str;
-            default = "/mnt/Audiobooks";
-          };
         };
 
         pgid = mkOption {
