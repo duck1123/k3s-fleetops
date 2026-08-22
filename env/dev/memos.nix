@@ -14,5 +14,7 @@
       clusterIssuer = config.devDefaults.clusterIssuer;
       tls.enable = true;
     };
+
+    monitoring.autokuma.enable = true;
   };
 }
