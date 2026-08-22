@@ -240,6 +240,39 @@
           default = if namespace != null then namespace else name;
         };
 
+        # Read by the `autokuma` app, which collects one entry per service where
+        # this is enabled into a static AutoKuma monitor file — see
+        # applications/autokuma.nix. Opt-in and off by default: flipping this on
+        # (and `enable`) is the only thing needed to get a monitor; flipping
+        # either back off removes it on the next sync.
+        monitoring.autokuma = {
+          enable = mkEnableOption "an AutoKuma-managed Uptime Kuma monitor for ${name}";
+
+          type = mkOption {
+            description = mdDoc "AutoKuma monitor type (see upstream ENTITY_TYPES.md: http, tcp, ping, port, ...).";
+            type = str;
+            default = "http";
+          };
+
+          url = mkOption {
+            description = mdDoc "URL used for http-type monitors. Defaults to this app's ingress domain when it has one.";
+            type = nullOr str;
+            default = if uses-ingress then "https://${cfg.ingress.domain}" else null;
+          };
+
+          displayName = mkOption {
+            description = mdDoc "Monitor name shown in Uptime Kuma.";
+            type = str;
+            default = name;
+          };
+
+          extraSettings = mkOption {
+            description = mdDoc "Extra fields merged into the generated AutoKuma monitor definition (e.g. port, hostname, retries, tag_names).";
+            type = attrs;
+            default = { };
+          };
+        };
+
         neededSecrets = mkOption {
           type = listOf str;
           default = neededSecrets;

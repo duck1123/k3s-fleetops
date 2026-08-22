@@ -15,6 +15,7 @@
             age
             argo-workflows
             argocd
+            autokuma # provides the `kuma` CLI (kuma-cli) and `autokuma` binaries
             gum
             jet
             kubectl

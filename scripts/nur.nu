@@ -147,6 +147,64 @@ export def "nur secrets encrypt" [] {
   print "Encrypted to secrets.enc.yaml"
 }
 
+# ─── AutoKuma / kuma-cli ─────────────────────────────────────────────────────
+
+const AUTOKUMA_NS = "autokuma"
+const AUTOKUMA_SECRET = "autokuma-kuma-credentials"
+const UPTIME_KUMA_NS = "uptime-kuma"
+const UPTIME_KUMA_INGRESS = "uptime-kuma"
+
+def kuma-cli-config-path []: nothing -> string {
+  let base = ($env.XDG_CONFIG_HOME? | default $"($env.HOME)/.config")
+  $"($base)/kuma/config.toml"
+}
+
+# Write ~/.config/kuma/config.toml from the cluster: uptime-kuma's ingress
+# host for `url`, and the same SOPS-managed credentials autokuma itself uses
+# (secret ($AUTOKUMA_SECRET) in namespace ($AUTOKUMA_NS)) for `username`/`password`.
+# Run this once (and again after rotating the password) so `kuma` (kuma-cli)
+# works without passing --url/--username/--password on every invocation.
+export def "nur kuma-cli config" [] {
+  let host = (
+    ^kubectl get ingress $UPTIME_KUMA_INGRESS -n $UPTIME_KUMA_NS
+      -o jsonpath='{.spec.rules[0].host}'
+    | str trim
+  )
+  if ($host | is-empty) {
+    error make {msg: $"Could not find ($UPTIME_KUMA_INGRESS) ingress in namespace ($UPTIME_KUMA_NS)"}
+  }
+
+  let username = (
+    ^kubectl get secret $AUTOKUMA_SECRET -n $AUTOKUMA_NS -o jsonpath='{.data.USERNAME}'
+    | ^base64 -d
+  )
+  let password = (
+    ^kubectl get secret $AUTOKUMA_SECRET -n $AUTOKUMA_NS -o jsonpath='{.data.PASSWORD}'
+    | ^base64 -d
+  )
+  if ($username | is-empty) or ($password | is-empty) {
+    error make {msg: (
+      $"Secret ($AUTOKUMA_SECRET) in namespace ($AUTOKUMA_NS) has no USERNAME/PASSWORD yet. "
+      + "Set services.autokuma.kuma.username/password from secrets.autokuma.* "
+      + "(nur secrets edit), then nur switch, before running this."
+    )}
+  }
+
+  let path = (kuma-cli-config-path)
+  mkdir ($path | path dirname)
+  (
+    {
+      url: $"https://($host)/",
+      username: $username,
+      password: $password,
+    }
+    | to toml
+    | save -f $path
+  )
+  ^chmod 600 $path
+  print $"Wrote ($path)"
+}
+
 # ─── ArgoCD ──────────────────────────────────────────────────────────────────
 
 # Download latest stable ArgoCD install manifest to infra-manifests/argocd/install.yaml

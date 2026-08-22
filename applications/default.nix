@@ -12,6 +12,7 @@
     ./argo-workflows.nix
     ./attic.nix
     ./authentik.nix
+    ./autokuma.nix
     ./booklore.nix
     ./calibre.nix
     ./cert-manager.nix
