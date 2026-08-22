@@ -129,6 +129,14 @@
                     command = [ "autokuma" ];
                     env = [
                       {
+                        # Default log level is silent past startup migrations — no
+                        # connect/sync/error output at all, which made a genuine
+                        # hang indistinguishable from a quiet success. Scoped to
+                        # skip sled's very noisy pagecache/iobuf DEBUG spam.
+                        name = "RUST_LOG";
+                        value = "info,autokuma=debug,kuma_client=debug";
+                      }
+                      {
                         name = "AUTOKUMA__KUMA__URL";
                         value = cfg.kuma.url;
                       }

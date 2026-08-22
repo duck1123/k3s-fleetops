@@ -19,6 +19,8 @@ spec:
         - command:
             - autokuma
           env:
+            - name: RUST_LOG
+              value: info,autokuma=debug,kuma_client=debug
             - name: AUTOKUMA__KUMA__URL
               value: http://uptime-kuma.uptime-kuma:3001
             - name: AUTOKUMA__DOCKER__ENABLED
