@@ -29,8 +29,6 @@ spec:
               value: /data/monitors
             - name: AUTOKUMA__ON_DELETE
               value: delete
-            - name: AUTOKUMA__HEALTHCHECK_PORT
-              value: "8090"
             - name: SSL_CERT_FILE
               value: /nix/var/result/etc/ssl/certs/ca-bundle.crt
             - name: AUTOKUMA__KUMA__USERNAME
@@ -44,26 +42,7 @@ spec:
                   key: PASSWORD
                   name: autokuma-kuma-credentials
           image: ghcr.io/lillecarl/nix-csi/scratch:1.0.1
-          livenessProbe:
-            failureThreshold: 3
-            periodSeconds: 30
-            tcpSocket:
-              port: 8090
-            timeoutSeconds: 5
           name: autokuma
-          readinessProbe:
-            failureThreshold: 6
-            periodSeconds: 10
-            tcpSocket:
-              port: 8090
-            timeoutSeconds: 5
-          startupProbe:
-            failureThreshold: 60
-            initialDelaySeconds: 10
-            periodSeconds: 10
-            tcpSocket:
-              port: 8090
-            timeoutSeconds: 5
           volumeMounts:
             - mountPath: /nix
               name: nix
