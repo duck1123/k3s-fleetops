@@ -1,5 +1,6 @@
 { ... }:
 {
+  # https://wiki.kavitareader.com/
   flake.nixidyApps.kavita =
     {
       config,
