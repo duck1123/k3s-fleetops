@@ -318,11 +318,15 @@
 
         # Read by the `autokuma` app, which collects one entry per service where
         # this is enabled into a static AutoKuma monitor file — see
-        # applications/autokuma.nix. Opt-in and off by default: flipping this on
-        # (and `enable`) is the only thing needed to get a monitor; flipping
-        # either back off removes it on the next sync.
+        # applications/autokuma.nix. Defaults to on for any app with an ingress
+        # (opt out per-app with `monitoring.autokuma.enable = false;`); apps
+        # without an ingress still default off since there's no URL to probe.
         monitoring.autokuma = {
-          enable = mkEnableOption "an AutoKuma-managed Uptime Kuma monitor for ${name}";
+          enable = mkOption {
+            description = mdDoc "Enable an AutoKuma-managed Uptime Kuma monitor for ${name}. Defaults to true when ${name} has an ingress.";
+            type = types.bool;
+            default = uses-ingress;
+          };
 
           type = mkOption {
             description = mdDoc "AutoKuma monitor type (see upstream ENTITY_TYPES.md: http, tcp, ping, port, ...).";

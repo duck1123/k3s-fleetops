@@ -1,13 +1,33 @@
 apiVersion: v1
 data:
+  attic.json: '{"name":"attic","type":"http","url":"https://attic.home.kronkltd.net"}'
   audiobookshelf.json: '{"name":"audiobookshelf","type":"http","url":"https://audiobookshelf.home.kronkltd.net"}'
+  booklore.json: '{"name":"booklore","type":"http","url":"https://booklore.bearded-snake.ts.net"}'
+  cloudbeaver.json: '{"name":"cloudbeaver","type":"http","url":"https://cloudbeaver.home.kronkltd.net"}'
   fileflows.json: '{"name":"fileflows","type":"http","url":"https://fileflows.home.kronkltd.net"}'
   homarr.json: '{"name":"homarr","type":"http","url":"https://homarr.home.kronkltd.net"}'
   home-assistant.json: '{"name":"home-assistant","type":"http","url":"https://home-assistant.home.kronkltd.net"}'
   immich.json: '{"name":"immich","type":"http","url":"https://immich.home.kronkltd.net"}'
+  kite.json: '{"name":"kite","type":"http","url":"https://kite.home.kronkltd.net"}'
+  komga.json: '{"name":"komga","type":"http","url":"https://komga.home.kronkltd.net"}'
   lidarr.json: '{"name":"lidarr","type":"http","url":"https://lidarr.home.kronkltd.net"}'
+  listenarr.json: '{"name":"listenarr","type":"http","url":"https://listenarr.home.kronkltd.net"}'
+  longhorn.json: '{"name":"longhorn","type":"http","url":"https://longhorn.home.kronkltd.net"}'
   memos.json: '{"name":"memos","type":"http","url":"https://memos.home.kronkltd.net"}'
+  pihole.json: '{"name":"pihole","type":"http","url":"https://pihole.home.kronkltd.net"}'
+  prowlarr.json: '{"name":"prowlarr","type":"http","url":"https://prowlarr.home.kronkltd.net"}'
+  qbittorrent.json: '{"name":"qbittorrent","type":"http","url":"https://qbittorrent.home.kronkltd.net"}'
+  radarr.json: '{"name":"radarr","type":"http","url":"https://radarr.home.kronkltd.net"}'
+  romm.json: '{"name":"romm","type":"http","url":"https://romm.home.kronkltd.net"}'
   rustfs.json: '{"name":"rustfs","type":"http","url":"https://rustfs.home.kronkltd.net/health"}'
+  sabnzbd.json: '{"name":"sabnzbd","type":"http","url":"https://sabnzbd.home.kronkltd.net"}'
+  slskd.json: '{"name":"slskd","type":"http","url":"https://slskd.home.kronkltd.net"}'
+  sonarr.json: '{"name":"sonarr","type":"http","url":"https://sonarr.home.kronkltd.net"}'
+  stashapp.json: '{"name":"stashapp","type":"http","url":"https://stashapp.home.kronkltd.net"}'
+  tdarr.json: '{"name":"tdarr","type":"http","url":"https://tdarr.home.kronkltd.net"}'
+  trilium.json: '{"name":"trilium","type":"http","url":"https://trilium.home.kronkltd.net"}'
+  uptime-kuma.json: '{"name":"uptime-kuma","type":"http","url":"https://uptime-kuma.home.kronkltd.net"}'
+  windmill.json: '{"name":"windmill","type":"http","url":"https://windmill.home.kronkltd.net"}'
 kind: ConfigMap
 metadata:
   name: autokuma-monitors
