@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  name: navidrome
+  namespace: argocd
+spec:
+  destination:
+    namespace: navidrome
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: ./manifests/dev/navidrome
+    repoURL: https://github.com/duck1123/k3s-fleetops.git
+    targetRevision: master
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

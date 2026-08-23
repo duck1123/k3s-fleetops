@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/instance: navidrome
+    app.kubernetes.io/name: navidrome
+    app.kubernetes.io/version: latest
+  name: navidrome
+  namespace: navidrome
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: navidrome
+      app.kubernetes.io/name: navidrome
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: navidrome
+        app.kubernetes.io/name: navidrome
+    spec:
+      automountServiceAccountToken: true
+      containers:
+        - env:
+            - name: ND_MUSICFOLDER
+              value: /music
+            - name: ND_DATAFOLDER
+              value: /data
+            - name: TZ
+              value: Etc/UTC
+          image: deluan/navidrome:latest
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /ping
+              port: 4533
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 5
+          name: navidrome
+          ports:
+            - containerPort: 4533
+              name: http
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /ping
+              port: 4533
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          volumeMounts:
+            - mountPath: /data
+              name: data
+            - mountPath: /music
+              name: music
+              readOnly: true
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsUser: 1000
+      serviceAccountName: default
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: navidrome-navidrome-data
+        - name: music
+          persistentVolumeClaim:
+            claimName: navidrome-navidrome-music

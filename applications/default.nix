@@ -57,6 +57,7 @@
     ./minio.nix
     ./mssql.nix
     ./n8n.nix
+    ./navidrome.nix
     ./nocodb.nix
     ./openldap.nix
     ./opentelemetry-collector.nix

@@ -14,6 +14,7 @@ data:
   listenarr.json: '{"name":"listenarr","type":"http","url":"https://listenarr.home.kronkltd.net"}'
   longhorn.json: '{"name":"longhorn","type":"http","url":"https://longhorn.home.kronkltd.net"}'
   memos.json: '{"name":"memos","type":"http","url":"https://memos.home.kronkltd.net"}'
+  navidrome.json: '{"name":"navidrome","type":"http","url":"https://navidrome.home.kronkltd.net"}'
   pihole.json: '{"name":"pihole","type":"http","url":"https://pihole.home.kronkltd.net/admin/login"}'
   prowlarr.json: '{"name":"prowlarr","type":"http","url":"https://prowlarr.home.kronkltd.net"}'
   qbittorrent.json: '{"name":"qbittorrent","type":"http","url":"https://qbittorrent.home.kronkltd.net"}'
