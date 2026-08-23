@@ -15,7 +15,6 @@ tls.key
 /target/
 /.cursor/
 /backups/
-.gitnexus
 /secrets.yaml
 node_modules/
 dist/
