@@ -5,12 +5,8 @@
     hostAffinity = "nixmini";
     image = "ghcr.io/windmill-labs/windmill-full:latest";
 
-    ingress = {
-      domain = "windmill.${config.devDefaults.homeDomain}";
-      ingressClassName = "traefik";
-      clusterIssuer = config.devDefaults.clusterIssuer;
-      tls.enable = true;
-    };
+    ingressProvider = "traefik-lan";
+    ingress.tls.enable = true;
 
     database = {
       host = "postgresql.postgresql";

@@ -5,11 +5,7 @@
     # logLevel = "Debug";
     hostAffinity = "edgenix";
 
-    ingress = {
-      domain = "ersatztv.${config.devDefaults.tailDomain}";
-      ingressClassName = "tailscale";
-      clusterIssuer = "tailscale";
-    };
+    ingressProvider = "tailscale";
 
     nfs = {
       enable = true;

@@ -6,11 +6,7 @@
     hostAffinity = "edgenix";
     storageClassName = "longhorn";
 
-    ingress = {
-      domain = "kite.${config.devDefaults.homeDomain}";
-      clusterIssuer = config.devDefaults.clusterIssuer;
-      ingressClassName = "traefik";
-      tls.enable = true;
-    };
+    ingressProvider = "traefik-lan";
+    ingress.tls.enable = true;
   };
 }

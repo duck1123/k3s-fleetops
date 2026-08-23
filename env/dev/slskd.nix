@@ -5,12 +5,8 @@
     enable = true;
     # hostAffinity = "edgenix";
 
-    ingress = {
-      clusterIssuer = config.devDefaults.clusterIssuer;
-      domain = "slskd.${config.devDefaults.homeDomain}";
-      ingressClassName = "traefik";
-      tls.enable = true;
-    };
+    ingressProvider = "traefik-lan";
+    ingress.tls.enable = true;
 
     nfs = {
       enable = true;

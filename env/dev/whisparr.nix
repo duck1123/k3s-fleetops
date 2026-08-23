@@ -12,11 +12,7 @@
 
     enable = false;
 
-    ingress = {
-      domain = "whisparr.${config.devDefaults.tailDomain}";
-      ingressClassName = "tailscale";
-      clusterIssuer = "tailscale";
-    };
+    ingressProvider = "tailscale";
 
     nfs = {
       enable = true;

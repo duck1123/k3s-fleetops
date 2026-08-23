@@ -13,12 +13,8 @@
     enable = true;
     hostAffinity = "edgenix";
 
-    ingress = {
-      domain = "lidarr.${config.devDefaults.homeDomain}";
-      ingressClassName = "traefik";
-      clusterIssuer = config.devDefaults.clusterIssuer;
-      tls.enable = true;
-    };
+    ingressProvider = "traefik-lan";
+    ingress.tls.enable = true;
 
     monitoring.autokuma.enable = true;
 

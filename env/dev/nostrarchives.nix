@@ -17,11 +17,7 @@
       password = secrets.redis.password;
     };
 
-    ingress = {
-      domain = "nostrarchives.${config.devDefaults.tailDomain}";
-      ingressClassName = "tailscale";
-      clusterIssuer = "tailscale";
-    };
+    ingressProvider = "tailscale";
 
     relayDomain = "nostrarchives-relay.${config.devDefaults.tailDomain}";
   };

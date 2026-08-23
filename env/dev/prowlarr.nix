@@ -14,12 +14,8 @@
     hostAffinity = "edgenix";
     image = "linuxserver/prowlarr:2.5.2.5491-ls156";
 
-    ingress = {
-      clusterIssuer = config.devDefaults.clusterIssuer;
-      domain = "prowlarr.${config.devDefaults.homeDomain}";
-      ingressClassName = "traefik";
-      tls.enable = true;
-    };
+    ingressProvider = "traefik-lan";
+    ingress.tls.enable = true;
 
     replicas = 1;
     vpn.enable = false;

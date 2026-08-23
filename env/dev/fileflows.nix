@@ -4,11 +4,7 @@
     enable = true;
     hostAffinity = "nixmini";
 
-    ingress = {
-      domain = "fileflows.${config.devDefaults.homeDomain}";
-      ingressClassName = "traefik";
-      clusterIssuer = config.devDefaults.clusterIssuer;
-    };
+    ingressProvider = "traefik-lan";
 
     monitoring.autokuma.enable = true;
 

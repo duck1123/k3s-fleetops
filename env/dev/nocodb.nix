@@ -9,11 +9,7 @@
       auth.jwtSecret = (secrets.nocodb or { }).jwtSecret or "";
       enable = false;
 
-      ingress = {
-        domain = "nocodb.${config.devDefaults.homeDomain}";
-        ingressClassName = "traefik";
-        clusterIssuer = config.devDefaults.clusterIssuer;
-      };
+      ingressProvider = "traefik-lan";
 
       database = {
         host = "postgresql.postgresql";

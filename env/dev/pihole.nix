@@ -5,12 +5,8 @@
     enable = true;
     hostAffinity = "nasnix";
 
-    ingress = {
-      clusterIssuer = config.devDefaults.clusterIssuer;
-      domain = "pihole.${config.devDefaults.homeDomain}";
-      ingressClassName = "traefik";
-      tls.enable = true;
-    };
+    ingressProvider = "traefik-lan";
+    ingress.tls.enable = true;
     serviceDnsLoadBalancerIP = "192.168.0.243";
     storageClassName = "longhorn";
     customDnsEntries = [

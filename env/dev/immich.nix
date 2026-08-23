@@ -10,12 +10,8 @@
       name = "immich";
     };
 
-    ingress = {
-      domain = "immich.${config.devDefaults.homeDomain}";
-      ingressClassName = "traefik";
-      clusterIssuer = config.devDefaults.clusterIssuer;
-      tls.enable = true;
-    };
+    ingressProvider = "traefik-lan";
+    ingress.tls.enable = true;
 
     nfs.enable = false;
 
@@ -27,6 +23,7 @@
       path = "${config.devDefaults.nasBase}/Photos";
     };
 
+    monitoring.autokuma.enable = true;
     redis = {
       inherit (secrets.immich.redis) password;
       host = "redis.redis";

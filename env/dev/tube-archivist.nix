@@ -9,11 +9,7 @@
     enable = false;
     hostAffinity = "edgenix";
 
-    ingress = {
-      domain = "tube-archivist.${config.devDefaults.tailDomain}";
-      ingressClassName = "tailscale";
-      clusterIssuer = "tailscale";
-    };
+    ingressProvider = "tailscale";
 
     nfs = {
       enable = true;

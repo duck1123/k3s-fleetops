@@ -14,12 +14,8 @@
     hostAffinity = "edgenix";
     image = "linuxserver/radarr:6.3.0.10514-ls313";
 
-    ingress = {
-      clusterIssuer = config.devDefaults.clusterIssuer;
-      domain = "radarr.${config.devDefaults.homeDomain}";
-      ingressClassName = "traefik";
-      tls.enable = true;
-    };
+    ingressProvider = "traefik-lan";
+    ingress.tls.enable = true;
 
     nfs = {
       enable = true;

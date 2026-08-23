@@ -6,11 +6,7 @@
     # hostAffinity = "edgenix";
     resetDatabase = false;
 
-    ingress = {
-      domain = "tunarr.${config.devDefaults.homeDomain}";
-      ingressClassName = "traefik";
-      clusterIssuer = config.devDefaults.clusterIssuer;
-    };
+    ingressProvider = "traefik-lan";
 
     nfs = {
       enable = false;

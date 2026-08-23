@@ -7,13 +7,10 @@
     # https://github.com/AiDot-Development-Team/hass-AiDot
     installAidot.enable = true;
 
-    ingress = {
-      domain = "home-assistant.${config.devDefaults.homeDomain}";
-      ingressClassName = "traefik";
-      clusterIssuer = config.devDefaults.clusterIssuer;
-      tls.enable = true;
-    };
+    ingressProvider = "traefik-lan";
+    ingress.tls.enable = true;
 
+    monitoring.autokuma.enable = true;
     storageClassName = "longhorn";
   };
 }

@@ -4,13 +4,10 @@
     enable = true;
     # hostAffinity = "edgenix";
 
-    ingress = {
-      domain = "homarr.${config.devDefaults.homeDomain}";
-      ingressClassName = "traefik";
-      clusterIssuer = config.devDefaults.clusterIssuer;
-      tls.enable = true;
-    };
+    ingressProvider = "traefik-lan";
+    ingress.tls.enable = true;
 
+    monitoring.autokuma.enable = true;
     secretEncryptionKey = secrets.homarr.secretEncryptionKey;
     storageClassName = "longhorn";
   };

@@ -12,12 +12,8 @@
 
     enable = true;
 
-    ingress = {
-      clusterIssuer = config.devDefaults.clusterIssuer;
-      domain = "listenarr.${config.devDefaults.homeDomain}";
-      ingressClassName = "traefik";
-      tls.enable = true;
-    };
+    ingressProvider = "traefik-lan";
+    ingress.tls.enable = true;
 
     nfs = {
       enable = true;

@@ -4,12 +4,8 @@
     enable = true;
     hostAffinity = "nixmini";
 
-    ingress = {
-      clusterIssuer = config.devDefaults.clusterIssuer;
-      domain = "stashapp.${config.devDefaults.homeDomain}";
-      ingressClassName = "traefik";
-      tls.enable = true;
-    };
+    ingressProvider = "traefik-lan";
+    ingress.tls.enable = true;
 
     nfs = {
       enable = true;

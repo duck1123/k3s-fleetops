@@ -4,10 +4,6 @@
     enable = false;
     hostAffinity = "nasnix";
 
-    ingress = {
-      domain = "dozzle.${config.devDefaults.tailDomain}";
-      ingressClassName = "tailscale";
-      clusterIssuer = "tailscale";
-    };
+    ingressProvider = "tailscale";
   };
 }

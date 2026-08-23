@@ -3,11 +3,9 @@
   services.minio = {
     enable = false;
 
+    ingressProvider = "tailscale";
     ingress = {
       api-domain = "api-minio.${config.devDefaults.tailDomain}";
-      domain = "minio.${config.devDefaults.tailDomain}";
-      clusterIssuer = "tailscale";
-      ingressClassName = "tailscale";
       tls.enable = true;
     };
 

@@ -18,12 +18,8 @@
       username = "mariadb";
     };
 
-    ingress = {
-      domain = "romm.${config.devDefaults.homeDomain}";
-      ingressClassName = "traefik";
-      clusterIssuer = config.devDefaults.clusterIssuer;
-      tls.enable = true;
-    };
+    ingressProvider = "traefik-lan";
+    ingress.tls.enable = true;
 
     metadata.igdb = {
       enable = true;

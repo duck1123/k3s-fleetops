@@ -11,16 +11,12 @@
     enable = false;
     hostAffinity = "edgenix";
 
-    ingress = {
-      clusterIssuer = "tailscale";
-      domain = "grafana.${config.devDefaults.tailDomain}";
-      ingressClassName = "tailscale";
-      localIngress = {
-        enable = true;
-        domain = "grafana.${config.devDefaults.homeDomain}";
-        clusterIssuer = config.devDefaults.clusterIssuer;
-        tls.enable = true;
-      };
+    ingressProvider = "tailscale";
+    ingress.localIngress = {
+      enable = true;
+      domain = "grafana.${config.devDefaults.homeDomain}";
+      clusterIssuer = config.devDefaults.clusterIssuer;
+      tls.enable = true;
     };
 
     additionalDatasources = [

@@ -10,11 +10,7 @@
       endpoint = "http://rustfs-svc.rustfs:9000";
     };
 
-    ingress = {
-      clusterIssuer = config.devDefaults.clusterIssuer;
-      domain = "longhorn.${config.devDefaults.homeDomain}";
-      ingressClassName = "traefik";
-      tls.enable = true;
-    };
+    ingressProvider = "traefik-lan";
+    ingress.tls.enable = true;
   };
 }

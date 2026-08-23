@@ -3,10 +3,7 @@
   services.specter = {
     enable = false;
 
-    ingress = {
-      domain = "specter.${config.devDefaults.tailDomain}";
-      ingressClassName = "tailscale";
-    };
+    ingressProvider = "tailscale";
 
     namespace = "specter";
   };

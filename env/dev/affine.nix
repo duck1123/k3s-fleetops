@@ -20,16 +20,12 @@
 
     serverExternalUrl = "https://affine.${config.devDefaults.tailDomain}";
 
-    ingress = {
-      domain = "affine.${config.devDefaults.tailDomain}";
-      ingressClassName = "tailscale";
-      clusterIssuer = "tailscale";
-      localIngress = {
-        enable = true;
-        domain = "affine.${config.devDefaults.homeDomain}";
-        clusterIssuer = config.devDefaults.clusterIssuer;
-        tls.enable = true;
-      };
+    ingressProvider = "tailscale";
+    ingress.localIngress = {
+      enable = true;
+      domain = "affine.${config.devDefaults.homeDomain}";
+      clusterIssuer = config.devDefaults.clusterIssuer;
+      tls.enable = true;
     };
 
     storageClassName = "longhorn";

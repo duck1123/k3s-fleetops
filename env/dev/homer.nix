@@ -8,9 +8,6 @@
 
     enable = false;
 
-    ingress = {
-      domain = "homer.${config.devDefaults.tailDomain}";
-      ingressClassName = "tailscale";
-    };
+    ingressProvider = "tailscale";
   };
 }

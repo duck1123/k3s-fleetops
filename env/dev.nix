@@ -59,6 +59,11 @@ in
       clusterIssuer = "tailscale";
       domain = config.devDefaults.tailDomain;
     };
+    traefik-dev = {
+      ingressClassName = "traefik";
+      clusterIssuer = config.devDefaults.clusterIssuer;
+      domain = config.devDefaults.baseDomain;
+    };
   };
 
   nfsTargets.nas = {

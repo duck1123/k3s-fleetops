@@ -3,12 +3,8 @@
   services.trilium = {
     enable = true;
 
-    ingress = {
-      domain = "trilium.${config.devDefaults.homeDomain}";
-      ingressClassName = "traefik";
-      clusterIssuer = config.devDefaults.clusterIssuer;
-      tls.enable = true;
-    };
+    ingressProvider = "traefik-lan";
+    ingress.tls.enable = true;
 
     storageClassName = "longhorn";
   };

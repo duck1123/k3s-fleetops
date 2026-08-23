@@ -5,11 +5,9 @@
     enable = true;
     hostAffinity = "nasnix";
 
+    ingressProvider = "traefik-lan";
     ingress = {
       api-domain = "api-rustfs.${config.devDefaults.homeDomain}";
-      clusterIssuer = config.devDefaults.clusterIssuer;
-      domain = "rustfs.${config.devDefaults.homeDomain}";
-      ingressClassName = "traefik";
       tls.enable = true;
     };
 

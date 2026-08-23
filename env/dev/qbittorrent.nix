@@ -4,11 +4,7 @@
     enable = true;
     hostAffinity = "nasnix";
 
-    ingress = {
-      domain = "qbittorrent.${config.devDefaults.homeDomain}";
-      ingressClassName = "traefik";
-      clusterIssuer = config.devDefaults.clusterIssuer;
-    };
+    ingressProvider = "traefik-lan";
 
     nfs = {
       enable = true;

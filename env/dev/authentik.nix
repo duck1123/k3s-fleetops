@@ -4,11 +4,7 @@
     inherit (secrets.authentik) secret-key;
     enable = false;
 
-    ingress = {
-      inherit (config.devDefaults) clusterIssuer;
-      domain = "authentik.${config.devDefaults.baseDomain}";
-      ingressClassName = "traefik";
-    };
+    ingressProvider = "traefik-dev";
 
     postgresql = {
       inherit (secrets.authentik.postgresql)
