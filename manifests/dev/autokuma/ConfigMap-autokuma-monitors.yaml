@@ -1,5 +1,8 @@
 apiVersion: v1
 data:
+  audiobookshelf.json: '{"name":"audiobookshelf","type":"http","url":"https://audiobookshelf.home.kronkltd.net"}'
+  fileflows.json: '{"name":"fileflows","type":"http","url":"https://fileflows.home.kronkltd.net"}'
+  lidarr.json: '{"name":"lidarr","type":"http","url":"https://lidarr.home.kronkltd.net"}'
   memos.json: '{"name":"memos","type":"http","url":"https://memos.home.kronkltd.net"}'
   rustfs.json: '{"name":"rustfs","type":"http","url":"https://rustfs.home.kronkltd.net/health"}'
 kind: ConfigMap

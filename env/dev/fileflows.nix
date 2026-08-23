@@ -10,6 +10,8 @@
       clusterIssuer = config.devDefaults.clusterIssuer;
     };
 
+    monitoring.autokuma.enable = true;
+
     nfs = {
       enable = true;
       server = config.devDefaults.nasHost;

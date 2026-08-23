@@ -1,7 +1,17 @@
 { config, secrets, ... }:
 {
   services.lidarr = {
+    database = {
+      enable = true;
+      host = "postgresql.postgresql";
+      port = 5432;
+      name = "lidarr";
+      username = "lidarr";
+      password = secrets.postgresql.userPassword;
+    };
+
     enable = true;
+    hostAffinity = "edgenix";
 
     ingress = {
       domain = "lidarr.${config.devDefaults.homeDomain}";
@@ -10,10 +20,7 @@
       tls.enable = true;
     };
 
-    vpn = {
-      enable = false;
-      sharedGluetunService = "gluetun.gluetun";
-    };
+    monitoring.autokuma.enable = true;
 
     nfs = {
       enable = true;
@@ -26,18 +33,12 @@
       };
     };
 
-    database = {
-      enable = true;
-      host = "postgresql.postgresql";
-      port = 5432;
-      name = "lidarr";
-      username = "lidarr";
-      password = secrets.postgresql.userPassword;
-    };
-
-    hostAffinity = "edgenix";
-
     replicas = 1;
     storageClassName = "longhorn";
+
+    vpn = {
+      enable = false;
+      sharedGluetunService = "gluetun.gluetun";
+    };
   };
 }
