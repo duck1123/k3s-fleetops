@@ -11,7 +11,7 @@
     enable = false;
     hostAffinity = "edgenix";
 
-    ingressProvider = "tailscale";
+    ingressProvider = "traefik-lan";
     ingress.localIngress = {
       enable = true;
       domain = "grafana.${config.devDefaults.homeDomain}";

@@ -2,12 +2,12 @@
 {
   services.homer = {
     codeserver.ingress = {
-      domain = "codeserver.${config.devDefaults.tailDomain}";
+      domain = "codeserver.${config.devDefaults.homeDomain}";
       enable = true;
     };
 
     enable = false;
 
-    ingressProvider = "tailscale";
+    ingressProvider = "traefik-lan";
   };
 }

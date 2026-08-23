@@ -2,6 +2,6 @@
 {
   services.tempo = {
     enable = false;
-    ingressProvider = "tailscale";
+    ingressProvider = "traefik-lan";
   };
 }

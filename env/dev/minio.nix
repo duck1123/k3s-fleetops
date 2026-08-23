@@ -3,9 +3,9 @@
   services.minio = {
     enable = false;
 
-    ingressProvider = "tailscale";
+    ingressProvider = "traefik-lan";
     ingress = {
-      api-domain = "api-minio.${config.devDefaults.tailDomain}";
+      api-domain = "api-minio.${config.devDefaults.homeDomain}";
       tls.enable = true;
     };
 

@@ -3,7 +3,7 @@
   services.calibre = {
     enable = false;
 
-    ingressProvider = "tailscale";
+    ingressProvider = "traefik-lan";
 
     storageClassName = "longhorn";
   };

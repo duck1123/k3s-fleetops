@@ -11,8 +11,8 @@
       password = secrets.redis.password;
     };
 
-    ingressProvider = "tailscale";
+    ingressProvider = "traefik-lan";
 
-    relayDomain = "nostrarchives-relay.${config.devDefaults.tailDomain}";
+    relayDomain = "nostrarchives-relay.${config.devDefaults.homeDomain}";
   };
 }

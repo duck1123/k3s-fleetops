@@ -3,6 +3,6 @@
   services.mindsdb = {
     enable = false;
 
-    ingressProvider = "tailscale";
+    ingressProvider = "traefik-lan";
   };
 }

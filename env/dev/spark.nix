@@ -3,6 +3,6 @@
   services.spark = {
     enable = false;
 
-    ingressProvider = "tailscale";
+    ingressProvider = "traefik-lan";
   };
 }

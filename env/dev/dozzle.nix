@@ -4,6 +4,6 @@
     enable = false;
     hostAffinity = "nasnix";
 
-    ingressProvider = "tailscale";
+    ingressProvider = "traefik-lan";
   };
 }

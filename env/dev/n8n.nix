@@ -7,6 +7,6 @@
 
     encryptionKey = (secrets.n8n or { }).encryptionKey or "";
 
-    ingressProvider = "tailscale";
+    ingressProvider = "traefik-lan";
   };
 }

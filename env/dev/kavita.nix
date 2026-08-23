@@ -3,7 +3,7 @@
   services.kavita = {
     enable = false;
 
-    ingressProvider = "tailscale";
+    ingressProvider = "traefik-lan";
     ingress.tls.enable = true;
   };
 }

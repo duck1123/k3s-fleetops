@@ -5,7 +5,7 @@
     # logLevel = "Debug";
     hostAffinity = "edgenix";
 
-    ingressProvider = "tailscale";
+    ingressProvider = "traefik-lan";
 
     nfs = {
       enable = true;

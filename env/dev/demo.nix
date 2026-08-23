@@ -2,6 +2,6 @@
 {
   services.demo = {
     enable = false;
-    ingressProvider = "tailscale";
+    ingressProvider = "traefik-lan";
   };
 }

@@ -3,7 +3,7 @@
   services.specter = {
     enable = false;
 
-    ingressProvider = "tailscale";
+    ingressProvider = "traefik-lan";
 
     namespace = "specter";
   };

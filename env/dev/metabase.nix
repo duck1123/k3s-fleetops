@@ -3,6 +3,6 @@
   services.metabase = {
     enable = false;
 
-    ingressProvider = "tailscale";
+    ingressProvider = "traefik-lan";
   };
 }

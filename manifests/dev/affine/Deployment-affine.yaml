@@ -38,7 +38,7 @@ spec:
                   key: REDIS_SERVER_PASSWORD
                   name: affine-redis-password
             - name: AFFINE_SERVER_EXTERNAL_URL
-              value: https://affine.bearded-snake.ts.net
+              value: https://affine.home.kronkltd.net
           image: ghcr.io/toeverything/affine:stable
           imagePullPolicy: IfNotPresent
           livenessProbe:

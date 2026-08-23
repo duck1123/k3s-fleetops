@@ -4,7 +4,7 @@
     admin = { inherit (secrets.forgejo.admin) password username; };
     enable = false;
 
-    ingressProvider = "tailscale";
+    ingressProvider = "traefik-lan";
     ingress.localIngress = {
       enable = true;
       domain = "forgejo.${config.devDefaults.homeDomain}";

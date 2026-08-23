@@ -12,9 +12,9 @@
       password = secrets.redis.password;
     };
 
-    serverExternalUrl = "https://affine.${config.devDefaults.tailDomain}";
+    serverExternalUrl = "https://affine.${config.devDefaults.homeDomain}";
 
-    ingressProvider = "tailscale";
+    ingressProvider = "traefik-lan";
     ingress.localIngress = {
       enable = true;
       domain = "affine.${config.devDefaults.homeDomain}";
