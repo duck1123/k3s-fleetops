@@ -1,14 +1,8 @@
-{ config, secrets, ... }:
+{ config, ... }:
 {
   services.lidarr = {
-    database = {
-      enable = true;
-      host = "postgresql.postgresql";
-      port = 5432;
-      name = "lidarr";
-      username = "lidarr";
-      password = secrets.postgresql.userPassword;
-    };
+    databaseTarget = "postgresql";
+    database.enable = true;
 
     enable = true;
     hostAffinity = "edgenix";

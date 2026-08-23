@@ -3,11 +3,9 @@
   services.immich = {
     enable = true;
 
+    databaseTarget = "postgresql";
     database = {
       inherit (secrets.immich.database) password username;
-      host = "postgresql.postgresql";
-      port = 5432;
-      name = "immich";
     };
 
     ingressProvider = "traefik-lan";

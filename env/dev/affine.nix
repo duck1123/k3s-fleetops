@@ -4,13 +4,7 @@
     enable = false;
     # hostAffinity = "edgenix";
 
-    database = {
-      host = "postgresql.postgresql";
-      port = 5432;
-      name = "affine";
-      username = "affine";
-      password = secrets.postgresql.userPassword;
-    };
+    databaseTarget = "postgresql";
 
     redis = {
       host = "redis.redis";

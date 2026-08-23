@@ -25,6 +25,7 @@
       rec {
         name = "windmill";
         uses-ingress = true;
+        uses-database = true;
 
         # Store only the raw password; init container builds DATABASE_URL at runtime with proper URL encoding.
         sopsSecrets =
@@ -46,38 +47,6 @@
             description = mdDoc "The service port";
             type = types.int;
             default = 8000;
-          };
-
-          database = {
-            host = mkOption {
-              description = mdDoc "PostgreSQL host (use your existing Postgres service)";
-              type = types.str;
-              default = "postgresql.postgresql";
-            };
-
-            port = mkOption {
-              description = mdDoc "PostgreSQL port";
-              type = types.int;
-              default = 5432;
-            };
-
-            name = mkOption {
-              description = mdDoc "PostgreSQL database name for Windmill";
-              type = types.str;
-              default = "windmill";
-            };
-
-            username = mkOption {
-              description = mdDoc "PostgreSQL username for Windmill";
-              type = types.str;
-              default = "windmill";
-            };
-
-            password = mkOption {
-              description = mdDoc "PostgreSQL password for Windmill (from your secrets)";
-              type = types.str;
-              default = "";
-            };
           };
 
           replicas = mkOption {

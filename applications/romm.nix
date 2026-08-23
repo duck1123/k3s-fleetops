@@ -26,6 +26,7 @@
       rec {
         name = "romm";
         uses-ingress = true;
+        uses-database = true;
 
         sopsSecrets =
           cfg:
@@ -95,38 +96,6 @@
             description = mdDoc "The authentication secret key (used for sessions)";
             type = types.str;
             default = "CHANGEME";
-          };
-
-          database = {
-            host = mkOption {
-              description = mdDoc "The database host";
-              type = types.str;
-              default = "mariadb.mariadb";
-            };
-
-            name = mkOption {
-              description = mdDoc "The database name";
-              type = types.str;
-              default = "romm";
-            };
-
-            password = mkOption {
-              description = mdDoc "The database password";
-              type = types.str;
-              default = "CHANGEME";
-            };
-
-            port = mkOption {
-              description = mdDoc "The database port";
-              type = types.int;
-              default = 3306;
-            };
-
-            username = mkOption {
-              description = mdDoc "The database username";
-              type = types.str;
-              default = "romm";
-            };
           };
 
           nfs = {

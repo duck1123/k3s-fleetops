@@ -10,11 +10,9 @@
 
     authSecretKey = secrets.romm.authSecretKey;
 
+    databaseTarget = "mariadb";
     database = {
-      host = "mariadb.mariadb";
-      name = "romm";
       password = secrets.mariadb.password;
-      port = 3306;
       username = "mariadb";
     };
 

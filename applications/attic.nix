@@ -77,6 +77,7 @@
       {
         inherit name;
         uses-ingress = true;
+        uses-database = true;
 
         extraOptions = {
           service.port = mkOption {
@@ -89,34 +90,6 @@
             description = mdDoc "Base64-encoded HS256 JWT signing secret (generate with: openssl rand -base64 32). Stored in a SOPS secret.";
             type = types.str;
             default = "";
-          };
-
-          database = {
-            host = mkOption {
-              description = mdDoc "PostgreSQL service host";
-              type = types.str;
-              default = "postgresql.postgresql";
-            };
-            port = mkOption {
-              description = mdDoc "PostgreSQL port";
-              type = types.int;
-              default = 5432;
-            };
-            name = mkOption {
-              description = mdDoc "Database name";
-              type = types.str;
-              default = "attic";
-            };
-            username = mkOption {
-              description = mdDoc "Database user";
-              type = types.str;
-              default = "attic";
-            };
-            password = mkOption {
-              description = mdDoc "Database password";
-              type = types.str;
-              default = "";
-            };
           };
 
           storage = {

@@ -1,13 +1,10 @@
-{ config, secrets, ... }:
+{ config, ... }:
 {
   services.prowlarr = {
+    databaseTarget = "postgresql";
     database = {
       enable = true;
-      host = "postgresql.postgresql";
-      port = 5432;
       name = "prowlarr-main";
-      username = "prowlarr";
-      password = secrets.postgresql.userPassword;
     };
 
     enable = true;

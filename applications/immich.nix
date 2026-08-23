@@ -25,6 +25,7 @@
       rec {
         name = "immich";
         uses-ingress = true;
+        uses-database = true;
 
         sopsSecrets = cfg: {
           ${password-secret} = {
@@ -58,38 +59,6 @@
             description = mdDoc "Number of immich-server replicas";
             type = types.int;
             default = 1;
-          };
-
-          database = {
-            host = mkOption {
-              description = mdDoc "The database host";
-              type = types.str;
-              default = "postgresql";
-            };
-
-            name = mkOption {
-              description = mdDoc "The database name";
-              type = types.str;
-              default = "immich";
-            };
-
-            password = mkOption {
-              description = mdDoc "The database password";
-              type = types.str;
-              default = "CHANGEME";
-            };
-
-            port = mkOption {
-              description = mdDoc "The database port";
-              type = types.int;
-              default = 5432;
-            };
-
-            username = mkOption {
-              description = mdDoc "The database username";
-              type = types.str;
-              default = "immich";
-            };
           };
 
           redis = {

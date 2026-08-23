@@ -1,14 +1,8 @@
-{ config, secrets, ... }:
+{ config, ... }:
 {
   services.radarr = {
-    database = {
-      enable = true;
-      host = "postgresql.postgresql";
-      port = 5432;
-      name = "radarr";
-      username = "radarr";
-      password = secrets.postgresql.userPassword;
-    };
+    databaseTarget = "postgresql";
+    database.enable = true;
 
     enable = true;
     hostAffinity = "edgenix";

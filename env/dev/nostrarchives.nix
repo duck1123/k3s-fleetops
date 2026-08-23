@@ -3,13 +3,7 @@
   services.nostrarchives = {
     enable = false;
 
-    database = {
-      host = "postgresql.postgresql";
-      port = 5432;
-      name = "nostrarchives";
-      username = "nostrarchives";
-      password = secrets.postgresql.userPassword;
-    };
+    databaseTarget = "postgresql";
 
     redis = {
       host = "redis.redis";

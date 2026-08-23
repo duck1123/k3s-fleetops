@@ -5,11 +5,9 @@
     # hostAffinity = "edgenix";
     image = "ghcr.io/mealie-recipes/mealie:v3.22.0";
 
+    databaseTarget = "postgresql";
     database = {
       enable = true;
-      host = "postgresql.postgresql";
-      name = "mealie";
-      username = "mealie";
       password = secrets.mealie.databasePassword;
     };
 

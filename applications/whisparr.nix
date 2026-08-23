@@ -24,6 +24,7 @@
       rec {
         name = "whisparr";
         uses-ingress = true;
+        uses-database = true;
 
         extraOptions = {
           image = mkOption {
@@ -96,43 +97,6 @@
             default = true;
           };
 
-          database = {
-            enable = mkOption {
-              description = mdDoc "Enable PostgreSQL database";
-              type = types.bool;
-              default = false;
-            };
-
-            host = mkOption {
-              description = mdDoc "PostgreSQL database host";
-              type = types.str;
-              default = "postgresql.postgresql";
-            };
-
-            port = mkOption {
-              description = mdDoc "PostgreSQL database port";
-              type = types.int;
-              default = 5432;
-            };
-
-            name = mkOption {
-              description = mdDoc "PostgreSQL database name";
-              type = types.str;
-              default = "whisparr";
-            };
-
-            username = mkOption {
-              description = mdDoc "PostgreSQL database username";
-              type = types.str;
-              default = "whisparr";
-            };
-
-            password = mkOption {
-              description = mdDoc "PostgreSQL database password";
-              type = types.str;
-              default = "";
-            };
-          };
         };
 
         sopsSecrets =

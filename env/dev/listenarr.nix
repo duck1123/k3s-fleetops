@@ -1,14 +1,8 @@
-{ config, secrets, ... }:
+{ config, ... }:
 {
   services.listenarr = {
-    database = {
-      enable = true;
-      host = "postgresql.postgresql";
-      name = "listenarr";
-      password = secrets.postgresql.userPassword;
-      port = 5432;
-      username = "listenarr";
-    };
+    databaseTarget = "postgresql";
+    database.enable = true;
 
     enable = true;
 

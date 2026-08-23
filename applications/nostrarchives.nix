@@ -45,6 +45,7 @@
       {
         inherit name;
         uses-ingress = true;
+        uses-database = true;
 
         extraOptions = {
           service.port = mkOption {
@@ -57,34 +58,6 @@
             description = mdDoc "Tailscale domain for the NIP-50 WebSocket relay (port 8001). Empty string disables the relay ingress.";
             type = types.str;
             default = "";
-          };
-
-          database = {
-            host = mkOption {
-              description = mdDoc "PostgreSQL service host";
-              type = types.str;
-              default = "postgresql.postgresql";
-            };
-            port = mkOption {
-              description = mdDoc "PostgreSQL port";
-              type = types.int;
-              default = 5432;
-            };
-            name = mkOption {
-              description = mdDoc "Database name";
-              type = types.str;
-              default = "nostrarchives";
-            };
-            username = mkOption {
-              description = mdDoc "Database user";
-              type = types.str;
-              default = "nostrarchives";
-            };
-            password = mkOption {
-              description = mdDoc "Database password";
-              type = types.str;
-              default = "";
-            };
           };
 
           redis = {

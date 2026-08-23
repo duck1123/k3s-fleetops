@@ -1,14 +1,8 @@
-{ config, secrets, ... }:
+{ config, ... }:
 {
   services.whisparr = {
-    database = {
-      enable = true;
-      host = "postgresql.postgresql";
-      port = 5432;
-      name = "whisparr";
-      username = "whisparr";
-      password = secrets.postgresql.userPassword;
-    };
+    databaseTarget = "postgresql";
+    database.enable = true;
 
     enable = false;
 

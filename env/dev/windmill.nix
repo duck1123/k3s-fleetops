@@ -8,12 +8,9 @@
     ingressProvider = "traefik-lan";
     ingress.tls.enable = true;
 
+    databaseTarget = "postgresql";
     database = {
-      host = "postgresql.postgresql";
-      port = 5432;
-      name = "windmill";
-      username = secrets.windmill.database.username;
-      password = secrets.windmill.database.password;
+      inherit (secrets.windmill.database) username password;
     };
 
     storageClassName = "longhorn";

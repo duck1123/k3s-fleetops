@@ -11,13 +11,8 @@
 
       ingressProvider = "traefik-lan";
 
-      database = {
-        host = "postgresql.postgresql";
-        port = 5432;
-        name = "nocodb";
-        username = "nocodb";
-        password = (secrets.nocodb.postgresql or { }).password or secrets.postgresql.userPassword;
-      };
+      databaseTarget = "postgresql";
+      database.password = (secrets.nocodb.postgresql or { }).password or secrets.postgresql.userPassword;
 
       redis = {
         host = "redis.redis";

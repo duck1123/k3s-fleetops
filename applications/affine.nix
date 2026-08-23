@@ -29,6 +29,7 @@
       rec {
         inherit name;
         uses-ingress = true;
+        uses-database = true;
 
         sopsSecrets =
           cfg:
@@ -44,34 +45,6 @@
             description = mdDoc "AFFiNE Docker image (ghcr.io/toeverything/affine)";
             type = types.str;
             default = "ghcr.io/toeverything/affine:stable";
-          };
-
-          database = {
-            host = mkOption {
-              description = mdDoc "PostgreSQL host (cluster service DNS)";
-              type = types.str;
-              default = "postgresql.postgresql";
-            };
-            port = mkOption {
-              description = mdDoc "PostgreSQL port";
-              type = types.int;
-              default = 5432;
-            };
-            name = mkOption {
-              description = mdDoc "Database name";
-              type = types.str;
-              default = "affine";
-            };
-            username = mkOption {
-              description = mdDoc "Database username";
-              type = types.str;
-              default = "affine";
-            };
-            password = mkOption {
-              description = mdDoc "Database password";
-              type = types.str;
-              default = "";
-            };
           };
 
           redis = {

@@ -24,6 +24,7 @@
       rec {
         name = "mealie";
         uses-ingress = true;
+        uses-database = true;
 
         extraOptions = {
           image = mkOption {
@@ -44,43 +45,6 @@
             default = 1;
           };
 
-          database = {
-            enable = mkOption {
-              description = mdDoc "Enable PostgreSQL database (disables built-in SQLite)";
-              type = types.bool;
-              default = false;
-            };
-
-            host = mkOption {
-              description = mdDoc "PostgreSQL host";
-              type = types.str;
-              default = "postgresql.postgresql";
-            };
-
-            port = mkOption {
-              description = mdDoc "PostgreSQL port";
-              type = types.int;
-              default = 5432;
-            };
-
-            name = mkOption {
-              description = mdDoc "PostgreSQL database name";
-              type = types.str;
-              default = "mealie";
-            };
-
-            username = mkOption {
-              description = mdDoc "PostgreSQL username";
-              type = types.str;
-              default = "mealie";
-            };
-
-            password = mkOption {
-              description = mdDoc "PostgreSQL password";
-              type = types.str;
-              default = "";
-            };
-          };
         };
 
         sopsSecrets =

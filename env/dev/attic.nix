@@ -8,13 +8,7 @@
 
     tokenHs256SecretBase64 = secrets.attic.tokenHs256SecretBase64;
 
-    database = {
-      host = "postgresql.postgresql";
-      port = 5432;
-      name = "attic";
-      username = "attic";
-      password = secrets.postgresql.userPassword;
-    };
+    databaseTarget = "postgresql";
 
     storage = {
       bucket = "attic";

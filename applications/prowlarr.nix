@@ -24,6 +24,7 @@
       rec {
         name = "prowlarr";
         uses-ingress = true;
+        uses-database = true;
 
         extraOptions = {
           image = mkOption {
@@ -76,43 +77,6 @@
             default = 1;
           };
 
-          database = {
-            enable = mkOption {
-              description = mdDoc "Enable PostgreSQL database";
-              type = types.bool;
-              default = false;
-            };
-
-            host = mkOption {
-              description = mdDoc "PostgreSQL database host";
-              type = types.str;
-              default = "postgresql.postgresql";
-            };
-
-            port = mkOption {
-              description = mdDoc "PostgreSQL database port";
-              type = types.int;
-              default = 5432;
-            };
-
-            name = mkOption {
-              description = mdDoc "PostgreSQL main database name (default: prowlarr-main, log database will be {name}-log)";
-              type = types.str;
-              default = "prowlarr-main";
-            };
-
-            username = mkOption {
-              description = mdDoc "PostgreSQL database username";
-              type = types.str;
-              default = "prowlarr";
-            };
-
-            password = mkOption {
-              description = mdDoc "PostgreSQL database password (will be stored in SOPS secret)";
-              type = types.str;
-              default = "";
-            };
-          };
         };
 
         sopsSecrets =
