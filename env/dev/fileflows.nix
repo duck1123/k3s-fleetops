@@ -1,7 +1,7 @@
 { config, ... }:
 {
   services.fileflows = {
-    enable = true;
+    enable = false;
     hostAffinity = "nixmini";
 
     ingressProvider = "traefik-lan";

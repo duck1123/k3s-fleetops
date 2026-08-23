@@ -1,7 +1,7 @@
 { config, secrets, ... }:
 {
   services.affine = {
-    enable = false;
+    enable = true;
     # hostAffinity = "edgenix";
 
     databaseTarget = "postgresql";

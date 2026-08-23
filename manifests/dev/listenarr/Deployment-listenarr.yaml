@@ -28,21 +28,6 @@ spec:
               value: "1000"
             - name: TZ
               value: Etc/UTC
-            - name: LISTENARR__POSTGRES__HOST
-              value: postgresql.postgresql
-            - name: LISTENARR__POSTGRES__PORT
-              value: "5432"
-            - name: LISTENARR__POSTGRES__MAINDB
-              value: listenarr
-            - name: LISTENARR__POSTGRES__LOGDB
-              value: listenarr-log
-            - name: LISTENARR__POSTGRES__USER
-              value: listenarr
-            - name: LISTENARR__POSTGRES__PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: password
-                  name: listenarr-database-password
           image: ghcr.io/listenarrs/listenarr:canary
           imagePullPolicy: IfNotPresent
           livenessProbe:
@@ -83,9 +68,6 @@ spec:
         - name: config
           persistentVolumeClaim:
             claimName: listenarr-listenarr-config
-        - name: listenarr-database-password
-          secret:
-            secretName: listenarr-database-password
         - name: downloads
           persistentVolumeClaim:
             claimName: listenarr-listenarr-downloads

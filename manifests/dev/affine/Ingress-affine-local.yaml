@@ -3,22 +3,22 @@ kind: Ingress
 metadata:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
-  name: fileflows
-  namespace: fileflows
+  name: affine-local
+  namespace: affine
 spec:
   ingressClassName: traefik
   rules:
-    - host: fileflows.home.kronkltd.net
+    - host: affine.home.kronkltd.net
       http:
         paths:
           - backend:
               service:
-                name: fileflows
+                name: affine
                 port:
                   name: http
             path: /
-            pathType: Prefix
+            pathType: ImplementationSpecific
   tls:
     - hosts:
-        - fileflows.home.kronkltd.net
-      secretName: fileflows-tls
+        - affine.home.kronkltd.net
+      secretName: affine-local-tls
