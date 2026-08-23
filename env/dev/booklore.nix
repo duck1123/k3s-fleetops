@@ -8,7 +8,7 @@
 
     gid = "0";
 
-    ingressProvider = "tailscale";
+    ingressProvider = "traefik-lan";
     ingress.localIngress = {
       enable = true;
       domain = "booklore.${config.devDefaults.homeDomain}";

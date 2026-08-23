@@ -4,9 +4,9 @@ metadata:
   name: booklore
   namespace: booklore
 spec:
-  ingressClassName: tailscale
+  ingressClassName: traefik
   rules:
-    - host: booklore.bearded-snake.ts.net
+    - host: booklore.home.kronkltd.net
       http:
         paths:
           - backend:
@@ -18,4 +18,4 @@ spec:
             pathType: ImplementationSpecific
   tls:
     - hosts:
-        - booklore.bearded-snake.ts.net
+        - booklore.home.kronkltd.net
