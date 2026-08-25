@@ -5,7 +5,7 @@
     image = "ghcr.io/haveagitgat/tdarr:2.86.01";
     healthcheckcpuWorkers = 0;
     healthcheckgpuWorkers = 1;
-    hostAffinity = "nixmini";
+    hostAffinity = "edgenix";
 
     ingressProvider = "traefik-lan";
     ingress.tls.enable = true;
