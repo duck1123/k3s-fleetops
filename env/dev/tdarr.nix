@@ -19,7 +19,7 @@
     puid = 1000;
     pgid = 1000;
 
-    replicas = 1;
+    replicas = 0;
     storageClassName = "longhorn";
     useProbes = false;
     vpn.enable = false;
