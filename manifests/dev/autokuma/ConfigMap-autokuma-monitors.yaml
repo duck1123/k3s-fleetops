@@ -8,6 +8,7 @@ data:
   homarr.json: '{"name":"homarr","type":"http","url":"https://homarr.home.kronkltd.net"}'
   home-assistant.json: '{"name":"home-assistant","type":"http","url":"https://home-assistant.home.kronkltd.net"}'
   immich.json: '{"name":"immich","type":"http","url":"https://immich.home.kronkltd.net"}'
+  kapowarr.json: '{"name":"kapowarr","type":"http","url":"https://kapowarr.home.kronkltd.net"}'
   komga.json: '{"name":"komga","type":"http","url":"https://komga.home.kronkltd.net"}'
   lidarr.json: '{"name":"lidarr","type":"http","url":"https://lidarr.home.kronkltd.net"}'
   listenarr.json: '{"name":"listenarr","type":"http","url":"https://listenarr.home.kronkltd.net"}'

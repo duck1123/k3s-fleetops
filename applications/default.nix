@@ -34,6 +34,7 @@
     ./homarr.nix
     ./home-assistant.nix
     ./immich.nix
+    ./kapowarr.nix
     ./kavita.nix
     ./keycloak.nix
     ./komga.nix

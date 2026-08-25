@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: kapowarr-kapowarr-library-nfs
+spec:
+  accessModes:
+    - ReadWriteMany
+  capacity:
+    storage: 1Ti
+  mountOptions:
+    - nolock
+    - noexec
+    - soft
+    - timeo=30
+  nfs:
+    path: /volume1/Books
+    server: 192.168.0.124
+  persistentVolumeReclaimPolicy: Retain

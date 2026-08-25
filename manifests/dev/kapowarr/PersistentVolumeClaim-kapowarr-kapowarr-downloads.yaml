@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: kapowarr-kapowarr-downloads
+  namespace: kapowarr
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: ""
+  volumeName: kapowarr-kapowarr-downloads-nfs
