@@ -1,8 +1,8 @@
 { config, secrets, ... }:
 {
   services.windmill = {
-    enable = true;
-    hostAffinity = "nixmini";
+    enable = false;
+    # hostAffinity = "nixmini";
     image = "ghcr.io/windmill-labs/windmill-full:latest";
 
     ingressProvider = "traefik-lan";

@@ -2,9 +2,9 @@
 {
   services.listenarr = {
     databaseTarget = "postgresql";
-    database.enable = false;
+    database.enable = true;
 
-    enable = true;
+    enable = false;
 
     ingressProvider = "traefik-lan";
     ingress.tls.enable = true;

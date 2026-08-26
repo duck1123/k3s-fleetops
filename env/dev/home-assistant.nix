@@ -1,7 +1,7 @@
 { config, ... }:
 {
   services.home-assistant = {
-    enable = true;
+    enable = false;
     # hostAffinity = "edgenix";
 
     # https://github.com/AiDot-Development-Team/hass-AiDot

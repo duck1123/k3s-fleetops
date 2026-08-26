@@ -6,12 +6,10 @@ data:
   booklore.json: '{"name":"booklore","type":"http","url":"https://booklore.home.kronkltd.net"}'
   cloudbeaver.json: '{"name":"cloudbeaver","type":"http","url":"https://cloudbeaver.home.kronkltd.net"}'
   homarr.json: '{"name":"homarr","type":"http","url":"https://homarr.home.kronkltd.net"}'
-  home-assistant.json: '{"name":"home-assistant","type":"http","url":"https://home-assistant.home.kronkltd.net"}'
   immich.json: '{"name":"immich","type":"http","url":"https://immich.home.kronkltd.net"}'
   kapowarr.json: '{"name":"kapowarr","type":"http","url":"https://kapowarr.home.kronkltd.net"}'
   komga.json: '{"name":"komga","type":"http","url":"https://komga.home.kronkltd.net"}'
   lidarr.json: '{"name":"lidarr","type":"http","url":"https://lidarr.home.kronkltd.net"}'
-  listenarr.json: '{"name":"listenarr","type":"http","url":"https://listenarr.home.kronkltd.net"}'
   longhorn.json: '{"name":"longhorn","type":"http","url":"https://longhorn.home.kronkltd.net"}'
   memos.json: '{"name":"memos","type":"http","url":"https://memos.home.kronkltd.net"}'
   navidrome.json: '{"name":"navidrome","type":"http","url":"https://navidrome.home.kronkltd.net"}'
@@ -27,7 +25,6 @@ data:
   tdarr.json: '{"name":"tdarr","type":"http","url":"https://tdarr.home.kronkltd.net"}'
   trilium.json: '{"name":"trilium","type":"http","url":"https://trilium.home.kronkltd.net"}'
   uptime-kuma.json: '{"name":"uptime-kuma","type":"http","url":"https://uptime-kuma.home.kronkltd.net"}'
-  windmill.json: '{"name":"windmill","type":"http","url":"https://windmill.home.kronkltd.net"}'
 kind: ConfigMap
 metadata:
   name: autokuma-monitors
