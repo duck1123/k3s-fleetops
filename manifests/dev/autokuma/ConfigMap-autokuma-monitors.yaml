@@ -1,6 +1,5 @@
 apiVersion: v1
 data:
-  affine.json: '{"name":"affine","type":"http","url":"https://affine.home.kronkltd.net"}'
   attic.json: '{"name":"attic","type":"http","url":"https://attic.home.kronkltd.net"}'
   audiobookshelf.json: '{"name":"audiobookshelf","type":"http","url":"https://audiobookshelf.home.kronkltd.net"}'
   booklore.json: '{"name":"booklore","type":"http","url":"https://booklore.home.kronkltd.net"}'
@@ -12,7 +11,6 @@ data:
   lidarr.json: '{"name":"lidarr","type":"http","url":"https://lidarr.home.kronkltd.net"}'
   longhorn.json: '{"name":"longhorn","type":"http","url":"https://longhorn.home.kronkltd.net"}'
   memos.json: '{"name":"memos","type":"http","url":"https://memos.home.kronkltd.net"}'
-  navidrome.json: '{"name":"navidrome","type":"http","url":"https://navidrome.home.kronkltd.net"}'
   pihole.json: '{"name":"pihole","type":"http","url":"https://pihole.home.kronkltd.net/admin/login"}'
   prowlarr.json: '{"name":"prowlarr","type":"http","url":"https://prowlarr.home.kronkltd.net"}'
   qbittorrent.json: '{"name":"qbittorrent","type":"http","url":"https://qbittorrent.home.kronkltd.net"}'
