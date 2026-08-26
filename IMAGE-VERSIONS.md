@@ -57,7 +57,6 @@ These images have explicit version tags and require manual checks.
 | mealie | applications/mealie.nix, env/dev/mealie.nix | ghcr.io/mealie-recipes/mealie | v3.22.0 | https://github.com/mealie-recipes/mealie/releases |
 | romm | applications/romm.nix | ghcr.io/rommapp/romm | 5.1.0 | https://github.com/rommapp/romm/releases |
 | hivemq | applications/hivemq.nix | hivemq/hivemq-ce | 2026.5 | https://hub.docker.com/r/hivemq/hivemq-ce/tags |
-| specter | applications/specter.nix | lncm/specter-desktop | v2.1.1 | https://github.com/lncm/docker-specter-desktop/releases |
 | postgres init | applications/immich.nix | docker.io/postgres | 17.10 | https://hub.docker.com/_/postgres/tags |
 | pgvector | applications/postgresql.nix | pgvector/pgvector | pg17 (floating) | https://hub.docker.com/r/pgvector/pgvector/tags |
 | busybox | various (init containers) | busybox | 1.36 | https://hub.docker.com/_/busybox/tags |
@@ -106,7 +105,6 @@ These have newer versions available but involve major or breaking changes. Revie
 | keycloak | applications/keycloak.nix | 24.1.0 | 25.2.0 | Major bitnami chart version |
 | kyverno | applications/kyverno.nix | 3.4.4 | 3.8.1 | Significant policy engine changes |
 | spark | applications/spark.nix | 9.3.5 | 10.0.3 | Major version, breaking config changes |
-| airflow | applications/airflow.nix | 1.15.0 | 1.21.0 | Review DAG compatibility |
 | lldap | applications/lldap.nix | 0.4.2 | 0.6.4 | Check LDAP schema migrations |
 | opentelemetry-collector | applications/opentelemetry-collector.nix | 0.107.0 | 0.158.0 | Large version jump; verify config compatibility |
 | argo-workflows | applications/argo-workflows.nix | 11.1.10 | unclear | Bitnami renumbered (OCI: ~1.1.x); verify repo migration |
@@ -117,9 +115,6 @@ These have newer versions available but involve major or breaking changes. Revie
 
 | Service | File | Repo | Version |
 |---------|------|------|---------|
-| alice-bitcoin | applications/alice-bitcoin.nix | https://chart.kronkltd.net/ | 0.2.3 |
-| alice-lnd | applications/alice-lnd.nix | https://chart.kronkltd.net/ | 0.3.9 |
-| adventureworks | applications/adventureworks.nix | (internal) | 0.1.0 |
 | calibre | applications/calibre.nix | https://geek-cookbook.github.io/charts/ | 8.4.2 |
 | lldap | applications/lldap.nix | https://djjudas21.github.io/charts/ | 0.4.2 |
 | marquez | applications/marquez.nix | https://charts.ilum.cloud | 0.42.0 |

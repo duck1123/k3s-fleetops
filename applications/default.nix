@@ -2,11 +2,7 @@
 {
   imports = [
     ./affine.nix
-    ./adventureworks.nix
     ./audiobookshelf.nix
-    ./airflow.nix
-    ./alice-bitcoin.nix
-    ./alice-lnd.nix
     ./argocd.nix
     ./argo-events.nix
     ./argo-workflows.nix
@@ -80,7 +76,6 @@
     ./sops.nix
     ./stashapp.nix
     ./spark.nix
-    ./specter.nix
     ./sqlpad.nix
     ./tailscale.nix
     ./tdarr.nix
