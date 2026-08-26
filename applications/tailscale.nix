@@ -88,7 +88,8 @@
           };
         };
 
-        extraAppConfig = cfg:
+        extraAppConfig =
+          cfg:
           lib.mkIf (cfg.subnetRoutes != [ ]) {
             yamls = [
               # ProxyClass puts the Connector pod into the host network namespace so it can
