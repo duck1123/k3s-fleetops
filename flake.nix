@@ -3,46 +3,27 @@
 
   inputs = {
     attic = {
-      inputs.nixpkgs.follows = "nixpkgs";
-      url = "github:zhaofengli/attic";
-    };
-
-    clj-nix = {
       inputs = {
-        nix-fetcher-data.follows = "nix-fetcher-data";
-        nixpkgs.follows = "nixpkgs";
-      };
-      url = "github:jlesquembre/clj-nix";
-    };
-
-    flake-parts = {
-      inputs.nixpkgs-lib.follows = "nixpkgs-lib";
-      url = "github:hercules-ci/flake-parts";
-    };
-
-    flake-utils = {
-      inputs.systems.follows = "systems";
-      url = "github:numtide/flake-utils";
-    };
-
-    import-tree.url = "github:vic/import-tree";
-
-    make-shell.url = "github:nicknovitski/make-shell";
-
-    nix-csi = {
-      inputs = {
-        # flake-parts.follows = "flake-parts";
-        nixpkgs.follows = "nixpkgs";
-      };
-      url = "github:Lillecarl/nix-csi";
-    };
-
-    nix-fetcher-data = {
-      inputs = {
+        flake-compat.follows = "flake-compat";
         flake-parts.follows = "flake-parts";
         nixpkgs.follows = "nixpkgs";
       };
-      url = "github:jlesquembre/nix-fetcher-data";
+      url = "github:zhaofengli/attic";
+    };
+
+    flake-compat.url = "github:edolstra/flake-compat";
+    flake-parts.url = "github:hercules-ci/flake-parts";
+    flake-utils.url = "github:numtide/flake-utils";
+    import-tree.url = "github:vic/import-tree";
+
+    make-shell = {
+      inputs.flake-compat.follows = "flake-compat";
+      url = "github:nicknovitski/make-shell";
+    };
+
+    nix-csi = {
+      inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:Lillecarl/nix-csi";
     };
 
     nix-kube-generators.url = "github:farcaller/nix-kube-generators";
@@ -66,15 +47,6 @@
     };
 
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-
-    nixpkgs-lib.url = "github:nix-community/nixpkgs.lib";
-
-    sops-nix = {
-      inputs.nixpkgs.follows = "nixpkgs";
-      url = "github:Mic92/sops-nix";
-    };
-
-    systems.url = "github:nix-systems/default";
   };
 
   outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } (inputs.import-tree ./modules);
