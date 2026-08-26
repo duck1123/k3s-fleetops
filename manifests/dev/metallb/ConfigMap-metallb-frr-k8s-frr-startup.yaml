@@ -81,7 +81,7 @@ data:
     # or you can use "all_wrap" for all daemons, e.g. to use perf record:
     #   all_wrap="/usr/bin/perf record --call-graph -"
     # the normal daemon command is added to this at the end.
-  frr.conf: |
+  frr.conf: |+
     ! This file gets overriden the first time the speaker renders a config.
     ! So anything configured here is only temporary.
     frr version 8.0
@@ -89,6 +89,7 @@ data:
     hostname Router
     line vty
     log stdout informational
+
   vtysh.conf: |
     service integrated-vtysh-config
 kind: ConfigMap
