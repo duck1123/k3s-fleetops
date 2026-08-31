@@ -158,8 +158,8 @@
           })
           // {
             configMaps."${name}-config".data."garage.toml" = ''
-              metadata_dir = "/garage/meta"
-              data_dir = "/garage/data"
+              metadata_dir = "/data/meta"
+              data_dir = "/data/data"
               db_engine = "lmdb"
 
               replication_factor = 1
@@ -300,11 +300,11 @@
                             subPath = "garage.toml";
                           }
                           {
-                            mountPath = "/garage/meta";
+                            mountPath = "/data/meta";
                             name = "meta";
                           }
                           {
-                            mountPath = "/garage/data";
+                            mountPath = "/data/data";
                             name = "data";
                           }
                         ];

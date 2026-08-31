@@ -82,9 +82,9 @@ spec:
             - mountPath: /etc/garage.toml
               name: config
               subPath: garage.toml
-            - mountPath: /garage/meta
+            - mountPath: /data/meta
               name: meta
-            - mountPath: /garage/data
+            - mountPath: /data/data
               name: data
       securityContext: {}
       volumes:
