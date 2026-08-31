@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  name: garage
+  namespace: garage
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: garage.home.kronkltd.net
+      http:
+        paths:
+          - backend:
+              service:
+                name: garage
+                port:
+                  name: s3
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - garage.home.kronkltd.net
+      secretName: garage-tls

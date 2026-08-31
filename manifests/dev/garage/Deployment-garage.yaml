@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/instance: garage
+    app.kubernetes.io/name: garage
+  name: garage
+  namespace: garage
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: garage
+      app.kubernetes.io/name: garage
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: garage
+        app.kubernetes.io/name: garage
+    spec:
+      containers:
+        - command:
+            - /garage
+            - server
+            - --single-node
+            - --default-bucket
+          env:
+            - name: GARAGE_RPC_SECRET
+              valueFrom:
+                secretKeyRef:
+                  key: GARAGE_RPC_SECRET
+                  name: garage-secrets
+            - name: GARAGE_ADMIN_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  key: GARAGE_ADMIN_TOKEN
+                  name: garage-secrets
+            - name: GARAGE_DEFAULT_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: GARAGE_DEFAULT_ACCESS_KEY
+                  name: garage-secrets
+            - name: GARAGE_DEFAULT_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: GARAGE_DEFAULT_SECRET_KEY
+                  name: garage-secrets
+            - name: GARAGE_DEFAULT_BUCKET
+              value: default
+          image: dxflrs/garage:v2.3.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: admin
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+          name: garage
+          ports:
+            - containerPort: 3900
+              name: s3
+              protocol: TCP
+            - containerPort: 3901
+              name: rpc
+              protocol: TCP
+            - containerPort: 3903
+              name: admin
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: admin
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+          volumeMounts:
+            - mountPath: /etc/garage.toml
+              name: config
+              subPath: garage.toml
+            - mountPath: /garage/meta
+              name: meta
+            - mountPath: /garage/data
+              name: data
+      securityContext: {}
+      volumes:
+        - configMap:
+            name: garage-config
+          name: config
+        - name: meta
+          persistentVolumeClaim:
+            claimName: garage-meta
+        - name: data
+          persistentVolumeClaim:
+            claimName: garage-data
