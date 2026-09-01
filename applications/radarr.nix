@@ -107,327 +107,333 @@
             };
           };
 
-        extraResources = cfg: {
-          deployments = {
-            ${name} = {
-              metadata.labels = {
-                "app.kubernetes.io/instance" = name;
-                "app.kubernetes.io/name" = name;
-                "app.kubernetes.io/version" = "latest";
-              };
-
-              spec = {
-                replicas = cfg.replicas;
-                selector.matchLabels = {
+        extraResources =
+          cfg:
+          let
+            pinnedConfig = self.lib.mkPinnedVolume {
+              pvcName = "${name}-${name}-config";
+              volumeHandle = "pvc-979d8477-4390-4d8e-b559-7839008e080b";
+              size = "5Gi";
+            };
+          in
+          {
+            deployments = {
+              ${name} = {
+                metadata.labels = {
                   "app.kubernetes.io/instance" = name;
                   "app.kubernetes.io/name" = name;
+                  "app.kubernetes.io/version" = "latest";
                 };
 
-                template = {
-                  metadata.labels = {
+                spec = {
+                  replicas = cfg.replicas;
+                  selector.matchLabels = {
                     "app.kubernetes.io/instance" = name;
                     "app.kubernetes.io/name" = name;
                   };
 
-                  spec = {
-                    automountServiceAccountToken = true;
+                  template = {
+                    metadata.labels = {
+                      "app.kubernetes.io/instance" = name;
+                      "app.kubernetes.io/name" = name;
+                    };
 
-                    containers = [
-                      {
-                        inherit name;
-                        image = cfg.image;
-                        imagePullPolicy = "IfNotPresent";
-                        env = [
-                          {
-                            name = "PGID";
-                            value = "${toString cfg.pgid}";
-                          }
-                          {
-                            name = "PUID";
-                            value = "${toString cfg.puid}";
-                          }
-                          {
-                            name = "TZ";
-                            value = cfg.tz;
-                          }
-                        ]
-                        ++ (lib.optionals cfg.database.enable [
-                          {
-                            name = "RADARR__POSTGRES__HOST";
-                            value = cfg.database.host;
-                          }
-                          {
-                            name = "RADARR__POSTGRES__PORT";
-                            value = toString cfg.database.port;
-                          }
-                          {
-                            name = "RADARR__POSTGRES__MAINDB";
-                            value = cfg.database.name;
-                          }
-                          {
-                            name = "RADARR__POSTGRES__LOGDB";
-                            value =
-                              if lib.hasSuffix "-main" cfg.database.name then
-                                lib.removeSuffix "-main" cfg.database.name + "-log"
-                              else
-                                "${cfg.database.name}-log";
-                          }
-                          {
-                            name = "RADARR__POSTGRES__USER";
-                            value = cfg.database.username;
-                          }
-                          (
-                            if cfg.database.password != "" then
-                              {
-                                name = "RADARR__POSTGRES__PASSWORD";
-                                valueFrom = {
-                                  secretKeyRef = {
-                                    name = password-secret;
-                                    key = "password";
+                    spec = {
+                      automountServiceAccountToken = true;
+
+                      containers = [
+                        {
+                          inherit name;
+                          image = cfg.image;
+                          imagePullPolicy = "IfNotPresent";
+                          env = [
+                            {
+                              name = "PGID";
+                              value = "${toString cfg.pgid}";
+                            }
+                            {
+                              name = "PUID";
+                              value = "${toString cfg.puid}";
+                            }
+                            {
+                              name = "TZ";
+                              value = cfg.tz;
+                            }
+                          ]
+                          ++ (lib.optionals cfg.database.enable [
+                            {
+                              name = "RADARR__POSTGRES__HOST";
+                              value = cfg.database.host;
+                            }
+                            {
+                              name = "RADARR__POSTGRES__PORT";
+                              value = toString cfg.database.port;
+                            }
+                            {
+                              name = "RADARR__POSTGRES__MAINDB";
+                              value = cfg.database.name;
+                            }
+                            {
+                              name = "RADARR__POSTGRES__LOGDB";
+                              value =
+                                if lib.hasSuffix "-main" cfg.database.name then
+                                  lib.removeSuffix "-main" cfg.database.name + "-log"
+                                else
+                                  "${cfg.database.name}-log";
+                            }
+                            {
+                              name = "RADARR__POSTGRES__USER";
+                              value = cfg.database.username;
+                            }
+                            (
+                              if cfg.database.password != "" then
+                                {
+                                  name = "RADARR__POSTGRES__PASSWORD";
+                                  valueFrom = {
+                                    secretKeyRef = {
+                                      name = password-secret;
+                                      key = "password";
+                                    };
                                   };
-                                };
-                              }
-                            else
-                              {
-                                name = "RADARR__POSTGRES__PASSWORD";
-                                value = "";
-                              }
-                          )
-                        ])
-                        ++ (lib.optionals cfg.vpn.enable [
-                          # Configure Radarr to use shared gluetun's HTTP proxy
-                          {
-                            name = "HTTP_PROXY";
-                            value = "http://${cfg.vpn.sharedGluetunService}:8888";
-                          }
-                          {
-                            name = "HTTPS_PROXY";
-                            value = "http://${cfg.vpn.sharedGluetunService}:8888";
-                          }
-                          {
-                            name = "NO_PROXY";
-                            value = "localhost,127.0.0.1,.svc,.svc.cluster.local,sabnzbd.sabnzbd,sabnzbd.sabnzbd.svc.cluster.local";
-                          }
-                        ]);
-                        ports = [
-                          {
-                            containerPort = cfg.service.port;
-                            name = "http";
-                            protocol = "TCP";
-                          }
-                        ];
-                        readinessProbe = lib.mkIf cfg.useProbes {
-                          httpGet = {
-                            path = "/ping";
-                            port = cfg.service.port;
+                                }
+                              else
+                                {
+                                  name = "RADARR__POSTGRES__PASSWORD";
+                                  value = "";
+                                }
+                            )
+                          ])
+                          ++ (lib.optionals cfg.vpn.enable [
+                            # Configure Radarr to use shared gluetun's HTTP proxy
+                            {
+                              name = "HTTP_PROXY";
+                              value = "http://${cfg.vpn.sharedGluetunService}:8888";
+                            }
+                            {
+                              name = "HTTPS_PROXY";
+                              value = "http://${cfg.vpn.sharedGluetunService}:8888";
+                            }
+                            {
+                              name = "NO_PROXY";
+                              value = "localhost,127.0.0.1,.svc,.svc.cluster.local,sabnzbd.sabnzbd,sabnzbd.sabnzbd.svc.cluster.local";
+                            }
+                          ]);
+                          ports = [
+                            {
+                              containerPort = cfg.service.port;
+                              name = "http";
+                              protocol = "TCP";
+                            }
+                          ];
+                          readinessProbe = lib.mkIf cfg.useProbes {
+                            httpGet = {
+                              path = "/ping";
+                              port = cfg.service.port;
+                            };
+                            initialDelaySeconds = 60;
+                            periodSeconds = 10;
+                            timeoutSeconds = 5;
+                            successThreshold = 1;
+                            failureThreshold = 3;
                           };
-                          initialDelaySeconds = 60;
-                          periodSeconds = 10;
-                          timeoutSeconds = 5;
-                          successThreshold = 1;
-                          failureThreshold = 3;
-                        };
-                        livenessProbe = lib.mkIf cfg.useProbes {
-                          httpGet = {
-                            path = "/ping";
-                            port = cfg.service.port;
+                          livenessProbe = lib.mkIf cfg.useProbes {
+                            httpGet = {
+                              path = "/ping";
+                              port = cfg.service.port;
+                            };
+                            initialDelaySeconds = 90;
+                            periodSeconds = 30;
+                            timeoutSeconds = 5;
+                            successThreshold = 1;
+                            failureThreshold = 3;
                           };
-                          initialDelaySeconds = 90;
-                          periodSeconds = 30;
-                          timeoutSeconds = 5;
-                          successThreshold = 1;
-                          failureThreshold = 3;
-                        };
-                        volumeMounts = [
-                          {
-                            mountPath = "/config";
-                            name = "config";
-                          }
-                          {
-                            mountPath = "/downloads";
-                            name = "downloads";
-                          }
-                          {
-                            mountPath = "/movies";
-                            name = "movies";
-                          }
-                        ];
-                      }
-                    ];
+                          volumeMounts = [
+                            {
+                              mountPath = "/config";
+                              name = "config";
+                            }
+                            {
+                              mountPath = "/downloads";
+                              name = "downloads";
+                            }
+                            {
+                              mountPath = "/movies";
+                              name = "movies";
+                            }
+                          ];
+                        }
+                      ];
 
-                    serviceAccountName = "default";
-                    initContainers = lib.optionalAttrs cfg.vpn.enable (
-                      self.lib.waitForGluetun { inherit lib; } cfg.vpn.sharedGluetunService
-                    );
+                      serviceAccountName = "default";
+                      initContainers = lib.optionalAttrs cfg.vpn.enable (
+                        self.lib.waitForGluetun { inherit lib; } cfg.vpn.sharedGluetunService
+                      );
 
-                    volumes = [
-                      {
-                        name = "config";
-                        persistentVolumeClaim.claimName = "${name}-${name}-config";
-                      }
-                    ]
-                    ++ (lib.optionals (cfg.database.enable && cfg.database.password != "") [
-                      {
-                        name = password-secret;
-                        secret.secretName = password-secret;
-                      }
-                    ])
-                    ++ [
-                      {
-                        name = "downloads";
-                        persistentVolumeClaim.claimName = "${name}-${name}-downloads";
-                      }
-                      {
-                        name = "movies";
-                        persistentVolumeClaim.claimName = "${name}-${name}-movies";
-                      }
-                    ];
+                      volumes = [
+                        {
+                          name = "config";
+                          persistentVolumeClaim.claimName = "${name}-${name}-config";
+                        }
+                      ]
+                      ++ (lib.optionals (cfg.database.enable && cfg.database.password != "") [
+                        {
+                          name = password-secret;
+                          secret.secretName = password-secret;
+                        }
+                      ])
+                      ++ [
+                        {
+                          name = "downloads";
+                          persistentVolumeClaim.claimName = "${name}-${name}-downloads";
+                        }
+                        {
+                          name = "movies";
+                          persistentVolumeClaim.claimName = "${name}-${name}-movies";
+                        }
+                      ];
+                    };
                   };
                 };
               };
             };
-          };
 
-          ingresses.${name} = with cfg.ingress; {
-            metadata.annotations = optionalAttrs (clusterIssuer != "") {
-              "cert-manager.io/cluster-issuer" = clusterIssuer;
+            ingresses.${name} = with cfg.ingress; {
+              metadata.annotations = optionalAttrs (clusterIssuer != "") {
+                "cert-manager.io/cluster-issuer" = clusterIssuer;
+              };
+
+              spec = {
+                inherit ingressClassName;
+
+                rules = [
+                  {
+                    host = domain;
+
+                    http.paths = [
+                      {
+                        backend.service = {
+                          inherit name;
+                          port.name = "http";
+                        };
+
+                        path = "/";
+                        pathType = "ImplementationSpecific";
+                      }
+                    ];
+                  }
+                ];
+
+                tls = [
+                  {
+                    hosts = [ domain ];
+                    secretName = "${domain}-tls";
+                  }
+                ];
+              };
             };
 
-            spec = {
-              inherit ingressClassName;
+            persistentVolumeClaims = pinnedConfig.persistentVolumeClaims // {
+              "${name}-${name}-downloads".spec =
+                if cfg.nfs.enable then
+                  {
+                    accessModes = [ "ReadWriteMany" ];
+                    resources.requests.storage = "1Gi";
+                    storageClassName = "";
+                    volumeName = "${name}-${name}-downloads-nfs";
+                  }
+                else
+                  {
+                    inherit (cfg) storageClassName;
+                    accessModes = [ "ReadWriteOnce" ];
+                    resources.requests.storage = "50Gi";
+                  };
+              "${name}-${name}-movies".spec =
+                if cfg.nfs.enable then
+                  {
+                    accessModes = [ "ReadWriteMany" ];
+                    resources.requests.storage = "1Gi";
+                    storageClassName = "";
+                    volumeName = "${name}-${name}-movies-nfs";
+                  }
+                else
+                  {
+                    inherit (cfg) storageClassName;
+                    accessModes = [ "ReadWriteOnce" ];
+                    resources.requests.storage = "100Gi";
+                  };
+            };
 
-              rules = [
+            services.${name}.spec = {
+              ports = [
                 {
-                  host = domain;
-
-                  http.paths = [
-                    {
-                      backend.service = {
-                        inherit name;
-                        port.name = "http";
-                      };
-
-                      path = "/";
-                      pathType = "ImplementationSpecific";
-                    }
-                  ];
+                  name = "http";
+                  port = cfg.service.port;
+                  protocol = "TCP";
+                  targetPort = "http";
                 }
               ];
 
-              tls = [
-                {
-                  hosts = [ domain ];
-                  secretName = "${domain}-tls";
-                }
-              ];
-            };
-          };
-
-          persistentVolumeClaims = {
-            "${name}-${name}-config".spec = {
-              inherit (cfg) storageClassName;
-              accessModes = [ "ReadWriteOnce" ];
-              resources.requests.storage = "5Gi";
-            };
-            "${name}-${name}-downloads".spec =
-              if cfg.nfs.enable then
-                {
-                  accessModes = [ "ReadWriteMany" ];
-                  resources.requests.storage = "1Gi";
-                  storageClassName = "";
-                  volumeName = "${name}-${name}-downloads-nfs";
-                }
-              else
-                {
-                  inherit (cfg) storageClassName;
-                  accessModes = [ "ReadWriteOnce" ];
-                  resources.requests.storage = "50Gi";
-                };
-            "${name}-${name}-movies".spec =
-              if cfg.nfs.enable then
-                {
-                  accessModes = [ "ReadWriteMany" ];
-                  resources.requests.storage = "1Gi";
-                  storageClassName = "";
-                  volumeName = "${name}-${name}-movies-nfs";
-                }
-              else
-                {
-                  inherit (cfg) storageClassName;
-                  accessModes = [ "ReadWriteOnce" ];
-                  resources.requests.storage = "100Gi";
-                };
-          };
-
-          services.${name}.spec = {
-            ports = [
-              {
-                name = "http";
-                port = cfg.service.port;
-                protocol = "TCP";
-                targetPort = "http";
-              }
-            ];
-
-            selector = {
-              "app.kubernetes.io/instance" = name;
-              "app.kubernetes.io/name" = name;
-            };
-
-            type = "ClusterIP";
-          };
-
-          # Create NFS PersistentVolumes for downloads and movies when NFS is enabled
-          persistentVolumes = lib.optionalAttrs (cfg.nfs.enable) {
-            "${name}-${name}-downloads-nfs" = {
-              apiVersion = "v1";
-              kind = "PersistentVolume";
-              metadata = {
-                name = "${name}-${name}-downloads-nfs";
+              selector = {
+                "app.kubernetes.io/instance" = name;
+                "app.kubernetes.io/name" = name;
               };
-              spec = {
-                capacity = {
-                  storage = "1Ti";
-                };
-                accessModes = [ "ReadWriteMany" ];
-                mountOptions = [
-                  "nolock"
-                  "noexec"
-                  "soft"
-                  "timeo=30"
-                ];
-                nfs = {
-                  server = cfg.nfs.server;
-                  path = "${cfg.nfs.path}/Downloads";
-                };
-                persistentVolumeReclaimPolicy = "Retain";
-              };
+
+              type = "ClusterIP";
             };
-            "${name}-${name}-movies-nfs" = {
-              apiVersion = "v1";
-              kind = "PersistentVolume";
-              metadata = {
-                name = "${name}-${name}-movies-nfs";
-              };
-              spec = {
-                capacity = {
-                  storage = "1Ti";
+
+            # Create NFS PersistentVolumes for downloads and movies when NFS is enabled
+            persistentVolumes =
+              pinnedConfig.persistentVolumes
+              // lib.optionalAttrs (cfg.nfs.enable) {
+                "${name}-${name}-downloads-nfs" = {
+                  apiVersion = "v1";
+                  kind = "PersistentVolume";
+                  metadata = {
+                    name = "${name}-${name}-downloads-nfs";
+                  };
+                  spec = {
+                    capacity = {
+                      storage = "1Ti";
+                    };
+                    accessModes = [ "ReadWriteMany" ];
+                    mountOptions = [
+                      "nolock"
+                      "noexec"
+                      "soft"
+                      "timeo=30"
+                    ];
+                    nfs = {
+                      server = cfg.nfs.server;
+                      path = "${cfg.nfs.path}/Downloads";
+                    };
+                    persistentVolumeReclaimPolicy = "Retain";
+                  };
                 };
-                accessModes = [ "ReadWriteMany" ];
-                mountOptions = [
-                  "nolock"
-                  "noexec"
-                  "soft"
-                  "timeo=30"
-                ];
-                nfs = {
-                  server = cfg.nfs.server;
-                  path = "${cfg.nfs.path}/Movies";
+                "${name}-${name}-movies-nfs" = {
+                  apiVersion = "v1";
+                  kind = "PersistentVolume";
+                  metadata = {
+                    name = "${name}-${name}-movies-nfs";
+                  };
+                  spec = {
+                    capacity = {
+                      storage = "1Ti";
+                    };
+                    accessModes = [ "ReadWriteMany" ];
+                    mountOptions = [
+                      "nolock"
+                      "noexec"
+                      "soft"
+                      "timeo=30"
+                    ];
+                    nfs = {
+                      server = cfg.nfs.server;
+                      path = "${cfg.nfs.path}/Movies";
+                    };
+                    persistentVolumeReclaimPolicy = "Retain";
+                  };
                 };
-                persistentVolumeReclaimPolicy = "Retain";
               };
-            };
           };
-        };
       };
 }

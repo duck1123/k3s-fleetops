@@ -87,227 +87,231 @@
             };
           };
 
-        extraResources = cfg: {
-          deployments = {
-            ${name} = {
-              metadata.labels = {
-                "app.kubernetes.io/instance" = name;
-                "app.kubernetes.io/name" = name;
-                "app.kubernetes.io/version" = "latest";
-              };
-
-              spec = {
-                replicas = cfg.replicas;
-                selector.matchLabels = {
+        extraResources =
+          cfg:
+          let
+            pinnedConfig = self.lib.mkPinnedVolume {
+              pvcName = "${name}-${name}-config";
+              volumeHandle = "pvc-ee5907d3-b4e4-4da5-91dc-d013f243b741";
+              size = "5Gi";
+            };
+          in
+          {
+            deployments = {
+              ${name} = {
+                metadata.labels = {
                   "app.kubernetes.io/instance" = name;
                   "app.kubernetes.io/name" = name;
+                  "app.kubernetes.io/version" = "latest";
                 };
 
-                template = {
-                  metadata.labels = {
+                spec = {
+                  replicas = cfg.replicas;
+                  selector.matchLabels = {
                     "app.kubernetes.io/instance" = name;
                     "app.kubernetes.io/name" = name;
                   };
 
-                  spec = {
-                    automountServiceAccountToken = true;
-                    serviceAccountName = "default";
-                    initContainers = lib.optionalAttrs cfg.vpn.enable (
-                      self.lib.waitForGluetun { inherit lib; } cfg.vpn.sharedGluetunService
-                    );
-                    containers = [
-                      {
-                        inherit name;
-                        image = cfg.image;
-                        imagePullPolicy = "IfNotPresent";
-                        env = [
-                          {
-                            name = "PGID";
-                            value = "${toString cfg.pgid}";
-                          }
-                          {
-                            name = "PUID";
-                            value = "${toString cfg.puid}";
-                          }
-                          {
-                            name = "TZ";
-                            value = cfg.tz;
-                          }
-                        ]
-                        ++ (lib.optionals cfg.database.enable [
-                          {
-                            name = "PROWLARR__POSTGRES__HOST";
-                            value = cfg.database.host;
-                          }
-                          {
-                            name = "PROWLARR__POSTGRES__PORT";
-                            value = toString cfg.database.port;
-                          }
-                          {
-                            name = "PROWLARR__POSTGRES__MAINDB";
-                            value = cfg.database.name;
-                          }
-                          {
-                            name = "PROWLARR__POSTGRES__LOGDB";
-                            value =
-                              if lib.hasSuffix "-main" cfg.database.name then
-                                lib.removeSuffix "-main" cfg.database.name + "-log"
-                              else
-                                "${cfg.database.name}-log";
-                          }
-                          {
-                            name = "PROWLARR__POSTGRES__USER";
-                            value = cfg.database.username;
-                          }
-                          (
-                            if cfg.database.password != "" then
-                              {
-                                name = "PROWLARR__POSTGRES__PASSWORD";
-                                valueFrom = {
-                                  secretKeyRef = {
-                                    name = password-secret;
-                                    key = "password";
+                  template = {
+                    metadata.labels = {
+                      "app.kubernetes.io/instance" = name;
+                      "app.kubernetes.io/name" = name;
+                    };
+
+                    spec = {
+                      automountServiceAccountToken = true;
+                      serviceAccountName = "default";
+                      initContainers = lib.optionalAttrs cfg.vpn.enable (
+                        self.lib.waitForGluetun { inherit lib; } cfg.vpn.sharedGluetunService
+                      );
+                      containers = [
+                        {
+                          inherit name;
+                          image = cfg.image;
+                          imagePullPolicy = "IfNotPresent";
+                          env = [
+                            {
+                              name = "PGID";
+                              value = "${toString cfg.pgid}";
+                            }
+                            {
+                              name = "PUID";
+                              value = "${toString cfg.puid}";
+                            }
+                            {
+                              name = "TZ";
+                              value = cfg.tz;
+                            }
+                          ]
+                          ++ (lib.optionals cfg.database.enable [
+                            {
+                              name = "PROWLARR__POSTGRES__HOST";
+                              value = cfg.database.host;
+                            }
+                            {
+                              name = "PROWLARR__POSTGRES__PORT";
+                              value = toString cfg.database.port;
+                            }
+                            {
+                              name = "PROWLARR__POSTGRES__MAINDB";
+                              value = cfg.database.name;
+                            }
+                            {
+                              name = "PROWLARR__POSTGRES__LOGDB";
+                              value =
+                                if lib.hasSuffix "-main" cfg.database.name then
+                                  lib.removeSuffix "-main" cfg.database.name + "-log"
+                                else
+                                  "${cfg.database.name}-log";
+                            }
+                            {
+                              name = "PROWLARR__POSTGRES__USER";
+                              value = cfg.database.username;
+                            }
+                            (
+                              if cfg.database.password != "" then
+                                {
+                                  name = "PROWLARR__POSTGRES__PASSWORD";
+                                  valueFrom = {
+                                    secretKeyRef = {
+                                      name = password-secret;
+                                      key = "password";
+                                    };
                                   };
-                                };
-                              }
-                            else
-                              {
-                                name = "PROWLARR__POSTGRES__PASSWORD";
-                                value = "";
-                              }
-                          )
-                        ])
-                        ++ (lib.optionals cfg.vpn.enable [
-                          # Configure Prowlarr to use shared gluetun's HTTP proxy
-                          {
-                            name = "HTTP_PROXY";
-                            value = "http://${cfg.vpn.sharedGluetunService}:8888";
-                          }
-                          {
-                            name = "HTTPS_PROXY";
-                            value = "http://${cfg.vpn.sharedGluetunService}:8888";
-                          }
-                          {
-                            name = "NO_PROXY";
-                            value = "localhost,127.0.0.1,.svc,.svc.cluster.local,sabnzbd.sabnzbd,sabnzbd.sabnzbd.svc.cluster.local,qbittorrent.qbittorrent,qbittorrent.qbittorrent.svc.cluster.local";
-                          }
-                        ]);
-                        ports = [
-                          {
-                            containerPort = cfg.service.port;
-                            name = "http";
-                            protocol = "TCP";
-                          }
-                        ];
-                        readinessProbe = lib.mkIf cfg.useProbes {
-                          httpGet = {
-                            path = "/";
-                            port = cfg.service.port;
+                                }
+                              else
+                                {
+                                  name = "PROWLARR__POSTGRES__PASSWORD";
+                                  value = "";
+                                }
+                            )
+                          ])
+                          ++ (lib.optionals cfg.vpn.enable [
+                            # Configure Prowlarr to use shared gluetun's HTTP proxy
+                            {
+                              name = "HTTP_PROXY";
+                              value = "http://${cfg.vpn.sharedGluetunService}:8888";
+                            }
+                            {
+                              name = "HTTPS_PROXY";
+                              value = "http://${cfg.vpn.sharedGluetunService}:8888";
+                            }
+                            {
+                              name = "NO_PROXY";
+                              value = "localhost,127.0.0.1,.svc,.svc.cluster.local,sabnzbd.sabnzbd,sabnzbd.sabnzbd.svc.cluster.local,qbittorrent.qbittorrent,qbittorrent.qbittorrent.svc.cluster.local";
+                            }
+                          ]);
+                          ports = [
+                            {
+                              containerPort = cfg.service.port;
+                              name = "http";
+                              protocol = "TCP";
+                            }
+                          ];
+                          readinessProbe = lib.mkIf cfg.useProbes {
+                            httpGet = {
+                              path = "/";
+                              port = cfg.service.port;
+                            };
+                            initialDelaySeconds = 60;
+                            periodSeconds = 10;
+                            timeoutSeconds = 5;
+                            successThreshold = 1;
+                            failureThreshold = 3;
                           };
-                          initialDelaySeconds = 60;
-                          periodSeconds = 10;
-                          timeoutSeconds = 5;
-                          successThreshold = 1;
-                          failureThreshold = 3;
-                        };
-                        livenessProbe = lib.mkIf cfg.useProbes {
-                          httpGet = {
-                            path = "/";
-                            port = cfg.service.port;
+                          livenessProbe = lib.mkIf cfg.useProbes {
+                            httpGet = {
+                              path = "/";
+                              port = cfg.service.port;
+                            };
+                            initialDelaySeconds = 90;
+                            periodSeconds = 30;
+                            timeoutSeconds = 5;
+                            successThreshold = 1;
+                            failureThreshold = 3;
                           };
-                          initialDelaySeconds = 90;
-                          periodSeconds = 30;
-                          timeoutSeconds = 5;
-                          successThreshold = 1;
-                          failureThreshold = 3;
-                        };
-                        volumeMounts = [
-                          {
-                            mountPath = "/config";
-                            name = "config";
-                          }
-                        ];
-                      }
-                    ];
-                    volumes = [
-                      {
-                        name = "config";
-                        persistentVolumeClaim.claimName = "${name}-${name}-config";
-                      }
-                    ]
-                    ++ (lib.optionals (cfg.database.enable && cfg.database.password != "") [
-                      {
-                        name = password-secret;
-                        secret.secretName = password-secret;
-                      }
-                    ]);
+                          volumeMounts = [
+                            {
+                              mountPath = "/config";
+                              name = "config";
+                            }
+                          ];
+                        }
+                      ];
+                      volumes = [
+                        {
+                          name = "config";
+                          persistentVolumeClaim.claimName = "${name}-${name}-config";
+                        }
+                      ]
+                      ++ (lib.optionals (cfg.database.enable && cfg.database.password != "") [
+                        {
+                          name = password-secret;
+                          secret.secretName = password-secret;
+                        }
+                      ]);
+                    };
                   };
                 };
               };
             };
-          };
 
-          ingresses.${name} = with cfg.ingress; {
-            metadata.annotations = lib.optionalAttrs (clusterIssuer != "") {
-              "cert-manager.io/cluster-issuer" = clusterIssuer;
+            ingresses.${name} = with cfg.ingress; {
+              metadata.annotations = lib.optionalAttrs (clusterIssuer != "") {
+                "cert-manager.io/cluster-issuer" = clusterIssuer;
+              };
+
+              spec = {
+                inherit ingressClassName;
+
+                rules = [
+                  {
+                    host = domain;
+
+                    http.paths = [
+                      {
+                        backend.service = {
+                          inherit name;
+                          port.name = "http";
+                        };
+
+                        path = "/";
+                        pathType = "ImplementationSpecific";
+                      }
+                    ];
+                  }
+                ];
+
+                tls = [
+                  {
+                    hosts = [ domain ];
+                    secretName = "${domain}-tls";
+                  }
+                ];
+              };
             };
 
-            spec = {
-              inherit ingressClassName;
+            persistentVolumeClaims = pinnedConfig.persistentVolumeClaims;
+            persistentVolumes = pinnedConfig.persistentVolumes;
 
-              rules = [
+            services.${name}.spec = {
+              ports = [
                 {
-                  host = domain;
-
-                  http.paths = [
-                    {
-                      backend.service = {
-                        inherit name;
-                        port.name = "http";
-                      };
-
-                      path = "/";
-                      pathType = "ImplementationSpecific";
-                    }
-                  ];
+                  name = "http";
+                  port = cfg.service.port;
+                  protocol = "TCP";
+                  targetPort = "http";
                 }
               ];
 
-              tls = [
-                {
-                  hosts = [ domain ];
-                  secretName = "${domain}-tls";
-                }
-              ];
-            };
-          };
+              selector = {
+                "app.kubernetes.io/instance" = name;
+                "app.kubernetes.io/name" = name;
+              };
 
-          persistentVolumeClaims = {
-            "${name}-${name}-config".spec = {
-              inherit (cfg) storageClassName;
-              accessModes = [ "ReadWriteOnce" ];
-              resources.requests.storage = "5Gi";
-            };
-          };
-
-          services.${name}.spec = {
-            ports = [
-              {
-                name = "http";
-                port = cfg.service.port;
-                protocol = "TCP";
-                targetPort = "http";
-              }
-            ];
-
-            selector = {
-              "app.kubernetes.io/instance" = name;
-              "app.kubernetes.io/name" = name;
+              type = "ClusterIP";
             };
 
-            type = "ClusterIP";
           };
-
-        };
       };
 }

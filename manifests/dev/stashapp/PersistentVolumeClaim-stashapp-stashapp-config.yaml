@@ -1,6 +1,8 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  annotations:
+    argocd.argoproj.io/sync-options: Replace=true
   name: stashapp-stashapp-config
   namespace: stashapp
 spec:
@@ -9,4 +11,5 @@ spec:
   resources:
     requests:
       storage: 200Gi
-  storageClassName: longhorn
+  storageClassName: ""
+  volumeName: stashapp-stashapp-config-pv

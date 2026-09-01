@@ -116,6 +116,11 @@
         extraResources =
           cfg:
           let
+            pinnedData = self.lib.mkPinnedVolume {
+              pvcName = "${name}-data";
+              volumeHandle = "pvc-8c803a5c-b039-4ed1-bcec-6726d2f8276b";
+              size = cfg.persistenceSize;
+            };
             envVars = [
               {
                 name = "TZ";
@@ -378,11 +383,8 @@
               ];
             };
 
-            persistentVolumeClaims."${name}-data".spec = {
-              inherit (cfg) storageClassName;
-              accessModes = [ "ReadWriteOnce" ];
-              resources.requests.storage = cfg.persistenceSize;
-            };
+            persistentVolumeClaims = pinnedData.persistentVolumeClaims;
+            persistentVolumes = pinnedData.persistentVolumes;
           };
       };
 }

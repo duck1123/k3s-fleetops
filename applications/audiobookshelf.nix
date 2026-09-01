@@ -45,215 +45,225 @@
         };
       };
 
-      extraResources = cfg: {
-        deployments.${name} = {
-          metadata.labels = {
-            "app.kubernetes.io/instance" = name;
-            "app.kubernetes.io/name" = name;
-            "app.kubernetes.io/version" = "latest";
+      extraResources =
+        cfg:
+        let
+          pinnedConfig = self.lib.mkPinnedVolume {
+            pvcName = "${name}-${name}-config";
+            volumeHandle = "pvc-fb2cd4cd-06ba-4dff-a6c5-7b7c2db91419";
+            size = "1Gi";
           };
-
-          spec = {
-            replicas = cfg.replicas;
-            strategy.type = "Recreate";
-            selector.matchLabels = {
+          pinnedMetadata = self.lib.mkPinnedVolume {
+            pvcName = "${name}-${name}-metadata";
+            volumeHandle = "pvc-ce35f347-ab06-495f-88ae-11f7bcf4be8f";
+            size = "5Gi";
+          };
+        in
+        {
+          deployments.${name} = {
+            metadata.labels = {
               "app.kubernetes.io/instance" = name;
               "app.kubernetes.io/name" = name;
+              "app.kubernetes.io/version" = "latest";
             };
 
-            template = {
-              metadata.labels = {
+            spec = {
+              replicas = cfg.replicas;
+              strategy.type = "Recreate";
+              selector.matchLabels = {
                 "app.kubernetes.io/instance" = name;
                 "app.kubernetes.io/name" = name;
               };
 
-              spec = {
-                automountServiceAccountToken = true;
-                serviceAccountName = "default";
+              template = {
+                metadata.labels = {
+                  "app.kubernetes.io/instance" = name;
+                  "app.kubernetes.io/name" = name;
+                };
 
-                containers = [
-                  {
-                    inherit name;
-                    image = cfg.image;
-                    imagePullPolicy = "IfNotPresent";
-                    env = [
-                      {
-                        name = "PGID";
-                        value = toString cfg.pgid;
-                      }
-                      {
-                        name = "PUID";
-                        value = toString cfg.puid;
-                      }
-                      {
-                        name = "TZ";
-                        value = cfg.tz;
-                      }
-                    ];
-                    ports = [
-                      {
-                        containerPort = cfg.service.port;
-                        name = "http";
-                        protocol = "TCP";
-                      }
-                    ];
-                    readinessProbe = {
-                      httpGet = {
-                        path = "/healthcheck";
-                        port = cfg.service.port;
-                      };
-                      initialDelaySeconds = 15;
-                      periodSeconds = 10;
-                      timeoutSeconds = 5;
-                      successThreshold = 1;
-                      failureThreshold = 3;
-                    };
-                    livenessProbe = {
-                      httpGet = {
-                        path = "/healthcheck";
-                        port = cfg.service.port;
-                      };
-                      initialDelaySeconds = 30;
-                      periodSeconds = 30;
-                      timeoutSeconds = 5;
-                      successThreshold = 1;
-                      failureThreshold = 3;
-                    };
-                    volumeMounts = [
-                      {
-                        mountPath = "/config";
-                        name = "config";
-                      }
-                      {
-                        mountPath = "/metadata";
-                        name = "metadata";
-                      }
-                      {
-                        mountPath = "/audiobooks";
-                        name = "audiobooks";
-                      }
-                    ];
-                  }
-                ];
+                spec = {
+                  automountServiceAccountToken = true;
+                  serviceAccountName = "default";
 
-                volumes = [
-                  {
-                    name = "config";
-                    persistentVolumeClaim.claimName = "${name}-${name}-config";
-                  }
-                  {
-                    name = "metadata";
-                    persistentVolumeClaim.claimName = "${name}-${name}-metadata";
-                  }
-                  {
-                    name = "audiobooks";
-                    persistentVolumeClaim.claimName = "${name}-${name}-audiobooks";
-                  }
-                ];
-              };
-            };
-          };
-        };
-
-        ingresses.${name} = with cfg.ingress; {
-          metadata.annotations."cert-manager.io/cluster-issuer" = clusterIssuer;
-          spec = {
-            inherit ingressClassName;
-
-            rules = [
-              {
-                host = domain;
-                http.paths = [
-                  {
-                    backend.service = {
+                  containers = [
+                    {
                       inherit name;
-                      port.name = "http";
-                    };
-                    path = "/";
-                    pathType = "ImplementationSpecific";
-                  }
-                ];
-              }
-            ];
+                      image = cfg.image;
+                      imagePullPolicy = "IfNotPresent";
+                      env = [
+                        {
+                          name = "PGID";
+                          value = toString cfg.pgid;
+                        }
+                        {
+                          name = "PUID";
+                          value = toString cfg.puid;
+                        }
+                        {
+                          name = "TZ";
+                          value = cfg.tz;
+                        }
+                      ];
+                      ports = [
+                        {
+                          containerPort = cfg.service.port;
+                          name = "http";
+                          protocol = "TCP";
+                        }
+                      ];
+                      readinessProbe = {
+                        httpGet = {
+                          path = "/healthcheck";
+                          port = cfg.service.port;
+                        };
+                        initialDelaySeconds = 15;
+                        periodSeconds = 10;
+                        timeoutSeconds = 5;
+                        successThreshold = 1;
+                        failureThreshold = 3;
+                      };
+                      livenessProbe = {
+                        httpGet = {
+                          path = "/healthcheck";
+                          port = cfg.service.port;
+                        };
+                        initialDelaySeconds = 30;
+                        periodSeconds = 30;
+                        timeoutSeconds = 5;
+                        successThreshold = 1;
+                        failureThreshold = 3;
+                      };
+                      volumeMounts = [
+                        {
+                          mountPath = "/config";
+                          name = "config";
+                        }
+                        {
+                          mountPath = "/metadata";
+                          name = "metadata";
+                        }
+                        {
+                          mountPath = "/audiobooks";
+                          name = "audiobooks";
+                        }
+                      ];
+                    }
+                  ];
 
-            tls = [
-              {
-                hosts = [ domain ];
-                secretName = "${name}-tls";
-              }
-            ];
-          };
-        };
-
-        persistentVolumeClaims = {
-          "${name}-${name}-config".spec = {
-            inherit (cfg) storageClassName;
-            accessModes = [ "ReadWriteOnce" ];
-            resources.requests.storage = "1Gi";
-          };
-          "${name}-${name}-metadata".spec = {
-            inherit (cfg) storageClassName;
-            accessModes = [ "ReadWriteOnce" ];
-            resources.requests.storage = "5Gi";
-          };
-          "${name}-${name}-audiobooks".spec =
-            if cfg.nfs.enable then
-              {
-                accessModes = [ "ReadWriteMany" ];
-                resources.requests.storage = "1Gi";
-                storageClassName = "";
-                volumeName = "${name}-${name}-audiobooks-nfs";
-              }
-            else
-              {
-                inherit (cfg) storageClassName;
-                accessModes = [ "ReadWriteOnce" ];
-                resources.requests.storage = "100Gi";
+                  volumes = [
+                    {
+                      name = "config";
+                      persistentVolumeClaim.claimName = "${name}-${name}-config";
+                    }
+                    {
+                      name = "metadata";
+                      persistentVolumeClaim.claimName = "${name}-${name}-metadata";
+                    }
+                    {
+                      name = "audiobooks";
+                      persistentVolumeClaim.claimName = "${name}-${name}-audiobooks";
+                    }
+                  ];
+                };
               };
-        };
-
-        services.${name}.spec = {
-          ports = [
-            {
-              name = "http";
-              port = cfg.service.port;
-              protocol = "TCP";
-              targetPort = "http";
-            }
-          ];
-
-          selector = {
-            "app.kubernetes.io/instance" = name;
-            "app.kubernetes.io/name" = name;
+            };
           };
 
-          type = "ClusterIP";
-        };
-
-        persistentVolumes = lib.optionalAttrs cfg.nfs.enable {
-          "${name}-${name}-audiobooks-nfs" = {
-            apiVersion = "v1";
-            kind = "PersistentVolume";
-            metadata = {
-              name = "${name}-${name}-audiobooks-nfs";
-            };
+          ingresses.${name} = with cfg.ingress; {
+            metadata.annotations."cert-manager.io/cluster-issuer" = clusterIssuer;
             spec = {
-              capacity.storage = "1Ti";
-              accessModes = [ "ReadWriteMany" ];
-              mountOptions = [
-                "nolock"
-                "noexec"
-                "soft"
-                "timeo=30"
+              inherit ingressClassName;
+
+              rules = [
+                {
+                  host = domain;
+                  http.paths = [
+                    {
+                      backend.service = {
+                        inherit name;
+                        port.name = "http";
+                      };
+                      path = "/";
+                      pathType = "ImplementationSpecific";
+                    }
+                  ];
+                }
               ];
-              nfs = {
-                server = cfg.nfs.server;
-                path = cfg.nfs.path;
-              };
-              persistentVolumeReclaimPolicy = "Retain";
+
+              tls = [
+                {
+                  hosts = [ domain ];
+                  secretName = "${name}-tls";
+                }
+              ];
             };
           };
+
+          persistentVolumeClaims =
+            pinnedConfig.persistentVolumeClaims
+            // pinnedMetadata.persistentVolumeClaims
+            // {
+              "${name}-${name}-audiobooks".spec =
+                if cfg.nfs.enable then
+                  {
+                    accessModes = [ "ReadWriteMany" ];
+                    resources.requests.storage = "1Gi";
+                    storageClassName = "";
+                    volumeName = "${name}-${name}-audiobooks-nfs";
+                  }
+                else
+                  {
+                    inherit (cfg) storageClassName;
+                    accessModes = [ "ReadWriteOnce" ];
+                    resources.requests.storage = "100Gi";
+                  };
+            };
+
+          services.${name}.spec = {
+            ports = [
+              {
+                name = "http";
+                port = cfg.service.port;
+                protocol = "TCP";
+                targetPort = "http";
+              }
+            ];
+
+            selector = {
+              "app.kubernetes.io/instance" = name;
+              "app.kubernetes.io/name" = name;
+            };
+
+            type = "ClusterIP";
+          };
+
+          persistentVolumes =
+            pinnedConfig.persistentVolumes
+            // pinnedMetadata.persistentVolumes
+            // lib.optionalAttrs cfg.nfs.enable {
+              "${name}-${name}-audiobooks-nfs" = {
+                apiVersion = "v1";
+                kind = "PersistentVolume";
+                metadata = {
+                  name = "${name}-${name}-audiobooks-nfs";
+                };
+                spec = {
+                  capacity.storage = "1Ti";
+                  accessModes = [ "ReadWriteMany" ];
+                  mountOptions = [
+                    "nolock"
+                    "noexec"
+                    "soft"
+                    "timeo=30"
+                  ];
+                  nfs = {
+                    server = cfg.nfs.server;
+                    path = cfg.nfs.path;
+                  };
+                  persistentVolumeReclaimPolicy = "Retain";
+                };
+              };
+            };
         };
-      };
     };
 }

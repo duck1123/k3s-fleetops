@@ -26,129 +26,135 @@
         };
       };
 
-      extraResources = cfg: {
-        deployments.${name} = {
-          metadata.labels = {
-            "app.kubernetes.io/instance" = name;
-            "app.kubernetes.io/name" = name;
+      extraResources =
+        cfg:
+        let
+          pinnedData = self.lib.mkPinnedVolume {
+            pvcName = "${name}-${name}-data";
+            volumeHandle = "pvc-1d098edf-77ca-4e22-9742-312c090598b5";
+            size = "5Gi";
           };
-
-          spec = {
-            strategy.type = "Recreate";
-            selector.matchLabels = {
+        in
+        {
+          deployments.${name} = {
+            metadata.labels = {
               "app.kubernetes.io/instance" = name;
               "app.kubernetes.io/name" = name;
             };
 
-            template = {
-              metadata.labels = {
+            spec = {
+              strategy.type = "Recreate";
+              selector.matchLabels = {
                 "app.kubernetes.io/instance" = name;
                 "app.kubernetes.io/name" = name;
               };
 
-              spec = {
-                automountServiceAccountToken = true;
-                serviceAccountName = "default";
+              template = {
+                metadata.labels = {
+                  "app.kubernetes.io/instance" = name;
+                  "app.kubernetes.io/name" = name;
+                };
 
-                containers = [
-                  {
-                    inherit name;
-                    image = cfg.image;
-                    imagePullPolicy = "IfNotPresent";
+                spec = {
+                  automountServiceAccountToken = true;
+                  serviceAccountName = "default";
 
-                    ports = [
-                      {
-                        containerPort = cfg.service.port;
-                        name = "http";
-                        protocol = "TCP";
-                      }
-                    ];
+                  containers = [
+                    {
+                      inherit name;
+                      image = cfg.image;
+                      imagePullPolicy = "IfNotPresent";
 
-                    livenessProbe = {
-                      failureThreshold = 60;
-                      initialDelaySeconds = 30;
-                      periodSeconds = 10;
-                      tcpSocket.port = cfg.service.port;
-                    };
+                      ports = [
+                        {
+                          containerPort = cfg.service.port;
+                          name = "http";
+                          protocol = "TCP";
+                        }
+                      ];
 
-                    readinessProbe = {
-                      failureThreshold = 3;
-                      initialDelaySeconds = 10;
-                      periodSeconds = 10;
-                      tcpSocket.port = cfg.service.port;
-                    };
+                      livenessProbe = {
+                        failureThreshold = 60;
+                        initialDelaySeconds = 30;
+                        periodSeconds = 10;
+                        tcpSocket.port = cfg.service.port;
+                      };
 
-                    volumeMounts = [
-                      {
-                        mountPath = "/app/data";
-                        name = "data";
-                      }
-                    ];
-                  }
-                ];
+                      readinessProbe = {
+                        failureThreshold = 3;
+                        initialDelaySeconds = 10;
+                        periodSeconds = 10;
+                        tcpSocket.port = cfg.service.port;
+                      };
 
-                volumes = [
-                  {
-                    name = "data";
-                    persistentVolumeClaim.claimName = "${name}-${name}-data";
-                  }
-                ];
+                      volumeMounts = [
+                        {
+                          mountPath = "/app/data";
+                          name = "data";
+                        }
+                      ];
+                    }
+                  ];
+
+                  volumes = [
+                    {
+                      name = "data";
+                      persistentVolumeClaim.claimName = "${name}-${name}-data";
+                    }
+                  ];
+                };
               };
             };
           };
-        };
 
-        ingresses.${name} = with cfg.ingress; {
-          metadata.annotations."cert-manager.io/cluster-issuer" = clusterIssuer;
-          spec = {
-            inherit ingressClassName;
+          ingresses.${name} = with cfg.ingress; {
+            metadata.annotations."cert-manager.io/cluster-issuer" = clusterIssuer;
+            spec = {
+              inherit ingressClassName;
 
-            rules = [
+              rules = [
+                {
+                  host = domain;
+                  http.paths = [
+                    {
+                      backend.service = {
+                        inherit name;
+                        port.name = "http";
+                      };
+                      path = "/";
+                      pathType = "ImplementationSpecific";
+                    }
+                  ];
+                }
+              ];
+              tls = [
+                {
+                  hosts = [ domain ];
+                  secretName = "${name}-tls";
+                }
+              ];
+            };
+          };
+
+          persistentVolumeClaims = pinnedData.persistentVolumeClaims;
+          persistentVolumes = pinnedData.persistentVolumes;
+
+          services.${name}.spec = {
+            ports = [
               {
-                host = domain;
-                http.paths = [
-                  {
-                    backend.service = {
-                      inherit name;
-                      port.name = "http";
-                    };
-                    path = "/";
-                    pathType = "ImplementationSpecific";
-                  }
-                ];
+                name = "http";
+                port = cfg.service.port;
+                protocol = "TCP";
+                targetPort = "http";
               }
             ];
-            tls = [
-              {
-                hosts = [ domain ];
-                secretName = "${name}-tls";
-              }
-            ];
+
+            selector = {
+              "app.kubernetes.io/instance" = name;
+              "app.kubernetes.io/name" = name;
+            };
+            type = "ClusterIP";
           };
         };
-
-        persistentVolumeClaims."${name}-${name}-data".spec = {
-          accessModes = [ "ReadWriteOnce" ];
-          resources.requests.storage = "5Gi";
-          storageClassName = cfg.storageClassName;
-        };
-
-        services.${name}.spec = {
-          ports = [
-            {
-              name = "http";
-              port = cfg.service.port;
-              protocol = "TCP";
-              targetPort = "http";
-            }
-          ];
-
-          selector = {
-            "app.kubernetes.io/instance" = name;
-            "app.kubernetes.io/name" = name;
-          };
-          type = "ClusterIP";
-        };
-      };
     };
 }

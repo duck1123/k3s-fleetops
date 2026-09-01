@@ -69,198 +69,204 @@
 
         };
 
-        extraResources = cfg: {
-          deployments = {
-            komga = {
-              metadata.labels = {
-                "app.kubernetes.io/instance" = name;
-                "app.kubernetes.io/name" = name;
-              };
-
-              spec = {
-                selector.matchLabels = {
+        extraResources =
+          cfg:
+          let
+            pinnedConfig = self.lib.mkPinnedVolume {
+              pvcName = "${name}-${name}-config";
+              volumeHandle = "pvc-a982e08c-30f2-4e21-928f-970d367e417f";
+              size = "5Gi";
+            };
+          in
+          {
+            deployments = {
+              komga = {
+                metadata.labels = {
                   "app.kubernetes.io/instance" = name;
                   "app.kubernetes.io/name" = name;
                 };
 
-                template = {
-                  metadata.labels = {
+                spec = {
+                  selector.matchLabels = {
                     "app.kubernetes.io/instance" = name;
                     "app.kubernetes.io/name" = name;
                   };
 
-                  spec = {
-                    automountServiceAccountToken = true;
-                    serviceAccountName = "default";
-                    containers = [
-                      {
-                        inherit name;
-                        image = cfg.image;
-                        imagePullPolicy = "IfNotPresent";
-                        env = [
-                          {
-                            name = "PUID";
-                            value = cfg.uid;
-                          }
-                          {
-                            name = "PGID";
-                            value = cfg.gid;
-                          }
-                          {
-                            name = "TZ";
-                            value = cfg.tz;
-                          }
-                          {
-                            name = "SERVER_PORT";
-                            value = "${toString cfg.service.port}";
-                          }
-                        ];
+                  template = {
+                    metadata.labels = {
+                      "app.kubernetes.io/instance" = name;
+                      "app.kubernetes.io/name" = name;
+                    };
 
-                        livenessProbe = {
-                          failureThreshold = 3;
-                          initialDelaySeconds = 30;
-                          periodSeconds = 10;
-                          tcpSocket.port = cfg.service.port;
-                        };
+                    spec = {
+                      automountServiceAccountToken = true;
+                      serviceAccountName = "default";
+                      containers = [
+                        {
+                          inherit name;
+                          image = cfg.image;
+                          imagePullPolicy = "IfNotPresent";
+                          env = [
+                            {
+                              name = "PUID";
+                              value = cfg.uid;
+                            }
+                            {
+                              name = "PGID";
+                              value = cfg.gid;
+                            }
+                            {
+                              name = "TZ";
+                              value = cfg.tz;
+                            }
+                            {
+                              name = "SERVER_PORT";
+                              value = "${toString cfg.service.port}";
+                            }
+                          ];
 
-                        ports = [
-                          {
-                            containerPort = cfg.service.port;
-                            name = "http";
-                            protocol = "TCP";
-                          }
-                        ];
+                          livenessProbe = {
+                            failureThreshold = 3;
+                            initialDelaySeconds = 30;
+                            periodSeconds = 10;
+                            tcpSocket.port = cfg.service.port;
+                          };
 
-                        volumeMounts = [
-                          {
-                            mountPath = "/config";
-                            name = "config";
-                          }
-                          {
-                            mountPath = "/data";
-                            name = "data";
-                          }
-                        ];
-                      }
-                    ];
-                    volumes = [
-                      {
-                        name = "config";
-                        persistentVolumeClaim.claimName = "${name}-${name}-config";
-                      }
-                      {
-                        name = "data";
-                        persistentVolumeClaim.claimName = "${name}-${name}-data";
-                      }
-                    ];
+                          ports = [
+                            {
+                              containerPort = cfg.service.port;
+                              name = "http";
+                              protocol = "TCP";
+                            }
+                          ];
+
+                          volumeMounts = [
+                            {
+                              mountPath = "/config";
+                              name = "config";
+                            }
+                            {
+                              mountPath = "/data";
+                              name = "data";
+                            }
+                          ];
+                        }
+                      ];
+                      volumes = [
+                        {
+                          name = "config";
+                          persistentVolumeClaim.claimName = "${name}-${name}-config";
+                        }
+                        {
+                          name = "data";
+                          persistentVolumeClaim.claimName = "${name}-${name}-data";
+                        }
+                      ];
+                    };
                   };
                 };
               };
             };
-          };
 
-          ingresses = {
-            ${name} = {
-              metadata.annotations."cert-manager.io/cluster-issuer" = cfg.ingress.clusterIssuer;
-              spec = with cfg.ingress; {
-                inherit ingressClassName;
+            ingresses = {
+              ${name} = {
+                metadata.annotations."cert-manager.io/cluster-issuer" = cfg.ingress.clusterIssuer;
+                spec = with cfg.ingress; {
+                  inherit ingressClassName;
 
-                rules = [
+                  rules = [
+                    {
+                      host = domain;
+
+                      http.paths = [
+                        {
+                          backend.service = {
+                            inherit name;
+                            port.name = "http";
+                          };
+
+                          path = "/";
+                          pathType = "ImplementationSpecific";
+                        }
+                      ];
+                    }
+                  ];
+
+                  tls = [
+                    {
+                      hosts = [ domain ];
+                      secretName = "${name}-tls";
+                    }
+                  ];
+                };
+              };
+            };
+
+            persistentVolumeClaims = pinnedConfig.persistentVolumeClaims // {
+              "${name}-${name}-data".spec =
+                if cfg.nfs.enable then
                   {
-                    host = domain;
+                    accessModes = [ "ReadWriteMany" ];
+                    resources.requests.storage = "1Gi";
+                    storageClassName = "";
+                    volumeName = "${name}-${name}-data-nfs";
+                  }
+                else
+                  {
+                    inherit (cfg) storageClassName;
+                    accessModes = [ "ReadWriteOnce" ];
+                    resources.requests.storage = "50Gi";
+                  };
+            };
 
-                    http.paths = [
-                      {
-                        backend.service = {
-                          inherit name;
-                          port.name = "http";
-                        };
+            services = {
+              ${name}.spec = {
+                ports = [
+                  {
+                    name = "http";
+                    port = cfg.service.port;
+                    protocol = "TCP";
+                    targetPort = "http";
+                  }
+                ];
 
-                        path = "/";
-                        pathType = "ImplementationSpecific";
-                      }
+                selector = {
+                  "app.kubernetes.io/instance" = name;
+                  "app.kubernetes.io/name" = name;
+                };
+
+                type = "ClusterIP";
+              };
+            };
+
+            persistentVolumes =
+              pinnedConfig.persistentVolumes
+              // lib.optionalAttrs cfg.nfs.enable {
+                "${name}-${name}-data-nfs" = {
+                  apiVersion = "v1";
+                  kind = "PersistentVolume";
+                  metadata = {
+                    name = "${name}-${name}-data-nfs";
+                  };
+                  spec = {
+                    capacity = {
+                      storage = "1Ti";
+                    };
+                    accessModes = [ "ReadWriteMany" ];
+                    mountOptions = [
+                      "nolock"
+                      "noexec"
+                      "soft"
+                      "timeo=30"
                     ];
-                  }
-                ];
-
-                tls = [
-                  {
-                    hosts = [ domain ];
-                    secretName = "${name}-tls";
-                  }
-                ];
-              };
-            };
-          };
-
-          persistentVolumeClaims = {
-            "${name}-${name}-config".spec = {
-              inherit (cfg) storageClassName;
-              accessModes = [ "ReadWriteOnce" ];
-              resources.requests.storage = "5Gi";
-            };
-            "${name}-${name}-data".spec =
-              if cfg.nfs.enable then
-                {
-                  accessModes = [ "ReadWriteMany" ];
-                  resources.requests.storage = "1Gi";
-                  storageClassName = "";
-                  volumeName = "${name}-${name}-data-nfs";
-                }
-              else
-                {
-                  inherit (cfg) storageClassName;
-                  accessModes = [ "ReadWriteOnce" ];
-                  resources.requests.storage = "50Gi";
+                    nfs = {
+                      server = cfg.nfs.server;
+                      path = cfg.nfs.path;
+                    };
+                    persistentVolumeReclaimPolicy = "Retain";
+                  };
                 };
-          };
-
-          services = {
-            ${name}.spec = {
-              ports = [
-                {
-                  name = "http";
-                  port = cfg.service.port;
-                  protocol = "TCP";
-                  targetPort = "http";
-                }
-              ];
-
-              selector = {
-                "app.kubernetes.io/instance" = name;
-                "app.kubernetes.io/name" = name;
               };
-
-              type = "ClusterIP";
-            };
           };
-
-          persistentVolumes = lib.optionalAttrs cfg.nfs.enable {
-            "${name}-${name}-data-nfs" = {
-              apiVersion = "v1";
-              kind = "PersistentVolume";
-              metadata = {
-                name = "${name}-${name}-data-nfs";
-              };
-              spec = {
-                capacity = {
-                  storage = "1Ti";
-                };
-                accessModes = [ "ReadWriteMany" ];
-                mountOptions = [
-                  "nolock"
-                  "noexec"
-                  "soft"
-                  "timeo=30"
-                ];
-                nfs = {
-                  server = cfg.nfs.server;
-                  path = cfg.nfs.path;
-                };
-                persistentVolumeReclaimPolicy = "Retain";
-              };
-            };
-          };
-        };
       };
 }

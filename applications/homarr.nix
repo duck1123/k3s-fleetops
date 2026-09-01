@@ -76,6 +76,13 @@
 
         extraResources =
           cfg:
+          let
+            pinnedData = self.lib.mkPinnedVolume {
+              pvcName = "${name}-${name}-appdata";
+              volumeHandle = "pvc-fde5f73c-9f19-4e30-8874-46cbe0a2f6a3";
+              size = "1Gi";
+            };
+          in
           builtins.seq (require-secret-encryption-key cfg) {
             deployments = {
               ${name} = {
@@ -213,13 +220,8 @@
               };
             };
 
-            persistentVolumeClaims = {
-              "${name}-${name}-appdata".spec = {
-                accessModes = [ "ReadWriteOnce" ];
-                resources.requests.storage = "1Gi";
-                storageClassName = cfg.storageClassName;
-              };
-            };
+            persistentVolumeClaims = pinnedData.persistentVolumeClaims;
+            persistentVolumes = pinnedData.persistentVolumes;
 
             services.${name}.spec = {
               ports = [

@@ -134,29 +134,41 @@
 
         extraResources =
           cfg:
-          (lib.optionalAttrs cfg.nfs.enable {
-            persistentVolumes."${name}-data-nfs".spec = {
-              capacity.storage = "1Ti";
-              accessModes = [ "ReadWriteOnce" ];
-              storageClassName = "";
-              claimRef = {
-                name = "${name}-data";
-                namespace = cfg.namespace;
-              };
-              mountOptions = [
-                "nolock"
-                "noexec"
-                "soft"
-                "timeo=30"
-              ];
-              nfs = {
-                server = cfg.nfs.server;
-                path = cfg.nfs.path;
-              };
-              persistentVolumeReclaimPolicy = "Retain";
+          let
+            pinnedMeta = self.lib.mkPinnedVolume {
+              pvcName = "${name}-meta";
+              volumeHandle = "pvc-12507954-e2c5-4fd6-9a00-498f96993445";
+              size = cfg.metaPersistenceSize;
             };
-          })
-          // {
+            pinnedData = self.lib.mkPinnedVolume {
+              pvcName = "${name}-data";
+              volumeHandle = "pvc-06689573-2c6c-4acd-961d-95a4801239b2";
+              size = cfg.dataPersistenceSize;
+            };
+            nfsDataPV = lib.optionalAttrs cfg.nfs.enable {
+              "${name}-data-nfs".spec = {
+                capacity.storage = "1Ti";
+                accessModes = [ "ReadWriteOnce" ];
+                storageClassName = "";
+                claimRef = {
+                  name = "${name}-data";
+                  namespace = cfg.namespace;
+                };
+                mountOptions = [
+                  "nolock"
+                  "noexec"
+                  "soft"
+                  "timeo=30"
+                ];
+                nfs = {
+                  server = cfg.nfs.server;
+                  path = cfg.nfs.path;
+                };
+                persistentVolumeReclaimPolicy = "Retain";
+              };
+            };
+          in
+          {
             configMaps."${name}-config".data."garage.toml" = ''
               metadata_dir = "/data/meta"
               data_dir = "/data/data"
@@ -391,27 +403,25 @@
               ];
             };
 
-            persistentVolumeClaims = {
-              "${name}-meta".spec = {
-                inherit (cfg) storageClassName;
-                accessModes = [ "ReadWriteOnce" ];
-                resources.requests.storage = cfg.metaPersistenceSize;
-              };
-              "${name}-data".spec =
+            persistentVolumeClaims = pinnedMeta.persistentVolumeClaims // {
+              "${name}-data" =
                 if cfg.nfs.enable then
                   {
-                    accessModes = [ "ReadWriteOnce" ];
-                    resources.requests.storage = cfg.dataPersistenceSize;
-                    storageClassName = "";
-                    volumeName = "${name}-data-nfs";
+                    spec = {
+                      accessModes = [ "ReadWriteOnce" ];
+                      resources.requests.storage = cfg.dataPersistenceSize;
+                      storageClassName = "";
+                      volumeName = "${name}-data-nfs";
+                    };
                   }
                 else
-                  {
-                    inherit (cfg) storageClassName;
-                    accessModes = [ "ReadWriteOnce" ];
-                    resources.requests.storage = cfg.dataPersistenceSize;
-                  };
+                  pinnedData.persistentVolumeClaims."${name}-data";
             };
+
+            persistentVolumes =
+              pinnedMeta.persistentVolumes
+              // nfsDataPV
+              // lib.optionalAttrs (!cfg.nfs.enable) pinnedData.persistentVolumes;
           };
       };
 }

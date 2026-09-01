@@ -121,395 +121,403 @@
             };
           };
 
-        extraResources = cfg: {
-          deployments = {
-            ${name} = {
-              metadata.labels = {
-                "app.kubernetes.io/instance" = name;
-                "app.kubernetes.io/name" = name;
-                "app.kubernetes.io/version" = "latest";
-              };
-
-              spec = {
-                replicas = cfg.replicas;
-                selector.matchLabels = {
+        extraResources =
+          cfg:
+          let
+            pinnedConfig = self.lib.mkPinnedVolume {
+              pvcName = "${name}-${name}-config";
+              volumeHandle = "pvc-fbb22ab2-e000-4d67-a760-1d14cac3bdc9";
+              size = "10Gi";
+            };
+          in
+          {
+            deployments = {
+              ${name} = {
+                metadata.labels = {
                   "app.kubernetes.io/instance" = name;
                   "app.kubernetes.io/name" = name;
+                  "app.kubernetes.io/version" = "latest";
                 };
 
-                template = {
-                  metadata.labels = {
+                spec = {
+                  replicas = cfg.replicas;
+                  selector.matchLabels = {
                     "app.kubernetes.io/instance" = name;
                     "app.kubernetes.io/name" = name;
                   };
 
-                  spec = {
-                    automountServiceAccountToken = true;
-                    securityContext = {
-                      fsGroup = cfg.pgid;
+                  template = {
+                    metadata.labels = {
+                      "app.kubernetes.io/instance" = name;
+                      "app.kubernetes.io/name" = name;
                     };
-                    serviceAccountName = "default";
-                    initContainers = [
-                      {
-                        name = "fix-config-permissions";
-                        image = "busybox:latest";
-                        imagePullPolicy = "IfNotPresent";
-                        command = [
-                          "chown"
-                          "-R"
-                          "${toString cfg.puid}:${toString cfg.pgid}"
-                          "/config"
-                        ];
-                        securityContext.runAsUser = 0;
-                        volumeMounts = [
-                          {
-                            mountPath = "/config";
-                            name = "config";
-                          }
-                        ];
-                      }
-                    ]
-                    ++ (lib.optionals cfg.vpn.enable (
-                      self.lib.waitForGluetun { inherit lib; } cfg.vpn.sharedGluetunService
-                    ));
-                    containers = [
-                      {
-                        inherit name;
-                        image = cfg.image;
-                        imagePullPolicy = "IfNotPresent";
-                        # Run as root so wrapper can chown /config; image /init then drops to PUID:PGID
-                        securityContext.runAsUser = 0;
-                        # Chown /config in same container as app so mount is identical (fixes NFS/storage permission issues)
-                        command = [
-                          "sh"
-                          "-c"
-                          "chown -R ${toString cfg.puid}:${toString cfg.pgid} /config && exec /init"
-                        ];
-                        env = [
-                          {
-                            name = "PGID";
-                            value = "${toString cfg.pgid}";
-                          }
-                          {
-                            name = "PUID";
-                            value = "${toString cfg.puid}";
-                          }
-                          {
-                            name = "TZ";
-                            value = cfg.tz;
-                          }
-                        ]
-                        ++ (lib.optionals cfg.database.enable [
-                          {
-                            name = "LIDARR__POSTGRES__HOST";
-                            value = cfg.database.host;
-                          }
-                          {
-                            name = "LIDARR__POSTGRES__PORT";
-                            value = toString cfg.database.port;
-                          }
-                          {
-                            name = "LIDARR__POSTGRES__MAINDB";
-                            value = cfg.database.name;
-                          }
-                          {
-                            name = "LIDARR__POSTGRES__LOGDB";
-                            value =
-                              if lib.hasSuffix "-main" cfg.database.name then
-                                lib.removeSuffix "-main" cfg.database.name + "-log"
-                              else
-                                "${cfg.database.name}-log";
-                          }
-                          {
-                            name = "LIDARR__POSTGRES__USER";
-                            value = cfg.database.username;
-                          }
-                          (
-                            if cfg.database.password != "" then
-                              {
-                                name = "LIDARR__POSTGRES__PASSWORD";
-                                valueFrom = {
-                                  secretKeyRef = {
-                                    name = password-secret;
-                                    key = "password";
+
+                    spec = {
+                      automountServiceAccountToken = true;
+                      securityContext = {
+                        fsGroup = cfg.pgid;
+                      };
+                      serviceAccountName = "default";
+                      initContainers = [
+                        {
+                          name = "fix-config-permissions";
+                          image = "busybox:latest";
+                          imagePullPolicy = "IfNotPresent";
+                          command = [
+                            "chown"
+                            "-R"
+                            "${toString cfg.puid}:${toString cfg.pgid}"
+                            "/config"
+                          ];
+                          securityContext.runAsUser = 0;
+                          volumeMounts = [
+                            {
+                              mountPath = "/config";
+                              name = "config";
+                            }
+                          ];
+                        }
+                      ]
+                      ++ (lib.optionals cfg.vpn.enable (
+                        self.lib.waitForGluetun { inherit lib; } cfg.vpn.sharedGluetunService
+                      ));
+                      containers = [
+                        {
+                          inherit name;
+                          image = cfg.image;
+                          imagePullPolicy = "IfNotPresent";
+                          # Run as root so wrapper can chown /config; image /init then drops to PUID:PGID
+                          securityContext.runAsUser = 0;
+                          # Chown /config in same container as app so mount is identical (fixes NFS/storage permission issues)
+                          command = [
+                            "sh"
+                            "-c"
+                            "chown -R ${toString cfg.puid}:${toString cfg.pgid} /config && exec /init"
+                          ];
+                          env = [
+                            {
+                              name = "PGID";
+                              value = "${toString cfg.pgid}";
+                            }
+                            {
+                              name = "PUID";
+                              value = "${toString cfg.puid}";
+                            }
+                            {
+                              name = "TZ";
+                              value = cfg.tz;
+                            }
+                          ]
+                          ++ (lib.optionals cfg.database.enable [
+                            {
+                              name = "LIDARR__POSTGRES__HOST";
+                              value = cfg.database.host;
+                            }
+                            {
+                              name = "LIDARR__POSTGRES__PORT";
+                              value = toString cfg.database.port;
+                            }
+                            {
+                              name = "LIDARR__POSTGRES__MAINDB";
+                              value = cfg.database.name;
+                            }
+                            {
+                              name = "LIDARR__POSTGRES__LOGDB";
+                              value =
+                                if lib.hasSuffix "-main" cfg.database.name then
+                                  lib.removeSuffix "-main" cfg.database.name + "-log"
+                                else
+                                  "${cfg.database.name}-log";
+                            }
+                            {
+                              name = "LIDARR__POSTGRES__USER";
+                              value = cfg.database.username;
+                            }
+                            (
+                              if cfg.database.password != "" then
+                                {
+                                  name = "LIDARR__POSTGRES__PASSWORD";
+                                  valueFrom = {
+                                    secretKeyRef = {
+                                      name = password-secret;
+                                      key = "password";
+                                    };
                                   };
-                                };
-                              }
-                            else
-                              {
-                                name = "LIDARR__POSTGRES__PASSWORD";
-                                value = "";
-                              }
-                          )
-                        ])
-                        ++ (lib.optionals cfg.vpn.enable [
-                          # Configure Lidarr to use shared gluetun's HTTP proxy
-                          {
-                            name = "HTTP_PROXY";
-                            value = "http://${cfg.vpn.sharedGluetunService}:8888";
-                          }
-                          {
-                            name = "HTTPS_PROXY";
-                            value = "http://${cfg.vpn.sharedGluetunService}:8888";
-                          }
-                          {
-                            name = "NO_PROXY";
-                            value = "localhost,127.0.0.1,.svc,.svc.cluster.local,sabnzbd.sabnzbd,sabnzbd.sabnzbd.svc.cluster.local";
-                          }
-                        ]);
-                        ports = [
-                          {
-                            containerPort = cfg.service.port;
-                            name = "http";
-                            protocol = "TCP";
-                          }
-                        ];
-                        readinessProbe = lib.mkIf cfg.useProbes {
-                          # Use exec probe to test from inside container (works with IPv6 binding)
-                          exec = {
-                            command = [
-                              "sh"
-                              "-c"
-                              "wget -q -O- --timeout=2 http://127.0.0.1:${toString cfg.service.port}/ || wget -q -O- --timeout=2 http://[::1]:${toString cfg.service.port}/ || exit 1"
-                            ];
+                                }
+                              else
+                                {
+                                  name = "LIDARR__POSTGRES__PASSWORD";
+                                  value = "";
+                                }
+                            )
+                          ])
+                          ++ (lib.optionals cfg.vpn.enable [
+                            # Configure Lidarr to use shared gluetun's HTTP proxy
+                            {
+                              name = "HTTP_PROXY";
+                              value = "http://${cfg.vpn.sharedGluetunService}:8888";
+                            }
+                            {
+                              name = "HTTPS_PROXY";
+                              value = "http://${cfg.vpn.sharedGluetunService}:8888";
+                            }
+                            {
+                              name = "NO_PROXY";
+                              value = "localhost,127.0.0.1,.svc,.svc.cluster.local,sabnzbd.sabnzbd,sabnzbd.sabnzbd.svc.cluster.local";
+                            }
+                          ]);
+                          ports = [
+                            {
+                              containerPort = cfg.service.port;
+                              name = "http";
+                              protocol = "TCP";
+                            }
+                          ];
+                          readinessProbe = lib.mkIf cfg.useProbes {
+                            # Use exec probe to test from inside container (works with IPv6 binding)
+                            exec = {
+                              command = [
+                                "sh"
+                                "-c"
+                                "wget -q -O- --timeout=2 http://127.0.0.1:${toString cfg.service.port}/ || wget -q -O- --timeout=2 http://[::1]:${toString cfg.service.port}/ || exit 1"
+                              ];
+                            };
+                            initialDelaySeconds = 60;
+                            periodSeconds = 10;
+                            timeoutSeconds = 5;
+                            successThreshold = 1;
+                            failureThreshold = 5;
                           };
-                          initialDelaySeconds = 60;
-                          periodSeconds = 10;
-                          timeoutSeconds = 5;
-                          successThreshold = 1;
-                          failureThreshold = 5;
-                        };
-                        livenessProbe = lib.mkIf cfg.useProbes {
-                          # Use exec probe to test from inside container (works with IPv6 binding)
-                          exec = {
-                            command = [
-                              "sh"
-                              "-c"
-                              "wget -q -O- --timeout=2 http://127.0.0.1:${toString cfg.service.port}/ || wget -q -O- --timeout=2 http://[::1]:${toString cfg.service.port}/ || exit 1"
-                            ];
+                          livenessProbe = lib.mkIf cfg.useProbes {
+                            # Use exec probe to test from inside container (works with IPv6 binding)
+                            exec = {
+                              command = [
+                                "sh"
+                                "-c"
+                                "wget -q -O- --timeout=2 http://127.0.0.1:${toString cfg.service.port}/ || wget -q -O- --timeout=2 http://[::1]:${toString cfg.service.port}/ || exit 1"
+                              ];
+                            };
+                            initialDelaySeconds = 90;
+                            periodSeconds = 30;
+                            timeoutSeconds = 5;
+                            successThreshold = 1;
+                            failureThreshold = 3;
                           };
-                          initialDelaySeconds = 90;
-                          periodSeconds = 30;
-                          timeoutSeconds = 5;
-                          successThreshold = 1;
-                          failureThreshold = 3;
+                          volumeMounts = [
+                            {
+                              mountPath = "/config";
+                              name = "config";
+                            }
+                            {
+                              mountPath = "/downloads";
+                              name = "downloads";
+                            }
+                            {
+                              mountPath = "/music";
+                              name = "music";
+                            }
+                          ]
+                          ++ (lib.optionals (cfg.nfs.enable && cfg.nfs.slskdDownloads.enable) [
+                            {
+                              mountPath = "/downloads/slskd_downloads";
+                              name = "slskd-downloads";
+                            }
+                          ]);
+                        }
+                      ];
+                      volumes = [
+                        {
+                          name = "config";
+                          persistentVolumeClaim.claimName = "${name}-${name}-config";
+                        }
+                      ]
+                      ++ (lib.optionals (cfg.database.enable && cfg.database.password != "") [
+                        {
+                          name = password-secret;
+                          secret.secretName = password-secret;
+                        }
+                      ])
+                      ++ [
+                        {
+                          name = "downloads";
+                          persistentVolumeClaim.claimName = "${name}-${name}-downloads";
+                        }
+                        {
+                          name = "music";
+                          persistentVolumeClaim.claimName = "${name}-${name}-music";
+                        }
+                      ]
+                      ++ (lib.optionals (cfg.nfs.enable && cfg.nfs.slskdDownloads.enable) [
+                        {
+                          name = "slskd-downloads";
+                          persistentVolumeClaim.claimName = "${name}-${name}-slskd-downloads";
+                        }
+                      ]);
+                    };
+                  };
+                };
+              };
+            };
+
+            ingresses.${name} = with cfg.ingress; {
+              metadata.annotations."cert-manager.io/cluster-issuer" = clusterIssuer;
+              spec = {
+                inherit ingressClassName;
+
+                rules = [
+                  {
+                    host = domain;
+
+                    http.paths = [
+                      {
+                        backend.service = {
+                          inherit name;
+                          port.name = "http";
                         };
-                        volumeMounts = [
-                          {
-                            mountPath = "/config";
-                            name = "config";
-                          }
-                          {
-                            mountPath = "/downloads";
-                            name = "downloads";
-                          }
-                          {
-                            mountPath = "/music";
-                            name = "music";
-                          }
-                        ]
-                        ++ (lib.optionals (cfg.nfs.enable && cfg.nfs.slskdDownloads.enable) [
-                          {
-                            mountPath = "/downloads/slskd_downloads";
-                            name = "slskd-downloads";
-                          }
-                        ]);
+
+                        path = "/";
+                        pathType = "ImplementationSpecific";
                       }
                     ];
-                    volumes = [
-                      {
-                        name = "config";
-                        persistentVolumeClaim.claimName = "${name}-${name}-config";
-                      }
-                    ]
-                    ++ (lib.optionals (cfg.database.enable && cfg.database.password != "") [
-                      {
-                        name = password-secret;
-                        secret.secretName = password-secret;
-                      }
-                    ])
-                    ++ [
-                      {
-                        name = "downloads";
-                        persistentVolumeClaim.claimName = "${name}-${name}-downloads";
-                      }
-                      {
-                        name = "music";
-                        persistentVolumeClaim.claimName = "${name}-${name}-music";
-                      }
-                    ]
-                    ++ (lib.optionals (cfg.nfs.enable && cfg.nfs.slskdDownloads.enable) [
-                      {
-                        name = "slskd-downloads";
-                        persistentVolumeClaim.claimName = "${name}-${name}-slskd-downloads";
-                      }
-                    ]);
-                  };
-                };
+                  }
+                ];
+
+                tls = [
+                  {
+                    hosts = [ domain ];
+                    secretName = "${name}-tls";
+                  }
+                ];
               };
             };
-          };
 
-          ingresses.${name} = with cfg.ingress; {
-            metadata.annotations."cert-manager.io/cluster-issuer" = clusterIssuer;
-            spec = {
-              inherit ingressClassName;
-
-              rules = [
+            persistentVolumes =
+              pinnedConfig.persistentVolumes
+              // lib.optionalAttrs (cfg.nfs.enable) (
                 {
-                  host = domain;
-
-                  http.paths = [
-                    {
-                      backend.service = {
-                        inherit name;
-                        port.name = "http";
+                  "${name}-${name}-downloads-nfs" = {
+                    apiVersion = "v1";
+                    metadata.name = "${name}-${name}-downloads-nfs";
+                    spec = {
+                      accessModes = [ "ReadWriteMany" ];
+                      capacity.storage = "1Ti";
+                      mountOptions = [
+                        "nolock"
+                        "noexec"
+                        "soft"
+                        "timeo=30"
+                      ];
+                      nfs = {
+                        server = cfg.nfs.server;
+                        path = "${cfg.nfs.path}/Downloads";
                       };
+                      persistentVolumeReclaimPolicy = "Retain";
+                    };
+                  };
+                  "${name}-${name}-music-nfs" = {
+                    apiVersion = "v1";
+                    metadata.name = "${name}-${name}-music-nfs";
+                    spec = {
+                      capacity = {
+                        storage = "1Ti";
+                      };
+                      accessModes = [ "ReadWriteMany" ];
+                      mountOptions = [
+                        "nolock"
+                        "noexec"
+                        "soft"
+                        "timeo=30"
+                      ];
+                      nfs = {
+                        server = cfg.nfs.server;
+                        path = "${cfg.nfs.path}/Music";
+                      };
+                      persistentVolumeReclaimPolicy = "Retain";
+                    };
+                  };
+                }
+                // (lib.optionalAttrs cfg.nfs.slskdDownloads.enable {
+                  "${name}-${name}-slskd-downloads-nfs" = {
+                    apiVersion = "v1";
+                    metadata.name = "${name}-${name}-slskd-downloads-nfs";
+                    spec = {
+                      accessModes = [ "ReadWriteMany" ];
+                      capacity.storage = "1Ti";
+                      mountOptions = [
+                        "nolock"
+                        "noexec"
+                        "soft"
+                        "timeo=30"
+                      ];
+                      nfs = {
+                        server = cfg.nfs.server;
+                        path = cfg.nfs.slskdDownloads.path;
+                      };
+                      persistentVolumeReclaimPolicy = "Retain";
+                    };
+                  };
+                })
+              );
 
-                      path = "/";
-                      pathType = "ImplementationSpecific";
+            persistentVolumeClaims =
+              pinnedConfig.persistentVolumeClaims
+              // {
+                "${name}-${name}-downloads".spec =
+                  if cfg.nfs.enable then
+                    {
+                      accessModes = [ "ReadWriteMany" ];
+                      resources.requests.storage = "1Gi";
+                      storageClassName = "";
+                      volumeName = "${name}-${name}-downloads-nfs";
                     }
-                  ];
-                }
-              ];
-
-              tls = [
-                {
-                  hosts = [ domain ];
-                  secretName = "${name}-tls";
-                }
-              ];
-            };
-          };
-
-          persistentVolumes = lib.optionalAttrs (cfg.nfs.enable) (
-            {
-              "${name}-${name}-downloads-nfs" = {
-                apiVersion = "v1";
-                metadata.name = "${name}-${name}-downloads-nfs";
-                spec = {
-                  accessModes = [ "ReadWriteMany" ];
-                  capacity.storage = "1Ti";
-                  mountOptions = [
-                    "nolock"
-                    "noexec"
-                    "soft"
-                    "timeo=30"
-                  ];
-                  nfs = {
-                    server = cfg.nfs.server;
-                    path = "${cfg.nfs.path}/Downloads";
-                  };
-                  persistentVolumeReclaimPolicy = "Retain";
-                };
-              };
-              "${name}-${name}-music-nfs" = {
-                apiVersion = "v1";
-                metadata.name = "${name}-${name}-music-nfs";
-                spec = {
-                  capacity = {
-                    storage = "1Ti";
-                  };
-                  accessModes = [ "ReadWriteMany" ];
-                  mountOptions = [
-                    "nolock"
-                    "noexec"
-                    "soft"
-                    "timeo=30"
-                  ];
-                  nfs = {
-                    server = cfg.nfs.server;
-                    path = "${cfg.nfs.path}/Music";
-                  };
-                  persistentVolumeReclaimPolicy = "Retain";
-                };
-              };
-            }
-            // (lib.optionalAttrs cfg.nfs.slskdDownloads.enable {
-              "${name}-${name}-slskd-downloads-nfs" = {
-                apiVersion = "v1";
-                metadata.name = "${name}-${name}-slskd-downloads-nfs";
-                spec = {
-                  accessModes = [ "ReadWriteMany" ];
-                  capacity.storage = "1Ti";
-                  mountOptions = [
-                    "nolock"
-                    "noexec"
-                    "soft"
-                    "timeo=30"
-                  ];
-                  nfs = {
-                    server = cfg.nfs.server;
-                    path = cfg.nfs.slskdDownloads.path;
-                  };
-                  persistentVolumeReclaimPolicy = "Retain";
-                };
-              };
-            })
-          );
-
-          persistentVolumeClaims = {
-            "${name}-${name}-config".spec = {
-              inherit (cfg) storageClassName;
-              accessModes = [ "ReadWriteOnce" ];
-              resources.requests.storage = "10Gi";
-            };
-            "${name}-${name}-downloads".spec =
-              if cfg.nfs.enable then
-                {
-                  accessModes = [ "ReadWriteMany" ];
-                  resources.requests.storage = "1Gi";
-                  storageClassName = "";
-                  volumeName = "${name}-${name}-downloads-nfs";
-                }
-              else
-                {
-                  inherit (cfg) storageClassName;
-                  accessModes = [ "ReadWriteOnce" ];
-                  resources.requests.storage = "50Gi";
-                };
-            "${name}-${name}-music".spec =
-              if cfg.nfs.enable then
-                {
-                  accessModes = [ "ReadWriteMany" ];
-                  resources.requests.storage = "1Gi";
-                  storageClassName = "";
-                  volumeName = "${name}-${name}-music-nfs";
-                }
-              else
-                {
-                  inherit (cfg) storageClassName;
-                  accessModes = [ "ReadWriteOnce" ];
-                  resources.requests.storage = "100Gi";
-                };
-          }
-          // (lib.optionalAttrs (cfg.nfs.enable && cfg.nfs.slskdDownloads.enable) {
-            "${name}-${name}-slskd-downloads".spec = {
-              accessModes = [ "ReadWriteMany" ];
-              resources.requests.storage = "1Gi";
-              storageClassName = "";
-              volumeName = "${name}-${name}-slskd-downloads-nfs";
-            };
-          });
-
-          services.${name}.spec = {
-            ports = [
-              {
-                name = "http";
-                port = cfg.service.port;
-                protocol = "TCP";
-                targetPort = "http";
+                  else
+                    {
+                      inherit (cfg) storageClassName;
+                      accessModes = [ "ReadWriteOnce" ];
+                      resources.requests.storage = "50Gi";
+                    };
+                "${name}-${name}-music".spec =
+                  if cfg.nfs.enable then
+                    {
+                      accessModes = [ "ReadWriteMany" ];
+                      resources.requests.storage = "1Gi";
+                      storageClassName = "";
+                      volumeName = "${name}-${name}-music-nfs";
+                    }
+                  else
+                    {
+                      inherit (cfg) storageClassName;
+                      accessModes = [ "ReadWriteOnce" ];
+                      resources.requests.storage = "100Gi";
+                    };
               }
-            ];
+              // (lib.optionalAttrs (cfg.nfs.enable && cfg.nfs.slskdDownloads.enable) {
+                "${name}-${name}-slskd-downloads".spec = {
+                  accessModes = [ "ReadWriteMany" ];
+                  resources.requests.storage = "1Gi";
+                  storageClassName = "";
+                  volumeName = "${name}-${name}-slskd-downloads-nfs";
+                };
+              });
 
-            selector = {
-              "app.kubernetes.io/instance" = name;
-              "app.kubernetes.io/name" = name;
+            services.${name}.spec = {
+              ports = [
+                {
+                  name = "http";
+                  port = cfg.service.port;
+                  protocol = "TCP";
+                  targetPort = "http";
+                }
+              ];
+
+              selector = {
+                "app.kubernetes.io/instance" = name;
+                "app.kubernetes.io/name" = name;
+              };
+
+              type = "ClusterIP";
             };
 
-            type = "ClusterIP";
           };
-
-        };
       };
 }

@@ -194,201 +194,207 @@
           };
         };
 
-        extraResources = cfg: {
-          deployments.${name} = {
-            metadata.labels = {
-              "app.kubernetes.io/instance" = name;
-              "app.kubernetes.io/name" = name;
+        extraResources =
+          cfg:
+          let
+            pinnedConfig = self.lib.mkPinnedVolume {
+              pvcName = "${name}-${name}-config";
+              volumeHandle = "pvc-25589b0e-1276-441e-a91a-2e4e78ec378c";
+              size = "1Gi";
             };
-
-            spec = {
-              replicas = 1;
-              strategy.type = "Recreate";
-              selector.matchLabels = {
+          in
+          {
+            deployments.${name} = {
+              metadata.labels = {
                 "app.kubernetes.io/instance" = name;
                 "app.kubernetes.io/name" = name;
               };
 
-              template = {
-                metadata.labels = {
+              spec = {
+                replicas = 1;
+                strategy.type = "Recreate";
+                selector.matchLabels = {
                   "app.kubernetes.io/instance" = name;
                   "app.kubernetes.io/name" = name;
                 };
 
-                spec = {
-                  securityContext.fsGroup = cfg.pgid;
-                  serviceAccountName = "default";
-                  initContainers = [
-                    {
-                      name = "write-config";
-                      image = "busybox:latest";
-                      imagePullPolicy = "IfNotPresent";
-                      command = [
-                        "sh"
-                        "-c"
-                        writeConfigScript
-                      ];
-                      env = [
-                        {
-                          name = "LIDARR_HOST_URL";
-                          value = "http://${cfg.lidarr.host}:${toString cfg.lidarr.port}";
-                        }
-                        {
-                          name = "LIDARR_DOWNLOAD_DIR";
-                          value = cfg.lidarr.downloadDir;
-                        }
-                        {
-                          name = "SLSKD_HOST_URL";
-                          value = "http://${cfg.slskd.host}:${toString cfg.slskd.port}";
-                        }
-                        {
-                          name = "PUID";
-                          value = toString cfg.puid;
-                        }
-                        {
-                          name = "PGID";
-                          value = toString cfg.pgid;
-                        }
-                      ]
-                      ++ (lib.optionals (cfg.lidarr.apiKey != "") [
-                        {
-                          name = "LIDARR_API_KEY";
-                          valueFrom.secretKeyRef = {
-                            name = lidarr-api-secret;
-                            key = "api_key";
-                          };
-                        }
-                      ])
-                      ++ (lib.optionals (cfg.slskd.apiKey != "") [
-                        {
-                          name = "SLSKD_API_KEY";
-                          valueFrom.secretKeyRef = {
-                            name = slskd-api-secret;
-                            key = "api_key";
-                          };
-                        }
-                      ])
-                      ++ (lib.optionals (cfg.lidarr.apiKey == "") [
-                        {
-                          name = "LIDARR_API_KEY";
-                          value = "";
-                        }
-                      ])
-                      ++ (lib.optionals (cfg.slskd.apiKey == "") [
-                        {
-                          name = "SLSKD_API_KEY";
-                          value = "";
-                        }
-                      ]);
-                      volumeMounts = [
-                        {
-                          mountPath = "/data";
-                          name = "config";
-                        }
-                      ];
-                    }
-                  ];
-                  containers = [
-                    {
-                      inherit name;
-                      image = cfg.image;
-                      imagePullPolicy = "IfNotPresent";
-                      command = [
-                        "sh"
-                        "-c"
-                        "while true; do python soularr.py; sleep ${toString cfg.scriptInterval}; done"
-                      ];
-                      env = [
-                        {
-                          name = "PGID";
-                          value = toString cfg.pgid;
-                        }
-                        {
-                          name = "PUID";
-                          value = toString cfg.puid;
-                        }
-                        {
-                          name = "TZ";
-                          value = cfg.tz;
-                        }
-                        {
-                          name = "SCRIPT_INTERVAL";
-                          value = toString cfg.scriptInterval;
-                        }
-                      ];
-                      workingDir = "/app";
-                      securityContext.runAsUser = cfg.puid;
-                      securityContext.runAsGroup = cfg.pgid;
-                      volumeMounts = [
-                        {
-                          mountPath = "/data";
-                          name = "config";
-                        }
-                        {
-                          mountPath = "/downloads";
-                          name = "downloads";
-                        }
-                      ];
-                    }
-                  ];
-                  volumes = [
-                    {
-                      name = "config";
-                      persistentVolumeClaim.claimName = "${name}-${name}-config";
-                    }
-                    {
-                      name = "downloads";
-                      persistentVolumeClaim.claimName = "${name}-${name}-downloads";
-                    }
-                  ];
+                template = {
+                  metadata.labels = {
+                    "app.kubernetes.io/instance" = name;
+                    "app.kubernetes.io/name" = name;
+                  };
+
+                  spec = {
+                    securityContext.fsGroup = cfg.pgid;
+                    serviceAccountName = "default";
+                    initContainers = [
+                      {
+                        name = "write-config";
+                        image = "busybox:latest";
+                        imagePullPolicy = "IfNotPresent";
+                        command = [
+                          "sh"
+                          "-c"
+                          writeConfigScript
+                        ];
+                        env = [
+                          {
+                            name = "LIDARR_HOST_URL";
+                            value = "http://${cfg.lidarr.host}:${toString cfg.lidarr.port}";
+                          }
+                          {
+                            name = "LIDARR_DOWNLOAD_DIR";
+                            value = cfg.lidarr.downloadDir;
+                          }
+                          {
+                            name = "SLSKD_HOST_URL";
+                            value = "http://${cfg.slskd.host}:${toString cfg.slskd.port}";
+                          }
+                          {
+                            name = "PUID";
+                            value = toString cfg.puid;
+                          }
+                          {
+                            name = "PGID";
+                            value = toString cfg.pgid;
+                          }
+                        ]
+                        ++ (lib.optionals (cfg.lidarr.apiKey != "") [
+                          {
+                            name = "LIDARR_API_KEY";
+                            valueFrom.secretKeyRef = {
+                              name = lidarr-api-secret;
+                              key = "api_key";
+                            };
+                          }
+                        ])
+                        ++ (lib.optionals (cfg.slskd.apiKey != "") [
+                          {
+                            name = "SLSKD_API_KEY";
+                            valueFrom.secretKeyRef = {
+                              name = slskd-api-secret;
+                              key = "api_key";
+                            };
+                          }
+                        ])
+                        ++ (lib.optionals (cfg.lidarr.apiKey == "") [
+                          {
+                            name = "LIDARR_API_KEY";
+                            value = "";
+                          }
+                        ])
+                        ++ (lib.optionals (cfg.slskd.apiKey == "") [
+                          {
+                            name = "SLSKD_API_KEY";
+                            value = "";
+                          }
+                        ]);
+                        volumeMounts = [
+                          {
+                            mountPath = "/data";
+                            name = "config";
+                          }
+                        ];
+                      }
+                    ];
+                    containers = [
+                      {
+                        inherit name;
+                        image = cfg.image;
+                        imagePullPolicy = "IfNotPresent";
+                        command = [
+                          "sh"
+                          "-c"
+                          "while true; do python soularr.py; sleep ${toString cfg.scriptInterval}; done"
+                        ];
+                        env = [
+                          {
+                            name = "PGID";
+                            value = toString cfg.pgid;
+                          }
+                          {
+                            name = "PUID";
+                            value = toString cfg.puid;
+                          }
+                          {
+                            name = "TZ";
+                            value = cfg.tz;
+                          }
+                          {
+                            name = "SCRIPT_INTERVAL";
+                            value = toString cfg.scriptInterval;
+                          }
+                        ];
+                        workingDir = "/app";
+                        securityContext.runAsUser = cfg.puid;
+                        securityContext.runAsGroup = cfg.pgid;
+                        volumeMounts = [
+                          {
+                            mountPath = "/data";
+                            name = "config";
+                          }
+                          {
+                            mountPath = "/downloads";
+                            name = "downloads";
+                          }
+                        ];
+                      }
+                    ];
+                    volumes = [
+                      {
+                        name = "config";
+                        persistentVolumeClaim.claimName = "${name}-${name}-config";
+                      }
+                      {
+                        name = "downloads";
+                        persistentVolumeClaim.claimName = "${name}-${name}-downloads";
+                      }
+                    ];
+                  };
                 };
               };
             };
-          };
 
-          persistentVolumes = lib.optionalAttrs cfg.nfs.enable {
-            "${name}-${name}-downloads-nfs" = {
-              apiVersion = "v1";
-              metadata.name = "${name}-${name}-downloads-nfs";
-              spec = {
-                accessModes = [ "ReadWriteMany" ];
-                capacity.storage = "1Ti";
-                mountOptions = [
-                  "nolock"
-                  "noexec"
-                  "soft"
-                  "timeo=30"
-                ];
-                nfs = {
-                  server = cfg.nfs.server;
-                  path = cfg.nfs.path;
+            persistentVolumes =
+              pinnedConfig.persistentVolumes
+              // lib.optionalAttrs cfg.nfs.enable {
+                "${name}-${name}-downloads-nfs" = {
+                  apiVersion = "v1";
+                  metadata.name = "${name}-${name}-downloads-nfs";
+                  spec = {
+                    accessModes = [ "ReadWriteMany" ];
+                    capacity.storage = "1Ti";
+                    mountOptions = [
+                      "nolock"
+                      "noexec"
+                      "soft"
+                      "timeo=30"
+                    ];
+                    nfs = {
+                      server = cfg.nfs.server;
+                      path = cfg.nfs.path;
+                    };
+                    persistentVolumeReclaimPolicy = "Retain";
+                  };
                 };
-                persistentVolumeReclaimPolicy = "Retain";
               };
-            };
-          };
 
-          persistentVolumeClaims = {
-            "${name}-${name}-config".spec = {
-              inherit (cfg) storageClassName;
-              accessModes = [ "ReadWriteOnce" ];
-              resources.requests.storage = "1Gi";
+            persistentVolumeClaims = pinnedConfig.persistentVolumeClaims // {
+              "${name}-${name}-downloads".spec =
+                if cfg.nfs.enable then
+                  {
+                    accessModes = [ "ReadWriteMany" ];
+                    resources.requests.storage = "1Gi";
+                    storageClassName = "";
+                    volumeName = "${name}-${name}-downloads-nfs";
+                  }
+                else
+                  {
+                    inherit (cfg) storageClassName;
+                    accessModes = [ "ReadWriteOnce" ];
+                    resources.requests.storage = "10Gi";
+                  };
             };
-            "${name}-${name}-downloads".spec =
-              if cfg.nfs.enable then
-                {
-                  accessModes = [ "ReadWriteMany" ];
-                  resources.requests.storage = "1Gi";
-                  storageClassName = "";
-                  volumeName = "${name}-${name}-downloads-nfs";
-                }
-              else
-                {
-                  inherit (cfg) storageClassName;
-                  accessModes = [ "ReadWriteOnce" ];
-                  resources.requests.storage = "10Gi";
-                };
           };
-        };
       };
 }

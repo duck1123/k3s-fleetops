@@ -108,307 +108,311 @@
           };
         };
 
-        extraResources = cfg: {
-          deployments = {
-            ${name} = {
-              metadata.labels = {
-                "app.kubernetes.io/instance" = name;
-                "app.kubernetes.io/name" = name;
-                "app.kubernetes.io/version" = "latest";
-              };
-
-              spec = {
-                selector.matchLabels = {
+        extraResources =
+          cfg:
+          let
+            pinnedData = self.lib.mkPinnedVolume {
+              pvcName = "${name}-${name}-gluetun";
+              volumeHandle = "pvc-e563a1f5-1f3b-437e-ac58-77f4414da611";
+              size = "1Gi";
+            };
+          in
+          {
+            deployments = {
+              ${name} = {
+                metadata.labels = {
                   "app.kubernetes.io/instance" = name;
                   "app.kubernetes.io/name" = name;
+                  "app.kubernetes.io/version" = "latest";
                 };
 
-                template = {
-                  metadata.labels = {
+                spec = {
+                  selector.matchLabels = {
                     "app.kubernetes.io/instance" = name;
                     "app.kubernetes.io/name" = name;
                   };
 
-                  spec = {
-                    automountServiceAccountToken = true;
+                  template = {
+                    metadata.labels = {
+                      "app.kubernetes.io/instance" = name;
+                      "app.kubernetes.io/name" = name;
+                    };
 
-                    containers = [
-                      {
-                        inherit name;
-                        image = "qmcgaw/gluetun:latest";
-                        imagePullPolicy = "IfNotPresent";
-                        securityContext = {
-                          capabilities.add = [
-                            "NET_ADMIN"
-                            "MKNOD"
-                            "NET_RAW"
+                    spec = {
+                      automountServiceAccountToken = true;
+
+                      containers = [
+                        {
+                          inherit name;
+                          image = "qmcgaw/gluetun:latest";
+                          imagePullPolicy = "IfNotPresent";
+                          securityContext = {
+                            capabilities.add = [
+                              "NET_ADMIN"
+                              "MKNOD"
+                              "NET_RAW"
+                            ];
+                            privileged = false;
+                          };
+                          env = lib.filter (x: x != null) [
+                            {
+                              name = "VPN_SERVICE_PROVIDER";
+                              value = "mullvad";
+                            }
+                            {
+                              name = "VPN_TYPE";
+                              value = "wireguard";
+                            }
+                            {
+                              name = "WIREGUARD_PRIVATE_KEY";
+                              valueFrom.secretKeyRef = {
+                                name = "${name}-mullvad-wireguard";
+                                key = "privateKey";
+                              };
+                            }
+                            {
+                              name = "WIREGUARD_ADDRESSES";
+                              value = cfg.wireguardAddresses;
+                            }
+                            (
+                              if cfg.serverCountry != null && cfg.serverCountry != "" then
+                                {
+                                  name = "SERVER_COUNTRIES";
+                                  value = cfg.serverCountry;
+                                }
+                              else
+                                null
+                            )
+                            (
+                              if cfg.serverLocation != "" then
+                                {
+                                  name = "SERVER_CITIES";
+                                  value = cfg.serverLocation;
+                                }
+                              else
+                                null
+                            )
+                            {
+                              name = "FIREWALL";
+                              value = "on";
+                            }
+                            {
+                              name = "FIREWALL_VPN_INPUT_PORTS";
+                              value = "8888,8000";
+                            }
+                            {
+                              name = "LOG_LEVEL";
+                              value = cfg.logLevel;
+                            }
+                            {
+                              name = "HTTPPROXY_LOG";
+                              value = "on";
+                            }
+                            {
+                              name = "UPDATER_PERIOD";
+                              value = "24h";
+                            }
+                            {
+                              name = "TZ";
+                              value = cfg.tz;
+                            }
+                            {
+                              name = "HTTP_CONTROL_SERVER_LOG";
+                              value = "on";
+                            }
+                            {
+                              name = "HTTP_CONTROL_SERVER";
+                              value = "on";
+                            }
+                            {
+                              name = "DNS_KEEP_NAMESERVER";
+                              value = "off";
+                            }
+                            {
+                              name = "DNS_ADDRESS";
+                              value = if cfg.enableIPv6 then "::" else "";
+                            }
+                            {
+                              name = "DNS_IPV6";
+                              value = if cfg.enableIPv6 then "on" else "off";
+                            }
+                            {
+                              name = "DNS_UPSTREAM_IPV6";
+                              value = if cfg.enableIPv6 then "on" else "off";
+                            }
+                            {
+                              name = "HTTPPROXY";
+                              value = "on";
+                            }
+                            {
+                              name = "HTTPPROXY_LISTENING_ADDRESS";
+                              value = "0.0.0.0:8888";
+                            }
+                            {
+                              name = "HTTP_CONTROL_SERVER_LISTENING_ADDRESS";
+                              value = "0.0.0.0:8000";
+                            }
+                            {
+                              name = "HEALTH_SERVER_ADDRESS";
+                              value = ":9999";
+                            }
+                            (
+                              if cfg.controlServer.username != "" then
+                                {
+                                  name = "HTTP_CONTROL_SERVER_USER";
+                                  valueFrom.secretKeyRef = {
+                                    name = "${name}-control-server";
+                                    key = "username";
+                                  };
+                                }
+                              else
+                                null
+                            )
+                            (
+                              if cfg.controlServer.password != "" then
+                                {
+                                  name = "HTTP_CONTROL_SERVER_PASSWORD";
+                                  valueFrom.secretKeyRef = {
+                                    name = "${name}-control-server";
+                                    key = "password";
+                                  };
+                                }
+                              else
+                                null
+                            )
                           ];
-                          privileged = false;
-                        };
-                        env = lib.filter (x: x != null) [
-                          {
-                            name = "VPN_SERVICE_PROVIDER";
-                            value = "mullvad";
-                          }
-                          {
-                            name = "VPN_TYPE";
-                            value = "wireguard";
-                          }
-                          {
-                            name = "WIREGUARD_PRIVATE_KEY";
-                            valueFrom.secretKeyRef = {
-                              name = "${name}-mullvad-wireguard";
-                              key = "privateKey";
+                          ports = [
+                            {
+                              containerPort = 8888;
+                              name = "http-proxy";
+                              protocol = "TCP";
+                            }
+                            {
+                              containerPort = 1080;
+                              name = "socks-proxy";
+                              protocol = "TCP";
+                            }
+                            {
+                              containerPort = 8000;
+                              name = "http-control";
+                              protocol = "TCP";
+                            }
+                          ];
+                          readinessProbe = {
+                            httpGet = {
+                              path = "/";
+                              port = 9999;
                             };
-                          }
-                          {
-                            name = "WIREGUARD_ADDRESSES";
-                            value = cfg.wireguardAddresses;
-                          }
-                          (
-                            if cfg.serverCountry != null && cfg.serverCountry != "" then
-                              {
-                                name = "SERVER_COUNTRIES";
-                                value = cfg.serverCountry;
-                              }
-                            else
-                              null
-                          )
-                          (
-                            if cfg.serverLocation != "" then
-                              {
-                                name = "SERVER_CITIES";
-                                value = cfg.serverLocation;
-                              }
-                            else
-                              null
-                          )
-                          {
-                            name = "FIREWALL";
-                            value = "on";
-                          }
-                          {
-                            name = "FIREWALL_VPN_INPUT_PORTS";
-                            value = "8888,8000";
-                          }
-                          {
-                            name = "LOG_LEVEL";
-                            value = cfg.logLevel;
-                          }
-                          {
-                            name = "HTTPPROXY_LOG";
-                            value = "on";
-                          }
-                          {
-                            name = "UPDATER_PERIOD";
-                            value = "24h";
-                          }
-                          {
-                            name = "TZ";
-                            value = cfg.tz;
-                          }
-                          {
-                            name = "HTTP_CONTROL_SERVER_LOG";
-                            value = "on";
-                          }
-                          {
-                            name = "HTTP_CONTROL_SERVER";
-                            value = "on";
-                          }
-                          {
-                            name = "DNS_KEEP_NAMESERVER";
-                            value = "off";
-                          }
-                          {
-                            name = "DNS_ADDRESS";
-                            value = if cfg.enableIPv6 then "::" else "";
-                          }
-                          {
-                            name = "DNS_IPV6";
-                            value = if cfg.enableIPv6 then "on" else "off";
-                          }
-                          {
-                            name = "DNS_UPSTREAM_IPV6";
-                            value = if cfg.enableIPv6 then "on" else "off";
-                          }
-                          {
-                            name = "HTTPPROXY";
-                            value = "on";
-                          }
-                          {
-                            name = "HTTPPROXY_LISTENING_ADDRESS";
-                            value = "0.0.0.0:8888";
-                          }
-                          {
-                            name = "HTTP_CONTROL_SERVER_LISTENING_ADDRESS";
-                            value = "0.0.0.0:8000";
-                          }
-                          {
-                            name = "HEALTH_SERVER_ADDRESS";
-                            value = ":9999";
-                          }
-                          (
-                            if cfg.controlServer.username != "" then
-                              {
-                                name = "HTTP_CONTROL_SERVER_USER";
-                                valueFrom.secretKeyRef = {
-                                  name = "${name}-control-server";
-                                  key = "username";
-                                };
-                              }
-                            else
-                              null
-                          )
-                          (
-                            if cfg.controlServer.password != "" then
-                              {
-                                name = "HTTP_CONTROL_SERVER_PASSWORD";
-                                valueFrom.secretKeyRef = {
-                                  name = "${name}-control-server";
-                                  key = "password";
-                                };
-                              }
-                            else
-                              null
-                          )
-                        ];
-                        ports = [
-                          {
-                            containerPort = 8888;
-                            name = "http-proxy";
-                            protocol = "TCP";
-                          }
-                          {
-                            containerPort = 1080;
-                            name = "socks-proxy";
-                            protocol = "TCP";
-                          }
-                          {
-                            containerPort = 8000;
-                            name = "http-control";
-                            protocol = "TCP";
-                          }
-                        ];
-                        readinessProbe = {
-                          httpGet = {
-                            path = "/";
-                            port = 9999;
+                            initialDelaySeconds = 15;
+                            periodSeconds = 10;
+                            timeoutSeconds = 5;
+                            successThreshold = 1;
+                            failureThreshold = 3;
                           };
-                          initialDelaySeconds = 15;
-                          periodSeconds = 10;
-                          timeoutSeconds = 5;
-                          successThreshold = 1;
-                          failureThreshold = 3;
-                        };
-                        startupProbe = {
-                          httpGet = {
-                            path = "/";
-                            port = 9999;
+                          startupProbe = {
+                            httpGet = {
+                              path = "/";
+                              port = 9999;
+                            };
+                            initialDelaySeconds = 5;
+                            periodSeconds = 5;
+                            timeoutSeconds = 3;
+                            successThreshold = 1;
+                            failureThreshold = 30;
                           };
-                          initialDelaySeconds = 5;
-                          periodSeconds = 5;
-                          timeoutSeconds = 3;
-                          successThreshold = 1;
-                          failureThreshold = 30;
-                        };
-                        livenessProbe = {
-                          tcpSocket = {
-                            port = 8000;
+                          livenessProbe = {
+                            tcpSocket = {
+                              port = 8000;
+                            };
+                            initialDelaySeconds = 30;
+                            periodSeconds = 30;
+                            timeoutSeconds = 5;
+                            successThreshold = 1;
+                            failureThreshold = 3;
                           };
-                          initialDelaySeconds = 30;
-                          periodSeconds = 30;
-                          timeoutSeconds = 5;
-                          successThreshold = 1;
-                          failureThreshold = 3;
-                        };
-                        volumeMounts = [
-                          {
-                            mountPath = "/gluetun";
-                            name = "gluetun";
-                          }
-                        ];
-                      }
-                    ];
-
-                    dnsConfig = {
-                      # Use gluetun's internal DNS server (listening on port 53)
-                      # This ensures DNS queries go through the VPN and aren't blocked by firewall
-                      nameservers = [ "127.0.0.1" ];
-                      searches = [ ];
-                      options = [
-                        {
-                          name = "ndots";
-                          value = "2";
+                          volumeMounts = [
+                            {
+                              mountPath = "/gluetun";
+                              name = "gluetun";
+                            }
+                          ];
                         }
+                      ];
+
+                      dnsConfig = {
+                        # Use gluetun's internal DNS server (listening on port 53)
+                        # This ensures DNS queries go through the VPN and aren't blocked by firewall
+                        nameservers = [ "127.0.0.1" ];
+                        searches = [ ];
+                        options = [
+                          {
+                            name = "ndots";
+                            value = "2";
+                          }
+                          {
+                            name = "edns0";
+                          }
+                        ];
+                      };
+
+                      dnsPolicy = "None";
+
+                      serviceAccountName = "default";
+
+                      volumes = [
                         {
-                          name = "edns0";
+                          name = "gluetun";
+                          persistentVolumeClaim.claimName = "${name}-${name}-gluetun";
                         }
                       ];
                     };
-
-                    dnsPolicy = "None";
-
-                    serviceAccountName = "default";
-
-                    volumes = [
-                      {
-                        name = "gluetun";
-                        persistentVolumeClaim.claimName = "${name}-${name}-gluetun";
-                      }
-                    ];
                   };
                 };
               };
             };
-          };
 
-          persistentVolumeClaims = {
-            "${name}-${name}-gluetun".spec = {
-              inherit (cfg) storageClassName;
-              accessModes = [ "ReadWriteOnce" ];
-              resources.requests.storage = "1Gi";
+            persistentVolumeClaims = pinnedData.persistentVolumeClaims;
+            persistentVolumes = pinnedData.persistentVolumes;
+
+            services.${name}.spec = {
+              ports = [
+                {
+                  name = "http-proxy";
+                  port = 8888;
+                  protocol = "TCP";
+                  targetPort = "http-proxy";
+                }
+                {
+                  name = "socks-proxy";
+                  port = 1080;
+                  protocol = "TCP";
+                  targetPort = "socks-proxy";
+                }
+                {
+                  name = "http-control";
+                  port = 8000;
+                  protocol = "TCP";
+                  targetPort = "http-control";
+                }
+              ];
+
+              selector = {
+                "app.kubernetes.io/instance" = name;
+                "app.kubernetes.io/name" = name;
+              };
+
+              type = "ClusterIP";
+              # Enable dual-stack if IPv6 is enabled and cluster supports it
+              ipFamilyPolicy = if cfg.enableIPv6 then "RequireDualStack" else null;
+              ipFamilies =
+                if cfg.enableIPv6 then
+                  [
+                    "IPv4"
+                    "IPv6"
+                  ]
+                else
+                  [ "IPv4" ];
             };
           };
-
-          services.${name}.spec = {
-            ports = [
-              {
-                name = "http-proxy";
-                port = 8888;
-                protocol = "TCP";
-                targetPort = "http-proxy";
-              }
-              {
-                name = "socks-proxy";
-                port = 1080;
-                protocol = "TCP";
-                targetPort = "socks-proxy";
-              }
-              {
-                name = "http-control";
-                port = 8000;
-                protocol = "TCP";
-                targetPort = "http-control";
-              }
-            ];
-
-            selector = {
-              "app.kubernetes.io/instance" = name;
-              "app.kubernetes.io/name" = name;
-            };
-
-            type = "ClusterIP";
-            # Enable dual-stack if IPv6 is enabled and cluster supports it
-            ipFamilyPolicy = if cfg.enableIPv6 then "RequireDualStack" else null;
-            ipFamilies =
-              if cfg.enableIPv6 then
-                [
-                  "IPv4"
-                  "IPv6"
-                ]
-              else
-                [ "IPv4" ];
-          };
-        };
       };
 }

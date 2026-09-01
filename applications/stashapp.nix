@@ -70,269 +70,275 @@
         };
       };
 
-      extraResources = cfg: {
-        deployments = {
-          ${name} = {
-            metadata.labels = {
-              "app.kubernetes.io/instance" = name;
-              "app.kubernetes.io/name" = name;
-              "app.kubernetes.io/version" = "latest";
-            };
-
-            spec = {
-              replicas = cfg.replicas;
-              strategy.type = "Recreate";
-              selector.matchLabels = {
+      extraResources =
+        cfg:
+        let
+          pinnedConfig = self.lib.mkPinnedVolume {
+            pvcName = "${name}-${name}-config";
+            volumeHandle = "pvc-9d446279-6623-466b-9937-143eeca518ca";
+            size = "200Gi";
+          };
+        in
+        {
+          deployments = {
+            ${name} = {
+              metadata.labels = {
                 "app.kubernetes.io/instance" = name;
                 "app.kubernetes.io/name" = name;
+                "app.kubernetes.io/version" = "latest";
               };
 
-              template = {
-                metadata.labels = {
+              spec = {
+                replicas = cfg.replicas;
+                strategy.type = "Recreate";
+                selector.matchLabels = {
                   "app.kubernetes.io/instance" = name;
                   "app.kubernetes.io/name" = name;
                 };
 
-                spec = {
-                  automountServiceAccountToken = true;
-                  serviceAccountName = "default";
-                }
-                // {
-                  containers = [
-                    (
+                template = {
+                  metadata.labels = {
+                    "app.kubernetes.io/instance" = name;
+                    "app.kubernetes.io/name" = name;
+                  };
+
+                  spec = {
+                    automountServiceAccountToken = true;
+                    serviceAccountName = "default";
+                  }
+                  // {
+                    containers = [
+                      (
+                        {
+                          inherit name;
+                          image = cfg.image;
+                          imagePullPolicy = "IfNotPresent";
+                          env = [
+                            {
+                              name = "PGID";
+                              value = "${toString cfg.pgid}";
+                            }
+                            {
+                              name = "PUID";
+                              value = "${toString cfg.puid}";
+                            }
+                            {
+                              name = "TZ";
+                              value = cfg.tz;
+                            }
+                            {
+                              name = "STASH_STASH_DIR";
+                              value = "/data";
+                            }
+                            {
+                              name = "FFMPEG_EXE";
+                              value = "/usr/bin/ffmpeg";
+                            }
+                            {
+                              name = "FFPROBE_EXE";
+                              value = "/usr/bin/ffprobe";
+                            }
+                          ];
+                          ports = [
+                            {
+                              containerPort = cfg.service.port;
+                              name = "http";
+                              protocol = "TCP";
+                            }
+                          ];
+                          readinessProbe = {
+                            httpGet = {
+                              path = "/";
+                              port = cfg.service.port;
+                            };
+                            initialDelaySeconds = 30;
+                            periodSeconds = 10;
+                            timeoutSeconds = 5;
+                            successThreshold = 1;
+                            failureThreshold = 3;
+                          };
+                          livenessProbe = {
+                            httpGet = {
+                              path = "/";
+                              port = cfg.service.port;
+                            };
+                            initialDelaySeconds = 60;
+                            periodSeconds = 30;
+                            timeoutSeconds = 5;
+                            successThreshold = 1;
+                            failureThreshold = 3;
+                          };
+                          volumeMounts = [
+                            {
+                              mountPath = "/root/.stash";
+                              name = "config";
+                            }
+                            {
+                              mountPath = "/data";
+                              name = "data";
+                            }
+                          ]
+                          ++ (lib.optionals cfg.enableGPU (
+                            if cfg.vaapiRenderDevice != "" then
+                              [
+                                {
+                                  mountPath = "/dev/dri/renderD128";
+                                  name = "dri";
+                                }
+                              ]
+                            else
+                              [
+                                {
+                                  mountPath = "/dev/dri";
+                                  name = "dri";
+                                }
+                              ]
+                          ));
+                        }
+                        // (lib.optionalAttrs cfg.enableGPU {
+                          securityContext = {
+                            privileged = false;
+                            capabilities = {
+                              add = [ "SYS_ADMIN" ];
+                            };
+                          };
+                        })
+                      )
+                    ];
+                    volumes = [
                       {
-                        inherit name;
-                        image = cfg.image;
-                        imagePullPolicy = "IfNotPresent";
-                        env = [
+                        name = "config";
+                        persistentVolumeClaim.claimName = "${name}-${name}-config";
+                      }
+                      {
+                        name = "data";
+                        persistentVolumeClaim.claimName = "${name}-${name}-data";
+                      }
+                    ]
+                    ++ (lib.optionals cfg.enableGPU (
+                      if cfg.vaapiRenderDevice != "" then
+                        [
                           {
-                            name = "PGID";
-                            value = "${toString cfg.pgid}";
-                          }
-                          {
-                            name = "PUID";
-                            value = "${toString cfg.puid}";
-                          }
-                          {
-                            name = "TZ";
-                            value = cfg.tz;
-                          }
-                          {
-                            name = "STASH_STASH_DIR";
-                            value = "/data";
-                          }
-                          {
-                            name = "FFMPEG_EXE";
-                            value = "/usr/bin/ffmpeg";
-                          }
-                          {
-                            name = "FFPROBE_EXE";
-                            value = "/usr/bin/ffprobe";
-                          }
-                        ];
-                        ports = [
-                          {
-                            containerPort = cfg.service.port;
-                            name = "http";
-                            protocol = "TCP";
-                          }
-                        ];
-                        readinessProbe = {
-                          httpGet = {
-                            path = "/";
-                            port = cfg.service.port;
-                          };
-                          initialDelaySeconds = 30;
-                          periodSeconds = 10;
-                          timeoutSeconds = 5;
-                          successThreshold = 1;
-                          failureThreshold = 3;
-                        };
-                        livenessProbe = {
-                          httpGet = {
-                            path = "/";
-                            port = cfg.service.port;
-                          };
-                          initialDelaySeconds = 60;
-                          periodSeconds = 30;
-                          timeoutSeconds = 5;
-                          successThreshold = 1;
-                          failureThreshold = 3;
-                        };
-                        volumeMounts = [
-                          {
-                            mountPath = "/root/.stash";
-                            name = "config";
-                          }
-                          {
-                            mountPath = "/data";
-                            name = "data";
+                            name = "dri";
+                            hostPath.path = "/dev/dri/${cfg.vaapiRenderDevice}";
                           }
                         ]
-                        ++ (lib.optionals cfg.enableGPU (
-                          if cfg.vaapiRenderDevice != "" then
-                            [
-                              {
-                                mountPath = "/dev/dri/renderD128";
-                                name = "dri";
-                              }
-                            ]
-                          else
-                            [
-                              {
-                                mountPath = "/dev/dri";
-                                name = "dri";
-                              }
-                            ]
-                        ));
-                      }
-                      // (lib.optionalAttrs cfg.enableGPU {
-                        securityContext = {
-                          privileged = false;
-                          capabilities = {
-                            add = [ "SYS_ADMIN" ];
-                          };
-                        };
-                      })
-                    )
-                  ];
-                  volumes = [
-                    {
-                      name = "config";
-                      persistentVolumeClaim.claimName = "${name}-${name}-config";
-                    }
-                    {
-                      name = "data";
-                      persistentVolumeClaim.claimName = "${name}-${name}-data";
-                    }
-                  ]
-                  ++ (lib.optionals cfg.enableGPU (
-                    if cfg.vaapiRenderDevice != "" then
-                      [
-                        {
-                          name = "dri";
-                          hostPath.path = "/dev/dri/${cfg.vaapiRenderDevice}";
-                        }
-                      ]
-                    else
-                      [
-                        {
-                          name = "dri";
-                          hostPath = {
-                            path = "/dev/dri";
-                            type = "Directory";
-                          };
-                        }
-                      ]
-                  ));
+                      else
+                        [
+                          {
+                            name = "dri";
+                            hostPath = {
+                              path = "/dev/dri";
+                              type = "Directory";
+                            };
+                          }
+                        ]
+                    ));
+                  };
                 };
               };
             };
           };
-        };
 
-        ingresses.${name} = with cfg.ingress; {
-          metadata.annotations = optionalAttrs (clusterIssuer != "") {
-            "cert-manager.io/cluster-issuer" = clusterIssuer;
-          };
-
-          spec = {
-            inherit ingressClassName;
-
-            rules = [
-              {
-                host = domain;
-
-                http.paths = [
-                  {
-                    backend.service = {
-                      inherit name;
-                      port.name = "http";
-                    };
-
-                    path = "/";
-                    pathType = "ImplementationSpecific";
-                  }
-                ];
-              }
-            ];
-
-            tls = [
-              {
-                hosts = [ domain ];
-                secretName = "${domain}-tls";
-              }
-            ];
-          };
-        };
-
-        persistentVolumeClaims = {
-          "${name}-${name}-config".spec = {
-            inherit (cfg) storageClassName;
-            accessModes = [ "ReadWriteOnce" ];
-            resources.requests.storage = "200Gi";
-          };
-          "${name}-${name}-data".spec =
-            if cfg.nfs.enable then
-              {
-                accessModes = [ "ReadWriteMany" ];
-                resources.requests.storage = "1Gi";
-                storageClassName = "";
-                volumeName = "${name}-${name}-data-nfs";
-              }
-            else
-              {
-                inherit (cfg) storageClassName;
-                accessModes = [ "ReadWriteOnce" ];
-                resources.requests.storage = "100Gi";
-              };
-        };
-
-        services.${name}.spec = {
-          ports = [
-            {
-              name = "http";
-              port = cfg.service.port;
-              protocol = "TCP";
-              targetPort = "http";
-            }
-          ];
-
-          selector = {
-            "app.kubernetes.io/instance" = name;
-            "app.kubernetes.io/name" = name;
-          };
-
-          type = "ClusterIP";
-        };
-
-        # Create NFS PersistentVolume for data when NFS is enabled
-        persistentVolumes = lib.optionalAttrs cfg.nfs.enable {
-          "${name}-${name}-data-nfs" = {
-            apiVersion = "v1";
-            kind = "PersistentVolume";
-            metadata = {
-              name = "${name}-${name}-data-nfs";
+          ingresses.${name} = with cfg.ingress; {
+            metadata.annotations = optionalAttrs (clusterIssuer != "") {
+              "cert-manager.io/cluster-issuer" = clusterIssuer;
             };
+
             spec = {
-              capacity = {
-                storage = "1Ti";
-              };
-              accessModes = [ "ReadWriteMany" ];
-              mountOptions = [
-                "nolock"
-                "noexec"
-                "soft"
-                "timeo=30"
+              inherit ingressClassName;
+
+              rules = [
+                {
+                  host = domain;
+
+                  http.paths = [
+                    {
+                      backend.service = {
+                        inherit name;
+                        port.name = "http";
+                      };
+
+                      path = "/";
+                      pathType = "ImplementationSpecific";
+                    }
+                  ];
+                }
               ];
-              nfs = {
-                server = cfg.nfs.server;
-                path = cfg.nfs.path;
-              };
-              persistentVolumeReclaimPolicy = "Retain";
+
+              tls = [
+                {
+                  hosts = [ domain ];
+                  secretName = "${domain}-tls";
+                }
+              ];
             };
           };
+
+          persistentVolumeClaims = pinnedConfig.persistentVolumeClaims // {
+            "${name}-${name}-data".spec =
+              if cfg.nfs.enable then
+                {
+                  accessModes = [ "ReadWriteMany" ];
+                  resources.requests.storage = "1Gi";
+                  storageClassName = "";
+                  volumeName = "${name}-${name}-data-nfs";
+                }
+              else
+                {
+                  inherit (cfg) storageClassName;
+                  accessModes = [ "ReadWriteOnce" ];
+                  resources.requests.storage = "100Gi";
+                };
+          };
+
+          services.${name}.spec = {
+            ports = [
+              {
+                name = "http";
+                port = cfg.service.port;
+                protocol = "TCP";
+                targetPort = "http";
+              }
+            ];
+
+            selector = {
+              "app.kubernetes.io/instance" = name;
+              "app.kubernetes.io/name" = name;
+            };
+
+            type = "ClusterIP";
+          };
+
+          # Create NFS PersistentVolume for data when NFS is enabled
+          persistentVolumes =
+            pinnedConfig.persistentVolumes
+            // lib.optionalAttrs cfg.nfs.enable {
+              "${name}-${name}-data-nfs" = {
+                apiVersion = "v1";
+                kind = "PersistentVolume";
+                metadata = {
+                  name = "${name}-${name}-data-nfs";
+                };
+                spec = {
+                  capacity = {
+                    storage = "1Ti";
+                  };
+                  accessModes = [ "ReadWriteMany" ];
+                  mountOptions = [
+                    "nolock"
+                    "noexec"
+                    "soft"
+                    "timeo=30"
+                  ];
+                  nfs = {
+                    server = cfg.nfs.server;
+                    path = cfg.nfs.path;
+                  };
+                  persistentVolumeReclaimPolicy = "Retain";
+                };
+              };
+            };
         };
-      };
     };
 }

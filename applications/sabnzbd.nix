@@ -96,350 +96,356 @@
         };
       };
 
-      extraResources = cfg: {
-        deployments.${name} = {
-          metadata.labels = {
-            "app.kubernetes.io/instance" = name;
-            "app.kubernetes.io/name" = name;
-            "app.kubernetes.io/version" = "latest";
+      extraResources =
+        cfg:
+        let
+          pinnedConfig = self.lib.mkPinnedVolume {
+            pvcName = "${name}-${name}-config";
+            volumeHandle = "pvc-10cc181a-263c-4782-bad6-8ecd421f37d7";
+            size = "5Gi";
           };
-
-          spec = {
-            replicas = cfg.replicas;
-            strategy.type = "Recreate";
-            selector.matchLabels = {
+        in
+        {
+          deployments.${name} = {
+            metadata.labels = {
               "app.kubernetes.io/instance" = name;
               "app.kubernetes.io/name" = name;
+              "app.kubernetes.io/version" = "latest";
             };
 
-            template = {
-              metadata.labels = {
+            spec = {
+              replicas = cfg.replicas;
+              strategy.type = "Recreate";
+              selector.matchLabels = {
                 "app.kubernetes.io/instance" = name;
                 "app.kubernetes.io/name" = name;
               };
 
-              spec = {
-                automountServiceAccountToken = true;
-                serviceAccountName = "default";
+              template = {
+                metadata.labels = {
+                  "app.kubernetes.io/instance" = name;
+                  "app.kubernetes.io/name" = name;
+                };
 
-                # Init container to set hostname whitelist in config
-                initContainers =
-                  let
-                    hostnameList = lib.concatStringsSep "," (
-                      lib.filter (x: x != "") [
-                        cfg.hostWhitelist
-                        (if cfg.ingress.domain != "" then cfg.ingress.domain else "")
-                        "${name}.${cfg.namespace}"
-                        "${name}.${cfg.namespace}.svc.cluster.local"
-                      ]
-                    );
-                  in
-                  [
-                    {
-                      name = "set-hostname-whitelist";
-                      image = "busybox:latest";
-                      command = [
-                        "sh"
-                        "-c"
-                        ''
-                          CONFIG_FILE="/config/sabnzbd.ini"
-                          ALL_HOSTNAMES="${hostnameList}"
+                spec = {
+                  automountServiceAccountToken = true;
+                  serviceAccountName = "default";
 
-                          # Clean up duplicates (split by comma, remove empty, sort, rejoin with comma)
-                          ALL_HOSTNAMES=$(echo "$ALL_HOSTNAMES" | tr ',' '\n' | grep -v '^$' | sort -u | tr '\n' ',' | sed 's/,$//')
+                  # Init container to set hostname whitelist in config
+                  initContainers =
+                    let
+                      hostnameList = lib.concatStringsSep "," (
+                        lib.filter (x: x != "") [
+                          cfg.hostWhitelist
+                          (if cfg.ingress.domain != "" then cfg.ingress.domain else "")
+                          "${name}.${cfg.namespace}"
+                          "${name}.${cfg.namespace}.svc.cluster.local"
+                        ]
+                      );
+                    in
+                    [
+                      {
+                        name = "set-hostname-whitelist";
+                        image = "busybox:latest";
+                        command = [
+                          "sh"
+                          "-c"
+                          ''
+                            CONFIG_FILE="/config/sabnzbd.ini"
+                            ALL_HOSTNAMES="${hostnameList}"
 
-                          # Wait for config volume to be available
-                          while [ ! -d /config ]; do
-                            sleep 1
-                          done
+                            # Clean up duplicates (split by comma, remove empty, sort, rejoin with comma)
+                            ALL_HOSTNAMES=$(echo "$ALL_HOSTNAMES" | tr ',' '\n' | grep -v '^$' | sort -u | tr '\n' ',' | sed 's/,$//')
 
-                          # Create config file if it doesn't exist
-                          if [ ! -f "$CONFIG_FILE" ]; then
-                            touch "$CONFIG_FILE"
-                          fi
+                            # Wait for config volume to be available
+                            while [ ! -d /config ]; do
+                              sleep 1
+                            done
 
-                          # Ensure [misc] section exists
-                          if ! grep -q "^\[misc\]" "$CONFIG_FILE"; then
-                            echo "" >> "$CONFIG_FILE"
-                            echo "[misc]" >> "$CONFIG_FILE"
-                          fi
+                            # Create config file if it doesn't exist
+                            if [ ! -f "$CONFIG_FILE" ]; then
+                              touch "$CONFIG_FILE"
+                            fi
 
-                          # Remove any existing host_whitelist entry
-                          sed -i '/^host_whitelist/d' "$CONFIG_FILE"
-
-                          # Add host_whitelist to [misc] section
-                          if grep -q "^\[misc\]" "$CONFIG_FILE"; then
-                            sed -i "/^\[misc\]/a host_whitelist = $ALL_HOSTNAMES" "$CONFIG_FILE"
-                          else
-                            echo "host_whitelist = $ALL_HOSTNAMES" >> "$CONFIG_FILE"
-                          fi
-                          echo "Hostname whitelist set to: $ALL_HOSTNAMES"
-
-                          ${lib.optionalString cfg.debugLogging ''
-                            # Enable debug logging if requested
-                            if ! grep -q "^\[logging\]" "$CONFIG_FILE"; then
+                            # Ensure [misc] section exists
+                            if ! grep -q "^\[misc\]" "$CONFIG_FILE"; then
                               echo "" >> "$CONFIG_FILE"
-                              echo "[logging]" >> "$CONFIG_FILE"
+                              echo "[misc]" >> "$CONFIG_FILE"
                             fi
 
-                            sed -i '/^log_level/d' "$CONFIG_FILE"
-                            sed -i '/^log_backups/d' "$CONFIG_FILE"
-                            sed -i '/^max_log_size/d' "$CONFIG_FILE"
-                            sed -i '/^log_access/d' "$CONFIG_FILE"
-                            if grep -q "^\[logging\]" "$CONFIG_FILE"; then
-                              sed -i "/^\[logging\]/a log_level = 2" "$CONFIG_FILE"
-                              sed -i "/^\[logging\]/a log_backups = 5" "$CONFIG_FILE"
-                              sed -i "/^\[logging\]/a max_log_size = 10M" "$CONFIG_FILE"
-                              sed -i "/^\[logging\]/a log_access = 1" "$CONFIG_FILE"
+                            # Remove any existing host_whitelist entry
+                            sed -i '/^host_whitelist/d' "$CONFIG_FILE"
+
+                            # Add host_whitelist to [misc] section
+                            if grep -q "^\[misc\]" "$CONFIG_FILE"; then
+                              sed -i "/^\[misc\]/a host_whitelist = $ALL_HOSTNAMES" "$CONFIG_FILE"
                             else
-                              echo "log_level = 2" >> "$CONFIG_FILE"
-                              echo "log_backups = 5" >> "$CONFIG_FILE"
-                              echo "max_log_size = 10M" >> "$CONFIG_FILE"
-                              echo "log_access = 1" >> "$CONFIG_FILE"
+                              echo "host_whitelist = $ALL_HOSTNAMES" >> "$CONFIG_FILE"
                             fi
-                            echo "Debug logging enabled (log_level = 2, log_access = 1)"
-                          ''}
-                        ''
+                            echo "Hostname whitelist set to: $ALL_HOSTNAMES"
+
+                            ${lib.optionalString cfg.debugLogging ''
+                              # Enable debug logging if requested
+                              if ! grep -q "^\[logging\]" "$CONFIG_FILE"; then
+                                echo "" >> "$CONFIG_FILE"
+                                echo "[logging]" >> "$CONFIG_FILE"
+                              fi
+
+                              sed -i '/^log_level/d' "$CONFIG_FILE"
+                              sed -i '/^log_backups/d' "$CONFIG_FILE"
+                              sed -i '/^max_log_size/d' "$CONFIG_FILE"
+                              sed -i '/^log_access/d' "$CONFIG_FILE"
+                              if grep -q "^\[logging\]" "$CONFIG_FILE"; then
+                                sed -i "/^\[logging\]/a log_level = 2" "$CONFIG_FILE"
+                                sed -i "/^\[logging\]/a log_backups = 5" "$CONFIG_FILE"
+                                sed -i "/^\[logging\]/a max_log_size = 10M" "$CONFIG_FILE"
+                                sed -i "/^\[logging\]/a log_access = 1" "$CONFIG_FILE"
+                              else
+                                echo "log_level = 2" >> "$CONFIG_FILE"
+                                echo "log_backups = 5" >> "$CONFIG_FILE"
+                                echo "max_log_size = 10M" >> "$CONFIG_FILE"
+                                echo "log_access = 1" >> "$CONFIG_FILE"
+                              fi
+                              echo "Debug logging enabled (log_level = 2, log_access = 1)"
+                            ''}
+                          ''
+                        ];
+                        volumeMounts = [
+                          {
+                            mountPath = "/config";
+                            name = "config";
+                          }
+                        ];
+                      }
+                    ];
+                  containers = [
+                    {
+                      inherit name;
+                      image = cfg.image;
+                      imagePullPolicy = "IfNotPresent";
+                      env = [
+                        {
+                          name = "PGID";
+                          value = "${toString cfg.pgid}";
+                        }
+                        {
+                          name = "PUID";
+                          value = "${toString cfg.puid}";
+                        }
+                        {
+                          name = "TZ";
+                          value = cfg.tz;
+                        }
+                        {
+                          name = "PYTHONUNBUFFERED";
+                          value = "1";
+                        }
+                      ]
+                      ++ (lib.optionalAttrs cfg.vpn.enable [
+                        # Configure Sabnzbd to use shared gluetun's HTTP proxy
+                        {
+                          name = "HTTP_PROXY";
+                          value = "http://${cfg.vpn.sharedGluetunService}:8888";
+                        }
+                        {
+                          name = "HTTPS_PROXY";
+                          value = "http://${cfg.vpn.sharedGluetunService}:8888";
+                        }
+                        {
+                          name = "NO_PROXY";
+                          value = "localhost,127.0.0.1,.svc,.svc.cluster.local,${name}.${cfg.namespace},${name}.${cfg.namespace}.svc.cluster.local";
+                        }
+                      ]);
+                      ports = [
+                        {
+                          containerPort = cfg.service.port;
+                          name = "http";
+                          protocol = "TCP";
+                        }
                       ];
+                      readinessProbe = lib.mkIf cfg.useProbes {
+                        httpGet = {
+                          path = "/api?mode=version";
+                          port = cfg.service.port;
+                        };
+                        initialDelaySeconds = 120;
+                        periodSeconds = 15;
+                        timeoutSeconds = 10;
+                        successThreshold = 1;
+                        failureThreshold = 30;
+                      };
+                      livenessProbe = lib.mkIf cfg.useProbes {
+                        httpGet = {
+                          path = "/api?mode=version";
+                          port = cfg.service.port;
+                        };
+                        initialDelaySeconds = 180;
+                        periodSeconds = 30;
+                        timeoutSeconds = 10;
+                        successThreshold = 1;
+                        failureThreshold = 20;
+                      };
+
                       volumeMounts = [
                         {
                           mountPath = "/config";
                           name = "config";
                         }
+                        {
+                          mountPath = "/config/Downloads";
+                          name = "downloads";
+                        }
+                        {
+                          mountPath = "/config/incomplete-downloads";
+                          name = "incomplete-downloads";
+                        }
                       ];
                     }
                   ];
-                containers = [
-                  {
-                    inherit name;
-                    image = cfg.image;
-                    imagePullPolicy = "IfNotPresent";
-                    env = [
-                      {
-                        name = "PGID";
-                        value = "${toString cfg.pgid}";
-                      }
-                      {
-                        name = "PUID";
-                        value = "${toString cfg.puid}";
-                      }
-                      {
-                        name = "TZ";
-                        value = cfg.tz;
-                      }
-                      {
-                        name = "PYTHONUNBUFFERED";
-                        value = "1";
-                      }
-                    ]
-                    ++ (lib.optionalAttrs cfg.vpn.enable [
-                      # Configure Sabnzbd to use shared gluetun's HTTP proxy
-                      {
-                        name = "HTTP_PROXY";
-                        value = "http://${cfg.vpn.sharedGluetunService}:8888";
-                      }
-                      {
-                        name = "HTTPS_PROXY";
-                        value = "http://${cfg.vpn.sharedGluetunService}:8888";
-                      }
-                      {
-                        name = "NO_PROXY";
-                        value = "localhost,127.0.0.1,.svc,.svc.cluster.local,${name}.${cfg.namespace},${name}.${cfg.namespace}.svc.cluster.local";
-                      }
-                    ]);
-                    ports = [
-                      {
-                        containerPort = cfg.service.port;
-                        name = "http";
-                        protocol = "TCP";
-                      }
-                    ];
-                    readinessProbe = lib.mkIf cfg.useProbes {
-                      httpGet = {
-                        path = "/api?mode=version";
-                        port = cfg.service.port;
-                      };
-                      initialDelaySeconds = 120;
-                      periodSeconds = 15;
-                      timeoutSeconds = 10;
-                      successThreshold = 1;
-                      failureThreshold = 30;
-                    };
-                    livenessProbe = lib.mkIf cfg.useProbes {
-                      httpGet = {
-                        path = "/api?mode=version";
-                        port = cfg.service.port;
-                      };
-                      initialDelaySeconds = 180;
-                      periodSeconds = 30;
-                      timeoutSeconds = 10;
-                      successThreshold = 1;
-                      failureThreshold = 20;
-                    };
-
-                    volumeMounts = [
-                      {
-                        mountPath = "/config";
-                        name = "config";
-                      }
-                      {
-                        mountPath = "/config/Downloads";
-                        name = "downloads";
-                      }
-                      {
-                        mountPath = "/config/incomplete-downloads";
-                        name = "incomplete-downloads";
-                      }
-                    ];
-                  }
-                ];
-                volumes = [
-                  {
-                    name = "config";
-                    persistentVolumeClaim.claimName = "${name}-${name}-config";
-                  }
-                  {
-                    name = "downloads";
-                    persistentVolumeClaim.claimName = "${name}-${name}-downloads";
-                  }
-                  {
-                    name = "incomplete-downloads";
-                    persistentVolumeClaim.claimName = "${name}-${name}-incomplete-downloads";
-                  }
-                ];
+                  volumes = [
+                    {
+                      name = "config";
+                      persistentVolumeClaim.claimName = "${name}-${name}-config";
+                    }
+                    {
+                      name = "downloads";
+                      persistentVolumeClaim.claimName = "${name}-${name}-downloads";
+                    }
+                    {
+                      name = "incomplete-downloads";
+                      persistentVolumeClaim.claimName = "${name}-${name}-incomplete-downloads";
+                    }
+                  ];
+                };
               };
             };
           };
-        };
 
-        ingresses.${name} = with cfg.ingress; {
-          metadata.annotations = optionalAttrs (clusterIssuer != "") {
-            "cert-manager.io/cluster-issuer" = clusterIssuer;
+          ingresses.${name} = with cfg.ingress; {
+            metadata.annotations = optionalAttrs (clusterIssuer != "") {
+              "cert-manager.io/cluster-issuer" = clusterIssuer;
+            };
+
+            spec = {
+              inherit ingressClassName;
+
+              rules = [
+                {
+                  host = domain;
+
+                  http.paths = [
+                    {
+                      backend.service = {
+                        inherit name;
+                        port.name = "http";
+                      };
+
+                      path = "/";
+                      pathType = "ImplementationSpecific";
+                    }
+                  ];
+                }
+              ];
+
+              tls = [
+                {
+                  hosts = [ domain ];
+                  secretName = "${domain}-tls";
+                }
+              ];
+            };
           };
 
-          spec = {
-            inherit ingressClassName;
+          persistentVolumeClaims = pinnedConfig.persistentVolumeClaims // {
+            "${name}-${name}-downloads".spec =
+              if cfg.nfs.enable then
+                {
+                  accessModes = [ "ReadWriteMany" ];
+                  resources.requests.storage = "1Gi";
+                  storageClassName = "";
+                  volumeName = "${name}-${name}-downloads-nfs";
+                }
+              else
+                {
+                  inherit (cfg) storageClassName;
+                  accessModes = [ "ReadWriteOnce" ];
+                  resources.requests.storage = "50Gi";
+                };
+            "${name}-${name}-incomplete-downloads".spec =
+              if cfg.nfs.enable then
+                {
+                  accessModes = [ "ReadWriteMany" ];
+                  resources.requests.storage = "1Gi";
+                  storageClassName = "";
+                  volumeName = "${name}-${name}-incomplete-downloads-nfs";
+                }
+              else
+                {
+                  inherit (cfg) storageClassName;
+                  accessModes = [ "ReadWriteOnce" ];
+                  resources.requests.storage = "20Gi";
+                };
+          };
 
-            rules = [
+          services.${name}.spec = {
+            ports = [
               {
-                host = domain;
-
-                http.paths = [
-                  {
-                    backend.service = {
-                      inherit name;
-                      port.name = "http";
-                    };
-
-                    path = "/";
-                    pathType = "ImplementationSpecific";
-                  }
-                ];
+                name = "http";
+                port = cfg.service.port;
+                protocol = "TCP";
+                targetPort = "http";
               }
             ];
 
-            tls = [
-              {
-                hosts = [ domain ];
-                secretName = "${domain}-tls";
-              }
-            ];
-          };
-        };
-
-        persistentVolumeClaims = {
-          "${name}-${name}-config".spec = {
-            inherit (cfg) storageClassName;
-            accessModes = [ "ReadWriteOnce" ];
-            resources.requests.storage = "5Gi";
-          };
-          "${name}-${name}-downloads".spec =
-            if cfg.nfs.enable then
-              {
-                accessModes = [ "ReadWriteMany" ];
-                resources.requests.storage = "1Gi";
-                storageClassName = "";
-                volumeName = "${name}-${name}-downloads-nfs";
-              }
-            else
-              {
-                inherit (cfg) storageClassName;
-                accessModes = [ "ReadWriteOnce" ];
-                resources.requests.storage = "50Gi";
-              };
-          "${name}-${name}-incomplete-downloads".spec =
-            if cfg.nfs.enable then
-              {
-                accessModes = [ "ReadWriteMany" ];
-                resources.requests.storage = "1Gi";
-                storageClassName = "";
-                volumeName = "${name}-${name}-incomplete-downloads-nfs";
-              }
-            else
-              {
-                inherit (cfg) storageClassName;
-                accessModes = [ "ReadWriteOnce" ];
-                resources.requests.storage = "20Gi";
-              };
-        };
-
-        services.${name}.spec = {
-          ports = [
-            {
-              name = "http";
-              port = cfg.service.port;
-              protocol = "TCP";
-              targetPort = "http";
-            }
-          ];
-
-          selector = {
-            "app.kubernetes.io/instance" = name;
-            "app.kubernetes.io/name" = name;
-          };
-
-          type = "ClusterIP";
-        };
-
-        # Create NFS PersistentVolumes for downloads when NFS is enabled
-        persistentVolumes = lib.optionalAttrs (cfg.nfs.enable) {
-          "${name}-${name}-downloads-nfs" = {
-            metadata.name = "${name}-${name}-downloads-nfs";
-            spec = {
-              accessModes = [ "ReadWriteMany" ];
-              capacity.storage = "1Ti";
-              mountOptions = [
-                "nolock"
-                "noexec"
-                "soft"
-                "timeo=30"
-              ];
-              nfs = {
-                server = cfg.nfs.server;
-                path = "${cfg.nfs.path}/Downloads";
-              };
-              persistentVolumeReclaimPolicy = "Retain";
+            selector = {
+              "app.kubernetes.io/instance" = name;
+              "app.kubernetes.io/name" = name;
             };
+
+            type = "ClusterIP";
           };
-          "${name}-${name}-incomplete-downloads-nfs" = {
-            metadata.name = "${name}-${name}-incomplete-downloads-nfs";
-            spec = {
-              accessModes = [ "ReadWriteMany" ];
-              capacity.storage = "1Ti";
-              mountOptions = [
-                "nolock"
-                "noexec"
-                "soft"
-                "timeo=30"
-              ];
-              nfs = {
-                server = cfg.nfs.server;
-                path = "${cfg.nfs.path}/Downloads/incomplete";
+
+          # Create NFS PersistentVolumes for downloads when NFS is enabled
+          persistentVolumes =
+            pinnedConfig.persistentVolumes
+            // lib.optionalAttrs (cfg.nfs.enable) {
+              "${name}-${name}-downloads-nfs" = {
+                metadata.name = "${name}-${name}-downloads-nfs";
+                spec = {
+                  accessModes = [ "ReadWriteMany" ];
+                  capacity.storage = "1Ti";
+                  mountOptions = [
+                    "nolock"
+                    "noexec"
+                    "soft"
+                    "timeo=30"
+                  ];
+                  nfs = {
+                    server = cfg.nfs.server;
+                    path = "${cfg.nfs.path}/Downloads";
+                  };
+                  persistentVolumeReclaimPolicy = "Retain";
+                };
               };
-              persistentVolumeReclaimPolicy = "Retain";
+              "${name}-${name}-incomplete-downloads-nfs" = {
+                metadata.name = "${name}-${name}-incomplete-downloads-nfs";
+                spec = {
+                  accessModes = [ "ReadWriteMany" ];
+                  capacity.storage = "1Ti";
+                  mountOptions = [
+                    "nolock"
+                    "noexec"
+                    "soft"
+                    "timeo=30"
+                  ];
+                  nfs = {
+                    server = cfg.nfs.server;
+                    path = "${cfg.nfs.path}/Downloads/incomplete";
+                  };
+                  persistentVolumeReclaimPolicy = "Retain";
+                };
+              };
             };
-          };
         };
-      };
     };
 }

@@ -1,6 +1,8 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  annotations:
+    argocd.argoproj.io/sync-options: Replace=true
   name: radarr-radarr-config
   namespace: radarr
 spec:
@@ -9,4 +11,5 @@ spec:
   resources:
     requests:
       storage: 5Gi
-  storageClassName: longhorn
+  storageClassName: ""
+  volumeName: radarr-radarr-config-pv

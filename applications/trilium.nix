@@ -38,144 +38,148 @@
         };
       };
 
-      extraResources = cfg: {
-        deployments.${name} = {
-          metadata.labels = {
-            "app.kubernetes.io/instance" = name;
-            "app.kubernetes.io/name" = name;
+      extraResources =
+        cfg:
+        let
+          pinnedData = self.lib.mkPinnedVolume {
+            pvcName = "${name}-${name}-data";
+            volumeHandle = "pvc-582855f1-f480-4983-bf80-eb22b9f2ac0a";
+            size = cfg.dataStorage;
           };
-
-          spec = {
-            replicas = cfg.replicas;
-            strategy.type = "Recreate";
-            selector.matchLabels = {
+        in
+        {
+          deployments.${name} = {
+            metadata.labels = {
               "app.kubernetes.io/instance" = name;
               "app.kubernetes.io/name" = name;
             };
 
-            template = {
-              metadata.labels = {
+            spec = {
+              replicas = cfg.replicas;
+              strategy.type = "Recreate";
+              selector.matchLabels = {
                 "app.kubernetes.io/instance" = name;
                 "app.kubernetes.io/name" = name;
               };
 
-              spec = {
-                automountServiceAccountToken = true;
-                serviceAccountName = "default";
-                # Kubernetes injects <SERVICE_NAME>_PORT env vars into every pod; since the
-                # Service is named "trilium" this collides with Trilium's own TRILIUM_PORT
-                # env var (which expects a plain int, not the injected tcp:// URI).
-                enableServiceLinks = false;
+              template = {
+                metadata.labels = {
+                  "app.kubernetes.io/instance" = name;
+                  "app.kubernetes.io/name" = name;
+                };
 
-                containers = [
-                  {
-                    inherit name;
-                    image = cfg.image;
-                    imagePullPolicy = "IfNotPresent";
-                    env = [
-                      {
-                        name = "TZ";
-                        value = cfg.tz;
-                      }
-                    ];
-                    ports = [
-                      {
-                        containerPort = cfg.service.port;
-                        name = "http";
-                        protocol = "TCP";
-                      }
-                    ];
-                    readinessProbe = {
-                      tcpSocket.port = cfg.service.port;
-                      initialDelaySeconds = 15;
-                      periodSeconds = 10;
-                      timeoutSeconds = 5;
-                      successThreshold = 1;
-                      failureThreshold = 3;
-                    };
-                    livenessProbe = {
-                      tcpSocket.port = cfg.service.port;
-                      initialDelaySeconds = 30;
-                      periodSeconds = 30;
-                      timeoutSeconds = 5;
-                      successThreshold = 1;
-                      failureThreshold = 3;
-                    };
-                    volumeMounts = [
-                      {
-                        mountPath = "/home/node/trilium-data";
-                        name = "data";
-                      }
-                    ];
-                  }
-                ];
+                spec = {
+                  automountServiceAccountToken = true;
+                  serviceAccountName = "default";
+                  # Kubernetes injects <SERVICE_NAME>_PORT env vars into every pod; since the
+                  # Service is named "trilium" this collides with Trilium's own TRILIUM_PORT
+                  # env var (which expects a plain int, not the injected tcp:// URI).
+                  enableServiceLinks = false;
 
-                volumes = [
-                  {
-                    name = "data";
-                    persistentVolumeClaim.claimName = "${name}-${name}-data";
-                  }
-                ];
+                  containers = [
+                    {
+                      inherit name;
+                      image = cfg.image;
+                      imagePullPolicy = "IfNotPresent";
+                      env = [
+                        {
+                          name = "TZ";
+                          value = cfg.tz;
+                        }
+                      ];
+                      ports = [
+                        {
+                          containerPort = cfg.service.port;
+                          name = "http";
+                          protocol = "TCP";
+                        }
+                      ];
+                      readinessProbe = {
+                        tcpSocket.port = cfg.service.port;
+                        initialDelaySeconds = 15;
+                        periodSeconds = 10;
+                        timeoutSeconds = 5;
+                        successThreshold = 1;
+                        failureThreshold = 3;
+                      };
+                      livenessProbe = {
+                        tcpSocket.port = cfg.service.port;
+                        initialDelaySeconds = 30;
+                        periodSeconds = 30;
+                        timeoutSeconds = 5;
+                        successThreshold = 1;
+                        failureThreshold = 3;
+                      };
+                      volumeMounts = [
+                        {
+                          mountPath = "/home/node/trilium-data";
+                          name = "data";
+                        }
+                      ];
+                    }
+                  ];
+
+                  volumes = [
+                    {
+                      name = "data";
+                      persistentVolumeClaim.claimName = "${name}-${name}-data";
+                    }
+                  ];
+                };
               };
             };
           };
-        };
 
-        ingresses.${name} = with cfg.ingress; {
-          metadata.annotations."cert-manager.io/cluster-issuer" = clusterIssuer;
-          spec = {
-            inherit ingressClassName;
+          ingresses.${name} = with cfg.ingress; {
+            metadata.annotations."cert-manager.io/cluster-issuer" = clusterIssuer;
+            spec = {
+              inherit ingressClassName;
 
-            rules = [
+              rules = [
+                {
+                  host = domain;
+                  http.paths = [
+                    {
+                      backend.service = {
+                        inherit name;
+                        port.name = "http";
+                      };
+                      path = "/";
+                      pathType = "ImplementationSpecific";
+                    }
+                  ];
+                }
+              ];
+
+              tls = [
+                {
+                  hosts = [ domain ];
+                  secretName = "${name}-tls";
+                }
+              ];
+            };
+          };
+
+          persistentVolumeClaims = pinnedData.persistentVolumeClaims;
+          persistentVolumes = pinnedData.persistentVolumes;
+
+          services.${name}.spec = {
+            ports = [
               {
-                host = domain;
-                http.paths = [
-                  {
-                    backend.service = {
-                      inherit name;
-                      port.name = "http";
-                    };
-                    path = "/";
-                    pathType = "ImplementationSpecific";
-                  }
-                ];
+                name = "http";
+                port = cfg.service.port;
+                protocol = "TCP";
+                targetPort = "http";
               }
             ];
 
-            tls = [
-              {
-                hosts = [ domain ];
-                secretName = "${name}-tls";
-              }
-            ];
+            selector = {
+              "app.kubernetes.io/instance" = name;
+              "app.kubernetes.io/name" = name;
+            };
+
+            type = "ClusterIP";
           };
         };
-
-        persistentVolumeClaims = {
-          "${name}-${name}-data".spec = {
-            inherit (cfg) storageClassName;
-            accessModes = [ "ReadWriteOnce" ];
-            resources.requests.storage = cfg.dataStorage;
-          };
-        };
-
-        services.${name}.spec = {
-          ports = [
-            {
-              name = "http";
-              port = cfg.service.port;
-              protocol = "TCP";
-              targetPort = "http";
-            }
-          ];
-
-          selector = {
-            "app.kubernetes.io/instance" = name;
-            "app.kubernetes.io/name" = name;
-          };
-
-          type = "ClusterIP";
-        };
-      };
     };
 }
