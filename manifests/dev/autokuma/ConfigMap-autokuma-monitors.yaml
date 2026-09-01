@@ -24,6 +24,7 @@ data:
   tdarr.json: '{"name":"tdarr","type":"http","url":"https://tdarr.home.kronkltd.net"}'
   trilium.json: '{"name":"trilium","type":"http","url":"https://trilium.home.kronkltd.net"}'
   uptime-kuma.json: '{"name":"uptime-kuma","type":"http","url":"https://uptime-kuma.home.kronkltd.net"}'
+  xyops.json: '{"name":"xyops","type":"http","url":"https://xyops.home.kronkltd.net"}'
 kind: ConfigMap
 metadata:
   name: autokuma-monitors

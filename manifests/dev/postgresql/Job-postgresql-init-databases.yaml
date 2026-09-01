@@ -535,6 +535,32 @@ spec:
               EOSQL
               echo "Database nostrarchives created successfully"
 
+              echo "Creating database xyops and user xyops..."
+              psql -v ON_ERROR_STOP=1 <<-EOSQL
+                -- Create database if it doesn't exist
+                SELECT format('CREATE DATABASE %I', 'xyops') WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'xyops')\gexec
+
+                -- Create user if it doesn't exist, then always update password
+                DO \$\$
+                BEGIN
+                  IF NOT EXISTS (SELECT FROM pg_user WHERE usename = 'xyops') THEN
+                    EXECUTE format('CREATE USER %I WITH PASSWORD %L', 'xyops', 'omE.6H):+]qedMo>ZG;m');
+                  ELSE
+                    EXECUTE format('ALTER USER %I WITH PASSWORD %L', 'xyops', 'omE.6H):+]qedMo>ZG;m');
+                  END IF;
+                END
+                \$\$;
+
+                -- Grant privileges (quote database name)
+                DO \$\$
+                BEGIN
+                  EXECUTE format('GRANT ALL PRIVILEGES ON DATABASE %I TO %I', 'xyops', 'xyops');
+                  EXECUTE format('ALTER DATABASE %I OWNER TO %I', 'xyops', 'xyops');
+                END
+                \$\$;
+              EOSQL
+              echo "Database xyops created successfully"
+
           env:
             - name: PGHOST
               value: postgresql.postgresql

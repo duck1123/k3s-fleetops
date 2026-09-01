@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  name: xyops
+  namespace: xyops
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: xyops.home.kronkltd.net
+      http:
+        paths:
+          - backend:
+              service:
+                name: xyops
+                port:
+                  name: http
+            path: /
+            pathType: ImplementationSpecific
+  tls:
+    - hosts:
+        - xyops.home.kronkltd.net
+      secretName: xyops-tls

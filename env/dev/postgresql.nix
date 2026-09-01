@@ -64,6 +64,11 @@
           username = "nostrarchives";
           password = secrets.postgresql.userPassword;
         }
+        {
+          name = "xyops";
+          username = "xyops";
+          password = secrets.postgresql.userPassword;
+        }
       ];
   };
 }

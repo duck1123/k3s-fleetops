@@ -1,0 +1,115 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/instance: xyops
+    app.kubernetes.io/name: xyops
+  name: xyops
+  namespace: xyops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: xyops
+      app.kubernetes.io/name: xyops
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: xyops
+        app.kubernetes.io/name: xyops
+    spec:
+      containers:
+        - env:
+            - name: TZ
+              value: Etc/UTC
+            - name: XYOPS_hostname
+              value: xyops.xyops
+            - name: XYOPS_masters
+              value: xyops.xyops
+            - name: XYOPS_base_app_url
+              value: https://xyops.home.kronkltd.net
+            - name: XYOPS_xysat_local
+              value: "true"
+            - name: XYOPS_foreground
+              value: "true"
+            - name: XYOPS_echo
+              value: "true"
+            - name: XYOPS_Storage__engine
+              value: Hybrid
+            - name: XYOPS_Storage__Hybrid__docEngine
+              value: Postgres
+            - name: XYOPS_Storage__Hybrid__binaryEngine
+              value: S3
+            - name: XYOPS_Storage__Postgres__host
+              value: postgresql.postgresql
+            - name: XYOPS_Storage__Postgres__port
+              value: "5432"
+            - name: XYOPS_Storage__Postgres__database
+              value: xyops
+            - name: XYOPS_Storage__Postgres__user
+              value: xyops
+            - name: XYOPS_Storage__Postgres__table
+              value: xyops
+            - name: XYOPS_Storage__AWS__endpoint
+              value: http://garage.garage:3900
+            - name: XYOPS_Storage__AWS__endpointPrefix
+              value: "false"
+            - name: XYOPS_Storage__AWS__forcePathStyle
+              value: "true"
+            - name: XYOPS_Storage__AWS__region
+              value: garage
+            - name: XYOPS_Storage__S3__params__Bucket
+              value: default
+            - name: XYOPS_Storage__S3__keyPrefix
+              value: xyops/
+            - name: XYOPS_Storage__Postgres__password
+              valueFrom:
+                secretKeyRef:
+                  key: PASSWORD
+                  name: xyops-db
+            - name: XYOPS_Storage__AWS__credentials__accessKeyId
+              valueFrom:
+                secretKeyRef:
+                  key: ACCESS_KEY
+                  name: xyops-s3
+            - name: XYOPS_Storage__AWS__credentials__secretAccessKey
+              valueFrom:
+                secretKeyRef:
+                  key: SECRET_KEY
+                  name: xyops-s3
+          image: ghcr.io/pixlcore/xyops:latest
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 5
+          name: xyops
+          ports:
+            - containerPort: 5522
+              name: http
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 6
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 5
+          volumeMounts:
+            - mountPath: /opt/xyops/data
+              name: data
+              subPath: data
+            - mountPath: /opt/xyops/conf
+              name: data
+              subPath: conf
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: xyops-data

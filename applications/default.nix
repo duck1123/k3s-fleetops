@@ -87,5 +87,6 @@
     ./traefik.nix
     ./uptime-kuma.nix
     ./whisparr.nix
+    ./xyops.nix
   ];
 }
