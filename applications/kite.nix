@@ -8,6 +8,13 @@
       ...
     }:
     with lib;
+    let
+      pinnedData = self.lib.mkPinnedVolume {
+        pvcName = "kite-storage";
+        volumeHandle = "pvc-0ef43a60-ec9c-4a49-8da3-a38827d3c53a";
+        size = "1Gi";
+      };
+    in
     self.lib.mkArgoApp { inherit config lib; } {
       name = "kite";
 
@@ -44,6 +51,9 @@
             accessModes = [ "ReadWriteOnce" ];
             size = "1Gi";
             storageClass = cfg.storageClassName;
+            # Pinned via extraResources below instead of letting the chart
+            # create the PVC -- see modules/lib/mkPinnedVolume.nix.
+            existingClaim = "kite-storage";
           };
           host = ingress.domain;
           ingress = with cfg.ingress; {
@@ -72,5 +82,10 @@
           };
           nodeSelector."kubernetes.io/hostname" = cfg.hostAffinity;
         };
+
+      extraResources = cfg: {
+        persistentVolumeClaims = pinnedData.persistentVolumeClaims;
+        persistentVolumes = pinnedData.persistentVolumes;
+      };
     };
 }

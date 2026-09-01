@@ -10,6 +10,13 @@
       ...
     }:
     with lib;
+    let
+      pinnedData = self.lib.mkPinnedVolume {
+        pvcName = "gitea-shared-storage";
+        volumeHandle = "pvc-13e105ec-412c-4937-a19c-1b385f026664";
+        size = "10Gi";
+      };
+    in
     self.lib.mkArgoApp
       {
         inherit
@@ -134,6 +141,10 @@
 
           persistence = {
             storageClass = cfg.storageClassName;
+            # Pinned via extraResources below instead of letting the chart
+            # create the PVC -- see modules/lib/mkPinnedVolume.nix. claimName
+            # stays at its default ("gitea-shared-storage") to match.
+            create = false;
           };
           postgresql.enabled = false;
           postgresql-ha.enabled = false;
@@ -141,5 +152,9 @@
           redis-cluster.enabled = false;
         };
 
+        extraResources = cfg: {
+          persistentVolumeClaims = pinnedData.persistentVolumeClaims;
+          persistentVolumes = pinnedData.persistentVolumes;
+        };
       };
 }
