@@ -146,155 +146,178 @@
           );
 
           nodeSelector."kubernetes.io/hostname" = cfg.hostAffinity;
-          primary.persistence.storageClass = cfg.storageClassName;
+          primary.persistence = {
+            storageClass = cfg.storageClassName;
+            # Pinned via extraResources below (mkPinnedVolume) instead of
+            # the chart's own volumeClaimTemplates -- see
+            # modules/lib/mkPinnedVolume.nix. This also sidesteps a chart
+            # quirk where volumeClaimTemplates only apply when
+            # primary.persistence.size is set, which this app never did
+            # (persistence still worked because the chart's StatefulSet
+            # falls back to its own default size in that case).
+            existingClaim = "mariadb-data";
+          };
         };
 
-        extraResources = cfg: {
-          # Backup PVC for storing database backups
-          persistentVolumeClaims = lib.optionalAttrs cfg.backup.enable {
-            "mariadb-backups".spec = {
-              accessModes = [ "ReadWriteOnce" ];
-              resources.requests.storage = cfg.backup.storageSize;
-              storageClassName = cfg.storageClassName;
+        extraResources =
+          cfg:
+          let
+            pinnedData = self.lib.mkPinnedVolume {
+              pvcName = "mariadb-data";
+              volumeHandle = "pvc-7ef8145c-7770-449b-a78d-81b1df2e17df";
+              size = "8Gi";
             };
-          };
+            pinnedBackups = self.lib.mkPinnedVolume {
+              pvcName = "mariadb-backups";
+              volumeHandle = "pvc-f42c562c-5275-4ae2-999c-94eab513bcd9";
+              size = cfg.backup.storageSize;
+            };
+          in
+          {
+            # Data PVC (always pinned) + backup PVC (pinned, gated on cfg.backup.enable)
+            persistentVolumeClaims =
+              pinnedData.persistentVolumeClaims
+              // lib.optionalAttrs cfg.backup.enable pinnedBackups.persistentVolumeClaims;
 
-          # CronJob for automated backups
-          cronJobs = lib.optionalAttrs cfg.backup.enable {
-            "mariadb-backup" = {
-              metadata = {
-                labels = {
-                  "app.kubernetes.io/name" = name;
-                  "app.kubernetes.io/component" = "backup";
+            persistentVolumes =
+              pinnedData.persistentVolumes // lib.optionalAttrs cfg.backup.enable pinnedBackups.persistentVolumes;
+
+            # CronJob for automated backups
+            cronJobs = lib.optionalAttrs cfg.backup.enable {
+              "mariadb-backup" = {
+                metadata = {
+                  labels = {
+                    "app.kubernetes.io/name" = name;
+                    "app.kubernetes.io/component" = "backup";
+                  };
                 };
-              };
-              spec = {
-                schedule = cfg.backup.schedule;
-                successfulJobsHistoryLimit = 3;
-                failedJobsHistoryLimit = 3;
-                jobTemplate = {
-                  spec = {
-                    template = {
-                      spec = {
-                        restartPolicy = "OnFailure";
-                        containers = [
-                          {
-                            name = "backup";
-                            image = "bitnami/mariadb:latest";
-                            command = [
-                              "/bin/bash"
-                              "-c"
-                              ''
-                                set -e
-                                BACKUP_DIR="/backups"
-                                TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-                                BACKUP_FILE="$BACKUP_DIR/mariadb-backup-$TIMESTAMP.sql.gz"
+                spec = {
+                  schedule = cfg.backup.schedule;
+                  successfulJobsHistoryLimit = 3;
+                  failedJobsHistoryLimit = 3;
+                  jobTemplate = {
+                    spec = {
+                      template = {
+                        spec = {
+                          restartPolicy = "OnFailure";
+                          containers = [
+                            {
+                              name = "backup";
+                              image = "bitnami/mariadb:latest";
+                              command = [
+                                "/bin/bash"
+                                "-c"
+                                ''
+                                  set -e
+                                  BACKUP_DIR="/backups"
+                                  TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+                                  BACKUP_FILE="$BACKUP_DIR/mariadb-backup-$TIMESTAMP.sql.gz"
 
-                                echo "Starting backup at $(date)"
+                                  echo "Starting backup at $(date)"
 
-                                # Create backup
-                                mysqldump \
-                                  -h mariadb.mariadb \
-                                  -u root \
-                                  -p"$MARIADB_ROOT_PASSWORD" \
-                                  --all-databases \
-                                  --single-transaction \
-                                  --quick \
-                                  --lock-tables=false \
-                                  | gzip > "$BACKUP_FILE"
+                                  # Create backup
+                                  mysqldump \
+                                    -h mariadb.mariadb \
+                                    -u root \
+                                    -p"$MARIADB_ROOT_PASSWORD" \
+                                    --all-databases \
+                                    --single-transaction \
+                                    --quick \
+                                    --lock-tables=false \
+                                    | gzip > "$BACKUP_FILE"
 
-                                echo "Backup completed: $BACKUP_FILE"
-                                echo "Backup size: $(du -h "$BACKUP_FILE" | cut -f1)"
+                                  echo "Backup completed: $BACKUP_FILE"
+                                  echo "Backup size: $(du -h "$BACKUP_FILE" | cut -f1)"
 
-                                # Clean up old backups (keep last ${toString cfg.backup.retentionDays} days)
-                                find "$BACKUP_DIR" -name "mariadb-backup-*.sql.gz" -type f -mtime +${toString cfg.backup.retentionDays} -delete
+                                  # Clean up old backups (keep last ${toString cfg.backup.retentionDays} days)
+                                  find "$BACKUP_DIR" -name "mariadb-backup-*.sql.gz" -type f -mtime +${toString cfg.backup.retentionDays} -delete
 
-                                echo "Cleanup completed. Remaining backups:"
-                                ls -lh "$BACKUP_DIR"/*.sql.gz 2>/dev/null || echo "No backups found"
+                                  echo "Cleanup completed. Remaining backups:"
+                                  ls -lh "$BACKUP_DIR"/*.sql.gz 2>/dev/null || echo "No backups found"
 
-                                echo "Backup job completed at $(date)"
-                              ''
-                            ];
-                            env = [
-                              {
-                                name = "MARIADB_ROOT_PASSWORD";
-                                valueFrom = {
-                                  secretKeyRef = {
-                                    name = password-secret;
-                                    key = "mariadb-root-password";
+                                  echo "Backup job completed at $(date)"
+                                ''
+                              ];
+                              env = [
+                                {
+                                  name = "MARIADB_ROOT_PASSWORD";
+                                  valueFrom = {
+                                    secretKeyRef = {
+                                      name = password-secret;
+                                      key = "mariadb-root-password";
+                                    };
                                   };
-                                };
-                              }
-                            ];
-                            volumeMounts = [
-                              {
-                                name = "backup-storage";
-                                mountPath = "/backups";
-                              }
-                            ];
-                          }
-                        ];
-                        volumes = [
-                          {
-                            name = "backup-storage";
-                            persistentVolumeClaim = {
-                              claimName = "mariadb-backups";
-                            };
-                          }
-                        ];
+                                }
+                              ];
+                              volumeMounts = [
+                                {
+                                  name = "backup-storage";
+                                  mountPath = "/backups";
+                                }
+                              ];
+                            }
+                          ];
+                          volumes = [
+                            {
+                              name = "backup-storage";
+                              persistentVolumeClaim = {
+                                claimName = "mariadb-backups";
+                              };
+                            }
+                          ];
+                        };
                       };
                     };
                   };
                 };
               };
             };
-          };
 
-          # ConfigMap with restore script
-          configMaps = lib.optionalAttrs cfg.backup.enable {
-            "mariadb-restore-script" = {
-              data = {
-                "restore.sh" = ''
-                  #!/bin/bash
-                  # MariaDB Restore Script
-                  # Usage: restore.sh <backup-file.sql.gz>
+            # ConfigMap with restore script
+            configMaps = lib.optionalAttrs cfg.backup.enable {
+              "mariadb-restore-script" = {
+                data = {
+                  "restore.sh" = ''
+                    #!/bin/bash
+                    # MariaDB Restore Script
+                    # Usage: restore.sh <backup-file.sql.gz>
 
-                  set -e
+                    set -e
 
-                  if [ -z "$1" ]; then
-                    echo "Usage: $0 <backup-file.sql.gz>"
-                    echo "Available backups:"
-                    ls -lh /backups/*.sql.gz 2>/dev/null || echo "No backups found"
-                    exit 1
-                  fi
+                    if [ -z "$1" ]; then
+                      echo "Usage: $0 <backup-file.sql.gz>"
+                      echo "Available backups:"
+                      ls -lh /backups/*.sql.gz 2>/dev/null || echo "No backups found"
+                      exit 1
+                    fi
 
-                  BACKUP_FILE="$1"
+                    BACKUP_FILE="$1"
 
-                  if [ ! -f "$BACKUP_FILE" ]; then
-                    echo "Error: Backup file not found: $BACKUP_FILE"
-                    exit 1
-                  fi
+                    if [ ! -f "$BACKUP_FILE" ]; then
+                      echo "Error: Backup file not found: $BACKUP_FILE"
+                      exit 1
+                    fi
 
-                  echo "Starting restore from: $BACKUP_FILE"
-                  echo "This will replace all existing databases!"
-                  read -p "Are you sure? (yes/no): " confirm
+                    echo "Starting restore from: $BACKUP_FILE"
+                    echo "This will replace all existing databases!"
+                    read -p "Are you sure? (yes/no): " confirm
 
-                  if [ "$confirm" != "yes" ]; then
-                    echo "Restore cancelled"
-                    exit 0
-                  fi
+                    if [ "$confirm" != "yes" ]; then
+                      echo "Restore cancelled"
+                      exit 0
+                    fi
 
-                  echo "Restoring database..."
-                  gunzip -c "$BACKUP_FILE" | mysql \
-                    -h mariadb.mariadb \
-                    -u root \
-                    -p"$MARIADB_ROOT_PASSWORD"
+                    echo "Restoring database..."
+                    gunzip -c "$BACKUP_FILE" | mysql \
+                      -h mariadb.mariadb \
+                      -u root \
+                      -p"$MARIADB_ROOT_PASSWORD"
 
-                  echo "Restore completed successfully!"
-                '';
+                    echo "Restore completed successfully!"
+                  '';
+                };
               };
             };
           };
-        };
       };
 }

@@ -238,304 +238,304 @@ in
             storage = {
               className = cfg.storageClassName;
               size = cfg.persistenceSize;
+              # Bypasses the chart's own volumeClaimTemplates (which create a
+              # StatefulSet-owned, per-ordinal PVC) in favor of a plain,
+              # statically-pinned PVC -- see modules/lib/mkPinnedVolume.nix.
+              # persistentVolumeClaimName is checked before requestedSize, so
+              # this alone is enough to skip volumeClaimTemplates regardless
+              # of storage.size/requestedSize.
+              persistentVolumeClaimName = "postgresql-data";
             };
           };
 
-        extraResources = cfg: {
-          # Create a Job to initialize extra databases after PostgreSQL is ready
-          jobs = lib.optionalAttrs (cfg.extraDatabases != [ ]) {
-            "${name}-init-databases" = {
-              metadata = {
-                name = "${name}-init-databases";
-                namespace = cfg.namespace;
-                annotations = {
-                  "argocd.argoproj.io/hook" = "PostSync";
-                  "argocd.argoproj.io/hook-delete-policy" = "HookSucceeded";
-                };
-              };
-              spec = {
-                template = {
-                  spec = {
-                    restartPolicy = "OnFailure";
-                    containers = [
-                      {
-                        name = "init-databases";
-                        image = cfg.image;
-                        imagePullPolicy = "IfNotPresent";
-                        env = [
-                          {
-                            name = "PGHOST";
-                            value = "${name}.${cfg.namespace}";
-                          }
-                          {
-                            name = "PGPORT";
-                            value = "5432";
-                          }
-                          {
-                            name = "PGUSER";
-                            value = "postgres";
-                          }
-                          {
-                            name = "PGPASSWORD";
-                            valueFrom = {
-                              secretKeyRef = {
-                                name = password-secret;
-                                key = "adminPassword";
-                              };
-                            };
-                          }
-                        ];
-                        command = [
-                          "sh"
-                          "-c"
-                          ''
-                            set -e
-                            ${lib.concatMapStringsSep "\n" (db: ''
-                              echo "Creating database ${db.name} and user ${db.username}..."
-                              psql -v ON_ERROR_STOP=1 <<-EOSQL
-                                -- Create database if it doesn't exist
-                                SELECT format('CREATE DATABASE %I', '${db.name}') WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '${db.name}')\gexec
-
-                                -- Create user if it doesn't exist, then always update password
-                                DO \$\$
-                                BEGIN
-                                  IF NOT EXISTS (SELECT FROM pg_user WHERE usename = '${db.username}') THEN
-                                    EXECUTE format('CREATE USER %I WITH PASSWORD %L', '${db.username}', '${db.password}');
-                                  ELSE
-                                    EXECUTE format('ALTER USER %I WITH PASSWORD %L', '${db.username}', '${db.password}');
-                                  END IF;
-                                END
-                                \$\$;
-
-                                -- Grant privileges (quote database name)
-                                DO \$\$
-                                BEGIN
-                                  EXECUTE format('GRANT ALL PRIVILEGES ON DATABASE %I TO %I', '${db.name}', '${db.username}');
-                                  EXECUTE format('ALTER DATABASE %I OWNER TO %I', '${db.name}', '${db.username}');
-                                END
-                                \$\$;
-                              EOSQL
-                              echo "Database ${db.name} created successfully"
-                            '') cfg.extraDatabases}
-                          ''
-                        ];
-                      }
-                    ];
+        extraResources =
+          cfg:
+          let
+            pinnedData = self.lib.mkPinnedVolume {
+              pvcName = "postgresql-data";
+              volumeHandle = "pvc-f011e680-b80d-4628-abbd-8641d837938b";
+              size = cfg.persistenceSize;
+            };
+            pinnedBackups = self.lib.mkPinnedVolume {
+              pvcName = "${name}-backups";
+              volumeHandle = "pvc-4a9e7907-8262-4938-b52b-3b5971935619";
+              size = cfg.backup.storageSize;
+            };
+          in
+          {
+            # Create a Job to initialize extra databases after PostgreSQL is ready
+            jobs = lib.optionalAttrs (cfg.extraDatabases != [ ]) {
+              "${name}-init-databases" = {
+                metadata = {
+                  name = "${name}-init-databases";
+                  namespace = cfg.namespace;
+                  annotations = {
+                    "argocd.argoproj.io/hook" = "PostSync";
+                    "argocd.argoproj.io/hook-delete-policy" = "HookSucceeded";
                   };
                 };
-              };
-            };
-          };
-
-          # CronJob for automated backups
-          cronJobs = lib.optionalAttrs cfg.backup.enable {
-            "${name}-backup" = {
-              metadata = {
-                name = "${name}-backup";
-                namespace = cfg.namespace;
-                labels = {
-                  "app.kubernetes.io/name" = name;
-                  "app.kubernetes.io/component" = "backup";
-                };
-              };
-              spec = {
-                schedule = cfg.backup.schedule;
-                successfulJobsHistoryLimit = 3;
-                failedJobsHistoryLimit = 3;
-                jobTemplate = {
-                  spec = {
-                    template = {
-                      spec = {
-                        restartPolicy = "OnFailure";
-                        containers = [
-                          {
-                            name = "backup";
-                            image = cfg.image;
-                            command = [
-                              "sh"
-                              "-c"
-                              ''
-                                set -e
-                                BACKUP_DIR="/backups"
-                                TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-                                BACKUP_FILE="$BACKUP_DIR/postgresql-backup-$TIMESTAMP.sql.gz"
-
-                                echo "Starting backup at $(date)"
-
-                                # Create backup of all databases
-                                pg_dumpall \
-                                  -h ${name}.${cfg.namespace} \
-                                  -U postgres \
-                                  -c \
-                                  | gzip > "$BACKUP_FILE"
-
-                                echo "Backup completed: $BACKUP_FILE"
-                                echo "Backup size: $(du -h "$BACKUP_FILE" | cut -f1)"
-
-                                # Clean up old backups (keep last ${toString cfg.backup.retentionDays} days)
-                                find "$BACKUP_DIR" -name "postgresql-backup-*.sql.gz" -type f -mtime +${toString cfg.backup.retentionDays} -delete
-
-                                echo "Cleanup completed. Remaining backups:"
-                                ls -lh "$BACKUP_DIR"/*.sql.gz 2>/dev/null || echo "No backups found"
-
-                                echo "Backup job completed at $(date)"
-                              ''
-                            ];
-                            env = [
-                              {
-                                name = "PGPASSWORD";
-                                valueFrom = {
-                                  secretKeyRef = {
-                                    name = password-secret;
-                                    key = "adminPassword";
-                                  };
-                                };
-                              }
-                            ];
-                            volumeMounts = [
-                              {
-                                mountPath = "/backups";
-                                name = "backup-storage";
-                              }
-                            ];
-                          }
-                        ];
-                        volumes = [
-                          {
-                            name = "backup-storage";
-                            persistentVolumeClaim = {
-                              claimName = "${name}-backups";
-                            };
-                          }
-                        ];
-                      };
-                    };
-                  };
-                };
-              };
-            };
-          };
-
-          # PVC for backup storage
-          persistentVolumeClaims = lib.optionalAttrs cfg.backup.enable {
-            "${name}-backups" = {
-              metadata = {
-                name = "${name}-backups";
-                namespace = cfg.namespace;
-              };
-              spec = {
-                inherit (cfg) storageClassName;
-                accessModes = [ "ReadWriteOnce" ];
-                resources.requests.storage = cfg.backup.storageSize;
-              };
-            };
-          };
-
-          # Patch StatefulSet to add volumeClaimTemplates for persistence
-          # The Helm chart isn't respecting persistence.enabled, so we patch it directly
-          # We also need to remove the emptyDir volume for postgres-data from the pod template
-          statefulSets = lib.optionalAttrs cfg.persistenceEnabled {
-            ${name} = {
-              spec = {
-                volumeClaimTemplates = [
-                  {
-                    metadata = {
-                      name = "postgres-data";
-                      labels = {
-                        "app.kubernetes.io/instance" = name;
-                        "app.kubernetes.io/name" = "postgres";
-                      };
-                    };
+                spec = {
+                  template = {
                     spec = {
-                      inherit (cfg) storageClassName;
-                      accessModes = [ "ReadWriteOnce" ];
-                      resources.requests.storage = cfg.persistenceSize;
+                      restartPolicy = "OnFailure";
+                      containers = [
+                        {
+                          name = "init-databases";
+                          image = cfg.image;
+                          imagePullPolicy = "IfNotPresent";
+                          env = [
+                            {
+                              name = "PGHOST";
+                              value = "${name}.${cfg.namespace}";
+                            }
+                            {
+                              name = "PGPORT";
+                              value = "5432";
+                            }
+                            {
+                              name = "PGUSER";
+                              value = "postgres";
+                            }
+                            {
+                              name = "PGPASSWORD";
+                              valueFrom = {
+                                secretKeyRef = {
+                                  name = password-secret;
+                                  key = "adminPassword";
+                                };
+                              };
+                            }
+                          ];
+                          command = [
+                            "sh"
+                            "-c"
+                            ''
+                              set -e
+                              ${lib.concatMapStringsSep "\n" (db: ''
+                                echo "Creating database ${db.name} and user ${db.username}..."
+                                psql -v ON_ERROR_STOP=1 <<-EOSQL
+                                  -- Create database if it doesn't exist
+                                  SELECT format('CREATE DATABASE %I', '${db.name}') WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '${db.name}')\gexec
+
+                                  -- Create user if it doesn't exist, then always update password
+                                  DO \$\$
+                                  BEGIN
+                                    IF NOT EXISTS (SELECT FROM pg_user WHERE usename = '${db.username}') THEN
+                                      EXECUTE format('CREATE USER %I WITH PASSWORD %L', '${db.username}', '${db.password}');
+                                    ELSE
+                                      EXECUTE format('ALTER USER %I WITH PASSWORD %L', '${db.username}', '${db.password}');
+                                    END IF;
+                                  END
+                                  \$\$;
+
+                                  -- Grant privileges (quote database name)
+                                  DO \$\$
+                                  BEGIN
+                                    EXECUTE format('GRANT ALL PRIVILEGES ON DATABASE %I TO %I', '${db.name}', '${db.username}');
+                                    EXECUTE format('ALTER DATABASE %I OWNER TO %I', '${db.name}', '${db.username}');
+                                  END
+                                  \$\$;
+                                EOSQL
+                                echo "Database ${db.name} created successfully"
+                              '') cfg.extraDatabases}
+                            ''
+                          ];
+                        }
+                      ];
                     };
-                  }
-                ];
-                # Override volumes list and health checks
-                # Merge health check overrides with Helm-generated container by name
-                # Use mkForce on probe fields to override Helm chart defaults
-                template = {
-                  spec = {
-                    containers = [
-                      {
-                        name = "postgres";
-                        # Health checks with less aggressive settings (using mkForce to override Helm values)
-                        livenessProbe = lib.mkForce {
-                          exec = {
-                            command = [
-                              "sh"
-                              "-c"
-                              "pg_isready -h localhost"
-                            ];
+                  };
+                };
+              };
+            };
+
+            # CronJob for automated backups
+            cronJobs = lib.optionalAttrs cfg.backup.enable {
+              "${name}-backup" = {
+                metadata = {
+                  name = "${name}-backup";
+                  namespace = cfg.namespace;
+                  labels = {
+                    "app.kubernetes.io/name" = name;
+                    "app.kubernetes.io/component" = "backup";
+                  };
+                };
+                spec = {
+                  schedule = cfg.backup.schedule;
+                  successfulJobsHistoryLimit = 3;
+                  failedJobsHistoryLimit = 3;
+                  jobTemplate = {
+                    spec = {
+                      template = {
+                        spec = {
+                          restartPolicy = "OnFailure";
+                          containers = [
+                            {
+                              name = "backup";
+                              image = cfg.image;
+                              command = [
+                                "sh"
+                                "-c"
+                                ''
+                                  set -e
+                                  BACKUP_DIR="/backups"
+                                  TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+                                  BACKUP_FILE="$BACKUP_DIR/postgresql-backup-$TIMESTAMP.sql.gz"
+
+                                  echo "Starting backup at $(date)"
+
+                                  # Create backup of all databases
+                                  pg_dumpall \
+                                    -h ${name}.${cfg.namespace} \
+                                    -U postgres \
+                                    -c \
+                                    | gzip > "$BACKUP_FILE"
+
+                                  echo "Backup completed: $BACKUP_FILE"
+                                  echo "Backup size: $(du -h "$BACKUP_FILE" | cut -f1)"
+
+                                  # Clean up old backups (keep last ${toString cfg.backup.retentionDays} days)
+                                  find "$BACKUP_DIR" -name "postgresql-backup-*.sql.gz" -type f -mtime +${toString cfg.backup.retentionDays} -delete
+
+                                  echo "Cleanup completed. Remaining backups:"
+                                  ls -lh "$BACKUP_DIR"/*.sql.gz 2>/dev/null || echo "No backups found"
+
+                                  echo "Backup job completed at $(date)"
+                                ''
+                              ];
+                              env = [
+                                {
+                                  name = "PGPASSWORD";
+                                  valueFrom = {
+                                    secretKeyRef = {
+                                      name = password-secret;
+                                      key = "adminPassword";
+                                    };
+                                  };
+                                }
+                              ];
+                              volumeMounts = [
+                                {
+                                  mountPath = "/backups";
+                                  name = "backup-storage";
+                                }
+                              ];
+                            }
+                          ];
+                          volumes = [
+                            {
+                              name = "backup-storage";
+                              persistentVolumeClaim = {
+                                claimName = "${name}-backups";
+                              };
+                            }
+                          ];
+                        };
+                      };
+                    };
+                  };
+                };
+              };
+            };
+
+            # Data PVC (pinned, gated on cfg.persistenceEnabled) + backup PVC (pinned, gated on cfg.backup.enable)
+            persistentVolumeClaims =
+              lib.optionalAttrs cfg.persistenceEnabled pinnedData.persistentVolumeClaims
+              // lib.optionalAttrs cfg.backup.enable pinnedBackups.persistentVolumeClaims;
+
+            persistentVolumes =
+              lib.optionalAttrs cfg.persistenceEnabled pinnedData.persistentVolumes
+              // lib.optionalAttrs cfg.backup.enable pinnedBackups.persistentVolumes;
+
+            # Patch StatefulSet health checks and the pod's scratch/config
+            # volumes (persistence itself now comes from
+            # storage.persistentVolumeClaimName in defaultValues + the pinned
+            # PVC above, not volumeClaimTemplates)
+            statefulSets = lib.optionalAttrs cfg.persistenceEnabled {
+              ${name} = {
+                spec = {
+                  # Override volumes list and health checks
+                  # Merge health check overrides with Helm-generated container by name
+                  # Use mkForce on probe fields to override Helm chart defaults
+                  template = {
+                    spec = {
+                      containers = [
+                        {
+                          name = "postgres";
+                          # Health checks with less aggressive settings (using mkForce to override Helm values)
+                          livenessProbe = lib.mkForce {
+                            exec = {
+                              command = [
+                                "sh"
+                                "-c"
+                                "pg_isready -h localhost"
+                              ];
+                            };
+                            initialDelaySeconds = cfg.healthCheck.livenessInitialDelaySeconds;
+                            periodSeconds = cfg.healthCheck.livenessPeriodSeconds;
+                            timeoutSeconds = cfg.healthCheck.livenessTimeoutSeconds;
+                            successThreshold = 1;
+                            failureThreshold = cfg.healthCheck.livenessFailureThreshold;
                           };
-                          initialDelaySeconds = cfg.healthCheck.livenessInitialDelaySeconds;
-                          periodSeconds = cfg.healthCheck.livenessPeriodSeconds;
-                          timeoutSeconds = cfg.healthCheck.livenessTimeoutSeconds;
-                          successThreshold = 1;
-                          failureThreshold = cfg.healthCheck.livenessFailureThreshold;
-                        };
-                        readinessProbe = lib.mkForce {
-                          exec = {
-                            command = [
-                              "sh"
-                              "-c"
-                              "pg_isready -h localhost"
-                            ];
+                          readinessProbe = lib.mkForce {
+                            exec = {
+                              command = [
+                                "sh"
+                                "-c"
+                                "pg_isready -h localhost"
+                              ];
+                            };
+                            initialDelaySeconds = 10;
+                            periodSeconds = cfg.healthCheck.readinessPeriodSeconds;
+                            timeoutSeconds = cfg.healthCheck.readinessTimeoutSeconds;
+                            successThreshold = 1;
+                            failureThreshold = cfg.healthCheck.readinessFailureThreshold;
                           };
-                          initialDelaySeconds = 10;
-                          periodSeconds = cfg.healthCheck.readinessPeriodSeconds;
-                          timeoutSeconds = cfg.healthCheck.readinessTimeoutSeconds;
-                          successThreshold = 1;
-                          failureThreshold = cfg.healthCheck.readinessFailureThreshold;
-                        };
-                        startupProbe = lib.mkForce {
-                          exec = {
-                            command = [
-                              "sh"
-                              "-c"
-                              "pg_isready -h localhost"
-                            ];
+                          startupProbe = lib.mkForce {
+                            exec = {
+                              command = [
+                                "sh"
+                                "-c"
+                                "pg_isready -h localhost"
+                              ];
+                            };
+                            initialDelaySeconds = 10;
+                            periodSeconds = cfg.healthCheck.startupPeriodSeconds;
+                            timeoutSeconds = cfg.healthCheck.startupTimeoutSeconds;
+                            successThreshold = 1;
+                            failureThreshold = cfg.healthCheck.startupFailureThreshold;
                           };
-                          initialDelaySeconds = 10;
-                          periodSeconds = cfg.healthCheck.startupPeriodSeconds;
-                          timeoutSeconds = cfg.healthCheck.startupTimeoutSeconds;
-                          successThreshold = 1;
-                          failureThreshold = cfg.healthCheck.startupFailureThreshold;
-                        };
-                      }
-                    ];
-                    volumes = [
-                      {
-                        name = "run";
-                        emptyDir = { };
-                      }
-                      {
-                        name = "tmp";
-                        emptyDir = { };
-                      }
-                      {
-                        name = "scripts";
-                        emptyDir = { };
-                      }
-                      {
-                        name = "configs";
-                        emptyDir = { };
-                      }
-                      {
-                        name = "initscripts";
-                        configMap = {
-                          name = "${name}-scripts";
-                          defaultMode = 365;
-                        };
-                      }
-                    ];
+                        }
+                      ];
+                      volumes = [
+                        {
+                          name = "run";
+                          emptyDir = { };
+                        }
+                        {
+                          name = "tmp";
+                          emptyDir = { };
+                        }
+                        {
+                          name = "scripts";
+                          emptyDir = { };
+                        }
+                        {
+                          name = "configs";
+                          emptyDir = { };
+                        }
+                        {
+                          name = "initscripts";
+                          configMap = {
+                            name = "${name}-scripts";
+                            defaultMode = 365;
+                          };
+                        }
+                      ];
+                    };
                   };
                 };
               };
             };
           };
-        };
       };
 }
