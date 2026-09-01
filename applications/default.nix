@@ -87,6 +87,7 @@
     ./traefik.nix
     ./uptime-kuma.nix
     ./whisparr.nix
+    ./xysat.nix
     ./xyops.nix
   ];
 }
