@@ -2,7 +2,7 @@
 {
   services.pihole = {
     auth = { inherit (secrets.pihole) email password; };
-    enable = true;
+    enable = false;
     hostAffinity = "nasnix";
 
     ingressProvider = "traefik-lan";

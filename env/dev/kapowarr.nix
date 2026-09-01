@@ -1,7 +1,7 @@
 { config, ... }:
 {
   services.kapowarr = {
-    enable = true;
+    enable = false;
     hostAffinity = "edgenix";
 
     ingressProvider = "traefik-lan";
