@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    app.kubernetes.io/instance: xysat
+    app.kubernetes.io/name: xysat
+  name: xysat
+  namespace: xysat
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: xysat
+      app.kubernetes.io/name: xysat
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: xysat
+        app.kubernetes.io/name: xysat
+    spec:
+      containers:
+        - env:
+            - name: XYSAT_config_file
+              value: /etc/xysat/config.json
+            - name: XYOPS_setup
+              valueFrom:
+                secretKeyRef:
+                  key: SETUP_URL
+                  name: xysat-setup
+          image: ghcr.io/pixlcore/xysat:latest
+          imagePullPolicy: IfNotPresent
+          name: xysat
+          volumeMounts:
+            - mountPath: /etc/xysat
+              name: conf
+      dnsPolicy: ClusterFirstWithHostNet
+      hostNetwork: true
+      hostPID: true
+      tolerations:
+        - operator: Exists
+      volumes:
+        - hostPath:
+            path: /var/lib/xysat
+            type: DirectoryOrCreate
+          name: conf
