@@ -164,6 +164,11 @@
               enabled = true;
               size = cfg.pvcSize;
               storageClass = cfg.storageClassName;
+              # Use our own statically-pinned PVC (see extraResources) instead
+              # of letting the chart generate a dynamically-provisioned one --
+              # this makes disabling/re-enabling pihole rebind to the same
+              # existing data rather than getting a fresh empty volume.
+              existingClaim = "pihole";
             };
 
             extraEnvVars = {
@@ -233,5 +238,52 @@
           // optionalAttrs (cfg.hostAffinity != null) {
             nodeSelector."kubernetes.io/hostname" = cfg.hostAffinity;
           };
+
+        extraResources = cfg: {
+          persistentVolumeClaims.pihole = {
+            metadata.annotations."argocd.argoproj.io/sync-options" = "Replace=true";
+            spec = {
+              accessModes = [ "ReadWriteOnce" ];
+              resources.requests.storage = cfg.pvcSize;
+              storageClassName = "";
+              volumeName = "pihole-data-pv";
+            };
+          };
+
+          # Pinned to the pre-existing Longhorn volume (captured via
+          # `kubectl get pv`) so that disabling/re-enabling pihole rebinds
+          # to the same data instead of dynamic provisioning handing back
+          # an empty volume. See applications/booklore.nix for the same
+          # pattern with more detail.
+          persistentVolumes."pihole-data-pv" = {
+            apiVersion = "v1";
+            kind = "PersistentVolume";
+            metadata = {
+              name = "pihole-data-pv";
+              annotations."argocd.argoproj.io/sync-options" = "Replace=true";
+            };
+            spec = {
+              capacity.storage = cfg.pvcSize;
+              accessModes = [ "ReadWriteOnce" ];
+              persistentVolumeReclaimPolicy = "Retain";
+              storageClassName = "";
+              csi = {
+                driver = "driver.longhorn.io";
+                fsType = "ext4";
+                volumeHandle = "pvc-131cfa45-b850-44ac-a9b1-81fadbc4bdd2";
+                volumeAttributes = {
+                  numberOfReplicas = "1";
+                  staleReplicaTimeout = "30";
+                  fromBackup = "";
+                  fsType = "ext4";
+                  dataLocality = "disabled";
+                  unmapMarkSnapChainRemoved = "ignored";
+                  disableRevisionCounter = "true";
+                  dataEngine = "v1";
+                };
+              };
+            };
+          };
+        };
       };
 }

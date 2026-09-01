@@ -12,9 +12,9 @@ data:
 
     [storage]
     type = "s3"
-    region = "us-east-1"
-    bucket = "attic"
-    endpoint = "https://api-rustfs.home.kronkltd.net"
+    region = "garage"
+    bucket = "default"
+    endpoint = "https://garage.home.kronkltd.net"
 
     # Upstream defaults from server/src/config-template.toml — these fields
     # have no serde defaults of their own, unlike [database]'s url.

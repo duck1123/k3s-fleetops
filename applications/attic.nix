@@ -94,7 +94,7 @@
 
           storage = {
             bucket = mkOption {
-              description = mdDoc "RustFS/S3 bucket name for cache storage";
+              description = mdDoc "S3 bucket name for cache storage";
               type = types.str;
               default = "attic";
             };
@@ -106,11 +106,11 @@
             endpoint = mkOption {
               description = mdDoc "S3-compatible endpoint URL";
               type = types.str;
-              default = "http://rustfs-svc.rustfs:9000";
+              default = "http://garage.garage:3900";
             };
 
             accessKey = mkOption {
-              description = mdDoc "S3 access key (RustFS lives in a different namespace, so this needs its own copy of the credential rather than referencing rustfs's secret cross-namespace)";
+              description = mdDoc "S3 access key (the S3 provider lives in a different namespace, so this needs its own copy of the credential rather than referencing its secret cross-namespace)";
               type = types.str;
               default = "";
             };

@@ -272,10 +272,14 @@
           };
 
           persistentVolumeClaims = {
-            "${name}-${name}-config".spec = {
-              inherit (cfg) storageClassName;
-              accessModes = [ "ReadWriteOnce" ];
-              resources.requests.storage = "5Gi";
+            "${name}-${name}-config" = {
+              metadata.annotations."argocd.argoproj.io/sync-options" = "Replace=true";
+              spec = {
+                accessModes = [ "ReadWriteOnce" ];
+                resources.requests.storage = "5Gi";
+                storageClassName = "";
+                volumeName = "${name}-config-pv";
+              };
             };
             "${name}-${name}-downloads".spec =
               if cfg.nfs.enable then
@@ -372,7 +376,44 @@
                   persistentVolumeReclaimPolicy = "Retain";
                 };
               };
-            });
+            })
+            // {
+              # Pinned to the pre-existing Longhorn volume (captured via
+              # `kubectl get pv`) so that disabling/re-enabling this app
+              # rebinds to the same data instead of dynamic provisioning
+              # handing back an empty volume. See booklore.nix for the same
+              # pattern with more detail.
+              "${name}-config-pv" = {
+                apiVersion = "v1";
+                kind = "PersistentVolume";
+                metadata = {
+                  name = "${name}-config-pv";
+                  annotations."argocd.argoproj.io/sync-options" = "Replace=true";
+                };
+                spec = {
+                  capacity.storage = "5Gi";
+                  accessModes = [ "ReadWriteOnce" ];
+                  persistentVolumeReclaimPolicy = "Retain";
+                  storageClassName = "";
+                  csi = {
+                    driver = "driver.longhorn.io";
+                    fsType = "ext4";
+                    volumeHandle = "pvc-aa4bb624-7cf8-4fbc-a6c9-7e09e50f53f6";
+                    volumeAttributes = {
+                      numberOfReplicas = "1";
+                      staleReplicaTimeout = "30";
+                      fromBackup = "";
+                      fsType = "ext4";
+                      dataLocality = "disabled";
+                      unmapMarkSnapChainRemoved = "ignored";
+                      disableRevisionCounter = "true";
+                      dataEngine = "v1";
+                      backupTargetName = "default";
+                    };
+                  };
+                };
+              };
+            };
         };
       };
 }

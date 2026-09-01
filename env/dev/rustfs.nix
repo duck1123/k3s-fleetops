@@ -2,7 +2,7 @@
 {
   services.rustfs = {
     accessKey = (secrets.rustfs or { }).accessKey or "";
-    enable = true;
+    enable = false;
     hostAffinity = "nasnix";
 
     ingressProvider = "traefik-lan";

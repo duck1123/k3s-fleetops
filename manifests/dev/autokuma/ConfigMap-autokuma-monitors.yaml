@@ -16,7 +16,6 @@ data:
   prowlarr.json: '{"name":"prowlarr","type":"http","url":"https://prowlarr.home.kronkltd.net"}'
   qbittorrent.json: '{"name":"qbittorrent","type":"http","url":"https://qbittorrent.home.kronkltd.net"}'
   radarr.json: '{"name":"radarr","type":"http","url":"https://radarr.home.kronkltd.net"}'
-  rustfs.json: '{"name":"rustfs","type":"http","url":"https://rustfs.home.kronkltd.net/health"}'
   sabnzbd.json: '{"name":"sabnzbd","type":"http","url":"https://sabnzbd.home.kronkltd.net"}'
   slskd.json: '{"name":"slskd","type":"http","url":"https://slskd.home.kronkltd.net"}'
   sonarr.json: '{"name":"sonarr","type":"http","url":"https://sonarr.home.kronkltd.net"}'

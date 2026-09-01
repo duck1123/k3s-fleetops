@@ -11,16 +11,22 @@
     databaseTarget = "postgresql";
 
     storage = {
-      bucket = "attic";
-      # Use the RustFS S3 API ingress rather than the in-cluster rustfs-svc
+      # Shares garage's single auto-created "default" bucket (see
+      # env/dev/garage.nix) rather than a dedicated "attic" bucket -- garage
+      # only provisions one bucket on boot, and atticd's own keys are
+      # content-hash-based so collision risk with other garage tenants
+      # (e.g. xyops) is effectively nil.
+      bucket = "default";
+      region = "garage";
+      # Use garage's ingress rather than the in-cluster garage.garage
       # ClusterIP: atticd generates presigned nar-download URLs against
-      # whatever host this is, and rustfs-svc.rustfs is only resolvable
-      # from inside the pod network — external pulls (any LAN host, or
-      # any nix-csi bootstrap that isn't itself a cluster pod) would 404
-      # on DNS. The ingress domain resolves everywhere.
-      endpoint = "https://${config.services.rustfs.ingress.api-domain}";
-      accessKey = (secrets.rustfs or { }).accessKey or "";
-      secretKey = (secrets.rustfs or { }).secretKey or "";
+      # whatever host this is, and garage.garage is only resolvable from
+      # inside the pod network — external pulls (any LAN host, or any
+      # nix-csi bootstrap that isn't itself a cluster pod) would 404 on
+      # DNS. The ingress domain resolves everywhere.
+      endpoint = "https://${config.services.garage.ingress.domain}";
+      accessKey = (secrets.garage or { }).accessKey or "";
+      secretKey = (secrets.garage or { }).secretKey or "";
     };
   };
 }
