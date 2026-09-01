@@ -21,6 +21,18 @@
   # `volumeHandle` must be captured once from the live cluster (`kubectl get
   # pv <name> -o jsonpath='{.spec.csi.volumeHandle}'`) before first use --
   # this function has no way to look it up itself.
+  #
+  # `storageClassName` defaults to "" (fully static, no provisioner
+  # involvement -- the safest default, and what every currently-pinned
+  # volume in this repo uses). Longhorn's admission webhook refuses to
+  # expand any volume whose PVC has storageClassName "" ("only dynamically
+  # provisioned pvc can be resized" -- see longhorn/longhorn#6446), even
+  # though `volumeName` still binds statically regardless of
+  # storageClassName. Pass storageClassName = "longhorn" for a volume that
+  # may need `kubectl patch volumes.longhorn.io ... spec.size` resizing
+  # later -- but note this requires a delete+recreate of the PVC if it was
+  # already provisioned with the "" default, since storageClassName is
+  # immutable on an existing PVC.
   flake.lib.mkPinnedVolume =
     {
       pvcName,
@@ -29,14 +41,14 @@
       pvName ? "${pvcName}-pv",
       accessModes ? [ "ReadWriteOnce" ],
       volumeAttributes ? { },
+      storageClassName ? "",
     }:
     {
       persistentVolumeClaims.${pvcName} = {
         metadata.annotations."argocd.argoproj.io/sync-options" = "Replace=true";
         spec = {
-          inherit accessModes;
+          inherit accessModes storageClassName;
           resources.requests.storage = size;
-          storageClassName = "";
           volumeName = pvName;
         };
       };
@@ -50,9 +62,8 @@
         };
         spec = {
           capacity.storage = size;
-          inherit accessModes;
+          inherit accessModes storageClassName;
           persistentVolumeReclaimPolicy = "Retain";
-          storageClassName = "";
           csi = {
             driver = "driver.longhorn.io";
             fsType = "ext4";

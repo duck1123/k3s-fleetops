@@ -143,7 +143,11 @@
             pinnedConfig = self.lib.mkPinnedVolume {
               pvcName = "${name}-${name}-config";
               volumeHandle = "pvc-3daa90da-e4b2-4dd2-8cfe-9a1f98764991";
-              size = "20Gi";
+              # Real storageClassName (not the "" default) so Longhorn's
+              # resize webhook treats this as expandable -- it was full,
+              # see modules/lib/mkPinnedVolume.nix for why "" blocks resize.
+              storageClassName = "longhorn";
+              size = "40Gi";
             };
           in
           {
