@@ -45,209 +45,215 @@
         };
       };
 
-      extraResources = cfg: {
-        deployments.${name} = {
-          metadata.labels = {
-            "app.kubernetes.io/instance" = name;
-            "app.kubernetes.io/name" = name;
-            "app.kubernetes.io/version" = "latest";
+      extraResources =
+        cfg:
+        let
+          pinnedData = self.lib.mkPinnedVolume {
+            pvcName = "${name}-${name}-data";
+            volumeHandle = "pvc-883bbf8c-bcb0-48e6-a6d3-b68277d13af8";
+            size = "5Gi";
           };
-
-          spec = {
-            replicas = cfg.replicas;
-            strategy.type = "Recreate";
-            selector.matchLabels = {
+        in
+        {
+          deployments.${name} = {
+            metadata.labels = {
               "app.kubernetes.io/instance" = name;
               "app.kubernetes.io/name" = name;
+              "app.kubernetes.io/version" = "latest";
             };
 
-            template = {
-              metadata.labels = {
+            spec = {
+              replicas = cfg.replicas;
+              strategy.type = "Recreate";
+              selector.matchLabels = {
                 "app.kubernetes.io/instance" = name;
                 "app.kubernetes.io/name" = name;
               };
 
-              spec = {
-                automountServiceAccountToken = true;
-                serviceAccountName = "default";
-                securityContext = {
-                  runAsUser = cfg.puid;
-                  runAsGroup = cfg.pgid;
-                  fsGroup = cfg.pgid;
+              template = {
+                metadata.labels = {
+                  "app.kubernetes.io/instance" = name;
+                  "app.kubernetes.io/name" = name;
                 };
 
-                containers = [
-                  {
-                    inherit name;
-                    image = cfg.image;
-                    imagePullPolicy = "IfNotPresent";
-                    env = [
-                      {
-                        name = "ND_MUSICFOLDER";
-                        value = "/music";
-                      }
-                      {
-                        name = "ND_DATAFOLDER";
-                        value = "/data";
-                      }
-                      {
-                        name = "TZ";
-                        value = cfg.tz;
-                      }
-                    ];
-                    ports = [
-                      {
-                        containerPort = cfg.service.port;
-                        name = "http";
-                        protocol = "TCP";
-                      }
-                    ];
-                    readinessProbe = {
-                      httpGet = {
-                        path = "/ping";
-                        port = cfg.service.port;
-                      };
-                      initialDelaySeconds = 15;
-                      periodSeconds = 10;
-                      timeoutSeconds = 5;
-                      successThreshold = 1;
-                      failureThreshold = 3;
-                    };
-                    livenessProbe = {
-                      httpGet = {
-                        path = "/ping";
-                        port = cfg.service.port;
-                      };
-                      initialDelaySeconds = 30;
-                      periodSeconds = 30;
-                      timeoutSeconds = 5;
-                      successThreshold = 1;
-                      failureThreshold = 3;
-                    };
-                    volumeMounts = [
-                      {
-                        mountPath = "/data";
-                        name = "data";
-                      }
-                      {
-                        mountPath = "/music";
-                        name = "music";
-                        readOnly = true;
-                      }
-                    ];
-                  }
-                ];
+                spec = {
+                  automountServiceAccountToken = true;
+                  serviceAccountName = "default";
+                  securityContext = {
+                    runAsUser = cfg.puid;
+                    runAsGroup = cfg.pgid;
+                    fsGroup = cfg.pgid;
+                  };
 
-                volumes = [
-                  {
-                    name = "data";
-                    persistentVolumeClaim.claimName = "${name}-${name}-data";
-                  }
-                  {
-                    name = "music";
-                    persistentVolumeClaim.claimName = "${name}-${name}-music";
-                  }
-                ];
-              };
-            };
-          };
-        };
-
-        ingresses.${name} = with cfg.ingress; {
-          metadata.annotations."cert-manager.io/cluster-issuer" = clusterIssuer;
-          spec = {
-            inherit ingressClassName;
-
-            rules = [
-              {
-                host = domain;
-                http.paths = [
-                  {
-                    backend.service = {
+                  containers = [
+                    {
                       inherit name;
-                      port.name = "http";
-                    };
-                    path = "/";
-                    pathType = "ImplementationSpecific";
-                  }
-                ];
-              }
-            ];
+                      image = cfg.image;
+                      imagePullPolicy = "IfNotPresent";
+                      env = [
+                        {
+                          name = "ND_MUSICFOLDER";
+                          value = "/music";
+                        }
+                        {
+                          name = "ND_DATAFOLDER";
+                          value = "/data";
+                        }
+                        {
+                          name = "TZ";
+                          value = cfg.tz;
+                        }
+                      ];
+                      ports = [
+                        {
+                          containerPort = cfg.service.port;
+                          name = "http";
+                          protocol = "TCP";
+                        }
+                      ];
+                      readinessProbe = {
+                        httpGet = {
+                          path = "/ping";
+                          port = cfg.service.port;
+                        };
+                        initialDelaySeconds = 15;
+                        periodSeconds = 10;
+                        timeoutSeconds = 5;
+                        successThreshold = 1;
+                        failureThreshold = 3;
+                      };
+                      livenessProbe = {
+                        httpGet = {
+                          path = "/ping";
+                          port = cfg.service.port;
+                        };
+                        initialDelaySeconds = 30;
+                        periodSeconds = 30;
+                        timeoutSeconds = 5;
+                        successThreshold = 1;
+                        failureThreshold = 3;
+                      };
+                      volumeMounts = [
+                        {
+                          mountPath = "/data";
+                          name = "data";
+                        }
+                        {
+                          mountPath = "/music";
+                          name = "music";
+                          readOnly = true;
+                        }
+                      ];
+                    }
+                  ];
 
-            tls = [
-              {
-                hosts = [ domain ];
-                secretName = "${name}-tls";
-              }
-            ];
-          };
-        };
-
-        persistentVolumeClaims = {
-          "${name}-${name}-data".spec = {
-            inherit (cfg) storageClassName;
-            accessModes = [ "ReadWriteOnce" ];
-            resources.requests.storage = "5Gi";
-          };
-          "${name}-${name}-music".spec =
-            if cfg.nfs.enable then
-              {
-                accessModes = [ "ReadOnlyMany" ];
-                resources.requests.storage = "1Gi";
-                storageClassName = "";
-                volumeName = "${name}-${name}-music-nfs";
-              }
-            else
-              {
-                inherit (cfg) storageClassName;
-                accessModes = [ "ReadWriteOnce" ];
-                resources.requests.storage = "100Gi";
+                  volumes = [
+                    {
+                      name = "data";
+                      persistentVolumeClaim.claimName = "${name}-${name}-data";
+                    }
+                    {
+                      name = "music";
+                      persistentVolumeClaim.claimName = "${name}-${name}-music";
+                    }
+                  ];
+                };
               };
-        };
-
-        services.${name}.spec = {
-          ports = [
-            {
-              name = "http";
-              port = cfg.service.port;
-              protocol = "TCP";
-              targetPort = "http";
-            }
-          ];
-
-          selector = {
-            "app.kubernetes.io/instance" = name;
-            "app.kubernetes.io/name" = name;
+            };
           };
 
-          type = "ClusterIP";
-        };
-
-        persistentVolumes = lib.optionalAttrs cfg.nfs.enable {
-          "${name}-${name}-music-nfs" = {
-            apiVersion = "v1";
-            kind = "PersistentVolume";
-            metadata = {
-              name = "${name}-${name}-music-nfs";
-            };
+          ingresses.${name} = with cfg.ingress; {
+            metadata.annotations."cert-manager.io/cluster-issuer" = clusterIssuer;
             spec = {
-              capacity.storage = "1Ti";
-              accessModes = [ "ReadOnlyMany" ];
-              mountOptions = [
-                "nolock"
-                "noexec"
-                "soft"
-                "timeo=30"
+              inherit ingressClassName;
+
+              rules = [
+                {
+                  host = domain;
+                  http.paths = [
+                    {
+                      backend.service = {
+                        inherit name;
+                        port.name = "http";
+                      };
+                      path = "/";
+                      pathType = "ImplementationSpecific";
+                    }
+                  ];
+                }
               ];
-              nfs = {
-                server = cfg.nfs.server;
-                path = cfg.nfs.path;
-                readOnly = true;
-              };
-              persistentVolumeReclaimPolicy = "Retain";
+
+              tls = [
+                {
+                  hosts = [ domain ];
+                  secretName = "${name}-tls";
+                }
+              ];
             };
           };
+
+          persistentVolumeClaims = pinnedData.persistentVolumeClaims // {
+            "${name}-${name}-music".spec =
+              if cfg.nfs.enable then
+                {
+                  accessModes = [ "ReadOnlyMany" ];
+                  resources.requests.storage = "1Gi";
+                  storageClassName = "";
+                  volumeName = "${name}-${name}-music-nfs";
+                }
+              else
+                {
+                  inherit (cfg) storageClassName;
+                  accessModes = [ "ReadWriteOnce" ];
+                  resources.requests.storage = "100Gi";
+                };
+          };
+
+          services.${name}.spec = {
+            ports = [
+              {
+                name = "http";
+                port = cfg.service.port;
+                protocol = "TCP";
+                targetPort = "http";
+              }
+            ];
+
+            selector = {
+              "app.kubernetes.io/instance" = name;
+              "app.kubernetes.io/name" = name;
+            };
+
+            type = "ClusterIP";
+          };
+
+          persistentVolumes =
+            pinnedData.persistentVolumes
+            // lib.optionalAttrs cfg.nfs.enable {
+              "${name}-${name}-music-nfs" = {
+                apiVersion = "v1";
+                kind = "PersistentVolume";
+                metadata = {
+                  name = "${name}-${name}-music-nfs";
+                };
+                spec = {
+                  capacity.storage = "1Ti";
+                  accessModes = [ "ReadOnlyMany" ];
+                  mountOptions = [
+                    "nolock"
+                    "noexec"
+                    "soft"
+                    "timeo=30"
+                  ];
+                  nfs = {
+                    server = cfg.nfs.server;
+                    path = cfg.nfs.path;
+                    readOnly = true;
+                  };
+                  persistentVolumeReclaimPolicy = "Retain";
+                };
+              };
+            };
         };
-      };
     };
 }

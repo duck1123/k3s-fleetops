@@ -53,184 +53,190 @@
             ${db-secret}.password = cfg.database.password;
           };
 
-        extraResources = cfg: {
-          deployments.${name} = {
-            metadata.labels = {
-              "app.kubernetes.io/instance" = name;
-              "app.kubernetes.io/name" = name;
-              "app.kubernetes.io/version" = "v3.19.2";
+        extraResources =
+          cfg:
+          let
+            pinnedData = self.lib.mkPinnedVolume {
+              pvcName = "${name}-${name}-data";
+              volumeHandle = "pvc-4e3d0692-5c4d-4a65-9f62-3c0f43326ede";
+              size = "5Gi";
             };
-
-            spec = {
-              replicas = cfg.replicas;
-              strategy.type = "Recreate";
-              selector.matchLabels = {
+          in
+          {
+            deployments.${name} = {
+              metadata.labels = {
                 "app.kubernetes.io/instance" = name;
                 "app.kubernetes.io/name" = name;
+                "app.kubernetes.io/version" = "v3.19.2";
               };
 
-              template = {
-                metadata.labels = {
+              spec = {
+                replicas = cfg.replicas;
+                strategy.type = "Recreate";
+                selector.matchLabels = {
                   "app.kubernetes.io/instance" = name;
                   "app.kubernetes.io/name" = name;
                 };
 
-                spec = {
-                  automountServiceAccountToken = true;
-                  serviceAccountName = "default";
+                template = {
+                  metadata.labels = {
+                    "app.kubernetes.io/instance" = name;
+                    "app.kubernetes.io/name" = name;
+                  };
 
-                  containers = [
-                    {
-                      inherit name;
-                      image = cfg.image;
-                      imagePullPolicy = "IfNotPresent";
-                      env = [
-                        {
-                          name = "TZ";
-                          value = cfg.tz;
-                        }
-                        {
-                          name = "BASE_URL";
-                          value = "https://${cfg.ingress.domain}";
-                        }
-                      ]
-                      ++ lib.optionals cfg.database.enable [
-                        {
-                          name = "DB_ENGINE";
-                          value = "postgres";
-                        }
-                        {
-                          name = "POSTGRES_SERVER";
-                          value = cfg.database.host;
-                        }
-                        {
-                          name = "POSTGRES_PORT";
-                          value = toString cfg.database.port;
-                        }
-                        {
-                          name = "POSTGRES_DB";
-                          value = cfg.database.name;
-                        }
-                        {
-                          name = "POSTGRES_USER";
-                          value = cfg.database.username;
-                        }
-                        {
-                          name = "POSTGRES_PASSWORD";
-                          valueFrom.secretKeyRef = {
-                            name = db-secret;
-                            key = "password";
+                  spec = {
+                    automountServiceAccountToken = true;
+                    serviceAccountName = "default";
+
+                    containers = [
+                      {
+                        inherit name;
+                        image = cfg.image;
+                        imagePullPolicy = "IfNotPresent";
+                        env = [
+                          {
+                            name = "TZ";
+                            value = cfg.tz;
+                          }
+                          {
+                            name = "BASE_URL";
+                            value = "https://${cfg.ingress.domain}";
+                          }
+                        ]
+                        ++ lib.optionals cfg.database.enable [
+                          {
+                            name = "DB_ENGINE";
+                            value = "postgres";
+                          }
+                          {
+                            name = "POSTGRES_SERVER";
+                            value = cfg.database.host;
+                          }
+                          {
+                            name = "POSTGRES_PORT";
+                            value = toString cfg.database.port;
+                          }
+                          {
+                            name = "POSTGRES_DB";
+                            value = cfg.database.name;
+                          }
+                          {
+                            name = "POSTGRES_USER";
+                            value = cfg.database.username;
+                          }
+                          {
+                            name = "POSTGRES_PASSWORD";
+                            valueFrom.secretKeyRef = {
+                              name = db-secret;
+                              key = "password";
+                            };
+                          }
+                        ];
+                        ports = [
+                          {
+                            containerPort = cfg.service.port;
+                            name = "http";
+                            protocol = "TCP";
+                          }
+                        ];
+                        readinessProbe = {
+                          httpGet = {
+                            path = "/api/app/about";
+                            port = cfg.service.port;
                           };
-                        }
-                      ];
-                      ports = [
-                        {
-                          containerPort = cfg.service.port;
-                          name = "http";
-                          protocol = "TCP";
-                        }
-                      ];
-                      readinessProbe = {
-                        httpGet = {
-                          path = "/api/app/about";
-                          port = cfg.service.port;
+                          initialDelaySeconds = 30;
+                          periodSeconds = 10;
+                          timeoutSeconds = 5;
+                          successThreshold = 1;
+                          failureThreshold = 3;
                         };
-                        initialDelaySeconds = 30;
-                        periodSeconds = 10;
-                        timeoutSeconds = 5;
-                        successThreshold = 1;
-                        failureThreshold = 3;
-                      };
-                      livenessProbe = {
-                        httpGet = {
-                          path = "/api/app/about";
-                          port = cfg.service.port;
+                        livenessProbe = {
+                          httpGet = {
+                            path = "/api/app/about";
+                            port = cfg.service.port;
+                          };
+                          initialDelaySeconds = 60;
+                          periodSeconds = 30;
+                          timeoutSeconds = 5;
+                          successThreshold = 1;
+                          failureThreshold = 3;
                         };
-                        initialDelaySeconds = 60;
-                        periodSeconds = 30;
-                        timeoutSeconds = 5;
-                        successThreshold = 1;
-                        failureThreshold = 3;
-                      };
-                      volumeMounts = [
-                        {
-                          mountPath = "/app/data";
-                          name = "data";
-                        }
-                      ];
-                    }
-                  ];
+                        volumeMounts = [
+                          {
+                            mountPath = "/app/data";
+                            name = "data";
+                          }
+                        ];
+                      }
+                    ];
 
-                  volumes = [
-                    {
-                      name = "data";
-                      persistentVolumeClaim.claimName = "${name}-${name}-data";
-                    }
-                  ]
-                  ++ lib.optionals (cfg.database.enable && cfg.database.password != "") [
-                    {
-                      name = db-secret;
-                      secret.secretName = db-secret;
-                    }
-                  ];
+                    volumes = [
+                      {
+                        name = "data";
+                        persistentVolumeClaim.claimName = "${name}-${name}-data";
+                      }
+                    ]
+                    ++ lib.optionals (cfg.database.enable && cfg.database.password != "") [
+                      {
+                        name = db-secret;
+                        secret.secretName = db-secret;
+                      }
+                    ];
+                  };
                 };
               };
             };
-          };
 
-          ingresses.${name} = with cfg.ingress; {
-            metadata.annotations."cert-manager.io/cluster-issuer" = clusterIssuer;
-            spec = {
-              inherit ingressClassName;
+            ingresses.${name} = with cfg.ingress; {
+              metadata.annotations."cert-manager.io/cluster-issuer" = clusterIssuer;
+              spec = {
+                inherit ingressClassName;
 
-              rules = [
+                rules = [
+                  {
+                    host = domain;
+                    http.paths = [
+                      {
+                        backend.service = {
+                          inherit name;
+                          port.name = "http";
+                        };
+                        path = "/";
+                        pathType = "ImplementationSpecific";
+                      }
+                    ];
+                  }
+                ];
+
+                tls = [
+                  {
+                    hosts = [ domain ];
+                    secretName = "${name}-tls";
+                  }
+                ];
+              };
+            };
+
+            persistentVolumeClaims = pinnedData.persistentVolumeClaims;
+            persistentVolumes = pinnedData.persistentVolumes;
+
+            services.${name}.spec = {
+              ports = [
                 {
-                  host = domain;
-                  http.paths = [
-                    {
-                      backend.service = {
-                        inherit name;
-                        port.name = "http";
-                      };
-                      path = "/";
-                      pathType = "ImplementationSpecific";
-                    }
-                  ];
+                  name = "http";
+                  port = cfg.service.port;
+                  protocol = "TCP";
+                  targetPort = "http";
                 }
               ];
 
-              tls = [
-                {
-                  hosts = [ domain ];
-                  secretName = "${name}-tls";
-                }
-              ];
+              selector = {
+                "app.kubernetes.io/instance" = name;
+                "app.kubernetes.io/name" = name;
+              };
+
+              type = "ClusterIP";
             };
           };
-
-          persistentVolumeClaims."${name}-${name}-data".spec = {
-            inherit (cfg) storageClassName;
-            accessModes = [ "ReadWriteOnce" ];
-            resources.requests.storage = "5Gi";
-          };
-
-          services.${name}.spec = {
-            ports = [
-              {
-                name = "http";
-                port = cfg.service.port;
-                protocol = "TCP";
-                targetPort = "http";
-              }
-            ];
-
-            selector = {
-              "app.kubernetes.io/instance" = name;
-              "app.kubernetes.io/name" = name;
-            };
-
-            type = "ClusterIP";
-          };
-        };
       };
 }

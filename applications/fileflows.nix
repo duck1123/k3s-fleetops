@@ -91,6 +91,16 @@
       extraResources =
         cfg:
         let
+          pinnedConfig = self.lib.mkPinnedVolume {
+            pvcName = "${name}-${name}-config";
+            volumeHandle = "pvc-238a7fe1-5d70-45c2-8a5f-1752cf171b36";
+            size = "5Gi";
+          };
+          pinnedTemp = self.lib.mkPinnedVolume {
+            pvcName = "${name}-${name}-temp";
+            volumeHandle = "pvc-6e5f5c78-e4d4-47ff-a407-9f1cefd37ea3";
+            size = "50Gi";
+          };
           mediaMounts = lib.optionals cfg.nfs.enable (
             [
               {
@@ -357,41 +367,31 @@
             };
           };
 
-          persistentVolumeClaims = {
-            "${name}-${name}-config".spec = {
-              inherit (cfg) storageClassName;
-              accessModes = [ "ReadWriteOnce" ];
-              resources.requests.storage = "5Gi";
+          persistentVolumeClaims =
+            pinnedConfig.persistentVolumeClaims
+            // pinnedTemp.persistentVolumeClaims
+            // lib.optionalAttrs cfg.nfs.enable {
+              "${name}-${name}-media-movies".spec = {
+                accessModes = [ "ReadWriteMany" ];
+                resources.requests.storage = "1Gi";
+                storageClassName = "";
+                volumeName = "${name}-${name}-media-movies-nfs";
+              };
+              "${name}-${name}-media-tv".spec = {
+                accessModes = [ "ReadWriteMany" ];
+                resources.requests.storage = "1Gi";
+                storageClassName = "";
+                volumeName = "${name}-${name}-media-tv-nfs";
+              };
+            }
+            // lib.optionalAttrs (cfg.nfs.enable && cfg.nfs.enableVideos) {
+              "${name}-${name}-media-videos".spec = {
+                accessModes = [ "ReadWriteMany" ];
+                resources.requests.storage = "1Gi";
+                storageClassName = "";
+                volumeName = "${name}-${name}-media-videos-nfs";
+              };
             };
-            # Temp on Longhorn — local SSD is better for heavy transcode scratch I/O
-            "${name}-${name}-temp".spec = {
-              inherit (cfg) storageClassName;
-              accessModes = [ "ReadWriteOnce" ];
-              resources.requests.storage = "50Gi";
-            };
-          }
-          // lib.optionalAttrs cfg.nfs.enable {
-            "${name}-${name}-media-movies".spec = {
-              accessModes = [ "ReadWriteMany" ];
-              resources.requests.storage = "1Gi";
-              storageClassName = "";
-              volumeName = "${name}-${name}-media-movies-nfs";
-            };
-            "${name}-${name}-media-tv".spec = {
-              accessModes = [ "ReadWriteMany" ];
-              resources.requests.storage = "1Gi";
-              storageClassName = "";
-              volumeName = "${name}-${name}-media-tv-nfs";
-            };
-          }
-          // lib.optionalAttrs (cfg.nfs.enable && cfg.nfs.enableVideos) {
-            "${name}-${name}-media-videos".spec = {
-              accessModes = [ "ReadWriteMany" ];
-              resources.requests.storage = "1Gi";
-              storageClassName = "";
-              volumeName = "${name}-${name}-media-videos-nfs";
-            };
-          };
 
           services.${name}.spec = {
             ports = [
@@ -409,45 +409,48 @@
             type = "ClusterIP";
           };
 
-          persistentVolumes = lib.optionalAttrs cfg.nfs.enable (
-            {
-              "${name}-${name}-media-movies-nfs" = {
-                apiVersion = "v1";
-                kind = "PersistentVolume";
-                metadata.name = "${name}-${name}-media-movies-nfs";
-                spec = nfsPVOptions // {
-                  nfs = {
-                    server = cfg.nfs.server;
-                    path = "${cfg.nfs.path}/Movies";
+          persistentVolumes =
+            pinnedConfig.persistentVolumes
+            // pinnedTemp.persistentVolumes
+            // lib.optionalAttrs cfg.nfs.enable (
+              {
+                "${name}-${name}-media-movies-nfs" = {
+                  apiVersion = "v1";
+                  kind = "PersistentVolume";
+                  metadata.name = "${name}-${name}-media-movies-nfs";
+                  spec = nfsPVOptions // {
+                    nfs = {
+                      server = cfg.nfs.server;
+                      path = "${cfg.nfs.path}/Movies";
+                    };
                   };
                 };
-              };
-              "${name}-${name}-media-tv-nfs" = {
-                apiVersion = "v1";
-                kind = "PersistentVolume";
-                metadata.name = "${name}-${name}-media-tv-nfs";
-                spec = nfsPVOptions // {
-                  nfs = {
-                    server = cfg.nfs.server;
-                    path = "${cfg.nfs.path}/TV";
+                "${name}-${name}-media-tv-nfs" = {
+                  apiVersion = "v1";
+                  kind = "PersistentVolume";
+                  metadata.name = "${name}-${name}-media-tv-nfs";
+                  spec = nfsPVOptions // {
+                    nfs = {
+                      server = cfg.nfs.server;
+                      path = "${cfg.nfs.path}/TV";
+                    };
                   };
                 };
-              };
-            }
-            // lib.optionalAttrs cfg.nfs.enableVideos {
-              "${name}-${name}-media-videos-nfs" = {
-                apiVersion = "v1";
-                kind = "PersistentVolume";
-                metadata.name = "${name}-${name}-media-videos-nfs";
-                spec = nfsPVOptions // {
-                  nfs = {
-                    server = cfg.nfs.server;
-                    path = "${cfg.nfs.path}/Videos";
+              }
+              // lib.optionalAttrs cfg.nfs.enableVideos {
+                "${name}-${name}-media-videos-nfs" = {
+                  apiVersion = "v1";
+                  kind = "PersistentVolume";
+                  metadata.name = "${name}-${name}-media-videos-nfs";
+                  spec = nfsPVOptions // {
+                    nfs = {
+                      server = cfg.nfs.server;
+                      path = "${cfg.nfs.path}/Videos";
+                    };
                   };
                 };
-              };
-            }
-          );
+              }
+            );
         };
     };
 }

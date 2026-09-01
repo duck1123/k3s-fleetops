@@ -12,6 +12,7 @@ in
     # 3. Set enable = true here and `nur switch`.
     enable = true;
 
-    setupUrl = if apiKey == "" then "" else "http://xyops.xyops:5522/api/app/satellite/config?t=${apiKey}";
+    setupUrl =
+      if apiKey == "" then "" else "http://xyops.xyops:5522/api/app/satellite/config?t=${apiKey}";
   };
 }

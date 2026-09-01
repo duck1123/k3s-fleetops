@@ -72,87 +72,51 @@
           };
         };
 
-        extraResources = cfg: {
-          # Migration job — runs self-host-predeploy.js on each sync, after secrets are created (wave 1)
-          # Using Sync phase (not PreSync) so the secret exists before the job runs.
-          jobs."${name}-migration" = {
-            metadata.annotations = {
-              "argocd.argoproj.io/hook" = "Sync";
-              "argocd.argoproj.io/hook-delete-policy" = "BeforeHookCreation,HookSucceeded";
-              "argocd.argoproj.io/sync-wave" = "1";
+        extraResources =
+          cfg:
+          let
+            pinnedStorage = self.lib.mkPinnedVolume {
+              pvcName = "${name}-storage";
+              volumeHandle = "pvc-4e946647-f3c7-475c-8475-8cae5ca47eb4";
+              size = "10Gi";
             };
-            spec = {
-              backoffLimit = 3;
-              template.spec = {
-                restartPolicy = "OnFailure";
-                containers = [
-                  {
-                    name = "migration";
-                    image = cfg.image;
-                    imagePullPolicy = "IfNotPresent";
-                    command = [
-                      "sh"
-                      "-c"
-                      "node ./scripts/self-host-predeploy.js"
-                    ];
-                    env = [
-                      {
-                        name = "DATABASE_URL";
-                        valueFrom.secretKeyRef = {
-                          name = db-secret;
-                          key = "DATABASE_URL";
-                        };
-                      }
-                      {
-                        name = "REDIS_SERVER_HOST";
-                        value = cfg.redis.host;
-                      }
-                      {
-                        name = "REDIS_SERVER_PORT";
-                        value = toString cfg.redis.port;
-                      }
-                    ]
-                    ++ optional (cfg.redis.password != "") {
-                      name = "REDIS_SERVER_PASSWORD";
-                      valueFrom.secretKeyRef = {
-                        name = redis-secret;
-                        key = "REDIS_SERVER_PASSWORD";
-                      };
-                    };
-                  }
-                ];
-              };
+            pinnedConfig = self.lib.mkPinnedVolume {
+              pvcName = "${name}-config";
+              volumeHandle = "pvc-da6fcdf7-7372-43e3-8c87-5eee4f2ab1a2";
+              size = "1Gi";
             };
-          };
-
-          deployments.${name} = {
-            metadata.annotations."argocd.argoproj.io/sync-wave" = "2";
-            spec = {
-              replicas = 1;
-              strategy.type = "Recreate";
-              selector.matchLabels = {
-                "app.kubernetes.io/instance" = name;
-                "app.kubernetes.io/name" = name;
+          in
+          {
+            # Migration job — runs self-host-predeploy.js on each sync, after secrets are created (wave 1)
+            # Using Sync phase (not PreSync) so the secret exists before the job runs.
+            jobs."${name}-migration" = {
+              metadata.annotations = {
+                "argocd.argoproj.io/hook" = "Sync";
+                "argocd.argoproj.io/hook-delete-policy" = "BeforeHookCreation,HookSucceeded";
+                "argocd.argoproj.io/sync-wave" = "1";
               };
-              template = {
-                metadata.labels = {
-                  "app.kubernetes.io/instance" = name;
-                  "app.kubernetes.io/name" = name;
-                };
-                spec = {
+              spec = {
+                backoffLimit = 3;
+                template.spec = {
+                  restartPolicy = "OnFailure";
                   containers = [
                     {
-                      inherit name;
+                      name = "migration";
                       image = cfg.image;
                       imagePullPolicy = "IfNotPresent";
-                      ports = [
-                        {
-                          containerPort = 3010;
-                          name = "http";
-                          protocol = "TCP";
-                        }
+                      command = [
+                        "sh"
+                        "-c"
+                        "node ./scripts/self-host-predeploy.js"
                       ];
                       env = [
+                        {
+                          name = "DATABASE_URL";
+                          valueFrom.secretKeyRef = {
+                            name = db-secret;
+                            key = "DATABASE_URL";
+                          };
+                        }
                         {
                           name = "REDIS_SERVER_HOST";
                           value = cfg.redis.host;
@@ -161,130 +125,172 @@
                           name = "REDIS_SERVER_PORT";
                           value = toString cfg.redis.port;
                         }
-                        {
-                          name = "AFFINE_INDEXER_ENABLED";
-                          value = "false";
-                        }
                       ]
-                      ++ optional (cfg.database.password != "") {
-                        name = "DATABASE_URL";
-                        valueFrom.secretKeyRef = {
-                          name = db-secret;
-                          key = "DATABASE_URL";
-                        };
-                      }
                       ++ optional (cfg.redis.password != "") {
                         name = "REDIS_SERVER_PASSWORD";
                         valueFrom.secretKeyRef = {
                           name = redis-secret;
                           key = "REDIS_SERVER_PASSWORD";
                         };
-                      }
-                      ++ optional (cfg.serverExternalUrl != "") {
-                        name = "AFFINE_SERVER_EXTERNAL_URL";
-                        value = cfg.serverExternalUrl;
                       };
-                      volumeMounts = [
-                        {
-                          mountPath = "/root/.affine/storage";
-                          name = "storage";
-                        }
-                        {
-                          mountPath = "/root/.affine/config";
-                          name = "affine-config";
-                        }
-                      ];
-                      readinessProbe = {
-                        httpGet = {
-                          path = "/";
-                          port = 3010;
-                        };
-                        initialDelaySeconds = 30;
-                        periodSeconds = 10;
-                        timeoutSeconds = 5;
-                        successThreshold = 1;
-                        failureThreshold = 6;
-                      };
-                      livenessProbe = {
-                        httpGet = {
-                          path = "/";
-                          port = 3010;
-                        };
-                        initialDelaySeconds = 60;
-                        periodSeconds = 30;
-                        timeoutSeconds = 10;
-                        successThreshold = 1;
-                        failureThreshold = 5;
-                      };
-                    }
-                  ];
-                  volumes = [
-                    {
-                      name = "storage";
-                      persistentVolumeClaim.claimName = "${name}-storage";
-                    }
-                    {
-                      name = "affine-config";
-                      persistentVolumeClaim.claimName = "${name}-config";
                     }
                   ];
                 };
               };
             };
-          };
 
-          services.${name}.spec = {
-            ports = [
-              {
-                name = "http";
-                port = 3010;
-                protocol = "TCP";
-                targetPort = "http";
-              }
-            ];
-            selector = {
-              "app.kubernetes.io/instance" = name;
-              "app.kubernetes.io/name" = name;
+            deployments.${name} = {
+              metadata.annotations."argocd.argoproj.io/sync-wave" = "2";
+              spec = {
+                replicas = 1;
+                strategy.type = "Recreate";
+                selector.matchLabels = {
+                  "app.kubernetes.io/instance" = name;
+                  "app.kubernetes.io/name" = name;
+                };
+                template = {
+                  metadata.labels = {
+                    "app.kubernetes.io/instance" = name;
+                    "app.kubernetes.io/name" = name;
+                  };
+                  spec = {
+                    containers = [
+                      {
+                        inherit name;
+                        image = cfg.image;
+                        imagePullPolicy = "IfNotPresent";
+                        ports = [
+                          {
+                            containerPort = 3010;
+                            name = "http";
+                            protocol = "TCP";
+                          }
+                        ];
+                        env = [
+                          {
+                            name = "REDIS_SERVER_HOST";
+                            value = cfg.redis.host;
+                          }
+                          {
+                            name = "REDIS_SERVER_PORT";
+                            value = toString cfg.redis.port;
+                          }
+                          {
+                            name = "AFFINE_INDEXER_ENABLED";
+                            value = "false";
+                          }
+                        ]
+                        ++ optional (cfg.database.password != "") {
+                          name = "DATABASE_URL";
+                          valueFrom.secretKeyRef = {
+                            name = db-secret;
+                            key = "DATABASE_URL";
+                          };
+                        }
+                        ++ optional (cfg.redis.password != "") {
+                          name = "REDIS_SERVER_PASSWORD";
+                          valueFrom.secretKeyRef = {
+                            name = redis-secret;
+                            key = "REDIS_SERVER_PASSWORD";
+                          };
+                        }
+                        ++ optional (cfg.serverExternalUrl != "") {
+                          name = "AFFINE_SERVER_EXTERNAL_URL";
+                          value = cfg.serverExternalUrl;
+                        };
+                        volumeMounts = [
+                          {
+                            mountPath = "/root/.affine/storage";
+                            name = "storage";
+                          }
+                          {
+                            mountPath = "/root/.affine/config";
+                            name = "affine-config";
+                          }
+                        ];
+                        readinessProbe = {
+                          httpGet = {
+                            path = "/";
+                            port = 3010;
+                          };
+                          initialDelaySeconds = 30;
+                          periodSeconds = 10;
+                          timeoutSeconds = 5;
+                          successThreshold = 1;
+                          failureThreshold = 6;
+                        };
+                        livenessProbe = {
+                          httpGet = {
+                            path = "/";
+                            port = 3010;
+                          };
+                          initialDelaySeconds = 60;
+                          periodSeconds = 30;
+                          timeoutSeconds = 10;
+                          successThreshold = 1;
+                          failureThreshold = 5;
+                        };
+                      }
+                    ];
+                    volumes = [
+                      {
+                        name = "storage";
+                        persistentVolumeClaim.claimName = "${name}-storage";
+                      }
+                      {
+                        name = "affine-config";
+                        persistentVolumeClaim.claimName = "${name}-config";
+                      }
+                    ];
+                  };
+                };
+              };
             };
-            type = "ClusterIP";
-          };
 
-          ingresses.${name}.spec = with cfg.ingress; {
-            inherit ingressClassName;
-            rules = [
-              {
-                host = domain;
-                http.paths = [
-                  {
-                    backend.service = {
-                      inherit name;
-                      port.name = "http";
-                    };
-                    path = "/";
-                    pathType = "ImplementationSpecific";
-                  }
-                ];
-              }
-            ];
-            tls = [
-              {
-                hosts = [ domain ];
-                secretName = tls.secretName;
-              }
-            ];
-          };
+            services.${name}.spec = {
+              ports = [
+                {
+                  name = "http";
+                  port = 3010;
+                  protocol = "TCP";
+                  targetPort = "http";
+                }
+              ];
+              selector = {
+                "app.kubernetes.io/instance" = name;
+                "app.kubernetes.io/name" = name;
+              };
+              type = "ClusterIP";
+            };
 
-          persistentVolumeClaims."${name}-storage".spec = {
-            accessModes = [ "ReadWriteOnce" ];
-            resources.requests.storage = "10Gi";
-            storageClassName = cfg.storageClassName;
-          };
+            ingresses.${name}.spec = with cfg.ingress; {
+              inherit ingressClassName;
+              rules = [
+                {
+                  host = domain;
+                  http.paths = [
+                    {
+                      backend.service = {
+                        inherit name;
+                        port.name = "http";
+                      };
+                      path = "/";
+                      pathType = "ImplementationSpecific";
+                    }
+                  ];
+                }
+              ];
+              tls = [
+                {
+                  hosts = [ domain ];
+                  secretName = tls.secretName;
+                }
+              ];
+            };
 
-          persistentVolumeClaims."${name}-config".spec = {
-            accessModes = [ "ReadWriteOnce" ];
-            resources.requests.storage = "1Gi";
-            storageClassName = cfg.storageClassName;
+            persistentVolumeClaims =
+              pinnedStorage.persistentVolumeClaims // pinnedConfig.persistentVolumeClaims;
+            persistentVolumes = pinnedStorage.persistentVolumes // pinnedConfig.persistentVolumes;
           };
-        };
       };
 }
