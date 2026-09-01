@@ -211,19 +211,8 @@ spec:
               - key: mariadb-password
                 path: mariadb-password
             secretName: mariadb-password
+        - name: data
+          persistentVolumeClaim:
+            claimName: mariadb-data
   updateStrategy:
     type: RollingUpdate
-  volumeClaimTemplates:
-    - metadata:
-        labels:
-          app.kubernetes.io/component: primary
-          app.kubernetes.io/instance: mariadb
-          app.kubernetes.io/name: mariadb
-        name: data
-      spec:
-        accessModes:
-          - ReadWriteOnce
-        resources:
-          requests:
-            storage: 8Gi
-        storageClassName: longhorn

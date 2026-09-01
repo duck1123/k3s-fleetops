@@ -141,20 +141,8 @@ spec:
             defaultMode: 365
             name: postgresql-scripts
           name: initscripts
-        - emptyDir: {}
-          name: postgres-data
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: postgresql-data
   updateStrategy:
     type: RollingUpdate
-  volumeClaimTemplates:
-    - metadata:
-        labels:
-          app.kubernetes.io/instance: postgresql
-          app.kubernetes.io/name: postgres
-        name: postgres-data
-      spec:
-        accessModes:
-          - ReadWriteOnce
-        resources:
-          requests:
-            storage: 20Gi
-        storageClassName: longhorn

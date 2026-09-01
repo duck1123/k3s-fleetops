@@ -3,13 +3,13 @@ kind: PersistentVolumeClaim
 metadata:
   annotations:
     argocd.argoproj.io/sync-options: Replace=true
-  name: cloudbeaver
-  namespace: cloudbeaver
+  name: mariadb-data
+  namespace: mariadb
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 5Gi
+      storage: 8Gi
   storageClassName: ""
-  volumeName: cloudbeaver-pv
+  volumeName: mariadb-data-pv

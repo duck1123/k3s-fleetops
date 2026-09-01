@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-options: Replace=true
+  name: mariadb-backups-pv
+spec:
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 50Gi
+  csi:
+    driver: driver.longhorn.io
+    fsType: ext4
+    volumeAttributes:
+      dataEngine: v1
+      dataLocality: disabled
+      disableRevisionCounter: "true"
+      fromBackup: ""
+      fsType: ext4
+      numberOfReplicas: "1"
+      staleReplicaTimeout: "30"
+      unmapMarkSnapChainRemoved: ignored
+    volumeHandle: pvc-f42c562c-5275-4ae2-999c-94eab513bcd9
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""

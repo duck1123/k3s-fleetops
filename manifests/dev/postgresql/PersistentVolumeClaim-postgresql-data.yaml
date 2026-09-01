@@ -3,13 +3,13 @@ kind: PersistentVolumeClaim
 metadata:
   annotations:
     argocd.argoproj.io/sync-options: Replace=true
-  name: cloudbeaver
-  namespace: cloudbeaver
+  name: postgresql-data
+  namespace: postgresql
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 5Gi
+      storage: 20Gi
   storageClassName: ""
-  volumeName: cloudbeaver-pv
+  volumeName: postgresql-data-pv
