@@ -1,6 +1,7 @@
 apiVersion: v1
 data:
-  authorized_keys: ""
+  authorized_keys: |
+    ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDW6736YDTONCvxi0JKBXpQ2XNHnUIv1yA8XDDtKrTRp duck@powerspecnix
   ssh_config: |
     GlobalKnownHostsFile /etc/ssh/ssh_known_hosts /etc/ssh-dynauth/ssh_known_hosts
 
