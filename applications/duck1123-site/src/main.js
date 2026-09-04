@@ -12,6 +12,19 @@ import {
 import { hasExtension, login } from "./auth.js";
 import { renderReplies, renderReplyForm, renderEngagement } from "./comments.js";
 import { renderNoteContent } from "./content.js";
+import {
+  getCachedProfile,
+  setCachedProfile,
+  getCachedNotes,
+  setCachedNotes,
+  getCachedReplies,
+  setCachedReplies,
+  getCachedEngagement,
+  setCachedEngagement,
+  getCachedProfiles,
+  mergeCachedProfiles,
+  pruneNoteCache,
+} from "./cache.js";
 
 const pool = createPool();
 let myPubkey = null;
@@ -107,21 +120,33 @@ function renderNote(note) {
   el.append(content, meta, engagementContainer, repliesContainer);
 
   async function loadReplies() {
+    const cachedReplies = getCachedReplies(note.id);
+    if (cachedReplies) {
+      renderReplies(repliesContainer, cachedReplies, getCachedProfiles());
+    }
+
     const replies = await fetchReplies(pool, [note.id], CONFIG.relays);
     const profiles = await fetchProfiles(
       pool,
       replies.map((reply) => reply.pubkey),
       CONFIG.relays,
     );
+    mergeCachedProfiles(profiles);
+    setCachedReplies(note.id, replies);
     renderReplies(repliesContainer, replies, profiles);
   }
 
   async function loadEngagement() {
+    const cachedEngagement = getCachedEngagement(note.id);
+    if (cachedEngagement) renderEngagement(engagementContainer, cachedEngagement);
+
     const [reactions, zaps] = await Promise.all([
       fetchReactions(pool, [note.id], CONFIG.relays),
       fetchZaps(pool, [note.id], CONFIG.relays),
     ]);
-    renderEngagement(engagementContainer, { reactions, zaps });
+    const engagement = { reactions, zaps };
+    setCachedEngagement(note.id, engagement);
+    renderEngagement(engagementContainer, engagement);
   }
 
   if (myPubkey) {
@@ -143,13 +168,25 @@ function renderNote(note) {
 }
 
 async function renderNotes() {
-  notesEl.innerHTML = '<p class="loading">Loading notes…</p>';
+  const cachedNotes = getCachedNotes();
+  if (cachedNotes?.length) {
+    notesEl.innerHTML = "";
+    for (const note of cachedNotes) notesEl.append(renderNote(note));
+  } else {
+    notesEl.innerHTML = '<p class="loading">Loading notes…</p>';
+  }
+
   const notes = await fetchNotes(pool, CONFIG.pubkey, CONFIG.relays);
-  notesEl.innerHTML = "";
   if (!notes.length) {
-    notesEl.innerHTML = '<p class="error">No notes found on the configured relays.</p>';
+    if (!cachedNotes?.length) {
+      notesEl.innerHTML = '<p class="error">No notes found on the configured relays.</p>';
+    }
     return;
   }
+
+  setCachedNotes(notes);
+  pruneNoteCache(notes.map((note) => note.id));
+  notesEl.innerHTML = "";
   for (const note of notes) {
     notesEl.append(renderNote(note));
   }
@@ -178,6 +215,20 @@ loginBtn.addEventListener("click", async () => {
   }
 });
 
+function loadProfile() {
+  const cachedProfile = getCachedProfile();
+  if (cachedProfile) renderProfile(cachedProfile);
+
+  fetchProfile(pool, CONFIG.pubkey, CONFIG.relays).then((profile) => {
+    if (profile) {
+      setCachedProfile(profile);
+      renderProfile(profile);
+    } else if (!cachedProfile) {
+      renderProfile(null);
+    }
+  });
+}
+
 updateAuthUI();
-fetchProfile(pool, CONFIG.pubkey, CONFIG.relays).then(renderProfile);
+loadProfile();
 renderNotes();
