@@ -4,5 +4,15 @@
   # npm/Vite project, not per-env Nix options) since this is a single-identity
   # site — see applications/duck1123-site/src/config.js and
   # public/.well-known/nostr.json to change them.
-  services.duck1123.enable = true;
+  services.duck1123 = {
+    enable = true;
+
+    # duck1123 has no k8s Ingress (it's reached via the Cloudflare Tunnel, see
+    # applications/duck1123/default.nix), so monitoring.autokuma has no
+    # ingress domain to default its url to — set both explicitly.
+    monitoring.autokuma = {
+      enable = true;
+      url = "https://duck1123.com";
+    };
+  };
 }

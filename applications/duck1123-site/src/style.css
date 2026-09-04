@@ -36,12 +36,23 @@ body {
 }
 
 #profile {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
   padding-bottom: 1rem;
   border-bottom: 1px solid var(--border);
   margin-bottom: 1rem;
+}
+
+#profile img.banner {
+  width: 100%;
+  max-height: 160px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+#profile .profile-row {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
 }
 
 #profile img.avatar {
@@ -50,6 +61,7 @@ body {
   border-radius: 50%;
   object-fit: cover;
   background: var(--border);
+  flex-shrink: 0;
 }
 
 #profile h1 {
@@ -66,6 +78,24 @@ body {
 #profile p.nip05 {
   margin: 0.15rem 0 0;
   color: var(--accent);
+  font-size: 0.8rem;
+}
+
+#profile a.website {
+  display: block;
+  margin: 0.25rem 0 0;
+  color: var(--accent);
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+#profile a.website:hover {
+  text-decoration: underline;
+}
+
+#profile p.lightning {
+  margin: 0.15rem 0 0;
+  color: var(--muted);
   font-size: 0.8rem;
 }
 
@@ -109,6 +139,25 @@ button:disabled {
   margin-top: 0.5rem;
 }
 
+.engagement {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+
+.pill {
+  background: var(--border);
+  border-radius: 999px;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.8rem;
+}
+
+.pill.zap {
+  background: rgba(124, 58, 237, 0.15);
+  color: var(--accent);
+}
+
 .replies {
   margin-top: 0.75rem;
   padding-left: 0.75rem;
@@ -118,6 +167,26 @@ button:disabled {
 .reply {
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
+}
+
+.reply-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.15rem;
+}
+
+.reply-avatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--border);
+}
+
+.reply-name {
+  font-weight: 600;
+  font-size: 0.85rem;
 }
 
 .reply .meta {

@@ -1,8 +1,16 @@
 import "./style.css";
 import { CONFIG } from "./config.js";
-import { createPool, fetchProfile, fetchNotes, fetchReplies } from "./nostr.js";
+import {
+  createPool,
+  fetchProfile,
+  fetchProfiles,
+  fetchNotes,
+  fetchReplies,
+  fetchReactions,
+  fetchZaps,
+} from "./nostr.js";
 import { hasExtension, login } from "./auth.js";
-import { renderReplies, renderReplyForm } from "./comments.js";
+import { renderReplies, renderReplyForm, renderEngagement } from "./comments.js";
 
 const pool = createPool();
 let myPubkey = null;
@@ -19,12 +27,23 @@ function renderProfile(profile) {
     return;
   }
 
+  if (profile.banner) {
+    const banner = document.createElement("img");
+    banner.className = "banner";
+    banner.src = profile.banner;
+    banner.alt = "";
+    profileEl.append(banner);
+  }
+
+  const row = document.createElement("div");
+  row.className = "profile-row";
+
   if (profile.picture) {
     const img = document.createElement("img");
     img.className = "avatar";
     img.src = profile.picture;
     img.alt = profile.name ?? "avatar";
-    profileEl.append(img);
+    row.append(img);
   }
 
   const info = document.createElement("div");
@@ -43,11 +62,30 @@ function renderProfile(profile) {
   if (profile.nip05) {
     const nip05 = document.createElement("p");
     nip05.className = "nip05";
-    nip05.textContent = profile.nip05;
+    nip05.textContent = `✓ ${profile.nip05}`;
     info.append(nip05);
   }
 
-  profileEl.append(info);
+  if (profile.website) {
+    const website = document.createElement("a");
+    website.className = "website";
+    website.href = profile.website;
+    website.target = "_blank";
+    website.rel = "noopener noreferrer";
+    website.textContent = profile.website.replace(/^https?:\/\//, "");
+    info.append(website);
+  }
+
+  const lightningAddress = profile.lud16 || profile.lud06;
+  if (lightningAddress) {
+    const lightning = document.createElement("p");
+    lightning.className = "lightning";
+    lightning.textContent = `⚡ ${lightningAddress}`;
+    info.append(lightning);
+  }
+
+  row.append(info);
+  profileEl.append(row);
 }
 
 function renderNote(note) {
@@ -62,9 +100,28 @@ function renderNote(note) {
   meta.className = "meta";
   meta.textContent = new Date(note.created_at * 1000).toLocaleString();
 
+  const engagementContainer = document.createElement("div");
   const repliesContainer = document.createElement("div");
 
-  el.append(content, meta, repliesContainer);
+  el.append(content, meta, engagementContainer, repliesContainer);
+
+  async function loadReplies() {
+    const replies = await fetchReplies(pool, [note.id], CONFIG.relays);
+    const profiles = await fetchProfiles(
+      pool,
+      replies.map((reply) => reply.pubkey),
+      CONFIG.relays,
+    );
+    renderReplies(repliesContainer, replies, profiles);
+  }
+
+  async function loadEngagement() {
+    const [reactions, zaps] = await Promise.all([
+      fetchReactions(pool, [note.id], CONFIG.relays),
+      fetchZaps(pool, [note.id], CONFIG.relays),
+    ]);
+    renderEngagement(engagementContainer, { reactions, zaps });
+  }
 
   if (myPubkey) {
     const form = renderReplyForm({
@@ -73,17 +130,13 @@ function renderNote(note) {
       note,
       ownerPubkey: CONFIG.pubkey,
       myPubkey,
-      onPublished: async () => {
-        const replies = await fetchReplies(pool, [note.id], CONFIG.relays);
-        renderReplies(repliesContainer, replies);
-      },
+      onPublished: loadReplies,
     });
     el.append(form);
   }
 
-  fetchReplies(pool, [note.id], CONFIG.relays).then((replies) => {
-    renderReplies(repliesContainer, replies);
-  });
+  loadReplies();
+  loadEngagement();
 
   return el;
 }
