@@ -8,7 +8,7 @@ This is a GitOps-based Kubernetes cluster configuration. ArgoCD manages the clus
 
 ## Key Commands
 
-All primary dev commands use [nur](https://github.com/nickel-org/nur) (`nur`), a Nushell task runner. Tasks are defined in `scripts/nur.nu`. List all available tasks:
+All primary dev commands use [nur](https://github.com/nur-taskrunner/nur) (`nur`), a Nushell task runner. Tasks are defined in `scripts/nur.nu`. List all available tasks:
 
 ```sh
 nur --help
@@ -64,6 +64,9 @@ nur argocd update-manifest            # Download latest stable ArgoCD install ma
 nur sealed-secrets install-key        # Upload sealed-secrets TLS keypair (tls.crt + tls.key required)
 nur sealed-secrets apply-label        # Mark uploaded key as active
 nur apply-git-hooks                   # Register git hooks for this repo
+nur apps list                         # List app names known to `nur apps restart` (from applications/default.nix)
+nur apps restart <name>               # Roll an app's Deployment/StatefulSet in namespace <name> — tab-completes;
+                                       # see scripts/nur-carapace-spec.yaml to enable that in your shell
 ```
 
 ### Database

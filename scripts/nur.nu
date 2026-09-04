@@ -128,6 +128,57 @@ export def "nur preview" [
   ^npm --prefix $dir run dev
 }
 
+# ─── App management ──────────────────────────────────────────────────────────
+
+# Every app name registered in applications/default.nix's imports list, so this
+# always matches whatever's actually wired into the cluster.
+def "nu-complete apps" [] {
+  (
+    open --raw applications/default.nix
+    | lines
+    | each { str trim }
+    | where {|line| $line | str starts-with './' }
+    | each {|line| $line | str replace --all --regex '^\./|\.nix$' '' }
+    | uniq
+    | sort
+  )
+}
+
+# List every app name accepted by `nur apps restart` (one per line — also what
+# the carapace completion spec in scripts/nur-carapace-spec.yaml shells out to)
+export def "nur apps list" [] {
+  nu-complete apps | str join "\n" | print
+}
+
+# Restart an app's pod(s) — rolls its Deployment (falling back to StatefulSet) in
+# the namespace of the same name, which is the mkArgoApp default and covers the
+# common single-workload case (see applications/duck1123/default.nix). Apps with
+# a non-default namespace or several workloads (Helm charts, nix-csi) aren't
+# resolved here — restart those manually with kubectl.
+export def "nur apps restart" [
+  name: string@"nu-complete apps"   # App name — see `nur apps list`
+] {
+  if not ($name in (nu-complete apps)) {
+    error make {msg: $"Unknown app ($name). Run `nur apps list` to see valid names."}
+  }
+
+  if (^kubectl get deployment $name -n $name | complete).exit_code == 0 {
+    ^kubectl rollout restart $"deployment/($name)" -n $name
+    ^kubectl rollout status $"deployment/($name)" -n $name
+    return
+  }
+
+  if (^kubectl get statefulset $name -n $name | complete).exit_code == 0 {
+    ^kubectl rollout restart $"statefulset/($name)" -n $name
+    ^kubectl rollout status $"statefulset/($name)" -n $name
+    return
+  }
+
+  error make {
+    msg: $"No Deployment or StatefulSet named ($name) found in namespace ($name). ($name) may use a non-default namespace or ship multiple workloads \(Helm chart, nix-csi\) — restart it manually with kubectl."
+  }
+}
+
 # ─── Secrets ─────────────────────────────────────────────────────────────────
 
 # Edit encrypted secrets in-place (no plaintext file written)
