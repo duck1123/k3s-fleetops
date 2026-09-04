@@ -14,7 +14,7 @@ data:
     store = daemon
     substituters = https://attic.home.kronkltd.net/nixos https://cache.nixos.org https://nix-csi.cachix.org
     system-features = nixos-test benchmark big-parallel
-    trusted-public-keys = nixos:6s8iAyKEnH2z4spigUdDmt1VwiAwrvPA9vQNUd9if1k= cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= nix-csi.cachix.org-1:i4w33gR4efO67jpz8U7g/MdvRQ6mQ3LEF9fB8tES60g=
+    trusted-public-keys = nixos:6s8iAyKEnH2z4spigUdDmt1VwiAwrvPA9vQNUd9if1k= powerspecnix-workstation:QPvTlnwGiEZxUT1nOhVy0OvMoI3UmD3byuzHkVVNLGg= cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= nix-csi.cachix.org-1:i4w33gR4efO67jpz8U7g/MdvRQ6mQ3LEF9fB8tES60g=
     trusted-users = root nix nix root
     warn-dirty = false
 

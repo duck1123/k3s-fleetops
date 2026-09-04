@@ -48,11 +48,16 @@
               substituters = [ "https://attic.home.kronkltd.net/nixos" ];
               trusted-public-keys = [ "nixos:6s8iAyKEnH2z4spigUdDmt1VwiAwrvPA9vQNUd9if1k=" ];
             };
-            # Lets an authorizedKeys-holding SSH pusher (e.g. `nix copy --to ssh-ng://nix@...`)
-            # add unsigned store paths directly — otherwise nix-daemon rejects them with
-            # "lacks a signature by a trusted key", since attic normally provides signing.
+            # Lets a workstation push locally-signed store paths directly via
+            # `nix copy --to ssh-ng://nix@...` — otherwise nix-daemon rejects unsigned
+            # paths with "lacks a signature by a trusted key" regardless of trusted-users,
+            # since the stdio-spawned remote daemon doesn't resolve the SSH-authenticated
+            # user as a trusted uid the way a local socket connection would.
             cacheSettings = atticSettings // {
               trusted-users = [ "nix" ];
+              trusted-public-keys = atticSettings.trusted-public-keys ++ [
+                "powerspecnix-workstation:QPvTlnwGiEZxUT1nOhVy0OvMoI3UmD3byuzHkVVNLGg="
+              ];
             };
             nixcsiEval = nixcsi.kubenixInstance {
               module.imports = [
