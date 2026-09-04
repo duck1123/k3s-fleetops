@@ -11,6 +11,7 @@ import {
 } from "./nostr.js";
 import { hasExtension, login } from "./auth.js";
 import { renderReplies, renderReplyForm, renderEngagement } from "./comments.js";
+import { renderNoteContent } from "./content.js";
 
 const pool = createPool();
 let myPubkey = null;
@@ -94,7 +95,7 @@ function renderNote(note) {
 
   const content = document.createElement("div");
   content.className = "content";
-  content.textContent = note.content;
+  renderNoteContent(content, note);
 
   const meta = document.createElement("div");
   meta.className = "meta";

@@ -1,5 +1,6 @@
 import { signEvent } from "./auth.js";
 import { publishEvent, getZapAmountSats } from "./nostr.js";
+import { renderNoteContent } from "./content.js";
 
 function formatTime(ts) {
   return new Date(ts * 1000).toLocaleString();
@@ -29,7 +30,7 @@ function renderReply(reply, profiles) {
 
   const content = document.createElement("div");
   content.className = "content";
-  content.textContent = reply.content;
+  renderNoteContent(content, reply);
 
   const meta = document.createElement("div");
   meta.className = "meta";

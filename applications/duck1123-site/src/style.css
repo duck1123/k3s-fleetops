@@ -133,6 +133,46 @@ button:disabled {
   word-break: break-word;
 }
 
+.note-link {
+  color: var(--accent);
+}
+
+.hashtag {
+  color: var(--accent);
+}
+
+.mention {
+  color: var(--accent);
+  font-style: italic;
+}
+
+.note-image-link {
+  display: block;
+  margin: 0.5rem 0;
+}
+
+.note-image {
+  max-width: 100%;
+  max-height: 360px;
+  border-radius: 8px;
+  display: block;
+}
+
+.note-media {
+  display: block;
+  width: 100%;
+  max-height: 360px;
+  margin: 0.5rem 0;
+  border-radius: 8px;
+}
+
+.note-emoji {
+  height: 1.2em;
+  width: 1.2em;
+  vertical-align: middle;
+  display: inline-block;
+}
+
 .note .meta {
   color: var(--muted);
   font-size: 0.8rem;
