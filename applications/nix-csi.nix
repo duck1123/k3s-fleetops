@@ -48,6 +48,12 @@
               substituters = [ "https://attic.home.kronkltd.net/nixos" ];
               trusted-public-keys = [ "nixos:6s8iAyKEnH2z4spigUdDmt1VwiAwrvPA9vQNUd9if1k=" ];
             };
+            # Lets an authorizedKeys-holding SSH pusher (e.g. `nix copy --to ssh-ng://nix@...`)
+            # add unsigned store paths directly — otherwise nix-daemon rejects them with
+            # "lacks a signature by a trusted key", since attic normally provides signing.
+            cacheSettings = atticSettings // {
+              trusted-users = [ "nix" ];
+            };
             nixcsiEval = nixcsi.kubenixInstance {
               module.imports = [
                 # Override curPkgs to avoid builtins.currentSystem (unavailable in pure eval)
@@ -59,7 +65,7 @@
                     # Bootstrap components (cache-init-env, proxy-env, etc.) aren't
                     # published to nix-csi.cachix.org for every commit — our own
                     # cache closes that gap so cold-starts don't depend on upstream CI.
-                    cache.nixConfig.settings = atticSettings;
+                    cache.nixConfig.settings = cacheSettings;
                     node.nixConfig.settings = atticSettings;
                     builders.nixConfig.settings = atticSettings;
                   };
