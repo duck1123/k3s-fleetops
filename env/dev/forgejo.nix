@@ -2,10 +2,8 @@
 {
   services.forgejo = {
     admin = { inherit (secrets.forgejo.admin) password username; };
-    enable = true;
-
+    enable = false;
     ingressProvider = "traefik-lan";
-
     monitoring.autokuma.enable = true;
 
     postgresql = {

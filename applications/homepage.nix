@@ -22,23 +22,31 @@
       # both `enable`s itself and opts into the dashboard, grouped by
       # `homepage.group`, so this stays in sync with whatever's switched on —
       # no manual link list to maintain alongside each app.
-      discoveredGroups = lib.foldl' (
-        acc: svc:
-        let
-          h = svc.homepage;
-          item = {
-            inherit (h) href;
-          }
-          // lib.optionalAttrs (h.icon != "") { inherit (h) icon; }
-          // lib.optionalAttrs (h.description != "") { inherit (h) description; }
-          // h.extraSettings;
-        in
-        lib.recursiveUpdate acc {
-          ${h.group} = {
-            ${h.displayName} = item;
-          };
-        }
-      ) { } (lib.filter (svc: (svc.enable or false) && (svc.homepage.enable or false)) (lib.attrValues config.services));
+      discoveredGroups =
+        lib.foldl'
+          (
+            acc: svc:
+            let
+              h = svc.homepage;
+              item = {
+                inherit (h) href;
+              }
+              // lib.optionalAttrs (h.icon != "") { inherit (h) icon; }
+              // lib.optionalAttrs (h.description != "") { inherit (h) description; }
+              // h.extraSettings;
+            in
+            lib.recursiveUpdate acc {
+              ${h.group} = {
+                ${h.displayName} = item;
+              };
+            }
+          )
+          { }
+          (
+            lib.filter (svc: (svc.enable or false) && (svc.homepage.enable or false)) (
+              lib.attrValues config.services
+            )
+          );
     in
     self.lib.mkArgoApp
       {

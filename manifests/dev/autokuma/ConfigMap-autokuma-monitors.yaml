@@ -4,7 +4,6 @@ data:
   audiobookshelf.json: '{"name":"audiobookshelf","type":"http","url":"https://audiobookshelf.home.kronkltd.net"}'
   cloudbeaver.json: '{"name":"cloudbeaver","type":"http","url":"https://cloudbeaver.home.kronkltd.net"}'
   duck1123.json: '{"name":"duck1123","type":"http","url":"https://duck1123.com"}'
-  forgejo.json: '{"name":"forgejo","type":"http","url":"https://forgejo.home.kronkltd.net"}'
   garage.json: '{"name":"garage","type":"http","url":"http://garage.garage.svc.cluster.local:3903/health"}'
   homarr.json: '{"name":"homarr","type":"http","url":"https://homarr.home.kronkltd.net"}'
   homepage.json: '{"name":"homepage","type":"http","url":"https://homepage.home.kronkltd.net"}'

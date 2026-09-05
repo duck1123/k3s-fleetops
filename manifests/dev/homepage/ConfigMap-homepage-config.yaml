@@ -10,8 +10,6 @@ data:
             href: https://audiobookshelf.home.kronkltd.net
         - cloudbeaver:
             href: https://cloudbeaver.home.kronkltd.net
-        - forgejo:
-            href: https://forgejo.home.kronkltd.net
         - garage:
             href: https://garage.home.kronkltd.net
         - homarr:
