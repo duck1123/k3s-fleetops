@@ -142,6 +142,25 @@
                 inherit pkgs;
                 value = cfg.widgets;
               };
+              # homepage lazily copies its bundled skeleton default for each of
+              # these the first time it's needed and fails hard (EROFS) if the
+              # copy target is read-only -- which our ConfigMap-backed
+              # /app/config always is. Supplying all of them up front means it
+              # never needs to write anything. We deliberately disable
+              # Kubernetes/Docker auto-discovery here since config is meant to
+              # come entirely from this Nix repo, not live cluster inspection.
+              "kubernetes.yaml" = self.lib.toYAML {
+                inherit pkgs;
+                value.mode = "disabled";
+              };
+              "docker.yaml" = self.lib.toYAML {
+                inherit pkgs;
+                value = { };
+              };
+              # Raw CSS/JS, not YAML -- toYAML would serialize "" as the
+              # two-character string `''` rather than an empty file.
+              "custom.css" = "";
+              "custom.js" = "";
             };
 
             deployments.${name} = {
