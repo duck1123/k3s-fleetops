@@ -59,6 +59,7 @@
     ./nocodb.nix
     ./openldap.nix
     ./opentelemetry-collector.nix
+    ./paperless-ngx.nix
     ./pihole.nix
     ./postgresql.nix
     ./promtail.nix

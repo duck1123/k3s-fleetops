@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  name: paperless-ngx
+  namespace: paperless-ngx
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: paperless-ngx.home.kronkltd.net
+      http:
+        paths:
+          - backend:
+              service:
+                name: paperless-ngx
+                port:
+                  name: http
+            path: /
+            pathType: ImplementationSpecific
+  tls:
+    - hosts:
+        - paperless-ngx.home.kronkltd.net
+      secretName: paperless-ngx-tls

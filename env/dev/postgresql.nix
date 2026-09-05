@@ -69,6 +69,11 @@
           username = "xyops";
           password = secrets.postgresql.userPassword;
         }
+        {
+          name = "paperless-ngx";
+          username = "paperless-ngx";
+          password = secrets.postgresql.userPassword;
+        }
       ];
   };
 }

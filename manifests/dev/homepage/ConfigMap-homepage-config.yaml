@@ -24,6 +24,8 @@ data:
             href: https://longhorn.home.kronkltd.net
         - memos:
             href: https://memos.home.kronkltd.net
+        - paperless-ngx:
+            href: https://paperless-ngx.home.kronkltd.net
         - prowlarr:
             href: https://prowlarr.home.kronkltd.net
         - qbittorrent:

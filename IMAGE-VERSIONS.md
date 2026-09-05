@@ -50,6 +50,7 @@ These images have explicit version tags and require manual checks.
 | Service | File | Image | Current Tag | Check URL |
 |---------|------|-------|-------------|-----------|
 | nocodb | applications/nocodb.nix | nocodb/nocodb | 2026.08.0 | https://hub.docker.com/r/nocodb/nocodb/tags |
+| paperless-ngx | applications/paperless-ngx.nix | ghcr.io/paperless-ngx/paperless-ngx | 2.14.7 | https://github.com/paperless-ngx/paperless-ngx/releases |
 | radarr | env/dev/radarr.nix | linuxserver/radarr | 6.3.0.10514-ls313 | https://hub.docker.com/r/linuxserver/radarr/tags |
 | sonarr | env/dev/sonarr.nix | linuxserver/sonarr | 4.0.19.2979-ls321 | https://hub.docker.com/r/linuxserver/sonarr/tags |
 | tdarr | env/dev/tdarr.nix | ghcr.io/haveagitgat/tdarr | 2.86.01 | https://github.com/HaveAGitGat/Tdarr (GHCR tags are authoritative; GitHub Releases page is stale) |
