@@ -202,6 +202,17 @@
                           httpGet = {
                             path = "/";
                             port = 3000;
+                            # kubelet's probe connects straight to the pod IP, which
+                            # HOMEPAGE_ALLOWED_HOSTS rejects (it validates the Host
+                            # header, not the actual origin). Override it to a value
+                            # homepage allows by default rather than adding a
+                            # per-pod-IP entry to the allowlist.
+                            httpHeaders = [
+                              {
+                                name = "Host";
+                                value = "localhost:3000";
+                              }
+                            ];
                           };
                           initialDelaySeconds = 10;
                           periodSeconds = 10;
@@ -213,6 +224,12 @@
                           httpGet = {
                             path = "/";
                             port = 3000;
+                            httpHeaders = [
+                              {
+                                name = "Host";
+                                value = "localhost:3000";
+                              }
+                            ];
                           };
                           initialDelaySeconds = 20;
                           periodSeconds = 30;

@@ -32,6 +32,9 @@ spec:
           livenessProbe:
             failureThreshold: 3
             httpGet:
+              httpHeaders:
+                - name: Host
+                  value: localhost:3000
               path: /
               port: 3000
             initialDelaySeconds: 20
@@ -46,6 +49,9 @@ spec:
           readinessProbe:
             failureThreshold: 3
             httpGet:
+              httpHeaders:
+                - name: Host
+                  value: localhost:3000
               path: /
               port: 3000
             initialDelaySeconds: 10
