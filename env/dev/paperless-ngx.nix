@@ -5,7 +5,7 @@
 
     databaseTarget = "postgresql";
 
-    inherit (secrets.paperless-ngx) adminUser adminPassword;
+    inherit (secrets.paperless-ngx) adminUser adminPassword secretKey;
 
     redis = {
       host = "redis.redis";

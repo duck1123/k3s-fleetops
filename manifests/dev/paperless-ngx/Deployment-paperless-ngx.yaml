@@ -51,6 +51,11 @@ spec:
                 secretKeyRef:
                   key: url
                   name: paperless-ngx-redis
+            - name: PAPERLESS_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: key
+                  name: paperless-ngx-secret-key
             - name: PAPERLESS_ADMIN_USER
               valueFrom:
                 secretKeyRef:
