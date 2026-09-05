@@ -38,7 +38,7 @@
           image = mkOption {
             description = mdDoc "The docker image";
             type = types.str;
-            default = "ghcr.io/paperless-ngx/paperless-ngx:2.14.7";
+            default = "ghcr.io/paperless-ngx/paperless-ngx:3.1.3";
           };
 
           service.port = mkOption {

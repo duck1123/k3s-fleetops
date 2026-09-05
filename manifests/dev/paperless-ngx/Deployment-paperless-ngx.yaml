@@ -61,7 +61,7 @@ spec:
                 secretKeyRef:
                   key: password
                   name: paperless-ngx-admin
-          image: ghcr.io/paperless-ngx/paperless-ngx:2.14.7
+          image: ghcr.io/paperless-ngx/paperless-ngx:3.1.3
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
