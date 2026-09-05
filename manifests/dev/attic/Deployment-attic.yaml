@@ -23,10 +23,6 @@ spec:
           env:
             - name: TZ
               value: Etc/UTC
-            - name: AWS_REGION
-              value: garage
-            - name: AWS_DEFAULT_REGION
-              value: garage
             - name: ATTIC_SERVER_TOKEN_HS256_SECRET_BASE64
               valueFrom:
                 secretKeyRef:

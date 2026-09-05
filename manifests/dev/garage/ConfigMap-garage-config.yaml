@@ -11,7 +11,16 @@ data:
     rpc_public_addr = "127.0.0.1:3901"
 
     [s3_api]
-    s3_region = "garage"
+    # "us-east-1" despite this being self-hosted, not AWS: attic-server's
+    # get_nar handler hardcodes prefer_stream=false for single-chunk NARs
+    # (github.com/zhaofengli/attic server/src/api/binary_cache.rs), which
+    # routes those downloads through presigned S3 URLs. Its presigning
+    # codepath signs with us-east-1 unconditionally, ignoring both
+    # [storage].region in server.toml and AWS_REGION/AWS_DEFAULT_REGION --
+    # so Garage must accept that literal region string regardless of what
+    # attic's own config claims. See applications/attic.nix and
+    # applications/xyops.nix, which must both match this value.
+    s3_region = "us-east-1"
     api_bind_addr = "[::]:3900"
 
     [admin]

@@ -59,7 +59,7 @@ spec:
             - name: XYOPS_Storage__AWS__forcePathStyle
               value: "true"
             - name: XYOPS_Storage__AWS__region
-              value: garage
+              value: us-east-1
             - name: XYOPS_Storage__S3__params__Bucket
               value: default
             - name: XYOPS_Storage__S3__keyPrefix

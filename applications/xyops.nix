@@ -90,7 +90,7 @@
             region = mkOption {
               description = mdDoc "S3 region (must match garage's configured s3_region, see applications/garage.nix)";
               type = types.str;
-              default = "garage";
+              default = "us-east-1";
             };
 
             endpoint = mkOption {

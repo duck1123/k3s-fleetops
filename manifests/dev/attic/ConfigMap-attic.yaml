@@ -12,7 +12,7 @@ data:
 
     [storage]
     type = "s3"
-    region = "garage"
+    region = "us-east-1"
     bucket = "default"
     endpoint = "https://garage.home.kronkltd.net"
 

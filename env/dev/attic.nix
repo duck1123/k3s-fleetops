@@ -17,7 +17,10 @@
       # content-hash-based so collision risk with other garage tenants
       # (e.g. xyops) is effectively nil.
       bucket = "default";
-      region = "garage";
+      # Must match garage's configured s3_region (see applications/garage.nix) --
+      # "us-east-1" because that's what attic-server's presigned-download
+      # codepath hardcodes regardless of this value, not because Garage cares.
+      region = "us-east-1";
       # Use garage's ingress rather than the in-cluster garage.garage
       # ClusterIP: atticd generates presigned nar-download URLs against
       # whatever host this is, and garage.garage is only resolvable from
