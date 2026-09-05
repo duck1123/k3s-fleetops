@@ -8,5 +8,5 @@ in
 fromCRD {
   name = "sops";
   src = sops-secrets-operator;
-  crds = [ "crds/isindir.github.com_sopssecrets.yaml" ];
+  crdFiles = [ "crds/isindir.github.com_sopssecrets.yaml" ];
 }

@@ -15,7 +15,7 @@ fromCRD {
     rev = "v1.15.6";
     hash = "sha256-oC6pjtiS8HvqzzRQsE+2bm6JP7Y3cbupXxCKSvP6/kU=";
   };
-  crds = [
+  crdFiles = [
     "pkg/k8s/apis/cilium.io/client/crds/v2/ciliumnetworkpolicies.yaml"
     "pkg/k8s/apis/cilium.io/client/crds/v2/ciliumclusterwidenetworkpolicies.yaml"
   ];

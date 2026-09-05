@@ -6,7 +6,7 @@ in
 fromCRD {
   name = "traefik";
   src = traefik;
-  crds = [
+  crdFiles = [
     "crds/traefik.io_ingressroutes.yaml"
     "crds/traefik.io_ingressroutetcps.yaml"
     "crds/traefik.io_ingressrouteudps.yaml"

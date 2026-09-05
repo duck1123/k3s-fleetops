@@ -15,7 +15,7 @@ fromCRD {
     rev = "v1.17.1";
     hash = "sha256-cp4y4NULf2e9lwwO4OiAbUNfXkE20ptnSTZjOMmFKgM=";
   };
-  crds = [
+  crdFiles = [
     "deploy/crds/crd-certificaterequests.yaml"
     "deploy/crds/crd-certificates.yaml"
     "deploy/crds/crd-challenges.yaml"
