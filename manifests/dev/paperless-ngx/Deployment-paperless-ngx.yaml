@@ -7,7 +7,7 @@ metadata:
   name: paperless-ngx
   namespace: paperless-ngx
 spec:
-  replicas: 0
+  replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/instance: paperless-ngx
