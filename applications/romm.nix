@@ -215,27 +215,6 @@
             };
           };
 
-          ingress.localIngress = {
-            enable = mkOption {
-              description = mdDoc "Enable a local-only ingress using Traefik";
-              type = types.bool;
-              default = false;
-            };
-
-            domain = mkOption {
-              description = mdDoc "The local domain to expose ${name} to (e.g., ${name}.local)";
-              type = types.str;
-              default = "${name}.local";
-            };
-
-            tls = {
-              enable = mkOption {
-                description = mdDoc "Enable TLS for local ingress";
-                type = types.bool;
-                default = false;
-              };
-            };
-          };
         };
 
         extraResources =

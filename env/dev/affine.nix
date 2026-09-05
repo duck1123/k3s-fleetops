@@ -15,12 +15,6 @@
     serverExternalUrl = "https://affine.${config.devDefaults.homeDomain}";
 
     ingressProvider = "traefik-lan";
-    ingress.localIngress = {
-      enable = true;
-      domain = "affine.${config.devDefaults.homeDomain}";
-      clusterIssuer = config.devDefaults.clusterIssuer;
-      tls.enable = true;
-    };
 
     storageClassName = "longhorn";
   };

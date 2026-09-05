@@ -12,12 +12,6 @@
     hostAffinity = "edgenix";
 
     ingressProvider = "traefik-lan";
-    ingress.localIngress = {
-      enable = true;
-      domain = "grafana.${config.devDefaults.homeDomain}";
-      clusterIssuer = config.devDefaults.clusterIssuer;
-      tls.enable = true;
-    };
 
     additionalDatasources = [
       {

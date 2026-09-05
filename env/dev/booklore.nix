@@ -1,4 +1,4 @@
-{ config, ... }:
+{ ... }:
 {
   services.booklore = {
     enable = false;
@@ -9,12 +9,6 @@
     gid = "0";
 
     ingressProvider = "traefik-lan";
-    ingress.localIngress = {
-      enable = true;
-      domain = "booklore.${config.devDefaults.homeDomain}";
-      clusterIssuer = config.devDefaults.clusterIssuer;
-      tls.enable = true;
-    };
 
     nfsTarget = "nas";
     nfsSubPath = "Books";

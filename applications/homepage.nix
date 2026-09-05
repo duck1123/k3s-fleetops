@@ -120,9 +120,7 @@
               ${groupName} = lib.mapAttrsToList (itemName: item: { ${itemName} = [ item ]; }) items;
             }) cfg.bookmarkGroups;
 
-            allowedHosts = [ cfg.ingress.domain ]
-            ++ lib.optional cfg.ingress.localIngress.enable cfg.ingress.localIngress.domain
-            ++ cfg.extraAllowedHosts;
+            allowedHosts = [ cfg.ingress.domain ] ++ cfg.extraAllowedHosts;
           in
           {
             configMaps.${config-configmap}.data = {

@@ -46,10 +46,8 @@
     let
       inherit (types)
         attrs
-        int
         listOf
         nullOr
-        oneOf
         path
         str
         submodule
@@ -137,39 +135,6 @@
         };
 
         tls = tls-options;
-
-        localIngress = {
-          enable = mkEnableOption "Enable a local-only Traefik ingress for LAN access (requires wildcard DNS → Traefik IP)";
-
-          domain = mkOption {
-            description = mdDoc "Local domain to expose ${name} on (e.g. ${name}.local)";
-            type = str;
-            default = "${name}.local";
-          };
-
-          serviceName = mkOption {
-            description = mdDoc "Kubernetes Service name to route to. Defaults to the app name.";
-            type = nullOr str;
-            default = null;
-          };
-
-          servicePort = mkOption {
-            description = mdDoc "Service port — a string selects a named port, an int selects by port number.";
-            type = oneOf [
-              str
-              int
-            ];
-            default = "http";
-          };
-
-          tls.enable = mkEnableOption "Enable TLS on the local ingress";
-
-          clusterIssuer = mkOption {
-            description = mdDoc "cert-manager ClusterIssuer name for TLS certificate issuance. When set, adds the cert-manager annotation and a named TLS secret to the ingress.";
-            type = str;
-            default = "";
-          };
-        };
       };
       nfs-options = {
         enable = mkEnableOption "an NFS mount for ${name}";
@@ -564,56 +529,9 @@
               # This is the application config for nixidy
               applications.${name} =
                 let
-                  localIngressResources =
-                    if uses-ingress && cfg.ingress.localIngress.enable then
-                      let
-                        svcName =
-                          if cfg.ingress.localIngress.serviceName != null then cfg.ingress.localIngress.serviceName else name;
-                        svcPort =
-                          let
-                            p = cfg.ingress.localIngress.servicePort;
-                          in
-                          if builtins.isInt p then { number = p; } else { name = p; };
-                      in
-                      {
-                        ingresses."${name}-local" = with cfg.ingress.localIngress; {
-                          metadata.annotations = lib.optionalAttrs (clusterIssuer != "") {
-                            "cert-manager.io/cluster-issuer" = clusterIssuer;
-                          };
-                          spec = {
-                            ingressClassName = "traefik";
-                            rules = [
-                              {
-                                host = domain;
-                                http.paths = [
-                                  {
-                                    backend.service = {
-                                      name = svcName;
-                                      port = svcPort;
-                                    };
-                                    path = "/";
-                                    pathType = "ImplementationSpecific";
-                                  }
-                                ];
-                              }
-                            ];
-                            tls = lib.optionals tls.enable [
-                              {
-                                hosts = [ domain ];
-                                secretName = lib.optionalString (clusterIssuer != "") "${name}-local-tls";
-                              }
-                            ];
-                          };
-                        };
-                      }
-                    else
-                      { };
-                  # App's own resources take precedence over the auto-generated localIngress.
                   # sopsSecrets are intentionally excluded: encryption happens outside Nix via
                   # scripts/write-sops-secrets.sh so plaintext values never enter the Nix store.
-                  baseResources = lib.recursiveUpdate localIngressResources (
-                    lib.recursiveUpdate (extraResources cfg) cfg.extraResources
-                  );
+                  baseResources = lib.recursiveUpdate (extraResources cfg) cfg.extraResources;
                   resources = addHostAffinityToResources (builtins.removeAttrs baseResources [
                     "sopsSecrets"
                   ]) cfg.hostAffinity;
