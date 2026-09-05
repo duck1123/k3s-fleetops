@@ -1,0 +1,57 @@
+apiVersion: v1
+data:
+  bookmarks.yaml: |
+    []
+  services.yaml: |
+    - Apps:
+        - attic:
+            href: https://attic.home.kronkltd.net
+        - audiobookshelf:
+            href: https://audiobookshelf.home.kronkltd.net
+        - cloudbeaver:
+            href: https://cloudbeaver.home.kronkltd.net
+        - garage:
+            href: https://garage.home.kronkltd.net
+        - homarr:
+            href: https://homarr.home.kronkltd.net
+        - immich:
+            href: https://immich.home.kronkltd.net
+        - komga:
+            href: https://komga.home.kronkltd.net
+        - lidarr:
+            href: https://lidarr.home.kronkltd.net
+        - longhorn:
+            href: https://longhorn.home.kronkltd.net
+        - memos:
+            href: https://memos.home.kronkltd.net
+        - prowlarr:
+            href: https://prowlarr.home.kronkltd.net
+        - qbittorrent:
+            href: https://qbittorrent.home.kronkltd.net
+        - radarr:
+            href: https://radarr.home.kronkltd.net
+        - sabnzbd:
+            href: https://sabnzbd.home.kronkltd.net
+        - slskd:
+            href: https://slskd.home.kronkltd.net
+        - sonarr:
+            href: https://sonarr.home.kronkltd.net
+        - stashapp:
+            href: https://stashapp.home.kronkltd.net
+        - tdarr:
+            href: https://tdarr.home.kronkltd.net
+        - trilium:
+            href: https://trilium.home.kronkltd.net
+        - uptime-kuma:
+            href: https://uptime-kuma.home.kronkltd.net
+        - xyops:
+            href: https://xyops.home.kronkltd.net
+  settings.yaml: |
+    theme: dark
+    title: Homelab
+  widgets.yaml: |
+    []
+kind: ConfigMap
+metadata:
+  name: homepage-config
+  namespace: homepage

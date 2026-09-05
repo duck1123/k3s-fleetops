@@ -164,6 +164,20 @@
                           value = cfg.tz;
                         }
                         {
+                          # atticd's S3 client resolves region via the AWS SDK's
+                          # standard provider chain rather than [storage].region
+                          # in server.toml, so without this it signs requests as
+                          # us-east-1 regardless of the config file. Garage
+                          # enforces its configured s3_region and rejects the
+                          # mismatch with AuthorizationHeaderMalformed.
+                          name = "AWS_REGION";
+                          value = cfg.storage.region;
+                        }
+                        {
+                          name = "AWS_DEFAULT_REGION";
+                          value = cfg.storage.region;
+                        }
+                        {
                           name = "ATTIC_SERVER_TOKEN_HS256_SECRET_BASE64";
                           valueFrom.secretKeyRef = {
                             name = token-secret;
