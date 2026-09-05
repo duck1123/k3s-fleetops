@@ -61,11 +61,23 @@ spec:
           volumeMounts:
             - mountPath: /app/config
               name: config
-            - mountPath: /app/config/logs
-              name: logs
+      initContainers:
+        - command:
+            - sh
+            - -c
+            - cp -r /app/src/skeleton/. /app/config/ && cp -f /config-src/*.yaml /app/config/
+          image: ghcr.io/gethomepage/homepage:latest
+          imagePullPolicy: IfNotPresent
+          name: config-init
+          volumeMounts:
+            - mountPath: /app/config
+              name: config
+            - mountPath: /config-src
+              name: config-src
+              readOnly: true
       volumes:
+        - emptyDir: {}
+          name: config
         - configMap:
             name: homepage-config
-          name: config
-        - emptyDir: {}
-          name: logs
+          name: config-src

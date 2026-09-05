@@ -142,25 +142,6 @@
                 inherit pkgs;
                 value = cfg.widgets;
               };
-              # homepage lazily copies its bundled skeleton default for each of
-              # these the first time it's needed and fails hard (EROFS) if the
-              # copy target is read-only -- which our ConfigMap-backed
-              # /app/config always is. Supplying all of them up front means it
-              # never needs to write anything. We deliberately disable
-              # Kubernetes/Docker auto-discovery here since config is meant to
-              # come entirely from this Nix repo, not live cluster inspection.
-              "kubernetes.yaml" = self.lib.toYAML {
-                inherit pkgs;
-                value.mode = "disabled";
-              };
-              "docker.yaml" = self.lib.toYAML {
-                inherit pkgs;
-                value = { };
-              };
-              # Raw CSS/JS, not YAML -- toYAML would serialize "" as the
-              # two-character string `''` rather than an empty file.
-              "custom.css" = "";
-              "custom.js" = "";
             };
 
             deployments.${name} = {
@@ -176,6 +157,39 @@
                 template = {
                   metadata.labels = labels;
                   spec = {
+                    initContainers = [
+                      {
+                        name = "config-init";
+                        image = cfg.image;
+                        imagePullPolicy = "IfNotPresent";
+                        # homepage lazily copies its own bundled skeleton default
+                        # for whatever config file it needs the first time it's
+                        # asked for one (kubernetes.yaml, docker.yaml, custom.css,
+                        # custom.js, proxmox.yaml, ... -- an open-ended and
+                        # version-dependent list, confirmed by it crashing on a
+                        # different missing file each time one was pre-empted).
+                        # Rather than chase that list, seed a writable /app/config
+                        # from the image's own skeleton, then overlay only the
+                        # files we actually manage from the read-only ConfigMap.
+                        command = [
+                          "sh"
+                          "-c"
+                          "cp -r /app/src/skeleton/. /app/config/ && cp -f /config-src/*.yaml /app/config/"
+                        ];
+                        volumeMounts = [
+                          {
+                            name = "config";
+                            mountPath = "/app/config";
+                          }
+                          {
+                            name = "config-src";
+                            mountPath = "/config-src";
+                            readOnly = true;
+                          }
+                        ];
+                      }
+                    ];
+
                     containers = [
                       {
                         inherit name;
@@ -242,25 +256,20 @@
                             name = "config";
                             mountPath = "/app/config";
                           }
-                          {
-                            # ConfigMap mounts are read-only; homepage writes its own
-                            # logs under the config dir, so give it a writable
-                            # overlay there instead of the whole ConfigMap volume.
-                            name = "logs";
-                            mountPath = "/app/config/logs";
-                          }
                         ];
                       }
                     ];
 
                     volumes = [
                       {
+                        # Writable -- seeded by the config-init initContainer from
+                        # the image's own skeleton, then overlaid with our config.
                         name = "config";
-                        configMap.name = config-configmap;
+                        emptyDir = { };
                       }
                       {
-                        name = "logs";
-                        emptyDir = { };
+                        name = "config-src";
+                        configMap.name = config-configmap;
                       }
                     ];
                   };
