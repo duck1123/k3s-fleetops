@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-options: Replace=true
+  name: gitea-shared-storage-pv
+spec:
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 10Gi
+  csi:
+    driver: driver.longhorn.io
+    fsType: ext4
+    volumeAttributes:
+      dataEngine: v1
+      dataLocality: disabled
+      disableRevisionCounter: "true"
+      fromBackup: ""
+      fsType: ext4
+      numberOfReplicas: "1"
+      staleReplicaTimeout: "30"
+      unmapMarkSnapChainRemoved: ignored
+    volumeHandle: pvc-13e105ec-412c-4937-a19c-1b385f026664
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
