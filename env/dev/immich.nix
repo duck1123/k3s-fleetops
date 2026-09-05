@@ -15,12 +15,6 @@
 
     hostAffinity = "nixmini";
 
-    # Temporarily scaled to 0 while the library PVC is swapped to its pinned
-    # equivalent (see applications/immich.nix) -- avoids a live pod holding
-    # the old PVC and blocking its deletion. Revert to 1 once the new pinned
-    # PVC is Bound.
-    replicas = 0;
-
     externalLibrary = {
       enable = true;
       server = config.devDefaults.nasHost;
