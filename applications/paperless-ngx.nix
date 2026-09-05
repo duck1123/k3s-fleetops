@@ -123,7 +123,34 @@
           };
 
         extraResources =
-          cfg: with cfg; {
+          cfg:
+          let
+            # Volume handles captured from the live cluster after the initial dynamic-PVC
+            # deploy (`kubectl get pv -o jsonpath='{.spec.csi.volumeHandle}'`) so disable/
+            # re-enable cycles rebind to the same data instead of provisioning empty volumes.
+            pinnedData = self.lib.mkPinnedVolume {
+              pvcName = "${name}-data";
+              volumeHandle = "pvc-a4fa895d-d3ee-46de-85ad-d25e2b4be3b2";
+              size = "1Gi";
+            };
+            pinnedMedia = self.lib.mkPinnedVolume {
+              pvcName = "${name}-media";
+              volumeHandle = "pvc-9ac4dcc3-29d3-4acc-8b6d-8dc96d0ff256";
+              size = "20Gi";
+            };
+            pinnedExport = self.lib.mkPinnedVolume {
+              pvcName = "${name}-export";
+              volumeHandle = "pvc-867ee2c3-0479-48dd-8788-45cbc629bf59";
+              size = "1Gi";
+            };
+            pinnedConsume = self.lib.mkPinnedVolume {
+              pvcName = "${name}-consume";
+              volumeHandle = "pvc-594d132e-e8f6-444a-988d-f649856d055a";
+              size = "2Gi";
+            };
+          in
+          with cfg;
+          {
             deployments.${name} = {
               metadata.labels = {
                 "app.kubernetes.io/instance" = name;
@@ -348,28 +375,17 @@
               };
             };
 
-            persistentVolumeClaims = {
-              "${name}-data".spec = {
-                inherit (cfg) storageClassName;
-                accessModes = [ "ReadWriteOnce" ];
-                resources.requests.storage = "1Gi";
-              };
-              "${name}-media".spec = {
-                inherit (cfg) storageClassName;
-                accessModes = [ "ReadWriteOnce" ];
-                resources.requests.storage = "20Gi";
-              };
-              "${name}-export".spec = {
-                inherit (cfg) storageClassName;
-                accessModes = [ "ReadWriteOnce" ];
-                resources.requests.storage = "1Gi";
-              };
-              "${name}-consume".spec = {
-                inherit (cfg) storageClassName;
-                accessModes = [ "ReadWriteOnce" ];
-                resources.requests.storage = "2Gi";
-              };
-            };
+            persistentVolumeClaims =
+              pinnedData.persistentVolumeClaims
+              // pinnedMedia.persistentVolumeClaims
+              // pinnedExport.persistentVolumeClaims
+              // pinnedConsume.persistentVolumeClaims;
+
+            persistentVolumes =
+              pinnedData.persistentVolumes
+              // pinnedMedia.persistentVolumes
+              // pinnedExport.persistentVolumes
+              // pinnedConsume.persistentVolumes;
 
             services.${name}.spec = {
               ports = [
