@@ -144,8 +144,7 @@ def "nu-complete apps" [] {
   )
 }
 
-# List every app name accepted by `nur apps restart` (one per line — also what
-# the carapace completion spec in scripts/nur-carapace-spec.yaml shells out to)
+# List every app name accepted by `nur apps restart` (one per line)
 export def "nur apps list" [] {
   nu-complete apps | str join "\n" | print
 }
@@ -156,7 +155,7 @@ export def "nur apps list" [] {
 # a non-default namespace or several workloads (Helm charts, nix-csi) aren't
 # resolved here — restart those manually with kubectl.
 export def "nur apps restart" [
-  name: string@"nu-complete apps"   # App name — see `nur apps list`
+  name: string   # App name — see `nur apps list`
 ] {
   if not ($name in (nu-complete apps)) {
     error make {msg: $"Unknown app ($name). Run `nur apps list` to see valid names."}

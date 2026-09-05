@@ -65,8 +65,7 @@ nur sealed-secrets install-key        # Upload sealed-secrets TLS keypair (tls.c
 nur sealed-secrets apply-label        # Mark uploaded key as active
 nur apply-git-hooks                   # Register git hooks for this repo
 nur apps list                         # List app names known to `nur apps restart` (from applications/default.nix)
-nur apps restart <name>               # Roll an app's Deployment/StatefulSet in namespace <name> — tab-completes;
-                                       # see scripts/nur-carapace-spec.yaml to enable that in your shell
+nur apps restart <name>               # Roll an app's Deployment/StatefulSet in namespace <name>
 ```
 
 ### Database
