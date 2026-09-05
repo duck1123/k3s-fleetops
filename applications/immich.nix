@@ -216,159 +216,172 @@
           ingress.main.enabled = false;
         };
 
-        extraResources = cfg: {
-          ingresses.${name} = {
-            metadata.annotations."cert-manager.io/cluster-issuer" = cfg.ingress.clusterIssuer;
-
-            spec = with cfg.ingress; {
-              inherit ingressClassName;
-
-              rules = [
-                {
-                  host = domain;
-
-                  http.paths = [
-                    {
-                      backend.service = {
-                        name = "${name}-server";
-                        port.name = "http";
-                      };
-
-                      path = "/";
-                      pathType = "ImplementationSpecific";
-                    }
-                  ];
-                }
-              ];
-
-              tls = [
-                {
-                  hosts = [ domain ];
-                  secretName = "${name}-tls";
-                }
-              ];
+        extraResources =
+          cfg:
+          let
+            # Volume handle captured from the live cluster (`kubectl get pv -o
+            # jsonpath='{.spec.csi.volumeHandle}'`) for the 100Gi photo/video library --
+            # pins disable/re-enable cycles to the same data instead of a fresh empty PVC.
+            pinnedLibrary = self.lib.mkPinnedVolume {
+              pvcName = "${name}-${name}-library";
+              volumeHandle = "pvc-d794cdee-ffa7-4885-a2be-b741de8dd416";
+              size = "100Gi";
             };
-          };
+          in
+          {
+            ingresses.${name} = {
+              metadata.annotations."cert-manager.io/cluster-issuer" = cfg.ingress.clusterIssuer;
 
-          # Create NFS PersistentVolumes when NFS options are enabled
-          persistentVolumes =
-            (lib.optionalAttrs cfg.nfs.enable {
-              "${name}-${name}-library-nfs" = {
-                apiVersion = "v1";
-                kind = "PersistentVolume";
-                metadata.name = "${name}-${name}-library-nfs";
-                spec = {
-                  accessModes = [ "ReadWriteMany" ];
-                  capacity.storage = "1Ti";
-                  mountOptions = [
-                    "nolock"
-                    "noexec"
-                    "soft"
-                    "timeo=30"
-                  ];
-                  nfs = {
-                    server = cfg.nfs.server;
-                    path = cfg.nfs.path;
-                  };
-                  persistentVolumeReclaimPolicy = "Retain";
-                };
+              spec = with cfg.ingress; {
+                inherit ingressClassName;
+
+                rules = [
+                  {
+                    host = domain;
+
+                    http.paths = [
+                      {
+                        backend.service = {
+                          name = "${name}-server";
+                          port.name = "http";
+                        };
+
+                        path = "/";
+                        pathType = "ImplementationSpecific";
+                      }
+                    ];
+                  }
+                ];
+
+                tls = [
+                  {
+                    hosts = [ domain ];
+                    secretName = "${name}-tls";
+                  }
+                ];
               };
-            })
-            // (lib.optionalAttrs cfg.externalLibrary.enable {
-              "${name}-${name}-external-library-nfs" = {
-                apiVersion = "v1";
-                kind = "PersistentVolume";
-                metadata.name = "${name}-${name}-external-library-nfs";
-                spec = {
+            };
+
+            # Create NFS PersistentVolumes when NFS options are enabled
+            persistentVolumes =
+              (lib.optionalAttrs cfg.nfs.enable {
+                "${name}-${name}-library-nfs" = {
+                  apiVersion = "v1";
+                  kind = "PersistentVolume";
+                  metadata.name = "${name}-${name}-library-nfs";
+                  spec = {
+                    accessModes = [ "ReadWriteMany" ];
+                    capacity.storage = "1Ti";
+                    mountOptions = [
+                      "nolock"
+                      "noexec"
+                      "soft"
+                      "timeo=30"
+                    ];
+                    nfs = {
+                      server = cfg.nfs.server;
+                      path = cfg.nfs.path;
+                    };
+                    persistentVolumeReclaimPolicy = "Retain";
+                  };
+                };
+              })
+              // (lib.optionalAttrs (!cfg.nfs.enable) pinnedLibrary.persistentVolumes)
+              // (lib.optionalAttrs cfg.externalLibrary.enable {
+                "${name}-${name}-external-library-nfs" = {
+                  apiVersion = "v1";
+                  kind = "PersistentVolume";
+                  metadata.name = "${name}-${name}-external-library-nfs";
+                  spec = {
+                    accessModes = [ "ReadOnlyMany" ];
+                    capacity.storage = "1Ti";
+                    mountOptions = [
+                      "nolock"
+                      "noexec"
+                      "soft"
+                      "timeo=30"
+                    ];
+                    nfs = {
+                      server = cfg.externalLibrary.server;
+                      path = cfg.externalLibrary.path;
+                    };
+                    persistentVolumeReclaimPolicy = "Retain";
+                  };
+                };
+              });
+
+            # NFS-backed PVC when NFS is enabled; otherwise pin to the existing
+            # dynamically-provisioned Longhorn volume (see pinnedLibrary above) so
+            # disable/re-enable cycles rebind to the same photo library.
+            persistentVolumeClaims =
+              (
+                if cfg.nfs.enable then
+                  {
+                    "${name}-${name}-library".spec = {
+                      accessModes = [ "ReadWriteMany" ];
+                      resources.requests.storage = "1Gi";
+                      storageClassName = "";
+                      volumeName = "${name}-${name}-library-nfs";
+                    };
+                  }
+                else
+                  pinnedLibrary.persistentVolumeClaims
+              )
+              // (lib.optionalAttrs cfg.externalLibrary.enable {
+                "${name}-${name}-external-library".spec = {
                   accessModes = [ "ReadOnlyMany" ];
-                  capacity.storage = "1Ti";
-                  mountOptions = [
-                    "nolock"
-                    "noexec"
-                    "soft"
-                    "timeo=30"
-                  ];
-                  nfs = {
-                    server = cfg.externalLibrary.server;
-                    path = cfg.externalLibrary.path;
-                  };
-                  persistentVolumeReclaimPolicy = "Retain";
-                };
-              };
-            });
-
-          # Create PVC for NFS library volume when NFS is enabled
-          persistentVolumeClaims = {
-            "${name}-${name}-library".spec =
-              if cfg.nfs.enable then
-                {
-                  accessModes = [ "ReadWriteMany" ];
                   resources.requests.storage = "1Gi";
                   storageClassName = "";
-                  volumeName = "${name}-${name}-library-nfs";
-                }
-              else
-                {
-                  inherit (cfg) storageClassName;
-                  accessModes = [ "ReadWriteOnce" ];
-                  resources.requests.storage = "100Gi";
+                  volumeName = "${name}-${name}-external-library-nfs";
                 };
-          }
-          // (lib.optionalAttrs cfg.externalLibrary.enable {
-            "${name}-${name}-external-library".spec = {
-              accessModes = [ "ReadOnlyMany" ];
-              resources.requests.storage = "1Gi";
-              storageClassName = "";
-              volumeName = "${name}-${name}-external-library-nfs";
-            };
-          });
+              });
 
-          # Job to enable vector extension in PostgreSQL database
-          # Uses ArgoCD sync hook to run after secrets are created but before Immich is deployed
-          jobs = {
-            "${name}-enable-vector-extension" = {
-              metadata.annotations = {
-                "argocd.argoproj.io/hook" = "Sync";
-                "argocd.argoproj.io/hook-delete-policy" = "BeforeHookCreation,HookSucceeded";
-                "argocd.argoproj.io/sync-wave" = "1";
-              };
-              spec = {
-                backoffLimit = 3;
-                template.spec = {
-                  restartPolicy = "OnFailure";
-                  containers = [
-                    {
-                      name = "enable-vector-extension";
-                      image = "docker.io/postgres:17.10";
-                      imagePullPolicy = "IfNotPresent";
-                      command = [ "psql" ];
-                      args = [
-                        "-h"
-                        cfg.database.host
-                        "-p"
-                        "${toString cfg.database.port}"
-                        "-U"
-                        cfg.database.username
-                        "-d"
-                        cfg.database.name
-                        "-c"
-                        "CREATE EXTENSION IF NOT EXISTS vector;"
-                      ];
-                      env = [
-                        {
-                          name = "PGPASSWORD";
-                          valueFrom.secretKeyRef = {
-                            name = password-secret;
-                            key = "password";
-                          };
-                        }
-                      ];
-                    }
-                  ];
+            # Job to enable vector extension in PostgreSQL database
+            # Uses ArgoCD sync hook to run after secrets are created but before Immich is deployed
+            jobs = {
+              "${name}-enable-vector-extension" = {
+                metadata.annotations = {
+                  "argocd.argoproj.io/hook" = "Sync";
+                  "argocd.argoproj.io/hook-delete-policy" = "BeforeHookCreation,HookSucceeded";
+                  "argocd.argoproj.io/sync-wave" = "1";
+                };
+                spec = {
+                  backoffLimit = 3;
+                  template.spec = {
+                    restartPolicy = "OnFailure";
+                    containers = [
+                      {
+                        name = "enable-vector-extension";
+                        image = "docker.io/postgres:17.10";
+                        imagePullPolicy = "IfNotPresent";
+                        command = [ "psql" ];
+                        args = [
+                          "-h"
+                          cfg.database.host
+                          "-p"
+                          "${toString cfg.database.port}"
+                          "-U"
+                          cfg.database.username
+                          "-d"
+                          cfg.database.name
+                          "-c"
+                          "CREATE EXTENSION IF NOT EXISTS vector;"
+                        ];
+                        env = [
+                          {
+                            name = "PGPASSWORD";
+                            valueFrom.secretKeyRef = {
+                              name = password-secret;
+                              key = "password";
+                            };
+                          }
+                        ];
+                      }
+                    ];
+                  };
                 };
               };
             };
           };
-        };
       };
 }

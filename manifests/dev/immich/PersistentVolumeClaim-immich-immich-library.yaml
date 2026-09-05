@@ -1,6 +1,8 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  annotations:
+    argocd.argoproj.io/sync-options: Replace=true
   name: immich-immich-library
   namespace: immich
 spec:
@@ -9,4 +11,5 @@ spec:
   resources:
     requests:
       storage: 100Gi
-  storageClassName: longhorn
+  storageClassName: ""
+  volumeName: immich-immich-library-pv
