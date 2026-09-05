@@ -38,7 +38,10 @@
           image = mkOption {
             description = mdDoc "The docker image";
             type = types.str;
-            default = "ghcr.io/paperless-ngx/paperless-ngx:3.1.3";
+            # TEMP: 2.20.15 is a required stepping stone before 3.1.3 -- paperless-ngx
+            # refuses to migrate straight from 2.14.7 to v3 (paperless.E002). Revert to
+            # 3.1.3 once migrations on 2.20.15 have completed successfully.
+            default = "ghcr.io/paperless-ngx/paperless-ngx:2.20.15";
           };
 
           service.port = mkOption {
