@@ -28,6 +28,7 @@
     ./hivemq.nix
     ./homer.nix
     ./homarr.nix
+    ./homepage.nix
     ./home-assistant.nix
     ./immich.nix
     ./kapowarr.nix

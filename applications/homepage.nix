@@ -1,0 +1,285 @@
+{ ... }:
+{
+  flake.nixidyApps.homepage =
+    {
+      config,
+      lib,
+      pkgs,
+      self,
+      ...
+    }:
+    with lib;
+    let
+      name = "homepage";
+      labels = {
+        "app.kubernetes.io/instance" = name;
+        "app.kubernetes.io/name" = name;
+      };
+      config-configmap = "${name}-config";
+
+      # Every mkArgoApp-based service exposes `homepage.*` (see
+      # modules/lib/mkArgoApp.nix). Collect one dashboard item per service that
+      # both `enable`s itself and opts into the dashboard, grouped by
+      # `homepage.group`, so this stays in sync with whatever's switched on —
+      # no manual link list to maintain alongside each app.
+      discoveredGroups = lib.foldl' (
+        acc: svc:
+        let
+          h = svc.homepage;
+          item = {
+            inherit (h) href;
+          }
+          // lib.optionalAttrs (h.icon != "") { inherit (h) icon; }
+          // lib.optionalAttrs (h.description != "") { inherit (h) description; }
+          // h.extraSettings;
+        in
+        lib.recursiveUpdate acc {
+          ${h.group} = {
+            ${h.displayName} = item;
+          };
+        }
+      ) { } (lib.filter (svc: (svc.enable or false) && (svc.homepage.enable or false)) (lib.attrValues config.services));
+    in
+    self.lib.mkArgoApp
+      {
+        inherit
+          config
+          lib
+          self
+          pkgs
+          ;
+      }
+      {
+        inherit name;
+        uses-ingress = true;
+
+        extraOptions = {
+          image = mkOption {
+            description = mdDoc "The homepage docker image";
+            type = types.str;
+            default = "ghcr.io/gethomepage/homepage:latest";
+          };
+
+          replicas = mkOption {
+            description = mdDoc "Number of replicas";
+            type = types.int;
+            default = 1;
+          };
+
+          settings = mkOption {
+            description = mdDoc "Raw contents of settings.yaml (title, theme, layout, ...). See https://gethomepage.dev/configs/settings/";
+            type = types.attrs;
+            default = {
+              title = "Homelab";
+              theme = "dark";
+            };
+          };
+
+          extraGroups = mkOption {
+            description = mdDoc ''
+              Extra/override dashboard groups merged with the ones auto-discovered from
+              `services.<name>.homepage.*`. Shape: `{ "Group Name".itemName = { href = "..."; icon = "..."; }; }`.
+              Use this for links that aren't a mkArgoApp service (e.g. router admin page, NAS UI).
+            '';
+            type = types.attrsOf (types.attrsOf types.attrs);
+            default = { };
+          };
+
+          bookmarkGroups = mkOption {
+            description = mdDoc ''
+              Contents of bookmarks.yaml. Shape: `{ "Group Name".bookmarkName = { href = "..."; abbr = "XX"; icon = "..."; }; }`.
+              See https://gethomepage.dev/configs/bookmarks/
+            '';
+            type = types.attrsOf (types.attrsOf types.attrs);
+            default = { };
+          };
+
+          widgets = mkOption {
+            description = mdDoc "Raw contents of widgets.yaml (info widgets like search/resources/datetime). See https://gethomepage.dev/configs/info-widgets/";
+            type = types.listOf types.attrs;
+            default = [ ];
+          };
+
+          extraAllowedHosts = mkOption {
+            description = mdDoc "Extra hostnames to add to HOMEPAGE_ALLOWED_HOSTS beyond this app's own ingress domain(s).";
+            type = types.listOf types.str;
+            default = [ ];
+          };
+        };
+
+        extraResources =
+          cfg:
+          let
+            finalGroups = lib.recursiveUpdate discoveredGroups cfg.extraGroups;
+
+            servicesYaml = lib.mapAttrsToList (groupName: items: {
+              ${groupName} = lib.mapAttrsToList (itemName: item: { ${itemName} = item; }) items;
+            }) finalGroups;
+
+            bookmarksYaml = lib.mapAttrsToList (groupName: items: {
+              ${groupName} = lib.mapAttrsToList (itemName: item: { ${itemName} = [ item ]; }) items;
+            }) cfg.bookmarkGroups;
+
+            allowedHosts = [ cfg.ingress.domain ]
+            ++ lib.optional cfg.ingress.localIngress.enable cfg.ingress.localIngress.domain
+            ++ cfg.extraAllowedHosts;
+          in
+          {
+            configMaps.${config-configmap}.data = {
+              "settings.yaml" = self.lib.toYAML {
+                inherit pkgs;
+                value = cfg.settings;
+              };
+              "services.yaml" = self.lib.toYAML {
+                inherit pkgs;
+                value = servicesYaml;
+              };
+              "bookmarks.yaml" = self.lib.toYAML {
+                inherit pkgs;
+                value = bookmarksYaml;
+              };
+              "widgets.yaml" = self.lib.toYAML {
+                inherit pkgs;
+                value = cfg.widgets;
+              };
+            };
+
+            deployments.${name} = {
+              metadata.labels = labels // {
+                "app.kubernetes.io/version" = "latest";
+              };
+
+              spec = {
+                replicas = cfg.replicas;
+                strategy.type = "Recreate";
+                selector.matchLabels = labels;
+
+                template = {
+                  metadata.labels = labels;
+                  spec = {
+                    containers = [
+                      {
+                        inherit name;
+                        image = cfg.image;
+                        imagePullPolicy = "IfNotPresent";
+                        env = [
+                          {
+                            name = "TZ";
+                            value = cfg.tz;
+                          }
+                          {
+                            name = "HOMEPAGE_ALLOWED_HOSTS";
+                            value = lib.concatStringsSep "," allowedHosts;
+                          }
+                        ];
+                        ports = [
+                          {
+                            containerPort = 3000;
+                            name = "http";
+                            protocol = "TCP";
+                          }
+                        ];
+                        readinessProbe = {
+                          httpGet = {
+                            path = "/";
+                            port = 3000;
+                          };
+                          initialDelaySeconds = 10;
+                          periodSeconds = 10;
+                          timeoutSeconds = 5;
+                          successThreshold = 1;
+                          failureThreshold = 3;
+                        };
+                        livenessProbe = {
+                          httpGet = {
+                            path = "/";
+                            port = 3000;
+                          };
+                          initialDelaySeconds = 20;
+                          periodSeconds = 30;
+                          timeoutSeconds = 5;
+                          successThreshold = 1;
+                          failureThreshold = 3;
+                        };
+                        volumeMounts = [
+                          {
+                            name = "config";
+                            mountPath = "/app/config";
+                          }
+                          {
+                            # ConfigMap mounts are read-only; homepage writes its own
+                            # logs under the config dir, so give it a writable
+                            # overlay there instead of the whole ConfigMap volume.
+                            name = "logs";
+                            mountPath = "/app/config/logs";
+                          }
+                        ];
+                      }
+                    ];
+
+                    volumes = [
+                      {
+                        name = "config";
+                        configMap.name = config-configmap;
+                      }
+                      {
+                        name = "logs";
+                        emptyDir = { };
+                      }
+                    ];
+                  };
+                };
+              };
+            };
+
+            ingresses.${name} = with cfg.ingress; {
+              metadata.annotations = optionalAttrs (clusterIssuer != "") {
+                "cert-manager.io/cluster-issuer" = clusterIssuer;
+              };
+
+              spec = {
+                inherit ingressClassName;
+
+                rules = [
+                  {
+                    host = domain;
+
+                    http.paths = [
+                      {
+                        backend.service = {
+                          inherit name;
+                          port.name = "http";
+                        };
+
+                        path = "/";
+                        pathType = "ImplementationSpecific";
+                      }
+                    ];
+                  }
+                ];
+
+                tls = [
+                  {
+                    hosts = [ domain ];
+                    secretName = "${name}-tls";
+                  }
+                ];
+              };
+            };
+
+            services.${name}.spec = {
+              ports = [
+                {
+                  name = "http";
+                  port = 3000;
+                  protocol = "TCP";
+                  targetPort = "http";
+                }
+              ];
+
+              selector = labels;
+              type = "ClusterIP";
+            };
+          };
+      };
+}

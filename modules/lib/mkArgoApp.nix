@@ -353,6 +353,55 @@
           };
         };
 
+        # Read by the `homepage` app, which collects one entry per service where
+        # this is enabled into a services.yaml dashboard group — see
+        # applications/homepage.nix. Defaults to on for any app with an ingress
+        # (opt out per-app with `homepage.enable = false;`); apps without an
+        # ingress default off since there's no href to link to.
+        homepage = {
+          enable = mkOption {
+            description = mdDoc "Show ${name} as a link on the homepage dashboard. Defaults to true when ${name} has an ingress.";
+            type = types.bool;
+            default = uses-ingress;
+          };
+
+          group = mkOption {
+            description = mdDoc "Dashboard group/category ${name} is listed under.";
+            type = str;
+            default = "Apps";
+          };
+
+          displayName = mkOption {
+            description = mdDoc "Name shown on the dashboard tile.";
+            type = str;
+            default = name;
+          };
+
+          icon = mkOption {
+            description = mdDoc "Dashboard icon (dashboard-icons name, Simple Icons slug, or full URL). Empty = no icon.";
+            type = str;
+            default = "";
+          };
+
+          description = mkOption {
+            description = mdDoc "Text shown under the tile name on the dashboard.";
+            type = str;
+            default = "";
+          };
+
+          href = mkOption {
+            description = mdDoc "Link target. Defaults to this app's ingress URL when it has one.";
+            type = nullOr str;
+            default = if uses-ingress then "https://${cfg.ingress.domain}" else null;
+          };
+
+          extraSettings = mkOption {
+            description = mdDoc "Extra fields merged into the generated dashboard item (e.g. widget, siteMonitor, ping).";
+            type = attrs;
+            default = { };
+          };
+        };
+
         neededSecrets = mkOption {
           type = listOf str;
           default = neededSecrets;

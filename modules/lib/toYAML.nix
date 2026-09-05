@@ -4,9 +4,7 @@
   flake.lib.toYAML =
     { pkgs, value }:
     let
-      yaml-formatter = pkgs.formats.yaml { };
-      json-str = (yaml-formatter.generate "config.yaml" value).drvAttrs.value;
-      json-file = builtins.toFile "input.json" json-str;
+      json-file = builtins.toFile "input.json" (builtins.toJSON value);
     in
     builtins.readFile (
       pkgs.runCommand "convert-values-yaml"
