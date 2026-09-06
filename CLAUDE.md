@@ -60,7 +60,8 @@ nur secrets encrypt   # → secrets.enc.yaml
 
 ```sh
 kubectl get pods -A                   # Check pod status
-nur argocd apply-master               # Register 00-master app with ArgoCD (triggers full sync)
+nur argocd apply-master               # Bootstrap-only: register 00-master app with ArgoCD (safe to re-run, but a no-op once already registered)
+nur argocd refresh [name]             # Force an immediate ArgoCD reconcile instead of waiting on its poll interval; no name = every Application
 nur forward argocd                    # Port-forward ArgoCD UI to localhost:8080
 nur forward traefik                   # Expose Traefik dashboard on localhost:9000
 nur argocd install                    # Install or upgrade ArgoCD into the cluster (safe to re-run)

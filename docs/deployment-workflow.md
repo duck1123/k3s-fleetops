@@ -19,8 +19,9 @@ The correct sequence, which actually sticks:
 3. `git commit` + `git push`.
 4. Optionally force immediate reconciliation instead of waiting for ArgoCD's poll interval:
    ```sh
-   kubectl patch application -n argocd <name> --type=merge -p '{"metadata":{"annotations":{"argocd.argoproj.io/refresh":"hard"}}}'
+   nur argocd refresh <name>   # or with no name, refreshes every Application
    ```
+   (`nur argocd apply-master` does *not* do this -- it only bootstraps `00-master` onto a cluster that doesn't have it yet; re-running it against an already-registered app is a no-op since the object's content hasn't changed.)
 
 This is the same sequence to scale back up afterward. It feels slower than reaching for `kubectl scale` directly, but the direct route simply doesn't work here and wastes more time fighting ArgoCD than it saves.
 

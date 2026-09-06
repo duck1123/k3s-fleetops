@@ -285,6 +285,19 @@ export def "nur argocd apply-master" [] {
   (^jet -i edn -o yaml < infra-manifests/00-master.edn | ^kubectl apply -f -)
 }
 
+# Force an immediate ArgoCD reconcile instead of waiting on its poll interval
+# (see docs/deployment-workflow.md) -- unlike `apply-master`, this doesn't
+# re-apply anything, it just tells ArgoCD to re-diff against git right now.
+# With no name, refreshes every Application (00-master and all its children);
+# pass one to target just that app, e.g. `nur argocd refresh ditto-relay`.
+export def "nur argocd refresh" [name?: string] {
+  if ($name | is-empty) {
+    ^kubectl annotate application -n argocd --all argocd.argoproj.io/refresh=hard --overwrite
+  } else {
+    ^kubectl annotate application -n argocd $name argocd.argoproj.io/refresh=hard --overwrite
+  }
+}
+
 # ─── Port-forwarding ─────────────────────────────────────────────────────────
 
 # Port-forward ArgoCD UI to localhost:8080
