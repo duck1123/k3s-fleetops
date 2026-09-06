@@ -56,7 +56,10 @@ in
     "Database"
     "Download"
     "Apps"
+    "Arr"
     "Media"
+    "Notes"
+    "Automation"
     "Nodes"
   ];
 

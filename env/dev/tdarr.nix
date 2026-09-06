@@ -9,6 +9,7 @@
 
     ingressProvider = "traefik-lan";
     ingress.tls.enable = true;
+    homepage.group = "Automation";
 
     nfs = {
       enable = true;

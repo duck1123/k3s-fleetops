@@ -6,6 +6,7 @@
 
     ingressProvider = "traefik-lan";
     ingress.tls.enable = true;
+    homepage.group = "Notes";
 
     storageClassName = "longhorn";
   };

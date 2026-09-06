@@ -11,6 +11,7 @@
 
     ingressProvider = "traefik-lan";
     ingress.tls.enable = true;
+    homepage.group = "Arr";
 
     nfsTarget = "nas";
     nfs.enable = true;

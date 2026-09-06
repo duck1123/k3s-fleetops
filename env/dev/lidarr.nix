@@ -10,6 +10,7 @@
 
     ingressProvider = "traefik-lan";
     ingress.tls.enable = true;
+    homepage.group = "Arr";
 
     monitoring.autokuma.enable = true;
 

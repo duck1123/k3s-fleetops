@@ -14,6 +14,7 @@
 
     ingressProvider = "traefik-lan";
     ingress.tls.enable = true;
+    homepage.group = "Arr";
 
     replicas = 1;
     vpn.enable = false;

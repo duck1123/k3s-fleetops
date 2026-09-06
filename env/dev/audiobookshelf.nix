@@ -8,6 +8,7 @@
     ingressProvider = "traefik-lan";
     ingress.tls.enable = true;
     monitoring.autokuma.enable = true;
+    homepage.group = "Media";
 
     nfsTarget = "nas";
     nfsSubPath = "Audiobooks";

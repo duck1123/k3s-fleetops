@@ -16,5 +16,6 @@
     };
 
     ingressProvider = "traefik-lan";
+    homepage.group = "Automation";
   };
 }

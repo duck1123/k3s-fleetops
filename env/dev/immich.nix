@@ -21,6 +21,7 @@
     ingress.tls.enable = true;
     ingressProvider = "traefik-lan";
     monitoring.autokuma.enable = true;
+    homepage.group = "Media";
     nfs.enable = false;
 
     redis = {

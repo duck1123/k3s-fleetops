@@ -9,6 +9,7 @@
 
     ingressProvider = "traefik-lan";
     ingress.tls.enable = true;
+    homepage.group = "Notes";
 
     monitoring.autokuma.enable = true;
   };

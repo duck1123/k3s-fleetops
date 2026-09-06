@@ -14,6 +14,9 @@ data:
             href: https://longhorn.home.kronkltd.net
             siteMonitor: https://longhorn.home.kronkltd.net
     - Database:
+        - cloudbeaver:
+            href: https://cloudbeaver.home.kronkltd.net
+            siteMonitor: https://cloudbeaver.home.kronkltd.net
         - nocodb:
             href: https://nocodb.home.kronkltd.net
             siteMonitor: https://nocodb.home.kronkltd.net
@@ -32,34 +35,10 @@ data:
             href: https://slskd.home.kronkltd.net
             siteMonitor: https://slskd.home.kronkltd.net
     - Apps:
-        - audiobookshelf:
-            href: https://audiobookshelf.home.kronkltd.net
-            siteMonitor: https://audiobookshelf.home.kronkltd.net
-            widget:
-              key: '{{HOMEPAGE_VAR_AUDIOBOOKSHELF_API_KEY}}'
-              type: audiobookshelf
-              url: http://audiobookshelf.audiobookshelf:80
-        - cloudbeaver:
-            href: https://cloudbeaver.home.kronkltd.net
-            siteMonitor: https://cloudbeaver.home.kronkltd.net
         - homarr:
             href: https://homarr.home.kronkltd.net
             siteMonitor: https://homarr.home.kronkltd.net
-        - immich:
-            href: https://immich.home.kronkltd.net
-            siteMonitor: https://immich.home.kronkltd.net
-            widget:
-              key: '{{HOMEPAGE_VAR_IMMICH_API_KEY}}'
-              type: immich
-              url: http://immich-server.immich:2283
-              version: 2
-        - komga:
-            href: https://komga.home.kronkltd.net
-            siteMonitor: https://komga.home.kronkltd.net
-            widget:
-              key: '{{HOMEPAGE_VAR_KOMGA_API_KEY}}'
-              type: komga
-              url: http://komga.komga:25600
+    - Arr:
         - lidarr:
             href: https://lidarr.home.kronkltd.net
             siteMonitor: https://lidarr.home.kronkltd.net
@@ -67,12 +46,6 @@ data:
               key: '{{HOMEPAGE_VAR_LIDARR_API_KEY}}'
               type: lidarr
               url: http://lidarr.lidarr:8686
-        - memos:
-            href: https://memos.home.kronkltd.net
-            siteMonitor: https://memos.home.kronkltd.net
-        - paperless-ngx:
-            href: https://paperless-ngx.home.kronkltd.net
-            siteMonitor: https://paperless-ngx.home.kronkltd.net
         - prowlarr:
             href: https://prowlarr.home.kronkltd.net
             siteMonitor: https://prowlarr.home.kronkltd.net
@@ -94,30 +67,29 @@ data:
               key: '{{HOMEPAGE_VAR_SONARR_API_KEY}}'
               type: sonarr
               url: http://sonarr.sonarr:8989
-        - stashapp:
-            href: https://stashapp.home.kronkltd.net
-            siteMonitor: https://stashapp.home.kronkltd.net
-            widget:
-              key: '{{HOMEPAGE_VAR_STASHAPP_API_KEY}}'
-              type: stash
-              url: http://stashapp.stashapp:9999
-        - tdarr:
-            href: https://tdarr.home.kronkltd.net
-            siteMonitor: https://tdarr.home.kronkltd.net
-        - trilium:
-            href: https://trilium.home.kronkltd.net
-            siteMonitor: https://trilium.home.kronkltd.net
-            widget:
-              key: '{{HOMEPAGE_VAR_TRILIUM_API_KEY}}'
-              type: trilium
-              url: http://trilium.trilium:8080
-        - uptime-kuma:
-            href: https://uptime-kuma.home.kronkltd.net
-            siteMonitor: https://uptime-kuma.home.kronkltd.net
-        - xyops:
-            href: https://xyops.home.kronkltd.net
-            siteMonitor: https://xyops.home.kronkltd.net
     - Media:
+        - audiobookshelf:
+            href: https://audiobookshelf.home.kronkltd.net
+            siteMonitor: https://audiobookshelf.home.kronkltd.net
+            widget:
+              key: '{{HOMEPAGE_VAR_AUDIOBOOKSHELF_API_KEY}}'
+              type: audiobookshelf
+              url: http://audiobookshelf.audiobookshelf:80
+        - immich:
+            href: https://immich.home.kronkltd.net
+            siteMonitor: https://immich.home.kronkltd.net
+            widget:
+              key: '{{HOMEPAGE_VAR_IMMICH_API_KEY}}'
+              type: immich
+              url: http://immich-server.immich:2283
+              version: 2
+        - komga:
+            href: https://komga.home.kronkltd.net
+            siteMonitor: https://komga.home.kronkltd.net
+            widget:
+              key: '{{HOMEPAGE_VAR_KOMGA_API_KEY}}'
+              type: komga
+              url: http://komga.komga:25600
         - plex:
             href: http://192.168.0.22:32400/web
             ping: 192.168.0.22
@@ -126,6 +98,37 @@ data:
               key: '{{HOMEPAGE_VAR_PLEX_API_KEY}}'
               type: plex
               url: http://192.168.0.22:32400
+        - stashapp:
+            href: https://stashapp.home.kronkltd.net
+            siteMonitor: https://stashapp.home.kronkltd.net
+            widget:
+              key: '{{HOMEPAGE_VAR_STASHAPP_API_KEY}}'
+              type: stash
+              url: http://stashapp.stashapp:9999
+    - Notes:
+        - memos:
+            href: https://memos.home.kronkltd.net
+            siteMonitor: https://memos.home.kronkltd.net
+        - paperless-ngx:
+            href: https://paperless-ngx.home.kronkltd.net
+            siteMonitor: https://paperless-ngx.home.kronkltd.net
+        - trilium:
+            href: https://trilium.home.kronkltd.net
+            siteMonitor: https://trilium.home.kronkltd.net
+            widget:
+              key: '{{HOMEPAGE_VAR_TRILIUM_API_KEY}}'
+              type: trilium
+              url: http://trilium.trilium:8080
+    - Automation:
+        - tdarr:
+            href: https://tdarr.home.kronkltd.net
+            siteMonitor: https://tdarr.home.kronkltd.net
+        - uptime-kuma:
+            href: https://uptime-kuma.home.kronkltd.net
+            siteMonitor: https://uptime-kuma.home.kronkltd.net
+        - xyops:
+            href: https://xyops.home.kronkltd.net
+            siteMonitor: https://xyops.home.kronkltd.net
     - Nodes:
         - edgenix:
             href: http://192.168.0.22:61208
