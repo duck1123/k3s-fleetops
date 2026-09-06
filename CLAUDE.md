@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a GitOps-based Kubernetes cluster configuration. ArgoCD manages the cluster by syncing manifests from the `manifests/dev/` directory (the `master` branch). Manifests are generated from Nix/nixidy configuration — never edit files in `manifests/` directly.
 
+Deeper notes that would otherwise bloat this file live under `docs/` — each section below links the relevant page where one exists. Start with [docs/deployment-workflow.md](docs/deployment-workflow.md) and [docs/troubleshooting.md](docs/troubleshooting.md) if something is actively broken.
+
 ## Key Commands
 
 All primary dev commands use [nur](https://github.com/nur-taskrunner/nur) (`nur`), a Nushell task runner. Tasks are defined in `scripts/nur.nu`. List all available tasks:
@@ -18,9 +20,11 @@ nur --help
 
 ```sh
 # Build the nixidy activation package without applying it (like `nixos-rebuild build`)
+# Add --fallback if the self-hosted Attic substituter is flaky (see docs/nix-csi-and-binary-cache.md)
 nur build
 
 # Full pipeline: build, then switch — generate manifests, post-process, write to manifests/dev/, activate
+# NOTE: this only writes local files — it does not deploy. See docs/deployment-workflow.md.
 nur switch
 
 # CI shorthand — same as switch
@@ -99,10 +103,13 @@ ArgoCD is bootstrapped manually (see README), then self-manages via the `00-mast
 | `env/dev/` | One module per service (e.g. `env/dev/sonarr.nix`) setting `services.<name>`; `env/dev/options.nix` declares shared `devDefaults.*` options (domains, clusterIssuer, NAS host/path, enableLogging). Services not currently deployed are configured here too with `enable = false`, ready to flip on |
 | `modules/lib/` | Shared Nix library functions (`mkArgoApp`, `loadSecrets`, `createSecret`, etc.) |
 | `modules/flake/` | Flake-parts modules wiring everything together |
+| `modules/*.nix` (top level) | Shared cross-app config registries (`ingressProviders`, `nfsTargets`, `databaseProviders`, `homepageGroups`, ...), each declaring one `options.<name>`. **Not** auto-wired into nixidy's per-environment eval the way the rest of `modules/` is auto-imported into the outer flake-parts one — see [docs/nixidy-module-system.md](docs/nixidy-module-system.md) before adding another one |
 | `generators/` | CRD option modules (imported at eval time via `crdImports`) |
 | `manifests/dev/` | **Generated output** — do not edit manually |
 | `infra-manifests/` | Bootstrap-only edn manifests (`00-master.edn`, `argocd/install.yaml`); `nur argocd apply-master`/`nur argocd install` consume these directly (via `jet`) |
 | `secrets.enc.yaml` | Sops-encrypted secrets (age key at `~/.config/sops/age/keys.txt`) |
+| `docs/` | Longer-form notes referenced from this file — module-system internals, homepage dashboard patterns, deployment gotchas, incident-derived troubleshooting |
+| `IMAGE-VERSIONS.md` | Pinned container image/Helm chart versions and how to bump them — update whenever a version changes |
 
 ### Adding or Modifying an Application
 
@@ -110,7 +117,9 @@ ArgoCD is bootstrapped manually (see README), then self-manages via the `00-mast
 2. Add the import to `applications/default.nix`.
 3. Create `env/dev/<name>.nix` setting `services.<name>` (use `enable = false` if it shouldn't deploy yet). No import edit needed here — `env/dev.nix` auto-imports every file under `env/dev/` via `import-tree`. Use `config.devDefaults.*` for shared domains/clusterIssuer/NAS values, and the `secrets`/`arrDatabases` module args (injected via `_module.args` in `env/dev.nix`) where needed.
 4. `git add` the new files. Flakes only evaluate git-tracked files — an untracked `applications/<name>.nix` or `env/dev/<name>.nix` fails `nix build`/`nur build`/`nur switch` with "Path ... is not tracked by Git", not a silent no-op, but it's easy to lose time on if you forget this step before building.
-5. Run `nur switch` to regenerate and apply manifests.
+5. Run `nur switch` to regenerate manifests, then `git commit`/`git push` — `nur switch` alone does not deploy (see [docs/deployment-workflow.md](docs/deployment-workflow.md)).
+
+To scale, pause, or otherwise change a *running* app's desired state (not just its initial rollout), change the value in `env/dev/<name>.nix` and go through the same `nur switch` → push flow — don't `kubectl scale`/`kubectl patch` directly, ArgoCD's `selfHeal` reverts it within seconds. See [docs/deployment-workflow.md](docs/deployment-workflow.md) for the exact sequence (including how to force an immediate sync instead of waiting on ArgoCD's poll interval).
 
 ### Apps Without a Dockerfile (nix-csi)
 
@@ -120,6 +129,7 @@ When an upstream project has no Dockerfile, use the nix-csi CSI driver (already 
 - Add a `csi` volume with `driver: nix.csi.store` and a `nixExpr` attribute containing a Nix expression that evaluates to the package derivation
 - Mount the volume at `/nix` with `subPath: nix` — this makes `/nix/var/result/bin` available on PATH inside the container
 - See `applications/demo.nix` for a working example and `applications/nostrarchives.nix` for a Rust app pattern
+- The `nix-csi` flake input is intentionally pinned (not tracking upstream) due to an unresolved breaking bug — see [docs/nix-csi-and-binary-cache.md](docs/nix-csi-and-binary-cache.md) before running `nix flake update` or touching `applications/nix-csi.nix`. That page also covers the self-hosted Attic/RustFS binary cache these apps (and `nix-csi` itself) pull from.
 
 ### Internet-Facing Apps (Cloudflare Tunnel)
 
@@ -148,6 +158,8 @@ Every ingress in this repo (`uses-ingress = true` via `mkArgoApp`) is LAN/Tailsc
 - `sopsSecrets` — secrets to encrypt and inject as Kubernetes Secrets
 - `uses-ingress` — adds standard ingress options (domain, clusterIssuer, ingressClassName)
 
+Every `mkArgoApp` service also gets a `homepage.*` option group (`enable`, `group`, `displayName`, `icon`, `extraSettings`, ...) that `applications/homepage.nix` uses to auto-build the dashboard — defaults to on whenever `uses-ingress = true`. See [docs/homepage-dashboard.md](docs/homepage-dashboard.md) for the widget-secrets pattern (never put an API key straight in `extraSettings`) and the `homepageGroups` registry that controls dashboard group validity/ordering.
+
 ### Secrets at Build Time
 
 `env/dev.nix` calls `self.lib.loadSecrets` which reads `$DECRYPTED_SECRET_FILE` (set by `with-decrypted-secrets.sh`). The `nur switch` task calls that wrapper script internally — callers just run `nur switch` directly.
@@ -165,3 +177,7 @@ nix develop
 ```
 
 Environment variables are managed via `.envrc` (direnv). Copy `.envrc.example` → `.envrc` and run `direnv allow`.
+
+## Troubleshooting
+
+If something in the cluster is actively broken (not a build/eval error), check [docs/troubleshooting.md](docs/troubleshooting.md) first — it covers several failure modes that have recurred (Longhorn SCSI medium errors that look like corruption but aren't, Longhorn disk-pressure from a stuck live engine upgrade, cluster-wide iSCSI breakage from a corrupt host record, gluetun's ICMP-only readiness flake) with their diagnostic signatures and known fixes.
