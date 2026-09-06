@@ -12,6 +12,7 @@ data:
   lidarr.json: '{"name":"lidarr","type":"http","url":"https://lidarr.home.kronkltd.net"}'
   longhorn.json: '{"name":"longhorn","type":"http","url":"https://longhorn.home.kronkltd.net"}'
   memos.json: '{"name":"memos","type":"http","url":"https://memos.home.kronkltd.net"}'
+  nocodb.json: '{"name":"nocodb","type":"http","url":"https://nocodb.home.kronkltd.net"}'
   paperless-ngx.json: '{"name":"paperless-ngx","type":"http","url":"https://paperless-ngx.home.kronkltd.net"}'
   prowlarr.json: '{"name":"prowlarr","type":"http","url":"https://prowlarr.home.kronkltd.net"}'
   qbittorrent.json: '{"name":"qbittorrent","type":"http","url":"https://qbittorrent.home.kronkltd.net"}'

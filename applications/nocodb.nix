@@ -87,12 +87,13 @@
 
           storage = {
             backend = mkOption {
-              description = mdDoc "S3-compatible storage backend: rustfs or minio";
+              description = mdDoc "S3-compatible storage backend: garage, rustfs, or minio (label only -- doesn't affect resource generation, see endpoint/region/accessKey/secretKey below)";
               type = types.enum [
+                "garage"
                 "rustfs"
                 "minio"
               ];
-              default = "rustfs";
+              default = "garage";
             };
             enable = mkOption {
               description = mdDoc "Enable S3/MinIO storage for attachments";
@@ -105,7 +106,12 @@
               default = "";
             };
             endpoint = mkOption {
-              description = mdDoc "S3 endpoint (e.g. http://rustfs.rustfs:9000 or http://minio.minio:9000)";
+              description = mdDoc ''
+                S3 endpoint. Must be externally resolvable (e.g. Garage's ingress
+                domain, not the in-cluster `garage.garage` ClusterIP) -- NocoDB
+                hands attachment URLs to the browser as S3 presigned URLs, so the
+                endpoint has to work from outside the cluster too.
+              '';
               type = types.str;
               default = "";
             };

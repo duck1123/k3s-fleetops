@@ -53,6 +53,7 @@ in
   # column placement exists.
   homepageGroups = [
     "Storage"
+    "Database"
     "Download"
     "Apps"
     "Media"

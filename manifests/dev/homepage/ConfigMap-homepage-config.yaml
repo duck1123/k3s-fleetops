@@ -10,6 +10,9 @@ data:
             href: https://garage.home.kronkltd.net
         - longhorn:
             href: https://longhorn.home.kronkltd.net
+    - Database:
+        - nocodb:
+            href: https://nocodb.home.kronkltd.net
     - Download:
         - qbittorrent:
             href: https://qbittorrent.home.kronkltd.net
