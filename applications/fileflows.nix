@@ -12,6 +12,13 @@
       name = "fileflows";
       uses-ingress = true;
 
+      # Shape only -- no volumeHandle here, that's environment-specific (see
+      # env/dev/fileflows.nix and docs/pinned-volumes.md).
+      volumes = cfg: {
+        config.size = "5Gi";
+        temp.size = "50Gi";
+      };
+
       extraOptions = {
         image = mkOption {
           description = mdDoc "The docker image";
@@ -91,16 +98,6 @@
       extraResources =
         cfg:
         let
-          pinnedConfig = self.lib.mkPinnedVolume {
-            pvcName = "${name}-${name}-config";
-            volumeHandle = "pvc-238a7fe1-5d70-45c2-8a5f-1752cf171b36";
-            size = "5Gi";
-          };
-          pinnedTemp = self.lib.mkPinnedVolume {
-            pvcName = "${name}-${name}-temp";
-            volumeHandle = "pvc-6e5f5c78-e4d4-47ff-a407-9f1cefd37ea3";
-            size = "50Gi";
-          };
           mediaMounts = lib.optionals cfg.nfs.enable (
             [
               {
@@ -297,14 +294,8 @@
                     serviceAccountName = "default";
 
                     volumes = [
-                      {
-                        name = "config";
-                        persistentVolumeClaim.claimName = "${name}-${name}-config";
-                      }
-                      {
-                        name = "temp";
-                        persistentVolumeClaim.claimName = "${name}-${name}-temp";
-                      }
+                      cfg.volumes.config.volume
+                      cfg.volumes.temp.volume
                     ]
                     ++ mediaVolumes
                     ++ (lib.optionals cfg.enableGPU (
@@ -368,9 +359,7 @@
           };
 
           persistentVolumeClaims =
-            pinnedConfig.persistentVolumeClaims
-            // pinnedTemp.persistentVolumeClaims
-            // lib.optionalAttrs cfg.nfs.enable {
+            lib.optionalAttrs cfg.nfs.enable {
               "${name}-${name}-media-movies".spec = {
                 accessModes = [ "ReadWriteMany" ];
                 resources.requests.storage = "1Gi";
@@ -410,9 +399,7 @@
           };
 
           persistentVolumes =
-            pinnedConfig.persistentVolumes
-            // pinnedTemp.persistentVolumes
-            // lib.optionalAttrs cfg.nfs.enable (
+            lib.optionalAttrs cfg.nfs.enable (
               {
                 "${name}-${name}-media-movies-nfs" = {
                   apiVersion = "v1";

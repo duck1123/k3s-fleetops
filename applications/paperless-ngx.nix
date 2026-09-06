@@ -34,6 +34,29 @@
         uses-ingress = true;
         uses-database = true;
 
+        # `pvcName` overrides since these predate the "${name}-${name}-<key>"
+        # convention. Shape only -- no volumeHandle here, that's
+        # environment-specific (see env/dev/paperless-ngx.nix and
+        # docs/pinned-volumes.md).
+        volumes = cfg: {
+          data = {
+            pvcName = "${name}-data";
+            size = "1Gi";
+          };
+          media = {
+            pvcName = "${name}-media";
+            size = "20Gi";
+          };
+          export = {
+            pvcName = "${name}-export";
+            size = "1Gi";
+          };
+          consume = {
+            pvcName = "${name}-consume";
+            size = "2Gi";
+          };
+        };
+
         extraOptions = {
           image = mkOption {
             description = mdDoc "The docker image";
@@ -124,31 +147,6 @@
 
         extraResources =
           cfg:
-          let
-            # Volume handles captured from the live cluster after the initial dynamic-PVC
-            # deploy (`kubectl get pv -o jsonpath='{.spec.csi.volumeHandle}'`) so disable/
-            # re-enable cycles rebind to the same data instead of provisioning empty volumes.
-            pinnedData = self.lib.mkPinnedVolume {
-              pvcName = "${name}-data";
-              volumeHandle = "pvc-a4fa895d-d3ee-46de-85ad-d25e2b4be3b2";
-              size = "1Gi";
-            };
-            pinnedMedia = self.lib.mkPinnedVolume {
-              pvcName = "${name}-media";
-              volumeHandle = "pvc-9ac4dcc3-29d3-4acc-8b6d-8dc96d0ff256";
-              size = "20Gi";
-            };
-            pinnedExport = self.lib.mkPinnedVolume {
-              pvcName = "${name}-export";
-              volumeHandle = "pvc-867ee2c3-0479-48dd-8788-45cbc629bf59";
-              size = "1Gi";
-            };
-            pinnedConsume = self.lib.mkPinnedVolume {
-              pvcName = "${name}-consume";
-              volumeHandle = "pvc-594d132e-e8f6-444a-988d-f649856d055a";
-              size = "2Gi";
-            };
-          in
           with cfg;
           {
             deployments.${name} = {
@@ -323,22 +321,10 @@
                     ];
 
                     volumes = [
-                      {
-                        name = "data";
-                        persistentVolumeClaim.claimName = "${name}-data";
-                      }
-                      {
-                        name = "media";
-                        persistentVolumeClaim.claimName = "${name}-media";
-                      }
-                      {
-                        name = "export";
-                        persistentVolumeClaim.claimName = "${name}-export";
-                      }
-                      {
-                        name = "consume";
-                        persistentVolumeClaim.claimName = "${name}-consume";
-                      }
+                      cfg.volumes.data.volume
+                      cfg.volumes.media.volume
+                      cfg.volumes.export.volume
+                      cfg.volumes.consume.volume
                     ];
                   };
                 };
@@ -374,18 +360,6 @@
                 ];
               };
             };
-
-            persistentVolumeClaims =
-              pinnedData.persistentVolumeClaims
-              // pinnedMedia.persistentVolumeClaims
-              // pinnedExport.persistentVolumeClaims
-              // pinnedConsume.persistentVolumeClaims;
-
-            persistentVolumes =
-              pinnedData.persistentVolumes
-              // pinnedMedia.persistentVolumes
-              // pinnedExport.persistentVolumes
-              // pinnedConsume.persistentVolumes;
 
             services.${name}.spec = {
               ports = [
