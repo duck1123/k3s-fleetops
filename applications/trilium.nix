@@ -74,133 +74,131 @@
         };
       };
 
-      extraResources =
-        cfg:
-        {
-          deployments.${name} = {
-            metadata.labels = {
+      extraResources = cfg: {
+        deployments.${name} = {
+          metadata.labels = {
+            "app.kubernetes.io/instance" = name;
+            "app.kubernetes.io/name" = name;
+          };
+
+          spec = {
+            replicas = cfg.replicas;
+            strategy.type = "Recreate";
+            selector.matchLabels = {
               "app.kubernetes.io/instance" = name;
               "app.kubernetes.io/name" = name;
             };
 
-            spec = {
-              replicas = cfg.replicas;
-              strategy.type = "Recreate";
-              selector.matchLabels = {
+            template = {
+              metadata.labels = {
                 "app.kubernetes.io/instance" = name;
                 "app.kubernetes.io/name" = name;
               };
 
-              template = {
-                metadata.labels = {
-                  "app.kubernetes.io/instance" = name;
-                  "app.kubernetes.io/name" = name;
-                };
+              spec = {
+                automountServiceAccountToken = true;
+                serviceAccountName = "default";
+                # Kubernetes injects <SERVICE_NAME>_PORT env vars into every pod; since the
+                # Service is named "trilium" this collides with Trilium's own TRILIUM_PORT
+                # env var (which expects a plain int, not the injected tcp:// URI).
+                enableServiceLinks = false;
 
-                spec = {
-                  automountServiceAccountToken = true;
-                  serviceAccountName = "default";
-                  # Kubernetes injects <SERVICE_NAME>_PORT env vars into every pod; since the
-                  # Service is named "trilium" this collides with Trilium's own TRILIUM_PORT
-                  # env var (which expects a plain int, not the injected tcp:// URI).
-                  enableServiceLinks = false;
+                containers = [
+                  {
+                    inherit name;
+                    image = cfg.image;
+                    imagePullPolicy = "IfNotPresent";
+                    env = [
+                      {
+                        name = "TZ";
+                        value = cfg.tz;
+                      }
+                    ];
+                    ports = [
+                      {
+                        containerPort = cfg.service.port;
+                        name = "http";
+                        protocol = "TCP";
+                      }
+                    ];
+                    readinessProbe = {
+                      tcpSocket.port = cfg.service.port;
+                      initialDelaySeconds = 15;
+                      periodSeconds = 10;
+                      timeoutSeconds = 5;
+                      successThreshold = 1;
+                      failureThreshold = 3;
+                    };
+                    livenessProbe = {
+                      tcpSocket.port = cfg.service.port;
+                      initialDelaySeconds = 30;
+                      periodSeconds = 30;
+                      timeoutSeconds = 5;
+                      successThreshold = 1;
+                      failureThreshold = 3;
+                    };
+                    volumeMounts = [
+                      {
+                        mountPath = "/home/node/trilium-data";
+                        name = "data";
+                      }
+                    ];
+                  }
+                ];
 
-                  containers = [
-                    {
-                      inherit name;
-                      image = cfg.image;
-                      imagePullPolicy = "IfNotPresent";
-                      env = [
-                        {
-                          name = "TZ";
-                          value = cfg.tz;
-                        }
-                      ];
-                      ports = [
-                        {
-                          containerPort = cfg.service.port;
-                          name = "http";
-                          protocol = "TCP";
-                        }
-                      ];
-                      readinessProbe = {
-                        tcpSocket.port = cfg.service.port;
-                        initialDelaySeconds = 15;
-                        periodSeconds = 10;
-                        timeoutSeconds = 5;
-                        successThreshold = 1;
-                        failureThreshold = 3;
-                      };
-                      livenessProbe = {
-                        tcpSocket.port = cfg.service.port;
-                        initialDelaySeconds = 30;
-                        periodSeconds = 30;
-                        timeoutSeconds = 5;
-                        successThreshold = 1;
-                        failureThreshold = 3;
-                      };
-                      volumeMounts = [
-                        {
-                          mountPath = "/home/node/trilium-data";
-                          name = "data";
-                        }
-                      ];
-                    }
-                  ];
-
-                  volumes = [ cfg.volumes.data.volume ];
-                };
+                volumes = [ cfg.volumes.data.volume ];
               };
             };
           };
+        };
 
-          ingresses.${name} = with cfg.ingress; {
-            metadata.annotations."cert-manager.io/cluster-issuer" = clusterIssuer;
-            spec = {
-              inherit ingressClassName;
+        ingresses.${name} = with cfg.ingress; {
+          metadata.annotations."cert-manager.io/cluster-issuer" = clusterIssuer;
+          spec = {
+            inherit ingressClassName;
 
-              rules = [
-                {
-                  host = domain;
-                  http.paths = [
-                    {
-                      backend.service = {
-                        inherit name;
-                        port.name = "http";
-                      };
-                      path = "/";
-                      pathType = "ImplementationSpecific";
-                    }
-                  ];
-                }
-              ];
-
-              tls = [
-                {
-                  hosts = [ domain ];
-                  secretName = "${name}-tls";
-                }
-              ];
-            };
-          };
-
-          services.${name}.spec = {
-            ports = [
+            rules = [
               {
-                name = "http";
-                port = cfg.service.port;
-                protocol = "TCP";
-                targetPort = "http";
+                host = domain;
+                http.paths = [
+                  {
+                    backend.service = {
+                      inherit name;
+                      port.name = "http";
+                    };
+                    path = "/";
+                    pathType = "ImplementationSpecific";
+                  }
+                ];
               }
             ];
 
-            selector = {
-              "app.kubernetes.io/instance" = name;
-              "app.kubernetes.io/name" = name;
-            };
-
-            type = "ClusterIP";
+            tls = [
+              {
+                hosts = [ domain ];
+                secretName = "${name}-tls";
+              }
+            ];
           };
         };
+
+        services.${name}.spec = {
+          ports = [
+            {
+              name = "http";
+              port = cfg.service.port;
+              protocol = "TCP";
+              targetPort = "http";
+            }
+          ];
+
+          selector = {
+            "app.kubernetes.io/instance" = name;
+            "app.kubernetes.io/name" = name;
+          };
+
+          type = "ClusterIP";
+        };
+      };
     };
 }

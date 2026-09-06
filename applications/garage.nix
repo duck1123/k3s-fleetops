@@ -446,8 +446,7 @@
                   pinnedData.persistentVolumeClaims."${name}-data";
             };
 
-            persistentVolumes =
-              nfsDataPV // lib.optionalAttrs (!cfg.nfs.enable) pinnedData.persistentVolumes;
+            persistentVolumes = nfsDataPV // lib.optionalAttrs (!cfg.nfs.enable) pinnedData.persistentVolumes;
           };
       };
 }

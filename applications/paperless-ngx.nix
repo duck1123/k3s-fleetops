@@ -146,9 +146,7 @@
           };
 
         extraResources =
-          cfg:
-          with cfg;
-          {
+          cfg: with cfg; {
             deployments.${name} = {
               metadata.labels = {
                 "app.kubernetes.io/instance" = name;

@@ -224,482 +224,480 @@
 
         };
 
-        extraResources =
-          cfg:
-          {
-            deployments.${name} = {
-              metadata.labels = {
+        extraResources = cfg: {
+          deployments.${name} = {
+            metadata.labels = {
+              "app.kubernetes.io/instance" = name;
+              "app.kubernetes.io/name" = name;
+            };
+
+            spec = {
+              strategy.type = "Recreate";
+              selector.matchLabels = {
                 "app.kubernetes.io/instance" = name;
                 "app.kubernetes.io/name" = name;
               };
 
-              spec = {
-                strategy.type = "Recreate";
-                selector.matchLabels = {
+              template = {
+                metadata.labels = {
                   "app.kubernetes.io/instance" = name;
                   "app.kubernetes.io/name" = name;
                 };
 
-                template = {
-                  metadata.labels = {
-                    "app.kubernetes.io/instance" = name;
-                    "app.kubernetes.io/name" = name;
-                  };
-
-                  spec = {
-                    automountServiceAccountToken = true;
-                    serviceAccountName = "default";
-                    containers = [
-                      {
-                        inherit name;
-                        image = cfg.image;
-                        imagePullPolicy = "IfNotPresent";
-                        env = [
-                          # Try DB_* format (without DATABASE_ prefix)
-                          {
-                            name = "DB_HOST";
-                            value = cfg.database.host;
-                          }
-                          {
-                            name = "DB_PORT";
-                            value = "${toString cfg.database.port}";
-                          }
-                          {
-                            name = "DB_NAME";
-                            value = cfg.database.name;
-                          }
-                          {
-                            name = "DB_USER";
-                            value = cfg.database.username;
-                          }
-                          {
-                            name = "DB_PASSWD";
-                            valueFrom.secretKeyRef = {
-                              name = password-secret;
-                              key = "password";
-                            };
-                          }
-                          # Also provide DATABASE_* format as fallback
-                          {
-                            name = "DATABASE_HOST";
-                            value = cfg.database.host;
-                          }
-                          {
-                            name = "DATABASE_PORT";
-                            value = "${toString cfg.database.port}";
-                          }
-                          {
-                            name = "DATABASE_NAME";
-                            value = cfg.database.name;
-                          }
-                          {
-                            name = "DATABASE_USER";
-                            value = cfg.database.username;
-                          }
-                          {
-                            name = "DATABASE_PASSWORD";
-                            valueFrom.secretKeyRef = {
-                              name = password-secret;
-                              key = "password";
-                            };
-                          }
-                          {
-                            name = "ROMM_AUTH_SECRET_KEY";
-                            valueFrom.secretKeyRef = {
-                              name = admin-secret;
-                              key = "authSecretKey";
-                            };
-                          }
-                          {
-                            name = "ROMM_ADMIN_USERNAME";
-                            valueFrom.secretKeyRef = {
-                              name = admin-secret;
-                              key = "username";
-                            };
-                          }
-                          {
-                            name = "ROMM_ADMIN_PASSWORD";
-                            valueFrom.secretKeyRef = {
-                              name = admin-secret;
-                              key = "password";
-                            };
-                          }
-                          {
-                            name = "ROMM_CONFIG_PATH";
-                            value = "/romm/config/config.yml";
-                          }
-                          # Nginx bind configuration
-                          # Nginx should listen on 8080, gunicorn runs on 5000
-                          # Based on Dockerfile: EXPOSE 8080 6379/tcp
-                          # The nginx template likely uses PORT for the listen directive
-                          {
-                            name = "HOST";
-                            value = "0.0.0.0";
-                          }
-                          {
-                            name = "PORT";
-                            value = "8080";
-                          }
-                          {
-                            name = "ROMM_HOST";
-                            value = "0.0.0.0";
-                          }
-                          {
-                            name = "ROMM_PORT";
-                            value = "8080";
-                          }
-                          {
-                            name = "NGINX_PORT";
-                            value = "8080";
-                          }
-                          {
-                            name = "GUNICORN_PORT";
-                            value = "${toString cfg.service.port}";
-                          }
-                          {
-                            name = "GUNICORN_HOST";
-                            value = "127.0.0.1";
-                          }
-                          # Valkey/Redis configuration - romm uses internal valkey by default
-                          # If you want to use external Redis, uncomment and configure:
-                          # {
-                          #   name = "REDIS_HOST";
-                          #   value = "redis.redis";
-                          # }
-                          # {
-                          #   name = "REDIS_PORT";
-                          #   value = "6379";
-                          # }
-                        ]
-                        ++ lib.optionals cfg.metadata.igdb.enable [
-                          {
-                            name = "IGDB_CLIENT_ID";
-                            valueFrom.secretKeyRef = {
-                              name = metadata-secret;
-                              key = "igdbClientId";
-                            };
-                          }
-                          {
-                            name = "IGDB_CLIENT_SECRET";
-                            valueFrom.secretKeyRef = {
-                              name = metadata-secret;
-                              key = "igdbClientSecret";
-                            };
-                          }
-                        ]
-                        ++ lib.optionals cfg.metadata.mobygames.enable [
-                          {
-                            name = "MOBYGAMES_API_KEY";
-                            valueFrom.secretKeyRef = {
-                              name = metadata-secret;
-                              key = "mobygamesApiKey";
-                            };
-                          }
-                        ]
-                        ++ lib.optionals cfg.metadata.steamgriddb.enable [
-                          {
-                            name = "STEAMGRIDDB_API_KEY";
-                            valueFrom.secretKeyRef = {
-                              name = metadata-secret;
-                              key = "steamgriddbApiKey";
-                            };
-                          }
-                        ]
-                        ++ lib.optionals cfg.metadata.screenscraper.enable [
-                          {
-                            name = "SCREENSCRAPER_USER";
-                            valueFrom.secretKeyRef = {
-                              name = metadata-secret;
-                              key = "screenscrapeUser";
-                            };
-                          }
-                          {
-                            name = "SCREENSCRAPER_PASSWORD";
-                            valueFrom.secretKeyRef = {
-                              name = metadata-secret;
-                              key = "screenscrapePassword";
-                            };
-                          }
-                        ];
-
-                        ports = [
-                          {
-                            containerPort = 8080;
-                            name = "http";
-                            protocol = "TCP";
-                          }
-                          {
-                            containerPort = 6379;
-                            name = "redis";
-                            protocol = "TCP";
-                          }
-                        ];
-
-                        volumeMounts = [
-                          {
-                            mountPath = "/romm/data";
-                            name = "data";
-                          }
-                          {
-                            mountPath = "/romm/config";
-                            name = "config";
-                          }
-                          {
-                            mountPath = "/romm/library";
-                            name = "library";
-                          }
-                          {
-                            mountPath = "/romm/assets";
-                            name = "assets";
-                          }
-                          {
-                            mountPath = "/romm/resources";
-                            name = "resources";
-                          }
-                        ];
-                      }
-                    ];
-                    volumes = [
-                      cfg.volumes.data.volume
-                      cfg.volumes.config.volume
-                      {
-                        name = "library";
-                        persistentVolumeClaim.claimName = "${name}-library";
-                      }
-                      {
-                        name = "assets";
-                        persistentVolumeClaim.claimName = "${name}-assets";
-                      }
-                      {
-                        name = "resources";
-                        persistentVolumeClaim.claimName = "${name}-resources";
-                      }
-                    ];
-                    # Init container to pre-create config file
-                    initContainers = [
-                      {
-                        name = "init-config";
-                        image = "busybox:latest";
-                        command = [
-                          "sh"
-                          "-c"
-                          ''
-                            if [ ! -f /romm/config/config.yml ]; then
-                              echo "Creating initial config.yml file"
-                              touch /romm/config/config.yml
-                              chmod 644 /romm/config/config.yml
-                            else
-                              echo "config.yml already exists"
-                            fi
-                          ''
-                        ];
-                        volumeMounts = [
-                          {
-                            mountPath = "/romm/config";
-                            name = "config";
-                          }
-                        ];
-                      }
-                      {
-                        # The Synology NFS export applies Windows ACLs that can deny
-                        # read access to uid=1000 (romm, the nginx worker user) even
-                        # when POSIX permissions show 777. Running chmod as root via
-                        # NFS resets the ACLs to match POSIX, restoring access.
-                        name = "fix-library-permissions";
-                        image = "busybox:latest";
-                        command = [
-                          "sh"
-                          "-c"
-                          "chmod -R a+r /romm/library/ && echo 'Library permissions fixed'"
-                        ];
-                        volumeMounts = [
-                          {
-                            mountPath = "/romm/library";
-                            name = "library";
-                          }
-                        ];
-                      }
-                    ];
-                  };
-                };
-              };
-            };
-
-            services.${name}.spec = {
-              ports = [
-                {
-                  name = "http";
-                  port = 8080;
-                  protocol = "TCP";
-                  targetPort = "http";
-                }
-                {
-                  name = "redis";
-                  port = 6379;
-                  protocol = "TCP";
-                  targetPort = "redis";
-                }
-              ];
-
-              selector = {
-                "app.kubernetes.io/instance" = name;
-                "app.kubernetes.io/name" = name;
-              };
-              type = "ClusterIP";
-            };
-
-            ingresses = {
-              ${name} = with cfg.ingress; {
-                metadata.annotations."cert-manager.io/cluster-issuer" = clusterIssuer;
                 spec = {
-                  inherit ingressClassName;
-
-                  rules = [
+                  automountServiceAccountToken = true;
+                  serviceAccountName = "default";
+                  containers = [
                     {
-                      host = domain;
-                      http.paths = [
+                      inherit name;
+                      image = cfg.image;
+                      imagePullPolicy = "IfNotPresent";
+                      env = [
+                        # Try DB_* format (without DATABASE_ prefix)
                         {
-                          backend.service = {
-                            inherit name;
-                            port.name = "http";
+                          name = "DB_HOST";
+                          value = cfg.database.host;
+                        }
+                        {
+                          name = "DB_PORT";
+                          value = "${toString cfg.database.port}";
+                        }
+                        {
+                          name = "DB_NAME";
+                          value = cfg.database.name;
+                        }
+                        {
+                          name = "DB_USER";
+                          value = cfg.database.username;
+                        }
+                        {
+                          name = "DB_PASSWD";
+                          valueFrom.secretKeyRef = {
+                            name = password-secret;
+                            key = "password";
                           };
-                          path = "/";
-                          pathType = "ImplementationSpecific";
+                        }
+                        # Also provide DATABASE_* format as fallback
+                        {
+                          name = "DATABASE_HOST";
+                          value = cfg.database.host;
+                        }
+                        {
+                          name = "DATABASE_PORT";
+                          value = "${toString cfg.database.port}";
+                        }
+                        {
+                          name = "DATABASE_NAME";
+                          value = cfg.database.name;
+                        }
+                        {
+                          name = "DATABASE_USER";
+                          value = cfg.database.username;
+                        }
+                        {
+                          name = "DATABASE_PASSWORD";
+                          valueFrom.secretKeyRef = {
+                            name = password-secret;
+                            key = "password";
+                          };
+                        }
+                        {
+                          name = "ROMM_AUTH_SECRET_KEY";
+                          valueFrom.secretKeyRef = {
+                            name = admin-secret;
+                            key = "authSecretKey";
+                          };
+                        }
+                        {
+                          name = "ROMM_ADMIN_USERNAME";
+                          valueFrom.secretKeyRef = {
+                            name = admin-secret;
+                            key = "username";
+                          };
+                        }
+                        {
+                          name = "ROMM_ADMIN_PASSWORD";
+                          valueFrom.secretKeyRef = {
+                            name = admin-secret;
+                            key = "password";
+                          };
+                        }
+                        {
+                          name = "ROMM_CONFIG_PATH";
+                          value = "/romm/config/config.yml";
+                        }
+                        # Nginx bind configuration
+                        # Nginx should listen on 8080, gunicorn runs on 5000
+                        # Based on Dockerfile: EXPOSE 8080 6379/tcp
+                        # The nginx template likely uses PORT for the listen directive
+                        {
+                          name = "HOST";
+                          value = "0.0.0.0";
+                        }
+                        {
+                          name = "PORT";
+                          value = "8080";
+                        }
+                        {
+                          name = "ROMM_HOST";
+                          value = "0.0.0.0";
+                        }
+                        {
+                          name = "ROMM_PORT";
+                          value = "8080";
+                        }
+                        {
+                          name = "NGINX_PORT";
+                          value = "8080";
+                        }
+                        {
+                          name = "GUNICORN_PORT";
+                          value = "${toString cfg.service.port}";
+                        }
+                        {
+                          name = "GUNICORN_HOST";
+                          value = "127.0.0.1";
+                        }
+                        # Valkey/Redis configuration - romm uses internal valkey by default
+                        # If you want to use external Redis, uncomment and configure:
+                        # {
+                        #   name = "REDIS_HOST";
+                        #   value = "redis.redis";
+                        # }
+                        # {
+                        #   name = "REDIS_PORT";
+                        #   value = "6379";
+                        # }
+                      ]
+                      ++ lib.optionals cfg.metadata.igdb.enable [
+                        {
+                          name = "IGDB_CLIENT_ID";
+                          valueFrom.secretKeyRef = {
+                            name = metadata-secret;
+                            key = "igdbClientId";
+                          };
+                        }
+                        {
+                          name = "IGDB_CLIENT_SECRET";
+                          valueFrom.secretKeyRef = {
+                            name = metadata-secret;
+                            key = "igdbClientSecret";
+                          };
+                        }
+                      ]
+                      ++ lib.optionals cfg.metadata.mobygames.enable [
+                        {
+                          name = "MOBYGAMES_API_KEY";
+                          valueFrom.secretKeyRef = {
+                            name = metadata-secret;
+                            key = "mobygamesApiKey";
+                          };
+                        }
+                      ]
+                      ++ lib.optionals cfg.metadata.steamgriddb.enable [
+                        {
+                          name = "STEAMGRIDDB_API_KEY";
+                          valueFrom.secretKeyRef = {
+                            name = metadata-secret;
+                            key = "steamgriddbApiKey";
+                          };
+                        }
+                      ]
+                      ++ lib.optionals cfg.metadata.screenscraper.enable [
+                        {
+                          name = "SCREENSCRAPER_USER";
+                          valueFrom.secretKeyRef = {
+                            name = metadata-secret;
+                            key = "screenscrapeUser";
+                          };
+                        }
+                        {
+                          name = "SCREENSCRAPER_PASSWORD";
+                          valueFrom.secretKeyRef = {
+                            name = metadata-secret;
+                            key = "screenscrapePassword";
+                          };
+                        }
+                      ];
+
+                      ports = [
+                        {
+                          containerPort = 8080;
+                          name = "http";
+                          protocol = "TCP";
+                        }
+                        {
+                          containerPort = 6379;
+                          name = "redis";
+                          protocol = "TCP";
+                        }
+                      ];
+
+                      volumeMounts = [
+                        {
+                          mountPath = "/romm/data";
+                          name = "data";
+                        }
+                        {
+                          mountPath = "/romm/config";
+                          name = "config";
+                        }
+                        {
+                          mountPath = "/romm/library";
+                          name = "library";
+                        }
+                        {
+                          mountPath = "/romm/assets";
+                          name = "assets";
+                        }
+                        {
+                          mountPath = "/romm/resources";
+                          name = "resources";
                         }
                       ];
                     }
                   ];
-                  tls = [
+                  volumes = [
+                    cfg.volumes.data.volume
+                    cfg.volumes.config.volume
                     {
-                      hosts = [ domain ];
-                      secretName = "${name}-tls";
+                      name = "library";
+                      persistentVolumeClaim.claimName = "${name}-library";
+                    }
+                    {
+                      name = "assets";
+                      persistentVolumeClaim.claimName = "${name}-assets";
+                    }
+                    {
+                      name = "resources";
+                      persistentVolumeClaim.claimName = "${name}-resources";
+                    }
+                  ];
+                  # Init container to pre-create config file
+                  initContainers = [
+                    {
+                      name = "init-config";
+                      image = "busybox:latest";
+                      command = [
+                        "sh"
+                        "-c"
+                        ''
+                          if [ ! -f /romm/config/config.yml ]; then
+                            echo "Creating initial config.yml file"
+                            touch /romm/config/config.yml
+                            chmod 644 /romm/config/config.yml
+                          else
+                            echo "config.yml already exists"
+                          fi
+                        ''
+                      ];
+                      volumeMounts = [
+                        {
+                          mountPath = "/romm/config";
+                          name = "config";
+                        }
+                      ];
+                    }
+                    {
+                      # The Synology NFS export applies Windows ACLs that can deny
+                      # read access to uid=1000 (romm, the nginx worker user) even
+                      # when POSIX permissions show 777. Running chmod as root via
+                      # NFS resets the ACLs to match POSIX, restoring access.
+                      name = "fix-library-permissions";
+                      image = "busybox:latest";
+                      command = [
+                        "sh"
+                        "-c"
+                        "chmod -R a+r /romm/library/ && echo 'Library permissions fixed'"
+                      ];
+                      volumeMounts = [
+                        {
+                          mountPath = "/romm/library";
+                          name = "library";
+                        }
+                      ];
                     }
                   ];
                 };
               };
             };
-
-            persistentVolumeClaims = {
-                "${name}-library".spec =
-                  if cfg.nfs.enable then
-                    {
-                      accessModes = [ "ReadWriteMany" ];
-                      resources.requests.storage = "1Gi";
-                      storageClassName = "";
-                      volumeName = "${name}-${name}-library-nfs";
-                    }
-                  else
-                    {
-                      accessModes = [ "ReadWriteOnce" ];
-                      resources.requests.storage = "5Gi";
-                      storageClassName = cfg.storageClassName;
-                    };
-                "${name}-assets".spec =
-                  if cfg.nfs.enable then
-                    {
-                      accessModes = [ "ReadWriteMany" ];
-                      resources.requests.storage = "1Gi";
-                      storageClassName = "";
-                      volumeName = "${name}-${name}-assets-nfs";
-                    }
-                  else
-                    {
-                      accessModes = [ "ReadWriteOnce" ];
-                      resources.requests.storage = "5Gi";
-                      storageClassName = cfg.storageClassName;
-                    };
-                "${name}-resources".spec =
-                  if cfg.nfs.enable then
-                    {
-                      accessModes = [ "ReadWriteMany" ];
-                      resources.requests.storage = "1Gi";
-                      storageClassName = "";
-                      volumeName = "${name}-${name}-resources-nfs";
-                    }
-                  else
-                    {
-                      accessModes = [ "ReadWriteOnce" ];
-                      resources.requests.storage = "5Gi";
-                      storageClassName = cfg.storageClassName;
-                    };
-              };
-
-            # Create NFS PersistentVolumes for roms when NFS is enabled
-            persistentVolumes = lib.optionalAttrs cfg.nfs.enable {
-                "${name}-${name}-library-nfs" = {
-                  apiVersion = "v1";
-                  kind = "PersistentVolume";
-                  metadata = {
-                    name = "${name}-${name}-library-nfs";
-                  };
-                  spec = {
-                    capacity = {
-                      storage = "1Ti";
-                    };
-                    accessModes = [ "ReadWriteMany" ];
-                    mountOptions = [
-                      "nolock"
-                      "noexec"
-                      "soft"
-                      "timeo=30"
-                    ];
-                    nfs = {
-                      server = cfg.nfs.server;
-                      path = cfg.nfs.libraryPath;
-                    };
-                    persistentVolumeReclaimPolicy = "Retain";
-                  };
-                };
-                "${name}-${name}-assets-nfs" = {
-                  apiVersion = "v1";
-                  kind = "PersistentVolume";
-                  metadata = {
-                    name = "${name}-${name}-assets-nfs";
-                  };
-                  spec = {
-                    capacity = {
-                      storage = "1Ti";
-                    };
-                    accessModes = [ "ReadWriteMany" ];
-                    mountOptions = [
-                      "nolock"
-                      "noexec"
-                      "soft"
-                      "timeo=30"
-                    ];
-                    nfs = {
-                      server = cfg.nfs.server;
-                      path = cfg.nfs.assetsPath;
-                    };
-                    persistentVolumeReclaimPolicy = "Retain";
-                  };
-                };
-                "${name}-${name}-resources-nfs" = {
-                  apiVersion = "v1";
-                  kind = "PersistentVolume";
-                  metadata = {
-                    name = "${name}-${name}-resources-nfs";
-                  };
-                  spec = {
-                    capacity = {
-                      storage = "1Ti";
-                    };
-                    accessModes = [ "ReadWriteMany" ];
-                    mountOptions = [
-                      "nolock"
-                      "noexec"
-                      "soft"
-                      "timeo=30"
-                    ];
-                    nfs = {
-                      server = cfg.nfs.server;
-                      path = cfg.nfs.resourcesPath;
-                    };
-                    persistentVolumeReclaimPolicy = "Retain";
-                  };
-                };
-              };
-
           };
+
+          services.${name}.spec = {
+            ports = [
+              {
+                name = "http";
+                port = 8080;
+                protocol = "TCP";
+                targetPort = "http";
+              }
+              {
+                name = "redis";
+                port = 6379;
+                protocol = "TCP";
+                targetPort = "redis";
+              }
+            ];
+
+            selector = {
+              "app.kubernetes.io/instance" = name;
+              "app.kubernetes.io/name" = name;
+            };
+            type = "ClusterIP";
+          };
+
+          ingresses = {
+            ${name} = with cfg.ingress; {
+              metadata.annotations."cert-manager.io/cluster-issuer" = clusterIssuer;
+              spec = {
+                inherit ingressClassName;
+
+                rules = [
+                  {
+                    host = domain;
+                    http.paths = [
+                      {
+                        backend.service = {
+                          inherit name;
+                          port.name = "http";
+                        };
+                        path = "/";
+                        pathType = "ImplementationSpecific";
+                      }
+                    ];
+                  }
+                ];
+                tls = [
+                  {
+                    hosts = [ domain ];
+                    secretName = "${name}-tls";
+                  }
+                ];
+              };
+            };
+          };
+
+          persistentVolumeClaims = {
+            "${name}-library".spec =
+              if cfg.nfs.enable then
+                {
+                  accessModes = [ "ReadWriteMany" ];
+                  resources.requests.storage = "1Gi";
+                  storageClassName = "";
+                  volumeName = "${name}-${name}-library-nfs";
+                }
+              else
+                {
+                  accessModes = [ "ReadWriteOnce" ];
+                  resources.requests.storage = "5Gi";
+                  storageClassName = cfg.storageClassName;
+                };
+            "${name}-assets".spec =
+              if cfg.nfs.enable then
+                {
+                  accessModes = [ "ReadWriteMany" ];
+                  resources.requests.storage = "1Gi";
+                  storageClassName = "";
+                  volumeName = "${name}-${name}-assets-nfs";
+                }
+              else
+                {
+                  accessModes = [ "ReadWriteOnce" ];
+                  resources.requests.storage = "5Gi";
+                  storageClassName = cfg.storageClassName;
+                };
+            "${name}-resources".spec =
+              if cfg.nfs.enable then
+                {
+                  accessModes = [ "ReadWriteMany" ];
+                  resources.requests.storage = "1Gi";
+                  storageClassName = "";
+                  volumeName = "${name}-${name}-resources-nfs";
+                }
+              else
+                {
+                  accessModes = [ "ReadWriteOnce" ];
+                  resources.requests.storage = "5Gi";
+                  storageClassName = cfg.storageClassName;
+                };
+          };
+
+          # Create NFS PersistentVolumes for roms when NFS is enabled
+          persistentVolumes = lib.optionalAttrs cfg.nfs.enable {
+            "${name}-${name}-library-nfs" = {
+              apiVersion = "v1";
+              kind = "PersistentVolume";
+              metadata = {
+                name = "${name}-${name}-library-nfs";
+              };
+              spec = {
+                capacity = {
+                  storage = "1Ti";
+                };
+                accessModes = [ "ReadWriteMany" ];
+                mountOptions = [
+                  "nolock"
+                  "noexec"
+                  "soft"
+                  "timeo=30"
+                ];
+                nfs = {
+                  server = cfg.nfs.server;
+                  path = cfg.nfs.libraryPath;
+                };
+                persistentVolumeReclaimPolicy = "Retain";
+              };
+            };
+            "${name}-${name}-assets-nfs" = {
+              apiVersion = "v1";
+              kind = "PersistentVolume";
+              metadata = {
+                name = "${name}-${name}-assets-nfs";
+              };
+              spec = {
+                capacity = {
+                  storage = "1Ti";
+                };
+                accessModes = [ "ReadWriteMany" ];
+                mountOptions = [
+                  "nolock"
+                  "noexec"
+                  "soft"
+                  "timeo=30"
+                ];
+                nfs = {
+                  server = cfg.nfs.server;
+                  path = cfg.nfs.assetsPath;
+                };
+                persistentVolumeReclaimPolicy = "Retain";
+              };
+            };
+            "${name}-${name}-resources-nfs" = {
+              apiVersion = "v1";
+              kind = "PersistentVolume";
+              metadata = {
+                name = "${name}-${name}-resources-nfs";
+              };
+              spec = {
+                capacity = {
+                  storage = "1Ti";
+                };
+                accessModes = [ "ReadWriteMany" ];
+                mountOptions = [
+                  "nolock"
+                  "noexec"
+                  "soft"
+                  "timeo=30"
+                ];
+                nfs = {
+                  server = cfg.nfs.server;
+                  path = cfg.nfs.resourcesPath;
+                };
+                persistentVolumeReclaimPolicy = "Retain";
+              };
+            };
+          };
+
+        };
       };
 }

@@ -398,46 +398,45 @@
             type = "ClusterIP";
           };
 
-          persistentVolumes =
-            lib.optionalAttrs cfg.nfs.enable (
-              {
-                "${name}-${name}-media-movies-nfs" = {
-                  apiVersion = "v1";
-                  kind = "PersistentVolume";
-                  metadata.name = "${name}-${name}-media-movies-nfs";
-                  spec = nfsPVOptions // {
-                    nfs = {
-                      server = cfg.nfs.server;
-                      path = "${cfg.nfs.path}/Movies";
-                    };
+          persistentVolumes = lib.optionalAttrs cfg.nfs.enable (
+            {
+              "${name}-${name}-media-movies-nfs" = {
+                apiVersion = "v1";
+                kind = "PersistentVolume";
+                metadata.name = "${name}-${name}-media-movies-nfs";
+                spec = nfsPVOptions // {
+                  nfs = {
+                    server = cfg.nfs.server;
+                    path = "${cfg.nfs.path}/Movies";
                   };
                 };
-                "${name}-${name}-media-tv-nfs" = {
-                  apiVersion = "v1";
-                  kind = "PersistentVolume";
-                  metadata.name = "${name}-${name}-media-tv-nfs";
-                  spec = nfsPVOptions // {
-                    nfs = {
-                      server = cfg.nfs.server;
-                      path = "${cfg.nfs.path}/TV";
-                    };
+              };
+              "${name}-${name}-media-tv-nfs" = {
+                apiVersion = "v1";
+                kind = "PersistentVolume";
+                metadata.name = "${name}-${name}-media-tv-nfs";
+                spec = nfsPVOptions // {
+                  nfs = {
+                    server = cfg.nfs.server;
+                    path = "${cfg.nfs.path}/TV";
                   };
                 };
-              }
-              // lib.optionalAttrs cfg.nfs.enableVideos {
-                "${name}-${name}-media-videos-nfs" = {
-                  apiVersion = "v1";
-                  kind = "PersistentVolume";
-                  metadata.name = "${name}-${name}-media-videos-nfs";
-                  spec = nfsPVOptions // {
-                    nfs = {
-                      server = cfg.nfs.server;
-                      path = "${cfg.nfs.path}/Videos";
-                    };
+              };
+            }
+            // lib.optionalAttrs cfg.nfs.enableVideos {
+              "${name}-${name}-media-videos-nfs" = {
+                apiVersion = "v1";
+                kind = "PersistentVolume";
+                metadata.name = "${name}-${name}-media-videos-nfs";
+                spec = nfsPVOptions // {
+                  nfs = {
+                    server = cfg.nfs.server;
+                    path = "${cfg.nfs.path}/Videos";
                   };
                 };
-              }
-            );
+              };
+            }
+          );
         };
     };
 }
