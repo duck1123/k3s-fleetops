@@ -15,6 +15,12 @@
       name = "sabnzbd";
       uses-ingress = true;
 
+      # Shape only -- no volumeHandle here, that's environment-specific (see
+      # env/dev/sabnzbd.nix and docs/pinned-volumes.md).
+      volumes = cfg: {
+        config.size = "5Gi";
+      };
+
       extraOptions = {
         image = mkOption {
           description = mdDoc "The docker image";
@@ -127,13 +133,6 @@
 
       extraResources =
         cfg:
-        let
-          pinnedConfig = self.lib.mkPinnedVolume {
-            pvcName = "${name}-${name}-config";
-            volumeHandle = "pvc-10cc181a-263c-4782-bad6-8ecd421f37d7";
-            size = "5Gi";
-          };
-        in
         {
           deployments.${name} = {
             metadata.labels = {
@@ -332,10 +331,7 @@
                     }
                   ];
                   volumes = [
-                    {
-                      name = "config";
-                      persistentVolumeClaim.claimName = "${name}-${name}-config";
-                    }
+                    cfg.volumes.config.volume
                     {
                       name = "downloads";
                       persistentVolumeClaim.claimName = "${name}-${name}-downloads";
@@ -385,7 +381,7 @@
             };
           };
 
-          persistentVolumeClaims = pinnedConfig.persistentVolumeClaims // {
+          persistentVolumeClaims = {
             "${name}-${name}-downloads".spec =
               if cfg.nfs.enable then
                 {
@@ -435,9 +431,7 @@
           };
 
           # Create NFS PersistentVolumes for downloads when NFS is enabled
-          persistentVolumes =
-            pinnedConfig.persistentVolumes
-            // lib.optionalAttrs (cfg.nfs.enable) {
+          persistentVolumes = lib.optionalAttrs (cfg.nfs.enable) {
               "${name}-${name}-downloads-nfs" = {
                 metadata.name = "${name}-${name}-downloads-nfs";
                 spec = {

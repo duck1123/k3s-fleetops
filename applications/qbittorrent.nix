@@ -25,6 +25,12 @@
         name = "qbittorrent";
         uses-ingress = true;
 
+        # Shape only -- no volumeHandle here, that's environment-specific (see
+        # env/dev/qbittorrent.nix and docs/pinned-volumes.md).
+        volumes = cfg: {
+          config.size = "5Gi";
+        };
+
         sopsSecrets =
           cfg:
           lib.optionalAttrs (cfg.webui.username != "" && cfg.webui.password != "") {
@@ -116,13 +122,6 @@
 
         extraResources =
           cfg:
-          let
-            pinnedConfig = self.lib.mkPinnedVolume {
-              pvcName = "${name}-${name}-config";
-              volumeHandle = "pvc-bc3fea68-9795-4b43-87f3-49f7a7ebd41c";
-              size = "5Gi";
-            };
-          in
           {
             deployments = {
               ${name} = {
@@ -433,10 +432,7 @@
                         }
                       ];
                       volumes = [
-                        {
-                          name = "config";
-                          persistentVolumeClaim.claimName = "${name}-${name}-config";
-                        }
+                        cfg.volumes.config.volume
                         {
                           name = "downloads";
                           persistentVolumeClaim.claimName = "${name}-${name}-downloads";
@@ -480,7 +476,7 @@
               };
             };
 
-            persistentVolumeClaims = pinnedConfig.persistentVolumeClaims // {
+            persistentVolumeClaims = {
               "${name}-${name}-downloads".spec =
                 if cfg.nfs.enable then
                   {
@@ -528,9 +524,7 @@
             };
 
             # Create NFS PersistentVolume for downloads when NFS is enabled
-            persistentVolumes =
-              pinnedConfig.persistentVolumes
-              // lib.optionalAttrs (cfg.nfs.enable) {
+            persistentVolumes = lib.optionalAttrs (cfg.nfs.enable) {
                 "${name}-${name}-downloads-nfs" = {
                   apiVersion = "v1";
                   kind = "PersistentVolume";
