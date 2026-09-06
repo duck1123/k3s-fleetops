@@ -53,15 +53,14 @@
             ${db-secret}.password = cfg.database.password;
           };
 
+        # Shape only -- no volumeHandle here, that's environment-specific (see
+        # env/dev/mealie.nix and docs/pinned-volumes.md).
+        volumes = cfg: {
+          data.size = "5Gi";
+        };
+
         extraResources =
           cfg:
-          let
-            pinnedData = self.lib.mkPinnedVolume {
-              pvcName = "${name}-${name}-data";
-              volumeHandle = "pvc-4e3d0692-5c4d-4a65-9f62-3c0f43326ede";
-              size = "5Gi";
-            };
-          in
           {
             deployments.${name} = {
               metadata.labels = {
@@ -171,10 +170,7 @@
                     ];
 
                     volumes = [
-                      {
-                        name = "data";
-                        persistentVolumeClaim.claimName = "${name}-${name}-data";
-                      }
+                      cfg.volumes.data.volume
                     ]
                     ++ lib.optionals (cfg.database.enable && cfg.database.password != "") [
                       {
@@ -216,9 +212,6 @@
                 ];
               };
             };
-
-            persistentVolumeClaims = pinnedData.persistentVolumeClaims;
-            persistentVolumes = pinnedData.persistentVolumes;
 
             services.${name}.spec = {
               ports = [

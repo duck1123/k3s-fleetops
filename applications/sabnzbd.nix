@@ -11,7 +11,7 @@
     let
       cfg = config.services.sabnzbd;
     in
-    self.lib.mkArgoApp { inherit config lib; } rec {
+    self.lib.mkArgoApp { inherit config lib self; } rec {
       name = "sabnzbd";
       uses-ingress = true;
 

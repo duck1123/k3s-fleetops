@@ -11,7 +11,7 @@
     let
       cfg = config.services.stashapp;
     in
-    self.lib.mkArgoApp { inherit config lib; } rec {
+    self.lib.mkArgoApp { inherit config lib self; } rec {
       name = "stashapp";
       uses-ingress = true;
 

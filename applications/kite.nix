@@ -8,14 +8,7 @@
       ...
     }:
     with lib;
-    let
-      pinnedData = self.lib.mkPinnedVolume {
-        pvcName = "kite-storage";
-        volumeHandle = "pvc-0ef43a60-ec9c-4a49-8da3-a38827d3c53a";
-        size = "1Gi";
-      };
-    in
-    self.lib.mkArgoApp { inherit config lib; } {
+    self.lib.mkArgoApp { inherit config lib self; } {
       name = "kite";
 
       # https://github.com/kite-org/kite (formerly zxh326/kite)
@@ -27,6 +20,16 @@
       };
 
       uses-ingress = true;
+
+      # `pvcName = "kite-storage"` to match the chart's `existingClaim` value
+      # below. Shape only -- no volumeHandle here, that's environment-specific
+      # (see env/dev/kite.nix and docs/pinned-volumes.md).
+      volumes = cfg: {
+        data = {
+          pvcName = "kite-storage";
+          size = "1Gi";
+        };
+      };
 
       extraOptions = {
         encryptKey = mkOption {
@@ -51,8 +54,8 @@
             accessModes = [ "ReadWriteOnce" ];
             size = "1Gi";
             storageClass = cfg.storageClassName;
-            # Pinned via extraResources below instead of letting the chart
-            # create the PVC -- see modules/lib/mkPinnedVolume.nix.
+            # Pinned via the `volumes` parameter above instead of letting the
+            # chart create the PVC -- see docs/pinned-volumes.md.
             existingClaim = "kite-storage";
           };
           host = ingress.domain;
@@ -82,10 +85,5 @@
           };
           nodeSelector."kubernetes.io/hostname" = cfg.hostAffinity;
         };
-
-      extraResources = cfg: {
-        persistentVolumeClaims = pinnedData.persistentVolumeClaims;
-        persistentVolumes = pinnedData.persistentVolumes;
-      };
     };
 }

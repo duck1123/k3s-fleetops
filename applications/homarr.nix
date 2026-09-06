@@ -36,6 +36,12 @@
           ${secret-encryption-key-secret}.SECRET_ENCRYPTION_KEY = cfg.secretEncryptionKey;
         };
 
+        # Shape only -- no volumeHandle here, that's environment-specific (see
+        # env/dev/homarr.nix and docs/pinned-volumes.md).
+        volumes = cfg: {
+          appdata.size = "1Gi";
+        };
+
         extraOptions = {
           image = mkOption {
             description = mdDoc "The Homarr docker image";
@@ -76,13 +82,6 @@
 
         extraResources =
           cfg:
-          let
-            pinnedData = self.lib.mkPinnedVolume {
-              pvcName = "${name}-${name}-appdata";
-              volumeHandle = "pvc-fde5f73c-9f19-4e30-8874-46cbe0a2f6a3";
-              size = "1Gi";
-            };
-          in
           builtins.seq (require-secret-encryption-key cfg) {
             deployments = {
               ${name} = {
@@ -176,12 +175,7 @@
                         }
                       ];
 
-                      volumes = [
-                        {
-                          name = "appdata";
-                          persistentVolumeClaim.claimName = "${name}-${name}-appdata";
-                        }
-                      ];
+                      volumes = [ cfg.volumes.appdata.volume ];
                     };
                   };
                 };
@@ -219,9 +213,6 @@
                 ];
               };
             };
-
-            persistentVolumeClaims = pinnedData.persistentVolumeClaims;
-            persistentVolumes = pinnedData.persistentVolumes;
 
             services.${name}.spec = {
               ports = [

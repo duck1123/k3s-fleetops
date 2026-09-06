@@ -8,7 +8,7 @@
       ...
     }:
     with lib;
-    self.lib.mkArgoApp { inherit config lib; } rec {
+    self.lib.mkArgoApp { inherit config lib self; } rec {
       name = "fileflows";
       uses-ingress = true;
 

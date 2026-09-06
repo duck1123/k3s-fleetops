@@ -11,7 +11,7 @@
     let
       cfg = config.services.audiobookshelf;
     in
-    self.lib.mkArgoApp { inherit config lib; } rec {
+    self.lib.mkArgoApp { inherit config lib self; } rec {
       name = "audiobookshelf";
       uses-ingress = true;
       uses-nfs = true;

@@ -10,13 +10,6 @@
       ...
     }:
     with lib;
-    let
-      pinnedData = self.lib.mkPinnedVolume {
-        pvcName = "gitea-shared-storage";
-        volumeHandle = "pvc-13e105ec-412c-4937-a19c-1b385f026664";
-        size = "10Gi";
-      };
-    in
     self.lib.mkArgoApp
       {
         inherit
@@ -38,6 +31,17 @@
               replicationPassword
               userPassword
               ;
+          };
+        };
+
+        # `pvcName = "gitea-shared-storage"` to match the chart's own default
+        # claimName (persistence.create = false below, so nothing else creates
+        # this PVC). Shape only -- no volumeHandle here, that's
+        # environment-specific (see env/dev/forgejo.nix and docs/pinned-volumes.md).
+        volumes = cfg: {
+          data = {
+            pvcName = "gitea-shared-storage";
+            size = "10Gi";
           };
         };
 
@@ -141,8 +145,8 @@
 
           persistence = {
             storageClass = cfg.storageClassName;
-            # Pinned via extraResources below instead of letting the chart
-            # create the PVC -- see modules/lib/mkPinnedVolume.nix. claimName
+            # Pinned via the `volumes` parameter above instead of letting the
+            # chart create the PVC -- see docs/pinned-volumes.md. claimName
             # stays at its default ("gitea-shared-storage") to match.
             create = false;
           };
@@ -150,11 +154,6 @@
           postgresql-ha.enabled = false;
           redis.enabled = false;
           redis-cluster.enabled = false;
-        };
-
-        extraResources = cfg: {
-          persistentVolumeClaims = pinnedData.persistentVolumeClaims;
-          persistentVolumes = pinnedData.persistentVolumes;
         };
       };
 }

@@ -15,7 +15,7 @@
         size = "5Gi";
       };
     in
-    self.lib.mkArgoApp { inherit config lib; } {
+    self.lib.mkArgoApp { inherit config lib self; } {
       name = "cloudbeaver";
 
       # https://artifacthub.io/packages/helm/avisto/cloudbeaver

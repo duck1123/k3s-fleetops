@@ -11,7 +11,7 @@
     let
       cfg = config.services.trilium;
     in
-    self.lib.mkArgoApp { inherit config lib; } rec {
+    self.lib.mkArgoApp { inherit config lib self; } rec {
       name = "trilium";
       uses-ingress = true;
 

@@ -30,6 +30,16 @@
         uses-ingress = true;
         uses-database = true;
 
+        # `pvcName = "${name}-data"` (not the usual "${name}-${name}-<key>"
+        # convention). Shape only -- no volumeHandle here, that's
+        # environment-specific (see env/dev/nocodb.nix and docs/pinned-volumes.md).
+        volumes = cfg: {
+          data = {
+            pvcName = "${name}-data";
+            size = "5Gi";
+          };
+        };
+
         sopsSecrets =
           cfg:
           optionalAttrs (cfg.auth.jwtSecret != "") {
@@ -168,13 +178,6 @@
 
         extraResources =
           cfg:
-          let
-            pinnedData = self.lib.mkPinnedVolume {
-              pvcName = "${name}-data";
-              volumeHandle = "pvc-31a2f2bc-8818-4500-ab0a-88f2db40d7b7";
-              size = "5Gi";
-            };
-          in
           {
             deployments.${name} = {
               metadata.labels = {
@@ -410,10 +413,7 @@
                     ];
 
                     volumes = [
-                      {
-                        name = "data";
-                        persistentVolumeClaim.claimName = "${name}-data";
-                      }
+                      cfg.volumes.data.volume
                     ]
                     ++ optional (cfg.database.password != "" || cfg.redis.password != "") {
                       name = storage-work-volume;
@@ -459,9 +459,6 @@
                 ];
               };
             };
-
-            persistentVolumeClaims = pinnedData.persistentVolumeClaims;
-            persistentVolumes = pinnedData.persistentVolumes;
 
             services.${name}.spec = {
               ports = [

@@ -8,9 +8,15 @@
       ...
     }:
     with lib;
-    self.lib.mkArgoApp { inherit config lib; } rec {
+    self.lib.mkArgoApp { inherit config lib self; } rec {
       name = "home-assistant";
       uses-ingress = true;
+
+      # Shape only -- no volumeHandle here, that's environment-specific (see
+      # env/dev/home-assistant.nix and docs/pinned-volumes.md).
+      volumes = cfg: {
+        config.size = cfg.configSize;
+      };
 
       extraOptions = {
         image = mkOption {
@@ -55,13 +61,6 @@
 
       extraResources =
         cfg:
-        let
-          pinnedConfig = self.lib.mkPinnedVolume {
-            pvcName = "${name}-${name}-config";
-            volumeHandle = "pvc-fbf41b36-718b-4942-bbe1-adf65e5bc7d1";
-            size = cfg.configSize;
-          };
-        in
         {
           deployments.${name} = {
             metadata.labels = {
@@ -237,12 +236,7 @@
                     }
                   ];
 
-                  volumes = [
-                    {
-                      name = "config";
-                      persistentVolumeClaim.claimName = "${name}-${name}-config";
-                    }
-                  ];
+                  volumes = [ cfg.volumes.config.volume ];
                 };
               };
             };
@@ -276,9 +270,6 @@
               ];
             };
           };
-
-          persistentVolumeClaims = pinnedConfig.persistentVolumeClaims;
-          persistentVolumes = pinnedConfig.persistentVolumes;
 
           services.${name}.spec = {
             ports = [
