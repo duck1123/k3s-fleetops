@@ -63,6 +63,7 @@ These images have explicit version tags and require manual checks.
 | busybox | various (init containers) | busybox | 1.36 | https://hub.docker.com/_/busybox/tags |
 | trilium | applications/trilium.nix | triliumnext/trilium | v0.104.1 | https://github.com/TriliumNext/Trilium/releases |
 | hass-AiDot | applications/home-assistant.nix | toxuin/hass-AiDot (git tag, not an image) | v1.2.0 | https://github.com/toxuin/hass-AiDot/releases |
+| opensearch | applications/ditto-relay.nix | opensearchproject/opensearch | 2.19.0 | https://hub.docker.com/r/opensearchproject/opensearch/tags |
 
 **Floating images** (no pinning needed — these always pull latest/stable):
 Many applications use `:latest`, `:stable`, or a floating major tag (e.g. `redis:8-alpine`, `louislam/uptime-kuma:1`).

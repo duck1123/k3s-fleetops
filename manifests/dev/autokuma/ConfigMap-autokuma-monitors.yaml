@@ -3,6 +3,7 @@ data:
   attic.json: '{"name":"attic","type":"http","url":"https://attic.home.kronkltd.net"}'
   audiobookshelf.json: '{"name":"audiobookshelf","type":"http","url":"https://audiobookshelf.home.kronkltd.net"}'
   cloudbeaver.json: '{"name":"cloudbeaver","type":"http","url":"https://cloudbeaver.home.kronkltd.net"}'
+  ditto-relay.json: '{"name":"ditto-relay","type":"http","url":"https://relay.duck1123.com"}'
   duck1123.json: '{"name":"duck1123","type":"http","url":"https://duck1123.com"}'
   garage.json: '{"name":"garage","type":"http","url":"http://garage.garage.svc.cluster.local:3903/health"}'
   homepage.json: '{"name":"homepage","type":"http","url":"https://homepage.home.kronkltd.net"}'

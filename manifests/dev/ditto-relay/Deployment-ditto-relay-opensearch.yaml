@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ditto-relay-opensearch
+  namespace: ditto-relay
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ditto-relay-opensearch
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ditto-relay-opensearch
+    spec:
+      containers:
+        - env:
+            - name: discovery.type
+              value: single-node
+            - name: DISABLE_SECURITY_PLUGIN
+              value: "true"
+            - name: DISABLE_INSTALL_DEMO_CONFIG
+              value: "true"
+            - name: OPENSEARCH_JAVA_OPTS
+              value: -Xms1g -Xmx1g
+          image: opensearchproject/opensearch:2.19.0
+          imagePullPolicy: IfNotPresent
+          name: ditto-relay-opensearch
+          ports:
+            - containerPort: 9200
+              name: http
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /usr/share/opensearch/data
+              name: opensearch-data
+      initContainers:
+        - command:
+            - sh
+            - -c
+            - chown -R 1000:1000 /usr/share/opensearch/data
+          image: busybox:latest
+          imagePullPolicy: IfNotPresent
+          name: fix-data-permissions
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - mountPath: /usr/share/opensearch/data
+              name: opensearch-data
+      volumes:
+        - name: opensearch-data
+          persistentVolumeClaim:
+            claimName: ditto-relay-ditto-relay-opensearch-data

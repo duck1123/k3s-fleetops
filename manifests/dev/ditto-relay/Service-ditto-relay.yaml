@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ditto-relay
+  namespace: ditto-relay
+spec:
+  ports:
+    - name: http
+      port: 13131
+      protocol: TCP
+      targetPort: 13131
+  selector:
+    app.kubernetes.io/name: ditto-relay

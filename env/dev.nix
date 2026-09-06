@@ -60,6 +60,7 @@ in
     "Media"
     "Notes"
     "Automation"
+    "Nostr"
     "Nodes"
   ];
 

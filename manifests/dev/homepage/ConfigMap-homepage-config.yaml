@@ -125,6 +125,13 @@ data:
         - xyops:
             href: https://xyops.home.kronkltd.net
             siteMonitor: https://xyops.home.kronkltd.net
+    - Nostr:
+        - Ditto Relay:
+            href: https://relay.duck1123.com
+            siteMonitor: https://relay.duck1123.com
+        - duck1123:
+            href: https://duck1123.com
+            siteMonitor: https://duck1123.com
     - Nodes:
         - edgenix:
             href: http://192.168.0.22:61208

@@ -15,6 +15,7 @@
     ./cloudbeaver.nix
     ./cloudflared.nix
     ./demo.nix
+    ./ditto-relay.nix
     ./duck1123
     ./dozzle.nix
     ./ersatztv.nix
