@@ -36,12 +36,12 @@
       # A function that takes the config and returns an attrset of volume specs (size, and
       # optionally pvcName/pvName/accessModes/volumeAttributes/storageClassName overrides), keyed
       # by a short logical volume name (e.g. "appdata", "config"). This declares each volume's
-      # *shape* only -- environment-agnostic, belongs in applications/<name>.nix. Whether a given
-      # volume actually gets pinned to a specific pre-existing Longhorn volume, and to which one,
-      # is controlled separately by `cfg.volumeHandles.<key>` (a plain option, set per-environment
-      # in e.g. env/dev/<name>.nix, since a volumeHandle only means something on one specific
-      # cluster) -- unset/null there just means an ordinary dynamically-provisioned PVC. See
-      # docs/pinned-volumes.md.
+      # *shape* only -- environment-agnostic, belongs in applications/<name>.nix. Any field here
+      # (including a `volumeHandle` to pin it to a specific pre-existing Longhorn volume) can be
+      # overridden per-environment via `cfg.volumeOverrides.<key>` (a plain option, set in e.g.
+      # env/dev/<name>.nix, since a volumeHandle only means something on one specific cluster) --
+      # a key with no `volumeHandle` anywhere just means an ordinary dynamically-provisioned PVC.
+      # See docs/pinned-volumes.md.
       volumes ? (cfg: { }),
       # A function that takes the config and returns secrets to encrypt (name -> stringData attrs)
       sopsSecrets ? (cfg: { }),
@@ -66,24 +66,31 @@
       cfg = config.services.${name};
       values = attrsets.recursiveUpdate (defaultValues cfg) cfg.values;
 
-      # See docs/pinned-volumes.md. `resolvedVolumes` is whatever the app's `volumes cfg`
-      # returned -- shape only (size, naming overrides), no volumeHandle. Each entry becomes
-      # either a plain dynamically-provisioned PVC (if `cfg.volumeHandles.<key>` is unset -- the
-      # default, and what a brand-new environment gets automatically) or a pinned PV+PVC via
-      # `mkPinnedVolume` (once that environment's config sets a real volumeHandle). `cfg.volumes`
-      # is what extraResources/extraAppConfig/etc reference instead of hand-typing the PVC name --
-      # `cfg.volumes.<key>.volume` is a ready `{ name; persistentVolumeClaim.claimName; }` for a
-      # Deployment's `spec.template.spec.volumes`, regardless of whether that key ends up pinned.
-      resolvedVolumes = volumes cfg;
+      # See docs/pinned-volumes.md. `volumes cfg` (environment-agnostic, from
+      # applications/<name>.nix) declares each volume's shape; `cfg.volumeOverrides.<key>`
+      # (set per-environment, e.g. env/dev/<name>.nix) is recursively merged on top of that --
+      # not just for `volumeHandle`, any field (`size` most commonly, but also `accessModes`,
+      # `storageClassName`, `volumeAttributes`, even `pvcName`) can be overridden per environment
+      # without touching applications/<name>.nix. A key with no `volumeHandle` anywhere (the
+      # default, and what a brand-new environment gets automatically) becomes a plain
+      # dynamically-provisioned PVC; one with a `volumeHandle` becomes a pinned PV+PVC via
+      # `mkPinnedVolume`. `cfg.volumes` is what extraResources/extraAppConfig/etc reference
+      # instead of hand-typing the PVC name -- `cfg.volumes.<key>.volume` is a ready
+      # `{ name; persistentVolumeClaim.claimName; }` for a Deployment's
+      # `spec.template.spec.volumes`, regardless of whether that key ends up pinned.
+      resolvedVolumes = lib.mapAttrs (
+        volName: shape: lib.recursiveUpdate shape (cfg.volumeOverrides.${volName} or { })
+      ) (volumes cfg);
       # Default naming follows this repo's existing convention; pass an explicit
-      # `pvcName` in a volume's arg-set to override it (e.g. to match a literal
-      # name a Helm chart's `existingClaim`-style value already expects).
+      # `pvcName` in a volume's arg-set (or a `volumeOverrides.<key>.pvcName` override) to
+      # override it -- e.g. to match a literal name a Helm chart's `existingClaim`-style
+      # value already expects.
       volumePvcName = volName: args: args.pvcName or "${name}-${name}-${volName}";
       volumeFragments = lib.mapAttrs (
         volName: args:
         let
           pvcName = volumePvcName volName args;
-          handle = cfg.volumeHandles.${volName} or null;
+          handle = args.volumeHandle or null;
         in
         if handle == null then
           {
@@ -459,16 +466,18 @@
           default = storageClassName;
         };
 
-        # Set per-environment (e.g. env/dev/<name>.nix) -- a Longhorn volumeHandle only
-        # identifies a volume on one specific cluster, so it doesn't belong in
-        # applications/<name>.nix. Unset/null for a key in the `volumes` parameter
-        # means that volume is an ordinary dynamically-provisioned PVC (what a
-        # brand-new environment gets automatically); set it once you've captured
-        # the real handle to pin that volume instead. See docs/pinned-volumes.md.
-        volumeHandles = mkOption {
+        # Set per-environment (e.g. env/dev/<name>.nix) -- recursively merged on top of the
+        # matching key's shape from the `volumes` parameter passed to mkArgoApp. Any field can
+        # be overridden this way (`size` most commonly, but also `accessModes`,
+        # `storageClassName`, `volumeAttributes`, `pvcName`) -- not just `volumeHandle`, though
+        # that's the one that actually pins a volume: a key with no `volumeHandle` anywhere is
+        # an ordinary dynamically-provisioned PVC (what a brand-new environment gets
+        # automatically, since a Longhorn volumeHandle only identifies a volume on one specific
+        # cluster and so doesn't belong in applications/<name>.nix). See docs/pinned-volumes.md.
+        volumeOverrides = mkOption {
           default = { };
-          type = types.attrsOf (types.nullOr types.str);
-          description = mdDoc "Map of volume key (from the `volumes` parameter passed to mkArgoApp) -> Longhorn volumeHandle to pin it to. Missing/null = ordinary dynamically-provisioned volume.";
+          type = types.attrsOf types.attrs;
+          description = mdDoc "Per-environment overrides merged onto the matching key's shape from the `volumes` parameter passed to mkArgoApp. Setting `volumeHandle` here pins that volume.";
         };
 
         # Internal: computed from the outer `volumes` parameter -- see

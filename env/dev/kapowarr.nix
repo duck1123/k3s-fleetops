@@ -24,6 +24,6 @@
 
     # Captured via `kubectl get pv <name> -o jsonpath='{.spec.csi.volumeHandle}'`
     # -- see docs/pinned-volumes.md. Specific to this cluster.
-    volumeHandles.config = "pvc-aa4bb624-7cf8-4fbc-a6c9-7e09e50f53f6";
+    volumeOverrides.config.volumeHandle = "pvc-aa4bb624-7cf8-4fbc-a6c9-7e09e50f53f6";
   };
 }
