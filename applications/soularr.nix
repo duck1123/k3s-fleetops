@@ -88,6 +88,12 @@
         name = "soularr";
         uses-ingress = false;
 
+        # Shape only -- no volumeHandle here, that's environment-specific (see
+        # env/dev/soularr.nix and docs/pinned-volumes.md).
+        volumes = cfg: {
+          config.size = "1Gi";
+        };
+
         sopsSecrets =
           cfg:
           { }
@@ -196,13 +202,6 @@
 
         extraResources =
           cfg:
-          let
-            pinnedConfig = self.lib.mkPinnedVolume {
-              pvcName = "${name}-${name}-config";
-              volumeHandle = "pvc-25589b0e-1276-441e-a91a-2e4e78ec378c";
-              size = "1Gi";
-            };
-          in
           {
             deployments.${name} = {
               metadata.labels = {
@@ -341,10 +340,7 @@
                       }
                     ];
                     volumes = [
-                      {
-                        name = "config";
-                        persistentVolumeClaim.claimName = "${name}-${name}-config";
-                      }
+                      cfg.volumes.config.volume
                       {
                         name = "downloads";
                         persistentVolumeClaim.claimName = "${name}-${name}-downloads";
@@ -355,9 +351,7 @@
               };
             };
 
-            persistentVolumes =
-              pinnedConfig.persistentVolumes
-              // lib.optionalAttrs cfg.nfs.enable {
+            persistentVolumes = lib.optionalAttrs cfg.nfs.enable {
                 "${name}-${name}-downloads-nfs" = {
                   apiVersion = "v1";
                   metadata.name = "${name}-${name}-downloads-nfs";
@@ -379,7 +373,7 @@
                 };
               };
 
-            persistentVolumeClaims = pinnedConfig.persistentVolumeClaims // {
+            persistentVolumeClaims = {
               "${name}-${name}-downloads".spec =
                 if cfg.nfs.enable then
                   {

@@ -25,6 +25,18 @@
         name = "slskd";
         uses-ingress = true;
 
+        # Shape only -- no volumeHandle here, that's environment-specific (see
+        # env/dev/slskd.nix and docs/pinned-volumes.md).
+        volumes = cfg: {
+          config = {
+            # Real storageClassName (not the "" default) so Longhorn's resize
+            # webhook treats this as expandable -- it was full, see
+            # modules/lib/mkPinnedVolume.nix for why "" blocks resize.
+            storageClassName = "longhorn";
+            size = "40Gi";
+          };
+        };
+
         sopsSecrets =
           cfg:
           lib.optionalAttrs (cfg.webAuth.username != "" && cfg.webAuth.password != "") {
@@ -139,17 +151,6 @@
 
         extraResources =
           cfg:
-          let
-            pinnedConfig = self.lib.mkPinnedVolume {
-              pvcName = "${name}-${name}-config";
-              volumeHandle = "pvc-3daa90da-e4b2-4dd2-8cfe-9a1f98764991";
-              # Real storageClassName (not the "" default) so Longhorn's
-              # resize webhook treats this as expandable -- it was full,
-              # see modules/lib/mkPinnedVolume.nix for why "" blocks resize.
-              storageClassName = "longhorn";
-              size = "40Gi";
-            };
-          in
           {
             deployments.${name} = {
               metadata.labels = {
@@ -309,10 +310,7 @@
                       }
                     ];
                     volumes = [
-                      {
-                        name = "config";
-                        persistentVolumeClaim.claimName = "${name}-${name}-config";
-                      }
+                      cfg.volumes.config.volume
                       {
                         name = "downloads";
                         persistentVolumeClaim.claimName = "${name}-${name}-downloads";
@@ -329,9 +327,7 @@
               };
             };
 
-            persistentVolumes =
-              pinnedConfig.persistentVolumes
-              // lib.optionalAttrs cfg.nfs.enable {
+            persistentVolumes = lib.optionalAttrs cfg.nfs.enable {
                 "${name}-${name}-downloads-nfs" = {
                   apiVersion = "v1";
                   metadata.name = "${name}-${name}-downloads-nfs";
@@ -374,9 +370,7 @@
                 };
               };
 
-            persistentVolumeClaims =
-              pinnedConfig.persistentVolumeClaims
-              // {
+            persistentVolumeClaims = {
                 "${name}-${name}-downloads".spec =
                   if cfg.nfs.enable then
                     {
