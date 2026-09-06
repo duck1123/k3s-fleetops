@@ -27,6 +27,12 @@
         uses-ingress = true;
         uses-database = true;
 
+        # Shape only -- no volumeHandle here, that's environment-specific (see
+        # env/dev/prowlarr.nix and docs/pinned-volumes.md).
+        volumes = cfg: {
+          config.size = "5Gi";
+        };
+
         extraOptions = {
           image = mkOption {
             description = mdDoc "The docker image";
@@ -117,13 +123,6 @@
 
         extraResources =
           cfg:
-          let
-            pinnedConfig = self.lib.mkPinnedVolume {
-              pvcName = "${name}-${name}-config";
-              volumeHandle = "pvc-ee5907d3-b4e4-4da5-91dc-d013f243b741";
-              size = "5Gi";
-            };
-          in
           {
             deployments = {
               ${name} = {
@@ -267,10 +266,7 @@
                         }
                       ];
                       volumes = [
-                        {
-                          name = "config";
-                          persistentVolumeClaim.claimName = "${name}-${name}-config";
-                        }
+                        cfg.volumes.config.volume
                       ]
                       ++ (lib.optionals (cfg.database.enable && cfg.database.password != "") [
                         {
@@ -318,9 +314,6 @@
                 ];
               };
             };
-
-            persistentVolumeClaims = pinnedConfig.persistentVolumeClaims;
-            persistentVolumes = pinnedConfig.persistentVolumes;
 
             services.${name}.spec = {
               ports = [

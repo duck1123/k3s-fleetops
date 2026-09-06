@@ -12,6 +12,12 @@
       name = "uptime-kuma";
       uses-ingress = true;
 
+      # Shape only -- no volumeHandle here, that's environment-specific (see
+      # env/dev/uptime-kuma.nix and docs/pinned-volumes.md).
+      volumes = cfg: {
+        data.size = "5Gi";
+      };
+
       extraOptions = {
         image = mkOption {
           description = mdDoc "The docker image";
@@ -28,13 +34,6 @@
 
       extraResources =
         cfg:
-        let
-          pinnedData = self.lib.mkPinnedVolume {
-            pvcName = "${name}-${name}-data";
-            volumeHandle = "pvc-1d098edf-77ca-4e22-9742-312c090598b5";
-            size = "5Gi";
-          };
-        in
         {
           deployments.${name} = {
             metadata.labels = {
@@ -96,12 +95,7 @@
                     }
                   ];
 
-                  volumes = [
-                    {
-                      name = "data";
-                      persistentVolumeClaim.claimName = "${name}-${name}-data";
-                    }
-                  ];
+                  volumes = [ cfg.volumes.data.volume ];
                 };
               };
             };
@@ -135,9 +129,6 @@
               ];
             };
           };
-
-          persistentVolumeClaims = pinnedData.persistentVolumeClaims;
-          persistentVolumes = pinnedData.persistentVolumes;
 
           services.${name}.spec = {
             ports = [

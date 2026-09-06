@@ -29,6 +29,16 @@
         uses-ingress = true;
         uses-database = true;
 
+        # `pvcName = "${name}-data"` (not the usual "${name}-${name}-<key>"
+        # convention). Shape only -- no volumeHandle here, that's
+        # environment-specific (see env/dev/xyops.nix and docs/pinned-volumes.md).
+        volumes = cfg: {
+          data = {
+            pvcName = "${name}-data";
+            size = cfg.persistenceSize;
+          };
+        };
+
         # xyOps' Hybrid storage engine only supports one JSON doc-store
         # (Postgres or Redis) paired with one binary store, not all three at
         # once -- Postgres (via uses-database) is the docEngine here, S3
@@ -116,11 +126,6 @@
         extraResources =
           cfg:
           let
-            pinnedData = self.lib.mkPinnedVolume {
-              pvcName = "${name}-data";
-              volumeHandle = "pvc-8c803a5c-b039-4ed1-bcec-6726d2f8276b";
-              size = cfg.persistenceSize;
-            };
             envVars = [
               {
                 name = "TZ";
@@ -323,12 +328,7 @@
                       }
                     ];
 
-                    volumes = [
-                      {
-                        name = "data";
-                        persistentVolumeClaim.claimName = "${name}-data";
-                      }
-                    ];
+                    volumes = [ cfg.volumes.data.volume ];
                   };
                 };
               };
@@ -383,8 +383,6 @@
               ];
             };
 
-            persistentVolumeClaims = pinnedData.persistentVolumeClaims;
-            persistentVolumes = pinnedData.persistentVolumes;
           };
       };
 }

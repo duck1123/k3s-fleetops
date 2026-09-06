@@ -15,6 +15,12 @@
       name = "trilium";
       uses-ingress = true;
 
+      # Shape only -- no volumeHandle here, that's environment-specific (see
+      # env/dev/trilium.nix and docs/pinned-volumes.md).
+      volumes = cfg: {
+        data.size = cfg.dataStorage;
+      };
+
       extraOptions = {
         image = mkOption {
           description = mdDoc "The docker image";
@@ -70,13 +76,6 @@
 
       extraResources =
         cfg:
-        let
-          pinnedData = self.lib.mkPinnedVolume {
-            pvcName = "${name}-${name}-data";
-            volumeHandle = "pvc-582855f1-f480-4983-bf80-eb22b9f2ac0a";
-            size = cfg.dataStorage;
-          };
-        in
         {
           deployments.${name} = {
             metadata.labels = {
@@ -149,12 +148,7 @@
                     }
                   ];
 
-                  volumes = [
-                    {
-                      name = "data";
-                      persistentVolumeClaim.claimName = "${name}-${name}-data";
-                    }
-                  ];
+                  volumes = [ cfg.volumes.data.volume ];
                 };
               };
             };
@@ -189,9 +183,6 @@
               ];
             };
           };
-
-          persistentVolumeClaims = pinnedData.persistentVolumeClaims;
-          persistentVolumes = pinnedData.persistentVolumes;
 
           services.${name}.spec = {
             ports = [

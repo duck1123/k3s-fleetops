@@ -8,13 +8,6 @@
       ...
     }:
     with lib;
-    let
-      pinnedData = self.lib.mkPinnedVolume {
-        pvcName = "cloudbeaver";
-        volumeHandle = "pvc-44f776b3-80c5-4edc-9398-e681cab79b16";
-        size = "5Gi";
-      };
-    in
     self.lib.mkArgoApp { inherit config lib self; } {
       name = "cloudbeaver";
 
@@ -27,6 +20,16 @@
       };
 
       uses-ingress = true;
+
+      # `pvcName = "cloudbeaver"` to match the chart's `existingClaim` value
+      # below. Shape only -- no volumeHandle here, that's environment-specific
+      # (see env/dev/cloudbeaver.nix and docs/pinned-volumes.md).
+      volumes = cfg: {
+        data = {
+          pvcName = "cloudbeaver";
+          size = "5Gi";
+        };
+      };
 
       defaultValues = cfg: {
         ingress = with cfg.ingress; {
@@ -47,16 +50,10 @@
         persistence = {
           enabled = true;
           storageClass = cfg.storageClassName;
-          # Pin to the pre-existing Longhorn volume via extraResources below
-          # instead of letting the chart dynamically provision a fresh one --
-          # see modules/lib/mkPinnedVolume.nix.
+          # Pinned via the `volumes` parameter above instead of letting the
+          # chart dynamically provision a fresh one -- see docs/pinned-volumes.md.
           existingClaim = "cloudbeaver";
         };
-      };
-
-      extraResources = cfg: {
-        persistentVolumeClaims = pinnedData.persistentVolumeClaims;
-        persistentVolumes = pinnedData.persistentVolumes;
       };
     };
 }
