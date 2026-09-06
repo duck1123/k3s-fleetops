@@ -10,6 +10,7 @@
     ./authentik.nix
     ./autokuma.nix
     ./booklore.nix
+    ./bookorbit.nix
     ./calibre.nix
     ./cert-manager.nix
     ./cloudbeaver.nix

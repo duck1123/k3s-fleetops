@@ -57,6 +57,7 @@ These images have explicit version tags and require manual checks.
 | kavita | applications/kavita.nix | linuxserver/kavita | v0.9.0.2-ls110 | https://hub.docker.com/r/linuxserver/kavita/tags |
 | mealie | applications/mealie.nix, env/dev/mealie.nix | ghcr.io/mealie-recipes/mealie | v3.22.0 | https://github.com/mealie-recipes/mealie/releases |
 | romm | applications/romm.nix | ghcr.io/rommapp/romm | 5.1.0 | https://github.com/rommapp/romm/releases |
+| bookorbit | applications/bookorbit.nix | ghcr.io/bookorbit/bookorbit | 1.3.0 | https://github.com/bookorbit/bookorbit/pkgs/container/bookorbit |
 | hivemq | applications/hivemq.nix | hivemq/hivemq-ce | 2026.5 | https://hub.docker.com/r/hivemq/hivemq-ce/tags |
 | postgres init | applications/immich.nix | docker.io/postgres | 17.10 | https://hub.docker.com/_/postgres/tags |
 | pgvector | applications/postgresql.nix | pgvector/pgvector | pg17 (floating) | https://hub.docker.com/r/pgvector/pgvector/tags |

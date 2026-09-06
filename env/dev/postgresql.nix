@@ -74,6 +74,11 @@
           username = "paperless-ngx";
           password = secrets.postgresql.userPassword;
         }
+        {
+          name = "bookorbit";
+          username = "bookorbit";
+          password = secrets.postgresql.userPassword;
+        }
       ];
 
     # Captured via `kubectl get pv <name> -o jsonpath='{.spec.csi.volumeHandle}'`

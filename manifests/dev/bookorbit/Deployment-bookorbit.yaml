@@ -1,0 +1,105 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/instance: bookorbit
+    app.kubernetes.io/name: bookorbit
+    app.kubernetes.io/version: 1.3.0
+  name: bookorbit
+  namespace: bookorbit
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: bookorbit
+      app.kubernetes.io/name: bookorbit
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: bookorbit
+        app.kubernetes.io/name: bookorbit
+    spec:
+      automountServiceAccountToken: true
+      containers:
+        - env:
+            - name: NODE_ENV
+              value: production
+            - name: PORT
+              value: "3000"
+            - name: TZ
+              value: Etc/UTC
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: NODE_MAX_OLD_SPACE_SIZE
+              value: "2048"
+            - name: POSTGRES_HOST
+              value: postgresql.postgresql
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_USER
+              value: bookorbit
+            - name: POSTGRES_DB
+              value: bookorbit
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: bookorbit-database-password
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  key: JWT_SECRET
+                  name: bookorbit-jwt-secret
+            - name: SETUP_BOOTSTRAP_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  key: SETUP_BOOTSTRAP_TOKEN
+                  name: bookorbit-setup-token
+            - name: APP_URL
+              value: https://bookorbit.home.kronkltd.net
+            - name: LIBRARY_BROWSE_ROOT
+              value: /books
+          image: ghcr.io/bookorbit/bookorbit:1.3.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 5
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            successThreshold: 1
+            tcpSocket:
+              port: http
+            timeoutSeconds: 5
+          name: bookorbit
+          ports:
+            - containerPort: 3000
+              name: http
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 5
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            successThreshold: 1
+            tcpSocket:
+              port: http
+            timeoutSeconds: 5
+          volumeMounts:
+            - mountPath: /books
+              name: books
+            - mountPath: /data
+              name: data
+            - mountPath: /books/Audiobooks
+              name: audiobooks
+      serviceAccountName: default
+      volumes:
+        - name: books
+          persistentVolumeClaim:
+            claimName: bookorbit-bookorbit-books
+        - name: data
+          persistentVolumeClaim:
+            claimName: bookorbit-bookorbit-data
+        - name: audiobooks
+          persistentVolumeClaim:
+            claimName: bookorbit-bookorbit-audiobooks

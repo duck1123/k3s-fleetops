@@ -71,6 +71,9 @@ data:
               key: '{{HOMEPAGE_VAR_AUDIOBOOKSHELF_API_KEY}}'
               type: audiobookshelf
               url: http://audiobookshelf.audiobookshelf:80
+        - bookorbit:
+            href: https://bookorbit.home.kronkltd.net
+            siteMonitor: https://bookorbit.home.kronkltd.net
         - immich:
             href: https://immich.home.kronkltd.net
             siteMonitor: https://immich.home.kronkltd.net
