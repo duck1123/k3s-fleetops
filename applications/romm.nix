@@ -28,6 +28,13 @@
         uses-ingress = true;
         uses-database = true;
 
+        # Shape only -- no volumeHandle here, that's environment-specific (see
+        # env/dev/romm.nix and docs/pinned-volumes.md).
+        volumes = cfg: {
+          data.size = "5Gi";
+          config.size = "1Gi";
+        };
+
         sopsSecrets =
           cfg:
           {
@@ -219,18 +226,6 @@
 
         extraResources =
           cfg:
-          let
-            pinnedData = self.lib.mkPinnedVolume {
-              pvcName = "${name}-${name}-data";
-              volumeHandle = "pvc-c41afd8b-9c13-4cff-b8a3-5f9023fb7681";
-              size = "5Gi";
-            };
-            pinnedConfig = self.lib.mkPinnedVolume {
-              pvcName = "${name}-${name}-config";
-              volumeHandle = "pvc-79977181-2377-4be5-8218-a19774c66c15";
-              size = "1Gi";
-            };
-          in
           {
             deployments.${name} = {
               metadata.labels = {
@@ -465,14 +460,8 @@
                       }
                     ];
                     volumes = [
-                      {
-                        name = "data";
-                        persistentVolumeClaim.claimName = "${name}-${name}-data";
-                      }
-                      {
-                        name = "config";
-                        persistentVolumeClaim.claimName = "${name}-${name}-config";
-                      }
+                      cfg.volumes.data.volume
+                      cfg.volumes.config.volume
                       {
                         name = "library";
                         persistentVolumeClaim.claimName = "${name}-library";
@@ -590,10 +579,7 @@
               };
             };
 
-            persistentVolumeClaims =
-              pinnedData.persistentVolumeClaims
-              // pinnedConfig.persistentVolumeClaims
-              // {
+            persistentVolumeClaims = {
                 "${name}-library".spec =
                   if cfg.nfs.enable then
                     {
@@ -639,10 +625,7 @@
               };
 
             # Create NFS PersistentVolumes for roms when NFS is enabled
-            persistentVolumes =
-              pinnedData.persistentVolumes
-              // pinnedConfig.persistentVolumes
-              // lib.optionalAttrs cfg.nfs.enable {
+            persistentVolumes = lib.optionalAttrs cfg.nfs.enable {
                 "${name}-${name}-library-nfs" = {
                   apiVersion = "v1";
                   kind = "PersistentVolume";

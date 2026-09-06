@@ -12,6 +12,13 @@
       name = "tdarr";
       uses-ingress = true;
 
+      # Shape only -- no volumeHandle here, that's environment-specific (see
+      # env/dev/tdarr.nix and docs/pinned-volumes.md).
+      volumes = cfg: {
+        config.size = "10Gi";
+        temp.size = "50Gi";
+      };
+
       extraOptions = {
         image = mkOption {
           description = mdDoc "The docker image";
@@ -140,18 +147,6 @@
 
       extraResources =
         cfg:
-        let
-          pinnedConfig = self.lib.mkPinnedVolume {
-            pvcName = "${name}-${name}-config";
-            volumeHandle = "pvc-b11637b3-e2c3-4f93-82a3-2a19c53d0aff";
-            size = "10Gi";
-          };
-          pinnedTemp = self.lib.mkPinnedVolume {
-            pvcName = "${name}-${name}-temp";
-            volumeHandle = "pvc-157c8a73-0af2-4625-b441-2183651d25b5";
-            size = "50Gi";
-          };
-        in
         {
           deployments = {
             ${name} = {
@@ -397,14 +392,8 @@
                     ));
 
                     volumes = [
-                      {
-                        name = "config";
-                        persistentVolumeClaim.claimName = "${name}-${name}-config";
-                      }
-                      {
-                        name = "temp";
-                        persistentVolumeClaim.claimName = "${name}-${name}-temp";
-                      }
+                      cfg.volumes.config.volume
+                      cfg.volumes.temp.volume
                       {
                         name = "media-movies";
                         persistentVolumeClaim.claimName = "${name}-${name}-media-movies";
@@ -476,10 +465,7 @@
             };
           };
 
-          persistentVolumeClaims =
-            pinnedConfig.persistentVolumeClaims
-            // pinnedTemp.persistentVolumeClaims
-            // {
+          persistentVolumeClaims = {
               "${name}-${name}-media-movies".spec =
                 if cfg.nfs.enable then
                   {
@@ -533,10 +519,7 @@
           };
 
           # Create NFS PersistentVolumes for media when NFS is enabled
-          persistentVolumes =
-            pinnedConfig.persistentVolumes
-            // pinnedTemp.persistentVolumes
-            // lib.optionalAttrs (cfg.nfs.enable) {
+          persistentVolumes = lib.optionalAttrs (cfg.nfs.enable) {
               "${name}-${name}-media-movies-nfs" = {
                 apiVersion = "v1";
                 kind = "PersistentVolume";
