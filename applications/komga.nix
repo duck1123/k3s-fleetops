@@ -25,6 +25,12 @@
         name = "komga";
         uses-ingress = true;
 
+        # Shape only -- no volumeHandle here, that's environment-specific (see
+        # env/dev/komga.nix and docs/pinned-volumes.md).
+        volumes = cfg: {
+          config.size = "5Gi";
+        };
+
         extraOptions = {
           gid = mkOption {
             description = mdDoc "The group id";
@@ -101,13 +107,6 @@
 
         extraResources =
           cfg:
-          let
-            pinnedConfig = self.lib.mkPinnedVolume {
-              pvcName = "${name}-${name}-config";
-              volumeHandle = "pvc-a982e08c-30f2-4e21-928f-970d367e417f";
-              size = "5Gi";
-            };
-          in
           {
             deployments = {
               komga = {
@@ -183,10 +182,7 @@
                         }
                       ];
                       volumes = [
-                        {
-                          name = "config";
-                          persistentVolumeClaim.claimName = "${name}-${name}-config";
-                        }
+                        cfg.volumes.config.volume
                         {
                           name = "data";
                           persistentVolumeClaim.claimName = "${name}-${name}-data";
@@ -232,7 +228,7 @@
               };
             };
 
-            persistentVolumeClaims = pinnedConfig.persistentVolumeClaims // {
+            persistentVolumeClaims = {
               "${name}-${name}-data".spec =
                 if cfg.nfs.enable then
                   {
@@ -269,9 +265,7 @@
               };
             };
 
-            persistentVolumes =
-              pinnedConfig.persistentVolumes
-              // lib.optionalAttrs cfg.nfs.enable {
+            persistentVolumes = lib.optionalAttrs cfg.nfs.enable {
                 "${name}-${name}-data-nfs" = {
                   apiVersion = "v1";
                   kind = "PersistentVolume";

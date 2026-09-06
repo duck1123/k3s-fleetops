@@ -15,6 +15,12 @@
       name = "stashapp";
       uses-ingress = true;
 
+      # Shape only -- no volumeHandle here, that's environment-specific (see
+      # env/dev/stashapp.nix and docs/pinned-volumes.md).
+      volumes = cfg: {
+        config.size = "200Gi";
+      };
+
       extraOptions = {
         image = mkOption {
           description = mdDoc "The docker image";
@@ -102,13 +108,6 @@
 
       extraResources =
         cfg:
-        let
-          pinnedConfig = self.lib.mkPinnedVolume {
-            pvcName = "${name}-${name}-config";
-            volumeHandle = "pvc-9d446279-6623-466b-9937-143eeca518ca";
-            size = "200Gi";
-          };
-        in
         {
           deployments = {
             ${name} = {
@@ -236,10 +235,7 @@
                       )
                     ];
                     volumes = [
-                      {
-                        name = "config";
-                        persistentVolumeClaim.claimName = "${name}-${name}-config";
-                      }
+                      cfg.volumes.config.volume
                       {
                         name = "data";
                         persistentVolumeClaim.claimName = "${name}-${name}-data";
@@ -305,7 +301,7 @@
             };
           };
 
-          persistentVolumeClaims = pinnedConfig.persistentVolumeClaims // {
+          persistentVolumeClaims = {
             "${name}-${name}-data".spec =
               if cfg.nfs.enable then
                 {
@@ -341,9 +337,7 @@
           };
 
           # Create NFS PersistentVolume for data when NFS is enabled
-          persistentVolumes =
-            pinnedConfig.persistentVolumes
-            // lib.optionalAttrs cfg.nfs.enable {
+          persistentVolumes = lib.optionalAttrs cfg.nfs.enable {
               "${name}-${name}-data-nfs" = {
                 apiVersion = "v1";
                 kind = "PersistentVolume";

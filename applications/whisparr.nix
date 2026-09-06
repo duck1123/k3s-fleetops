@@ -26,6 +26,12 @@
         uses-ingress = true;
         uses-database = true;
 
+        # Shape only -- no volumeHandle here, that's environment-specific (see
+        # env/dev/whisparr.nix and docs/pinned-volumes.md).
+        volumes = cfg: {
+          config.size = "5Gi";
+        };
+
         extraOptions = {
           image = mkOption {
             description = mdDoc "The docker image";
@@ -109,13 +115,6 @@
 
         extraResources =
           cfg:
-          let
-            pinnedConfig = self.lib.mkPinnedVolume {
-              pvcName = "${name}-${name}-config";
-              volumeHandle = "pvc-7635e288-2ecd-476b-9cc8-e6355eb2ee27";
-              size = "5Gi";
-            };
-          in
           {
             deployments = {
               ${name} = {
@@ -304,10 +303,7 @@
                         }
                       ];
                       volumes = [
-                        {
-                          name = "config";
-                          persistentVolumeClaim.claimName = "${name}-${name}-config";
-                        }
+                        cfg.volumes.config.volume
                       ]
                       ++ (lib.optionals (cfg.database.enable && cfg.database.password != "") [
                         {
@@ -355,7 +351,7 @@
               tls = [ { hosts = [ domain ]; } ];
             };
 
-            persistentVolumeClaims = pinnedConfig.persistentVolumeClaims // {
+            persistentVolumeClaims = {
               "${name}-${name}-downloads".spec =
                 if cfg.nfs.enable then
                   {
@@ -405,9 +401,7 @@
             };
 
             # Create NFS PersistentVolumes for downloads and tv when NFS is enabled
-            persistentVolumes =
-              pinnedConfig.persistentVolumes
-              // lib.optionalAttrs (cfg.nfs.enable) {
+            persistentVolumes = lib.optionalAttrs (cfg.nfs.enable) {
                 "${name}-${name}-downloads-nfs" = {
                   apiVersion = "v1";
                   kind = "PersistentVolume";
