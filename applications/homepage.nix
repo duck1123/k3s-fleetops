@@ -218,12 +218,15 @@
                         # version-dependent list, confirmed by it crashing on a
                         # different missing file each time one was pre-empted).
                         # Rather than chase that list, seed a writable /app/config
-                        # from the image's own skeleton, then overlay only the
-                        # files we actually manage from the read-only ConfigMap.
+                        # from the image's own skeleton, then symlink (not copy) the
+                        # files we actually manage back to the ConfigMap mount --
+                        # ConfigMap volumes update live on their own (no pod restart
+                        # needed), but a one-time `cp` would freeze that content at
+                        # whatever it was when this initContainer last ran.
                         command = [
                           "sh"
                           "-c"
-                          "cp -r /app/src/skeleton/. /app/config/ && cp -f /config-src/*.yaml /app/config/"
+                          "cp -r /app/src/skeleton/. /app/config/ && ln -sf /config-src/*.yaml /app/config/"
                         ];
                         volumeMounts = [
                           {
@@ -312,6 +315,14 @@
                             name = "config";
                             mountPath = "/app/config";
                           }
+                          {
+                            # Symlink target for the config-init initContainer's
+                            # ln -sf -- must be mounted here too, at the same path,
+                            # for those symlinks to resolve in this container.
+                            name = "config-src";
+                            mountPath = "/config-src";
+                            readOnly = true;
+                          }
                         ];
                       }
                     ];
@@ -319,7 +330,7 @@
                     volumes = [
                       {
                         # Writable -- seeded by the config-init initContainer from
-                        # the image's own skeleton, then overlaid with our config.
+                        # the image's own skeleton, then symlinked to our config.
                         name = "config";
                         emptyDir = { };
                       }
