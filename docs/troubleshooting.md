@@ -81,6 +81,6 @@ An `Unknown parameter name` parse error here (not a network/disk problem) is the
 
 **Fix:** `kubectl delete pod -n gluetun <pod>` — the Deployment recreates it, gluetun reconnects (often to a different Mullvad server), and the ICMP check usually passes on the new connection. Recheck any app gated behind it afterward; they typically self-resolve once gluetun goes Ready without needing their own restart.
 
-## RustFS crash-looping with a generic `[FATAL] File access denied`
+## Self-hosted binary cache / nix-csi build failures
 
-See [nix-csi-and-binary-cache.md](nix-csi-and-binary-cache.md) — RustFS backs the self-hosted Attic Nix cache, so its failures cascade into `nix-csi`/build failures in a way that isn't obvious from the nix-csi side alone.
+See [nix-csi-and-binary-cache.md](nix-csi-and-binary-cache.md) — covers the pinned `nix-csi` flake input, the self-hosted Attic Nix cache (currently backed by Garage; RustFS was the original backend, now disabled but still referenced by a couple of unmigrated apps), and how failures in either cascade into `nix-csi`/build failures in ways that aren't obvious from the nix-csi side alone.

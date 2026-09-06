@@ -129,7 +129,7 @@ When an upstream project has no Dockerfile, use the nix-csi CSI driver (already 
 - Add a `csi` volume with `driver: nix.csi.store` and a `nixExpr` attribute containing a Nix expression that evaluates to the package derivation
 - Mount the volume at `/nix` with `subPath: nix` — this makes `/nix/var/result/bin` available on PATH inside the container
 - See `applications/demo.nix` for a working example and `applications/nostrarchives.nix` for a Rust app pattern
-- The `nix-csi` flake input is intentionally pinned (not tracking upstream) due to an unresolved breaking bug — see [docs/nix-csi-and-binary-cache.md](docs/nix-csi-and-binary-cache.md) before running `nix flake update` or touching `applications/nix-csi.nix`. That page also covers the self-hosted Attic/RustFS binary cache these apps (and `nix-csi` itself) pull from.
+- The `nix-csi` flake input is intentionally pinned (not tracking upstream) due to an unresolved breaking bug — see [docs/nix-csi-and-binary-cache.md](docs/nix-csi-and-binary-cache.md) before running `nix flake update` or touching `applications/nix-csi.nix`. That page also covers the self-hosted Attic binary cache (backed by Garage) these apps (and `nix-csi` itself) pull from.
 
 ### Internet-Facing Apps (Cloudflare Tunnel)
 
