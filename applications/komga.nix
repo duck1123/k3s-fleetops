@@ -9,6 +9,9 @@
       ...
     }:
     with lib;
+    let
+      cfg = config.services.komga;
+    in
     self.lib.mkArgoApp
       {
         inherit
@@ -27,6 +30,33 @@
             description = mdDoc "The group id";
             type = types.str;
             default = "1000";
+          };
+
+          apiKey = mkOption {
+            description = mdDoc ''
+              Komga API key (web UI -> Settings -> Users -> API Keys). Stored in
+              secrets.enc.yaml as `komga.key` and wired in via
+              `env/dev/komga.nix`. Only powers the auto-added homepage dashboard
+              widget below -- never injected into the komga container itself.
+            '';
+            type = types.str;
+            default = "";
+          };
+
+          # Auto-add a Komga widget to this app's homepage dashboard tile once
+          # an API key is configured -- see applications/immich.nix for the same
+          # pattern with more detail. Set
+          # `services.homepage.widgetSecrets.KOMGA_API_KEY` from
+          # `config.services.komga.apiKey` in env/dev/homepage.nix. Add
+          # `version = 2;` here if this ever moves to Komga v2.
+          homepage.extraSettings = mkOption {
+            default = lib.optionalAttrs (cfg.apiKey != "") {
+              widget = {
+                type = "komga";
+                url = "http://${name}.${cfg.namespace}:${toString cfg.service.port}";
+                key = "{{HOMEPAGE_VAR_KOMGA_API_KEY}}";
+              };
+            };
           };
 
           image = mkOption {

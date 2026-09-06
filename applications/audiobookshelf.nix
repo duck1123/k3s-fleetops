@@ -8,6 +8,9 @@
       ...
     }:
     with lib;
+    let
+      cfg = config.services.audiobookshelf;
+    in
     self.lib.mkArgoApp { inherit config lib; } rec {
       name = "audiobookshelf";
       uses-ingress = true;
@@ -18,6 +21,33 @@
           description = mdDoc "The docker image";
           type = types.str;
           default = "ghcr.io/advplyr/audiobookshelf:latest";
+        };
+
+        apiKey = mkOption {
+          description = mdDoc ''
+            Audiobookshelf API token (web UI -> user account settings). Stored in
+            secrets.enc.yaml as `audiobookshelf.key` and wired in via
+            `env/dev/audiobookshelf.nix`. Only powers the auto-added homepage
+            dashboard widget below -- never injected into the audiobookshelf
+            container itself.
+          '';
+          type = types.str;
+          default = "";
+        };
+
+        # Auto-add an Audiobookshelf widget to this app's homepage dashboard
+        # tile once an API key is configured -- see applications/immich.nix for
+        # the same pattern with more detail. Set
+        # `services.homepage.widgetSecrets.AUDIOBOOKSHELF_API_KEY` from
+        # `config.services.audiobookshelf.apiKey` in env/dev/homepage.nix.
+        homepage.extraSettings = mkOption {
+          default = lib.optionalAttrs (cfg.apiKey != "") {
+            widget = {
+              type = "audiobookshelf";
+              url = "http://${name}.${cfg.namespace}:${toString cfg.service.port}";
+              key = "{{HOMEPAGE_VAR_AUDIOBOOKSHELF_API_KEY}}";
+            };
+          };
         };
 
         service.port = mkOption {

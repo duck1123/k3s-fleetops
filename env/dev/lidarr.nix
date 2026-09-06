@@ -1,10 +1,11 @@
-{ config, ... }:
+{ config, secrets, ... }:
 {
   services.lidarr = {
     databaseTarget = "postgresql";
     database.enable = true;
 
     enable = true;
+    apiKey = secrets.lidarr.key;
     hostAffinity = "edgenix";
 
     ingressProvider = "traefik-lan";

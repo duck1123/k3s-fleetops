@@ -1,7 +1,8 @@
-{ config, ... }:
+{ config, secrets, ... }:
 {
   services.sabnzbd = {
     enable = true;
+    apiKey = secrets.sabnzbd.key;
     hostAffinity = "edgenix";
 
     ingressProvider = "traefik-lan";

@@ -8,6 +8,10 @@ data:
             href: https://attic.home.kronkltd.net
         - audiobookshelf:
             href: https://audiobookshelf.home.kronkltd.net
+            widget:
+              key: '{{HOMEPAGE_VAR_AUDIOBOOKSHELF_API_KEY}}'
+              type: audiobookshelf
+              url: http://audiobookshelf.audiobookshelf:80
         - cloudbeaver:
             href: https://cloudbeaver.home.kronkltd.net
         - garage:
@@ -23,8 +27,16 @@ data:
               version: 2
         - komga:
             href: https://komga.home.kronkltd.net
+            widget:
+              key: '{{HOMEPAGE_VAR_KOMGA_API_KEY}}'
+              type: komga
+              url: http://komga.komga:25600
         - lidarr:
             href: https://lidarr.home.kronkltd.net
+            widget:
+              key: '{{HOMEPAGE_VAR_LIDARR_API_KEY}}'
+              type: lidarr
+              url: http://lidarr.lidarr:8686
         - longhorn:
             href: https://longhorn.home.kronkltd.net
         - memos:
@@ -33,26 +45,57 @@ data:
             href: https://paperless-ngx.home.kronkltd.net
         - prowlarr:
             href: https://prowlarr.home.kronkltd.net
+            widget:
+              key: '{{HOMEPAGE_VAR_PROWLARR_API_KEY}}'
+              type: prowlarr
+              url: http://prowlarr.prowlarr:9696
         - qbittorrent:
             href: https://qbittorrent.home.kronkltd.net
         - radarr:
             href: https://radarr.home.kronkltd.net
+            widget:
+              key: '{{HOMEPAGE_VAR_RADARR_API_KEY}}'
+              type: radarr
+              url: http://radarr.radarr:7878
         - sabnzbd:
             href: https://sabnzbd.home.kronkltd.net
+            widget:
+              key: '{{HOMEPAGE_VAR_SABNZBD_API_KEY}}'
+              type: sabnzbd
+              url: http://sabnzbd.sabnzbd:8080
         - slskd:
             href: https://slskd.home.kronkltd.net
         - sonarr:
             href: https://sonarr.home.kronkltd.net
+            widget:
+              key: '{{HOMEPAGE_VAR_SONARR_API_KEY}}'
+              type: sonarr
+              url: http://sonarr.sonarr:8989
         - stashapp:
             href: https://stashapp.home.kronkltd.net
+            widget:
+              key: '{{HOMEPAGE_VAR_STASHAPP_API_KEY}}'
+              type: stash
+              url: http://stashapp.stashapp:9999
         - tdarr:
             href: https://tdarr.home.kronkltd.net
         - trilium:
             href: https://trilium.home.kronkltd.net
+            widget:
+              key: '{{HOMEPAGE_VAR_TRILIUM_API_KEY}}'
+              type: trilium
+              url: http://trilium.trilium:8080
         - uptime-kuma:
             href: https://uptime-kuma.home.kronkltd.net
         - xyops:
             href: https://xyops.home.kronkltd.net
+    - Media:
+        - plex:
+            href: http://192.168.0.22:32400/web
+            widget:
+              key: '{{HOMEPAGE_VAR_PLEX_API_KEY}}'
+              type: plex
+              url: http://192.168.0.22:32400
     - Nodes:
         - edgenix:
             href: http://192.168.0.22:61208

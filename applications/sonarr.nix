@@ -11,6 +11,7 @@
     with lib;
     let
       password-secret = "sonarr-database-password";
+      cfg = config.services.sonarr;
     in
     self.lib.mkArgoApp
       {
@@ -38,6 +39,33 @@
             description = mdDoc "The service port";
             type = types.int;
             default = 8989;
+          };
+
+          apiKey = mkOption {
+            description = mdDoc ''
+              Sonarr API key (Settings -> General -> Security). Stored in
+              secrets.enc.yaml as `sonarr.key` and wired in via
+              `env/dev/sonarr.nix`. Only powers the auto-added homepage
+              dashboard widget below -- never injected into the sonarr
+              container itself.
+            '';
+            type = types.str;
+            default = "";
+          };
+
+          # Auto-add a Sonarr widget to this app's homepage dashboard tile once
+          # an API key is configured -- see applications/immich.nix for the same
+          # pattern with more detail. Set
+          # `services.homepage.widgetSecrets.SONARR_API_KEY` from
+          # `config.services.sonarr.apiKey` in env/dev/homepage.nix.
+          homepage.extraSettings = mkOption {
+            default = lib.optionalAttrs (cfg.apiKey != "") {
+              widget = {
+                type = "sonarr";
+                url = "http://${name}.${cfg.namespace}:${toString cfg.service.port}";
+                key = "{{HOMEPAGE_VAR_SONARR_API_KEY}}";
+              };
+            };
           };
 
           vpn = {

@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, secrets, ... }:
 {
   services.homepage = {
     enable = true;
@@ -19,6 +19,20 @@
     # on the host OS -- not a k8s app, so it can't be auto-discovered like
     # mkArgoApp services and is listed here by static LAN IP instead.
     extraGroups = {
+      Media = {
+        # Plex runs via NixOS `services.plex` on edgenix (dotfiles'
+        # `features.media.server`), not in the cluster -- not a mkArgoApp
+        # service, so it's listed here by static LAN IP instead.
+        plex = {
+          href = "http://192.168.0.22:32400/web";
+          widget = {
+            type = "plex";
+            url = "http://192.168.0.22:32400";
+            key = "{{HOMEPAGE_VAR_PLEX_API_KEY}}";
+          };
+        };
+      };
+
       Nodes = {
         nixmini = {
           href = "http://192.168.0.25:61208";
@@ -77,11 +91,24 @@
     # here) as `{{HOMEPAGE_VAR_<KEY>}}` -- homepage substitutes the placeholder
     # from the container env at render time, so the ConfigMap/git stay
     # plaintext-free. See applications/homepage.nix for how this is wired.
-    # immich.nix auto-populates its own `homepage.extraSettings.widget` once
-    # `services.immich.adminApiKey` is set -- this just has to supply the
-    # matching env var for the `{{HOMEPAGE_VAR_IMMICH_API_KEY}}` placeholder.
+    # Each mkArgoApp service below auto-populates its own
+    # `homepage.extraSettings.widget` once its `apiKey` (or, for immich,
+    # `adminApiKey`) is set -- see applications/immich.nix for the pattern.
+    # This just has to supply the matching env var for each widget's
+    # `{{HOMEPAGE_VAR_*}}` placeholder. PLEX_API_KEY backs the static Plex
+    # entry above (Plex isn't a mkArgoApp service).
     widgetSecrets = {
       IMMICH_API_KEY = config.services.immich.adminApiKey;
+      AUDIOBOOKSHELF_API_KEY = config.services.audiobookshelf.apiKey;
+      KOMGA_API_KEY = config.services.komga.apiKey;
+      LIDARR_API_KEY = config.services.lidarr.apiKey;
+      PLEX_API_KEY = secrets.plex.key;
+      PROWLARR_API_KEY = config.services.prowlarr.apiKey;
+      RADARR_API_KEY = config.services.radarr.apiKey;
+      SABNZBD_API_KEY = config.services.sabnzbd.apiKey;
+      SONARR_API_KEY = config.services.sonarr.apiKey;
+      STASHAPP_API_KEY = config.services.stashapp.apiKey;
+      TRILIUM_API_KEY = config.services.trilium.apiKey;
     };
   };
 }

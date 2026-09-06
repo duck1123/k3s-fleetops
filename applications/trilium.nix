@@ -8,6 +8,9 @@
       ...
     }:
     with lib;
+    let
+      cfg = config.services.trilium;
+    in
     self.lib.mkArgoApp { inherit config lib; } rec {
       name = "trilium";
       uses-ingress = true;
@@ -23,6 +26,33 @@
           description = mdDoc "The service port";
           type = types.int;
           default = 8080;
+        };
+
+        apiKey = mkOption {
+          description = mdDoc ''
+            Trilium ETAPI token (Options -> ETAPI -> Create new ETAPI token).
+            Stored in secrets.enc.yaml as `trilium.key` and wired in via
+            `env/dev/trilium.nix`. Only powers the auto-added homepage
+            dashboard widget below -- never injected into the trilium
+            container itself.
+          '';
+          type = types.str;
+          default = "";
+        };
+
+        # Auto-add a Trilium widget to this app's homepage dashboard tile once
+        # an ETAPI token is configured -- see applications/immich.nix for the
+        # same pattern with more detail. Set
+        # `services.homepage.widgetSecrets.TRILIUM_API_KEY` from
+        # `config.services.trilium.apiKey` in env/dev/homepage.nix.
+        homepage.extraSettings = mkOption {
+          default = lib.optionalAttrs (cfg.apiKey != "") {
+            widget = {
+              type = "trilium";
+              url = "http://${name}.${cfg.namespace}:${toString cfg.service.port}";
+              key = "{{HOMEPAGE_VAR_TRILIUM_API_KEY}}";
+            };
+          };
         };
 
         dataStorage = mkOption {

@@ -1,7 +1,8 @@
-{ config, ... }:
+{ config, secrets, ... }:
 {
   services.stashapp = {
     enable = true;
+    apiKey = secrets.stashapp.key;
     hostAffinity = "nixmini";
 
     ingressProvider = "traefik-lan";

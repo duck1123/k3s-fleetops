@@ -11,6 +11,7 @@
     with lib;
     let
       password-secret = "prowlarr-database-password";
+      cfg = config.services.prowlarr;
     in
     self.lib.mkArgoApp
       {
@@ -37,6 +38,33 @@
             description = mdDoc "The service port";
             type = types.int;
             default = 9696;
+          };
+
+          apiKey = mkOption {
+            description = mdDoc ''
+              Prowlarr API key (Settings -> General -> Security). Stored in
+              secrets.enc.yaml as `prowlarr.key` and wired in via
+              `env/dev/prowlarr.nix`. Only powers the auto-added homepage
+              dashboard widget below -- never injected into the prowlarr
+              container itself.
+            '';
+            type = types.str;
+            default = "";
+          };
+
+          # Auto-add a Prowlarr widget to this app's homepage dashboard tile
+          # once an API key is configured -- see applications/immich.nix for the
+          # same pattern with more detail. Set
+          # `services.homepage.widgetSecrets.PROWLARR_API_KEY` from
+          # `config.services.prowlarr.apiKey` in env/dev/homepage.nix.
+          homepage.extraSettings = mkOption {
+            default = lib.optionalAttrs (cfg.apiKey != "") {
+              widget = {
+                type = "prowlarr";
+                url = "http://${name}.${cfg.namespace}:${toString cfg.service.port}";
+                key = "{{HOMEPAGE_VAR_PROWLARR_API_KEY}}";
+              };
+            };
           };
 
           useProbes = mkOption {

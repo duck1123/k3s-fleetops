@@ -8,6 +8,9 @@
       ...
     }:
     with lib;
+    let
+      cfg = config.services.sabnzbd;
+    in
     self.lib.mkArgoApp { inherit config lib; } rec {
       name = "sabnzbd";
       uses-ingress = true;
@@ -23,6 +26,32 @@
           description = mdDoc "The service port";
           type = types.int;
           default = 8080;
+        };
+
+        apiKey = mkOption {
+          description = mdDoc ''
+            SABnzbd API key (Config -> General). Stored in secrets.enc.yaml as
+            `sabnzbd.key` and wired in via `env/dev/sabnzbd.nix`. Only powers
+            the auto-added homepage dashboard widget below -- never injected
+            into the sabnzbd container itself.
+          '';
+          type = types.str;
+          default = "";
+        };
+
+        # Auto-add a SABnzbd widget to this app's homepage dashboard tile once
+        # an API key is configured -- see applications/immich.nix for the same
+        # pattern with more detail. Set
+        # `services.homepage.widgetSecrets.SABNZBD_API_KEY` from
+        # `config.services.sabnzbd.apiKey` in env/dev/homepage.nix.
+        homepage.extraSettings = mkOption {
+          default = lib.optionalAttrs (cfg.apiKey != "") {
+            widget = {
+              type = "sabnzbd";
+              url = "http://${name}.${cfg.namespace}:${toString cfg.service.port}";
+              key = "{{HOMEPAGE_VAR_SABNZBD_API_KEY}}";
+            };
+          };
         };
 
         vpn = {

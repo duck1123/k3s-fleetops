@@ -8,6 +8,9 @@
       ...
     }:
     with lib;
+    let
+      cfg = config.services.stashapp;
+    in
     self.lib.mkArgoApp { inherit config lib; } rec {
       name = "stashapp";
       uses-ingress = true;
@@ -23,6 +26,33 @@
           description = mdDoc "The service port";
           type = types.int;
           default = 9999;
+        };
+
+        apiKey = mkOption {
+          description = mdDoc ''
+            Stash API key (Settings -> Security -> API Key). Stored in
+            secrets.enc.yaml as `stashapp.key` and wired in via
+            `env/dev/stashapp.nix`. Only powers the auto-added homepage
+            dashboard widget below -- never injected into the stashapp
+            container itself.
+          '';
+          type = types.str;
+          default = "";
+        };
+
+        # Auto-add a Stash widget to this app's homepage dashboard tile once an
+        # API key is configured -- see applications/immich.nix for the same
+        # pattern with more detail. Note homepage's widget type is "stash", not
+        # "stashapp". Set `services.homepage.widgetSecrets.STASHAPP_API_KEY`
+        # from `config.services.stashapp.apiKey` in env/dev/homepage.nix.
+        homepage.extraSettings = mkOption {
+          default = lib.optionalAttrs (cfg.apiKey != "") {
+            widget = {
+              type = "stash";
+              url = "http://${name}.${cfg.namespace}:${toString cfg.service.port}";
+              key = "{{HOMEPAGE_VAR_STASHAPP_API_KEY}}";
+            };
+          };
         };
 
         nfs = {

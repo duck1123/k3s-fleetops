@@ -27,10 +27,60 @@ spec:
               value: Etc/UTC
             - name: HOMEPAGE_ALLOWED_HOSTS
               value: homepage.home.kronkltd.net
+            - name: HOMEPAGE_VAR_AUDIOBOOKSHELF_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: AUDIOBOOKSHELF_API_KEY
+                  name: homepage-widget-secrets
             - name: HOMEPAGE_VAR_IMMICH_API_KEY
               valueFrom:
                 secretKeyRef:
                   key: IMMICH_API_KEY
+                  name: homepage-widget-secrets
+            - name: HOMEPAGE_VAR_KOMGA_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: KOMGA_API_KEY
+                  name: homepage-widget-secrets
+            - name: HOMEPAGE_VAR_LIDARR_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: LIDARR_API_KEY
+                  name: homepage-widget-secrets
+            - name: HOMEPAGE_VAR_PLEX_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: PLEX_API_KEY
+                  name: homepage-widget-secrets
+            - name: HOMEPAGE_VAR_PROWLARR_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: PROWLARR_API_KEY
+                  name: homepage-widget-secrets
+            - name: HOMEPAGE_VAR_RADARR_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: RADARR_API_KEY
+                  name: homepage-widget-secrets
+            - name: HOMEPAGE_VAR_SABNZBD_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: SABNZBD_API_KEY
+                  name: homepage-widget-secrets
+            - name: HOMEPAGE_VAR_SONARR_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: SONARR_API_KEY
+                  name: homepage-widget-secrets
+            - name: HOMEPAGE_VAR_STASHAPP_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: STASHAPP_API_KEY
+                  name: homepage-widget-secrets
+            - name: HOMEPAGE_VAR_TRILIUM_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: TRILIUM_API_KEY
                   name: homepage-widget-secrets
           image: ghcr.io/gethomepage/homepage:latest
           imagePullPolicy: IfNotPresent

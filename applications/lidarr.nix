@@ -11,6 +11,7 @@
     with lib;
     let
       password-secret = "lidarr-database-password";
+      cfg = config.services.lidarr;
     in
     self.lib.mkArgoApp
       {
@@ -37,6 +38,33 @@
             description = mdDoc "The service port";
             type = types.int;
             default = 8686;
+          };
+
+          apiKey = mkOption {
+            description = mdDoc ''
+              Lidarr API key (Settings -> General -> Security). Stored in
+              secrets.enc.yaml as `lidarr.key` and wired in via
+              `env/dev/lidarr.nix`. Only powers the auto-added homepage
+              dashboard widget below -- never injected into the lidarr
+              container itself.
+            '';
+            type = types.str;
+            default = "";
+          };
+
+          # Auto-add a Lidarr widget to this app's homepage dashboard tile once
+          # an API key is configured -- see applications/immich.nix for the same
+          # pattern with more detail. Set
+          # `services.homepage.widgetSecrets.LIDARR_API_KEY` from
+          # `config.services.lidarr.apiKey` in env/dev/homepage.nix.
+          homepage.extraSettings = mkOption {
+            default = lib.optionalAttrs (cfg.apiKey != "") {
+              widget = {
+                type = "lidarr";
+                url = "http://${name}.${cfg.namespace}:${toString cfg.service.port}";
+                key = "{{HOMEPAGE_VAR_LIDARR_API_KEY}}";
+              };
+            };
           };
 
           vpn = {

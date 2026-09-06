@@ -11,6 +11,7 @@
     with lib;
     let
       password-secret = "radarr-database-password";
+      cfg = config.services.radarr;
     in
     self.lib.mkArgoApp
       {
@@ -37,6 +38,33 @@
             description = mdDoc "The service port";
             type = types.int;
             default = 7878;
+          };
+
+          apiKey = mkOption {
+            description = mdDoc ''
+              Radarr API key (Settings -> General -> Security). Stored in
+              secrets.enc.yaml as `radarr.key` and wired in via
+              `env/dev/radarr.nix`. Only powers the auto-added homepage
+              dashboard widget below -- never injected into the radarr
+              container itself.
+            '';
+            type = types.str;
+            default = "";
+          };
+
+          # Auto-add a Radarr widget to this app's homepage dashboard tile once
+          # an API key is configured -- see applications/immich.nix for the same
+          # pattern with more detail. Set
+          # `services.homepage.widgetSecrets.RADARR_API_KEY` from
+          # `config.services.radarr.apiKey` in env/dev/homepage.nix.
+          homepage.extraSettings = mkOption {
+            default = lib.optionalAttrs (cfg.apiKey != "") {
+              widget = {
+                type = "radarr";
+                url = "http://${name}.${cfg.namespace}:${toString cfg.service.port}";
+                key = "{{HOMEPAGE_VAR_RADARR_API_KEY}}";
+              };
+            };
           };
 
           vpn = {
