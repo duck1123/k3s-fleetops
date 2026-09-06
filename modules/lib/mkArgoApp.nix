@@ -70,16 +70,20 @@
       # `cfg.pinnedVolumes.<key>.volume` is a ready `{ name; persistentVolumeClaim.claimName; }`
       # for a Deployment's `spec.template.spec.volumes`.
       resolvedPinnedVolumes = pinnedVolumes cfg;
-      pinnedVolumePvcName = volName: "${name}-${name}-${volName}";
+      # Default naming follows this repo's existing convention; pass an explicit
+      # `pvcName` in a volume's arg-set to override it (e.g. to match a literal
+      # name a Helm chart's `existingClaim`-style value already expects).
+      pinnedVolumePvcName = volName: args: args.pvcName or "${name}-${name}-${volName}";
       pinnedVolumeFragments = lib.mapAttrs (
-        volName: args: self.lib.mkPinnedVolume ({ pvcName = pinnedVolumePvcName volName; } // args)
+        volName: args:
+        self.lib.mkPinnedVolume ({ pvcName = pinnedVolumePvcName volName args; } // args)
       ) resolvedPinnedVolumes;
       pinnedVolumeResources = lib.foldl' lib.recursiveUpdate { } (lib.attrValues pinnedVolumeFragments);
-      pinnedVolumeInfo = lib.mapAttrs (volName: _: {
-        pvcName = pinnedVolumePvcName volName;
+      pinnedVolumeInfo = lib.mapAttrs (volName: args: {
+        pvcName = pinnedVolumePvcName volName args;
         volume = {
           name = volName;
-          persistentVolumeClaim.claimName = pinnedVolumePvcName volName;
+          persistentVolumeClaim.claimName = pinnedVolumePvcName volName args;
         };
       }) resolvedPinnedVolumes;
 

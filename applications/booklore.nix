@@ -30,6 +30,19 @@
           };
         };
 
+        pinnedVolumes = cfg: {
+          data = {
+            volumeHandle = "pvc-da71c5a0-68e9-48f0-a8a2-e71d5a8adccc";
+            size = "5Gi";
+            volumeAttributes.backupTargetName = "default";
+          };
+          bookdrop = {
+            volumeHandle = "pvc-b8bc2a4f-b836-4142-a5cf-c513c51f5422";
+            size = "5Gi";
+            volumeAttributes.backupTargetName = "default";
+          };
+        };
+
         extraOptions = {
           gid = mkOption {
             description = mdDoc "The group id";
@@ -156,18 +169,12 @@
                       }
                     ];
                     volumes = [
-                      {
-                        name = "bookdrop";
-                        persistentVolumeClaim.claimName = "${name}-${name}-bookdrop";
-                      }
+                      cfg.pinnedVolumes.bookdrop.volume
                       {
                         name = "books";
                         persistentVolumeClaim.claimName = "${name}-${name}-books";
                       }
-                      {
-                        name = "data";
-                        persistentVolumeClaim.claimName = "${name}-${name}-data";
-                      }
+                      cfg.pinnedVolumes.data.volume
                     ];
                   };
                 };
@@ -204,15 +211,6 @@
           };
 
           persistentVolumeClaims = {
-            "${name}-${name}-bookdrop" = {
-              metadata.annotations."argocd.argoproj.io/sync-options" = "Replace=true";
-              spec = {
-                accessModes = [ "ReadWriteOnce" ];
-                resources.requests.storage = "5Gi";
-                storageClassName = "";
-                volumeName = "${name}-bookdrop-pv";
-              };
-            };
             "${name}-${name}-books".spec =
               if cfg.nfs.enable then
                 {
@@ -227,15 +225,6 @@
                   accessModes = [ "ReadWriteOnce" ];
                   resources.requests.storage = "5Gi";
                 };
-            "${name}-${name}-data" = {
-              metadata.annotations."argocd.argoproj.io/sync-options" = "Replace=true";
-              spec = {
-                accessModes = [ "ReadWriteOnce" ];
-                resources.requests.storage = "5Gi";
-                storageClassName = "";
-                volumeName = "${name}-data-pv";
-              };
-            };
           };
 
           services = {
@@ -258,102 +247,35 @@
             };
           };
 
-          persistentVolumes =
-            (lib.optionalAttrs cfg.nfs.enable {
-              "${name}-${name}-books-nfs" = {
-                apiVersion = "v1";
-                kind = "PersistentVolume";
-                metadata = {
-                  name = "${name}-${name}-books-nfs";
-                };
-                spec = {
-                  capacity = {
-                    storage = "1Ti";
-                  };
-                  accessModes = [ "ReadWriteMany" ];
-                  mountOptions = [
-                    "nolock"
-                    "noexec"
-                    "soft"
-                    "timeo=30"
-                  ];
-                  nfs = {
-                    server = cfg.nfs.server;
-                    path = cfg.nfs.path;
-                  };
-                  persistentVolumeReclaimPolicy = "Retain";
-                };
+          # data/bookdrop are pinned volumes -- see the `pinnedVolumes` attrset
+          # above; their PersistentVolume/PersistentVolumeClaim resources are
+          # merged in automatically by mkArgoApp.
+          persistentVolumes = lib.optionalAttrs cfg.nfs.enable {
+            "${name}-${name}-books-nfs" = {
+              apiVersion = "v1";
+              kind = "PersistentVolume";
+              metadata = {
+                name = "${name}-${name}-books-nfs";
               };
-            })
-            // {
-              # Pinned to the specific pre-existing Longhorn volumes (captured
-              # via `kubectl get pv`) so that disabling/re-enabling this app
-              # rebinds to the same data instead of dynamic provisioning
-              # handing back an empty volume. The PV object itself is free to
-              # be deleted and recreated by ArgoCD on every enable cycle --
-              # only the volumeHandle (the actual Longhorn volume identity)
-              # must never change.
-              "${name}-data-pv" = {
-                apiVersion = "v1";
-                kind = "PersistentVolume";
-                metadata = {
-                  name = "${name}-data-pv";
-                  annotations."argocd.argoproj.io/sync-options" = "Replace=true";
+              spec = {
+                capacity = {
+                  storage = "1Ti";
                 };
-                spec = {
-                  capacity.storage = "5Gi";
-                  accessModes = [ "ReadWriteOnce" ];
-                  persistentVolumeReclaimPolicy = "Retain";
-                  storageClassName = "";
-                  csi = {
-                    driver = "driver.longhorn.io";
-                    fsType = "ext4";
-                    volumeHandle = "pvc-da71c5a0-68e9-48f0-a8a2-e71d5a8adccc";
-                    volumeAttributes = {
-                      numberOfReplicas = "1";
-                      staleReplicaTimeout = "30";
-                      fromBackup = "";
-                      fsType = "ext4";
-                      dataLocality = "disabled";
-                      unmapMarkSnapChainRemoved = "ignored";
-                      disableRevisionCounter = "true";
-                      dataEngine = "v1";
-                      backupTargetName = "default";
-                    };
-                  };
+                accessModes = [ "ReadWriteMany" ];
+                mountOptions = [
+                  "nolock"
+                  "noexec"
+                  "soft"
+                  "timeo=30"
+                ];
+                nfs = {
+                  server = cfg.nfs.server;
+                  path = cfg.nfs.path;
                 };
-              };
-              "${name}-bookdrop-pv" = {
-                apiVersion = "v1";
-                kind = "PersistentVolume";
-                metadata = {
-                  name = "${name}-bookdrop-pv";
-                  annotations."argocd.argoproj.io/sync-options" = "Replace=true";
-                };
-                spec = {
-                  capacity.storage = "5Gi";
-                  accessModes = [ "ReadWriteOnce" ];
-                  persistentVolumeReclaimPolicy = "Retain";
-                  storageClassName = "";
-                  csi = {
-                    driver = "driver.longhorn.io";
-                    fsType = "ext4";
-                    volumeHandle = "pvc-b8bc2a4f-b836-4142-a5cf-c513c51f5422";
-                    volumeAttributes = {
-                      numberOfReplicas = "1";
-                      staleReplicaTimeout = "30";
-                      fromBackup = "";
-                      fsType = "ext4";
-                      dataLocality = "disabled";
-                      unmapMarkSnapChainRemoved = "ignored";
-                      disableRevisionCounter = "true";
-                      dataEngine = "v1";
-                      backupTargetName = "default";
-                    };
-                  };
-                };
+                persistentVolumeReclaimPolicy = "Retain";
               };
             };
+          };
         };
       };
 }
