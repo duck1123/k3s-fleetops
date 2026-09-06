@@ -5,6 +5,8 @@
     apiKey = secrets.sabnzbd.key;
     hostAffinity = "edgenix";
 
+    homepage.group = "Download";
+
     ingressProvider = "traefik-lan";
     ingress.tls.enable = true;
 

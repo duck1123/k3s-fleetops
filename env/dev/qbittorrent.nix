@@ -4,6 +4,8 @@
     enable = true;
     hostAffinity = "nasnix";
 
+    homepage.group = "Download";
+
     ingressProvider = "traefik-lan";
 
     nfs = {

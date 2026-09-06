@@ -48,6 +48,17 @@ in
     powerspecnix.libvaDriverName = "radeonsi";
   };
 
+  # Display order for homepage dashboard groups -- see modules/homepageGroups.nix.
+  # New groups go on the left (nearer the front of this list) until per-group
+  # column placement exists.
+  homepageGroups = [
+    "Storage"
+    "Download"
+    "Apps"
+    "Media"
+    "Nodes"
+  ];
+
   ingressProviders = {
     traefik-lan = {
       ingressClassName = "traefik";

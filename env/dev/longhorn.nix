@@ -10,6 +10,8 @@
       endpoint = "http://rustfs-svc.rustfs:9000";
     };
 
+    homepage.group = "Storage";
+
     ingressProvider = "traefik-lan";
     ingress.tls.enable = true;
   };

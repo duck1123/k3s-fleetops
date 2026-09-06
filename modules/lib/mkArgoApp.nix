@@ -331,8 +331,8 @@
           };
 
           group = mkOption {
-            description = mdDoc "Dashboard group/category ${name} is listed under.";
-            type = str;
+            description = mdDoc "Dashboard group/category ${name} is listed under. Must be one of `config.homepageGroups` (see modules/homepageGroups.nix) -- add new groups there first.";
+            type = types.enum config.homepageGroups;
             default = "Apps";
           };
 

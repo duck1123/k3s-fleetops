@@ -3,9 +3,25 @@ data:
   bookmarks.yaml: |
     []
   services.yaml: |
-    - Apps:
+    - Storage:
         - attic:
             href: https://attic.home.kronkltd.net
+        - garage:
+            href: https://garage.home.kronkltd.net
+        - longhorn:
+            href: https://longhorn.home.kronkltd.net
+    - Download:
+        - qbittorrent:
+            href: https://qbittorrent.home.kronkltd.net
+        - sabnzbd:
+            href: https://sabnzbd.home.kronkltd.net
+            widget:
+              key: '{{HOMEPAGE_VAR_SABNZBD_API_KEY}}'
+              type: sabnzbd
+              url: http://sabnzbd.sabnzbd:8080
+        - slskd:
+            href: https://slskd.home.kronkltd.net
+    - Apps:
         - audiobookshelf:
             href: https://audiobookshelf.home.kronkltd.net
             widget:
@@ -14,8 +30,6 @@ data:
               url: http://audiobookshelf.audiobookshelf:80
         - cloudbeaver:
             href: https://cloudbeaver.home.kronkltd.net
-        - garage:
-            href: https://garage.home.kronkltd.net
         - homarr:
             href: https://homarr.home.kronkltd.net
         - immich:
@@ -37,8 +51,6 @@ data:
               key: '{{HOMEPAGE_VAR_LIDARR_API_KEY}}'
               type: lidarr
               url: http://lidarr.lidarr:8686
-        - longhorn:
-            href: https://longhorn.home.kronkltd.net
         - memos:
             href: https://memos.home.kronkltd.net
         - paperless-ngx:
@@ -49,22 +61,12 @@ data:
               key: '{{HOMEPAGE_VAR_PROWLARR_API_KEY}}'
               type: prowlarr
               url: http://prowlarr.prowlarr:9696
-        - qbittorrent:
-            href: https://qbittorrent.home.kronkltd.net
         - radarr:
             href: https://radarr.home.kronkltd.net
             widget:
               key: '{{HOMEPAGE_VAR_RADARR_API_KEY}}'
               type: radarr
               url: http://radarr.radarr:7878
-        - sabnzbd:
-            href: https://sabnzbd.home.kronkltd.net
-            widget:
-              key: '{{HOMEPAGE_VAR_SABNZBD_API_KEY}}'
-              type: sabnzbd
-              url: http://sabnzbd.sabnzbd:8080
-        - slskd:
-            href: https://slskd.home.kronkltd.net
         - sonarr:
             href: https://sonarr.home.kronkltd.net
             widget:

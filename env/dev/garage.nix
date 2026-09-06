@@ -8,6 +8,8 @@
     accessKey = (secrets.garage or { }).accessKey or "";
     secretKey = (secrets.garage or { }).secretKey or "";
 
+    homepage.group = "Storage";
+
     ingressProvider = "traefik-lan";
     ingress.tls.enable = true;
 

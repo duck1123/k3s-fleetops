@@ -3,6 +3,8 @@
   services.attic = {
     enable = true;
 
+    homepage.group = "Storage";
+
     ingressProvider = "traefik-lan";
     ingress.tls.enable = true;
 

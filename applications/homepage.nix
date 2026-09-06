@@ -151,9 +151,21 @@
           let
             finalGroups = lib.recursiveUpdate discoveredGroups cfg.extraGroups;
 
-            servicesYaml = lib.mapAttrsToList (groupName: items: {
-              ${groupName} = lib.mapAttrsToList (itemName: item: { ${itemName} = item; }) items;
-            }) finalGroups;
+            # Render groups in `config.homepageGroups` order (that's what
+            # controls left-to-right/top-to-bottom dashboard placement --
+            # see modules/homepageGroups.nix) rather than the alphabetical
+            # order `finalGroups`' attrset keys would otherwise iterate in.
+            # Any group name not in the registry (there shouldn't be one,
+            # short of a stray `extraGroups` typo) still renders, just after
+            # the known ones.
+            orderedGroupNames =
+              config.homepageGroups ++ lib.subtractLists config.homepageGroups (lib.attrNames finalGroups);
+
+            servicesYaml = map (groupName: {
+              ${groupName} = lib.mapAttrsToList (itemName: item: {
+                ${itemName} = item;
+              }) finalGroups.${groupName};
+            }) (lib.filter (groupName: finalGroups ? ${groupName}) orderedGroupNames);
 
             bookmarksYaml = lib.mapAttrsToList (groupName: items: {
               ${groupName} = lib.mapAttrsToList (itemName: item: { ${itemName} = [ item ]; }) items;
