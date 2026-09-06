@@ -34,10 +34,6 @@ data:
         - slskd:
             href: https://slskd.home.kronkltd.net
             siteMonitor: https://slskd.home.kronkltd.net
-    - Apps:
-        - homarr:
-            href: https://homarr.home.kronkltd.net
-            siteMonitor: https://homarr.home.kronkltd.net
     - Arr:
         - lidarr:
             href: https://lidarr.home.kronkltd.net

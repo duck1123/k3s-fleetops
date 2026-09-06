@@ -1,7 +1,7 @@
 { config, secrets, ... }:
 {
   services.homarr = {
-    enable = true;
+    enable = false;
     # hostAffinity = "edgenix";
 
     ingressProvider = "traefik-lan";
