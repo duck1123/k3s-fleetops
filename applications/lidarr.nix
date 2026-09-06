@@ -27,6 +27,12 @@
         uses-ingress = true;
         uses-database = true;
 
+        # Shape only -- no volumeHandle here, that's environment-specific (see
+        # env/dev/lidarr.nix and docs/pinned-volumes.md).
+        volumes = cfg: {
+          config.size = "10Gi";
+        };
+
         extraOptions = {
           image = mkOption {
             description = mdDoc "The docker image";
@@ -151,13 +157,6 @@
 
         extraResources =
           cfg:
-          let
-            pinnedConfig = self.lib.mkPinnedVolume {
-              pvcName = "${name}-${name}-config";
-              volumeHandle = "pvc-fbb22ab2-e000-4d67-a760-1d14cac3bdc9";
-              size = "10Gi";
-            };
-          in
           {
             deployments = {
               ${name} = {
@@ -354,10 +353,7 @@
                         }
                       ];
                       volumes = [
-                        {
-                          name = "config";
-                          persistentVolumeClaim.claimName = "${name}-${name}-config";
-                        }
+                        cfg.volumes.config.volume
                       ]
                       ++ (lib.optionals (cfg.database.enable && cfg.database.password != "") [
                         {
@@ -419,9 +415,7 @@
               };
             };
 
-            persistentVolumes =
-              pinnedConfig.persistentVolumes
-              // lib.optionalAttrs (cfg.nfs.enable) (
+            persistentVolumes = lib.optionalAttrs (cfg.nfs.enable) (
                 {
                   "${name}-${name}-downloads-nfs" = {
                     apiVersion = "v1";
@@ -487,9 +481,7 @@
                 })
               );
 
-            persistentVolumeClaims =
-              pinnedConfig.persistentVolumeClaims
-              // {
+            persistentVolumeClaims = {
                 "${name}-${name}-downloads".spec =
                   if cfg.nfs.enable then
                     {

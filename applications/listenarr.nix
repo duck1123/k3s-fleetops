@@ -26,6 +26,12 @@
         uses-ingress = true;
         uses-database = true;
 
+        # Shape only -- no volumeHandle here, that's environment-specific (see
+        # env/dev/listenarr.nix and docs/pinned-volumes.md).
+        volumes = cfg: {
+          config.size = "5Gi";
+        };
+
         extraOptions = {
           image = mkOption {
             description = mdDoc "The docker image";
@@ -123,13 +129,6 @@
 
         extraResources =
           cfg:
-          let
-            pinnedConfig = self.lib.mkPinnedVolume {
-              pvcName = "${name}-${name}-config";
-              volumeHandle = "pvc-39d3b055-b19f-4454-b84a-0609fdae6109";
-              size = "5Gi";
-            };
-          in
           {
             deployments = {
               ${name} = {
@@ -290,10 +289,7 @@
                       ];
 
                       volumes = [
-                        {
-                          name = "config";
-                          persistentVolumeClaim.claimName = "${name}-${name}-config";
-                        }
+                        cfg.volumes.config.volume
                       ]
                       ++ (lib.optionals (cfg.database.enable && cfg.database.password != "") [
                         {
@@ -358,9 +354,7 @@
               };
             };
 
-            persistentVolumeClaims =
-              pinnedConfig.persistentVolumeClaims
-              // {
+            persistentVolumeClaims = {
                 "${name}-${name}-downloads".spec =
                   if cfg.nfs.enable then
                     {
@@ -418,9 +412,7 @@
             };
 
             # Create NFS PersistentVolumes for downloads and podcasts when NFS is enabled
-            persistentVolumes =
-              pinnedConfig.persistentVolumes
-              // lib.optionalAttrs (cfg.nfs.enable) {
+            persistentVolumes = lib.optionalAttrs (cfg.nfs.enable) {
                 "${name}-${name}-downloads-nfs" = {
                   apiVersion = "v1";
                   kind = "PersistentVolume";
