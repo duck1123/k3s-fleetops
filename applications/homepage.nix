@@ -61,6 +61,22 @@
         inherit name;
         uses-ingress = true;
 
+        # Secret plaintext must never flow through `self.lib.toYAML` (it round-trips
+        # through the Nix store via `builtins.toFile`/`pkgs.runCommand`, which would
+        # leave API keys world-readable in /nix/store). Instead each `widgetSecrets`
+        # entry becomes its own key in a sops-encrypted Kubernetes Secret (via the
+        # existing write-sops-secrets.sh pipeline) and is injected as a
+        # `HOMEPAGE_VAR_<KEY>` env var. Reference it from `settings`/`widgets`/
+        # `extraGroups`/`bookmarkGroups` with homepage's own substitution syntax,
+        # e.g. `key = "{{HOMEPAGE_VAR_SONARR_API_KEY}}";` -- homepage resolves the
+        # placeholder from the env var at render time, so the plaintext value never
+        # appears in the ConfigMap or in git. See https://gethomepage.dev/configs/secrets/
+        sopsSecrets =
+          cfg:
+          lib.optionalAttrs (cfg.widgetSecrets != { }) {
+            "${name}-widget-secrets" = cfg.widgetSecrets;
+          };
+
         extraOptions = {
           image = mkOption {
             description = mdDoc "The homepage docker image";
@@ -112,6 +128,21 @@
             description = mdDoc "Extra hostnames to add to HOMEPAGE_ALLOWED_HOSTS beyond this app's own ingress domain(s).";
             type = types.listOf types.str;
             default = [ ];
+          };
+
+          widgetSecrets = mkOption {
+            description = mdDoc ''
+              API keys/passwords for widgets (e.g. a service's `widget.key`), keyed by
+              the name you'll reference as `{{HOMEPAGE_VAR_<KEY>}}` inside `settings`,
+              `widgets`, `extraGroups`, or `bookmarkGroups`. Each entry is written to a
+              sops-encrypted Kubernetes Secret (never the ConfigMap) and exposed to the
+              container as a `HOMEPAGE_VAR_<KEY>` env var that homepage substitutes at
+              render time. Set real values in `env/dev/homepage.nix` from
+              `secrets.homepage.widgets.<key>` in secrets.enc.yaml -- never inline a
+              plaintext key/password directly in `widgets`/`extraGroups` here.
+            '';
+            type = types.attrsOf types.str;
+            default = { };
           };
         };
 
@@ -210,7 +241,14 @@
                             name = "HOMEPAGE_ALLOWED_HOSTS";
                             value = lib.concatStringsSep "," allowedHosts;
                           }
-                        ];
+                        ]
+                        ++ lib.mapAttrsToList (key: _: {
+                          name = "HOMEPAGE_VAR_${key}";
+                          valueFrom.secretKeyRef = {
+                            name = "${name}-widget-secrets";
+                            inherit key;
+                          };
+                        }) cfg.widgetSecrets;
                         ports = [
                           {
                             containerPort = 3000;

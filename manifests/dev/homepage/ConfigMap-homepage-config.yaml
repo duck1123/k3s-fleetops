@@ -16,6 +16,10 @@ data:
             href: https://homarr.home.kronkltd.net
         - immich:
             href: https://immich.home.kronkltd.net
+            widget:
+              key: '{{HOMEPAGE_VAR_IMMICH_API_KEY}}'
+              type: immich
+              url: http://immich-server.immich:2283
         - komga:
             href: https://komga.home.kronkltd.net
         - lidarr:

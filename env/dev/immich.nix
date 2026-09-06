@@ -3,6 +3,8 @@
   services.immich = {
     enable = true;
 
+    adminApiKey = secrets.immich.adminApiKey;
+
     databaseTarget = "postgresql";
     database = {
       inherit (secrets.immich.database) password username;

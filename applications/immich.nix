@@ -12,6 +12,7 @@
     let
       password-secret = "immich-database-password";
       redis-secret = "immich-redis-password";
+      cfg = config.services.immich;
     in
     self.lib.mkArgoApp
       {
@@ -53,6 +54,36 @@
             description = mdDoc "The docker image tag";
             type = types.str;
             default = "release";
+          };
+
+          adminApiKey = mkOption {
+            description = mdDoc ''
+              Immich admin API key (Immich UI -> Account Settings -> API Keys).
+              Stored in secrets.enc.yaml as `immich.adminApiKey` and wired in via
+              `env/dev/immich.nix`. Not used by the immich container itself --
+              only powers the auto-added homepage dashboard widget below (see
+              `homepage.extraSettings.widget`), which calls Immich's API to show
+              photo/storage stats.
+            '';
+            type = types.str;
+            default = "";
+          };
+
+          # Auto-add an Immich widget to this app's homepage dashboard tile once
+          # an admin API key is configured (see `adminApiKey` above) -- no manual
+          # `homepage.extraSettings` wiring needed per-environment. The actual key
+          # value is injected via homepage's `{{HOMEPAGE_VAR_IMMICH_API_KEY}}`
+          # placeholder (see applications/homepage.nix's `widgetSecrets`); set
+          # `services.homepage.widgetSecrets.IMMICH_API_KEY` from
+          # `config.services.immich.adminApiKey` in env/dev/homepage.nix.
+          homepage.extraSettings = mkOption {
+            default = lib.optionalAttrs (cfg.adminApiKey != "") {
+              widget = {
+                type = "immich";
+                url = "http://${name}-server.${cfg.namespace}:2283";
+                key = "{{HOMEPAGE_VAR_IMMICH_API_KEY}}";
+              };
+            };
           };
 
           replicas = mkOption {
