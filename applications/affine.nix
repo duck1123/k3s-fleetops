@@ -40,6 +40,20 @@
             ${redis-secret}.REDIS_SERVER_PASSWORD = cfg.redis.password;
           };
 
+        # `pvcName` overrides since these predate the "${name}-${name}-<key>"
+        # convention. Shape only -- no volumeHandle here, that's
+        # environment-specific (see env/dev/affine.nix and docs/pinned-volumes.md).
+        volumes = cfg: {
+          storage = {
+            pvcName = "${name}-storage";
+            size = "10Gi";
+          };
+          affine-config = {
+            pvcName = "${name}-config";
+            size = "1Gi";
+          };
+        };
+
         extraOptions = {
           image = mkOption {
             description = mdDoc "AFFiNE Docker image (ghcr.io/toeverything/affine)";
@@ -74,18 +88,6 @@
 
         extraResources =
           cfg:
-          let
-            pinnedStorage = self.lib.mkPinnedVolume {
-              pvcName = "${name}-storage";
-              volumeHandle = "pvc-4e946647-f3c7-475c-8475-8cae5ca47eb4";
-              size = "10Gi";
-            };
-            pinnedConfig = self.lib.mkPinnedVolume {
-              pvcName = "${name}-config";
-              volumeHandle = "pvc-da6fcdf7-7372-43e3-8c87-5eee4f2ab1a2";
-              size = "1Gi";
-            };
-          in
           {
             # Migration job — runs self-host-predeploy.js on each sync, after secrets are created (wave 1)
             # Using Sync phase (not PreSync) so the secret exists before the job runs.
@@ -233,14 +235,8 @@
                       }
                     ];
                     volumes = [
-                      {
-                        name = "storage";
-                        persistentVolumeClaim.claimName = "${name}-storage";
-                      }
-                      {
-                        name = "affine-config";
-                        persistentVolumeClaim.claimName = "${name}-config";
-                      }
+                      cfg.volumes.storage.volume
+                      cfg.volumes.affine-config.volume
                     ];
                   };
                 };
@@ -288,9 +284,6 @@
               ];
             };
 
-            persistentVolumeClaims =
-              pinnedStorage.persistentVolumeClaims // pinnedConfig.persistentVolumeClaims;
-            persistentVolumes = pinnedStorage.persistentVolumes // pinnedConfig.persistentVolumes;
           };
       };
 }

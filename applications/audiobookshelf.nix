@@ -16,6 +16,13 @@
       uses-ingress = true;
       uses-nfs = true;
 
+      # Shape only -- no volumeHandle here, that's environment-specific (see
+      # env/dev/audiobookshelf.nix and docs/pinned-volumes.md).
+      volumes = cfg: {
+        config.size = "1Gi";
+        metadata.size = "5Gi";
+      };
+
       extraOptions = {
         image = mkOption {
           description = mdDoc "The docker image";
@@ -77,18 +84,6 @@
 
       extraResources =
         cfg:
-        let
-          pinnedConfig = self.lib.mkPinnedVolume {
-            pvcName = "${name}-${name}-config";
-            volumeHandle = "pvc-fb2cd4cd-06ba-4dff-a6c5-7b7c2db91419";
-            size = "1Gi";
-          };
-          pinnedMetadata = self.lib.mkPinnedVolume {
-            pvcName = "${name}-${name}-metadata";
-            volumeHandle = "pvc-ce35f347-ab06-495f-88ae-11f7bcf4be8f";
-            size = "5Gi";
-          };
-        in
         {
           deployments.${name} = {
             metadata.labels = {
@@ -181,14 +176,8 @@
                   ];
 
                   volumes = [
-                    {
-                      name = "config";
-                      persistentVolumeClaim.claimName = "${name}-${name}-config";
-                    }
-                    {
-                      name = "metadata";
-                      persistentVolumeClaim.claimName = "${name}-${name}-metadata";
-                    }
+                    cfg.volumes.config.volume
+                    cfg.volumes.metadata.volume
                     {
                       name = "audiobooks";
                       persistentVolumeClaim.claimName = "${name}-${name}-audiobooks";
@@ -229,25 +218,20 @@
             };
           };
 
-          persistentVolumeClaims =
-            pinnedConfig.persistentVolumeClaims
-            // pinnedMetadata.persistentVolumeClaims
-            // {
-              "${name}-${name}-audiobooks".spec =
-                if cfg.nfs.enable then
-                  {
-                    accessModes = [ "ReadWriteMany" ];
-                    resources.requests.storage = "1Gi";
-                    storageClassName = "";
-                    volumeName = "${name}-${name}-audiobooks-nfs";
-                  }
-                else
-                  {
-                    inherit (cfg) storageClassName;
-                    accessModes = [ "ReadWriteOnce" ];
-                    resources.requests.storage = "100Gi";
-                  };
-            };
+          persistentVolumeClaims."${name}-${name}-audiobooks".spec =
+            if cfg.nfs.enable then
+              {
+                accessModes = [ "ReadWriteMany" ];
+                resources.requests.storage = "1Gi";
+                storageClassName = "";
+                volumeName = "${name}-${name}-audiobooks-nfs";
+              }
+            else
+              {
+                inherit (cfg) storageClassName;
+                accessModes = [ "ReadWriteOnce" ];
+                resources.requests.storage = "100Gi";
+              };
 
           services.${name}.spec = {
             ports = [
@@ -267,10 +251,7 @@
             type = "ClusterIP";
           };
 
-          persistentVolumes =
-            pinnedConfig.persistentVolumes
-            // pinnedMetadata.persistentVolumes
-            // lib.optionalAttrs cfg.nfs.enable {
+          persistentVolumes = lib.optionalAttrs cfg.nfs.enable {
               "${name}-${name}-audiobooks-nfs" = {
                 apiVersion = "v1";
                 kind = "PersistentVolume";
