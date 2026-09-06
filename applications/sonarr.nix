@@ -28,6 +28,12 @@
         uses-nfs = true;
         uses-database = true;
 
+        # Shape only -- no volumeHandle here, that's environment-specific (see
+        # env/dev/sonarr.nix and docs/pinned-volumes.md).
+        volumes = cfg: {
+          config.size = "5Gi";
+        };
+
         extraOptions = {
           image = mkOption {
             description = mdDoc "The docker image";
@@ -117,13 +123,6 @@
 
         extraResources =
           cfg:
-          let
-            pinnedConfig = self.lib.mkPinnedVolume {
-              pvcName = "${name}-${name}-config";
-              volumeHandle = "pvc-bda437d3-382b-4c6b-bbd1-3982593d07fb";
-              size = "5Gi";
-            };
-          in
           {
             deployments = {
               ${name} = {
@@ -278,10 +277,7 @@
                       serviceAccountName = "default";
 
                       volumes = [
-                        {
-                          name = "config";
-                          persistentVolumeClaim.claimName = "${name}-${name}-config";
-                        }
+                        cfg.volumes.config.volume
                       ]
                       ++ (lib.optionals (cfg.database.enable && cfg.database.password != "") [
                         {
@@ -340,7 +336,7 @@
               };
             };
 
-            persistentVolumeClaims = pinnedConfig.persistentVolumeClaims // {
+            persistentVolumeClaims = {
               "${name}-${name}-downloads".spec =
                 if cfg.nfs.enable then
                   {
@@ -390,9 +386,7 @@
             };
 
             # Create NFS PersistentVolumes for downloads and tv when NFS is enabled
-            persistentVolumes =
-              pinnedConfig.persistentVolumes
-              // lib.optionalAttrs (cfg.nfs.enable) {
+            persistentVolumes = lib.optionalAttrs (cfg.nfs.enable) {
                 "${name}-${name}-downloads-nfs" = {
                   apiVersion = "v1";
                   kind = "PersistentVolume";

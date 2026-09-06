@@ -27,6 +27,12 @@
         uses-ingress = true;
         uses-database = true;
 
+        # Shape only -- no volumeHandle here, that's environment-specific (see
+        # env/dev/radarr.nix and docs/pinned-volumes.md).
+        volumes = cfg: {
+          config.size = "5Gi";
+        };
+
         extraOptions = {
           image = mkOption {
             description = mdDoc "The docker image";
@@ -137,13 +143,6 @@
 
         extraResources =
           cfg:
-          let
-            pinnedConfig = self.lib.mkPinnedVolume {
-              pvcName = "${name}-${name}-config";
-              volumeHandle = "pvc-979d8477-4390-4d8e-b559-7839008e080b";
-              size = "5Gi";
-            };
-          in
           {
             deployments = {
               ${name} = {
@@ -298,10 +297,7 @@
                       );
 
                       volumes = [
-                        {
-                          name = "config";
-                          persistentVolumeClaim.claimName = "${name}-${name}-config";
-                        }
+                        cfg.volumes.config.volume
                       ]
                       ++ (lib.optionals (cfg.database.enable && cfg.database.password != "") [
                         {
@@ -360,7 +356,7 @@
               };
             };
 
-            persistentVolumeClaims = pinnedConfig.persistentVolumeClaims // {
+            persistentVolumeClaims = {
               "${name}-${name}-downloads".spec =
                 if cfg.nfs.enable then
                   {
@@ -410,9 +406,7 @@
             };
 
             # Create NFS PersistentVolumes for downloads and movies when NFS is enabled
-            persistentVolumes =
-              pinnedConfig.persistentVolumes
-              // lib.optionalAttrs (cfg.nfs.enable) {
+            persistentVolumes = lib.optionalAttrs (cfg.nfs.enable) {
                 "${name}-${name}-downloads-nfs" = {
                   apiVersion = "v1";
                   kind = "PersistentVolume";
