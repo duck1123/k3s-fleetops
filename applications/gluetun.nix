@@ -22,6 +22,12 @@
         name = "gluetun";
         uses-ingress = false;
 
+        # Shape only -- no volumeHandle here, that's environment-specific (see
+        # env/dev/gluetun.nix and docs/pinned-volumes.md).
+        volumes = cfg: {
+          gluetun.size = "1Gi";
+        };
+
         sopsSecrets =
           cfg:
           {
@@ -110,13 +116,6 @@
 
         extraResources =
           cfg:
-          let
-            pinnedData = self.lib.mkPinnedVolume {
-              pvcName = "${name}-${name}-gluetun";
-              volumeHandle = "pvc-e563a1f5-1f3b-437e-ac58-77f4414da611";
-              size = "1Gi";
-            };
-          in
           {
             deployments = {
               ${name} = {
@@ -359,20 +358,12 @@
 
                       serviceAccountName = "default";
 
-                      volumes = [
-                        {
-                          name = "gluetun";
-                          persistentVolumeClaim.claimName = "${name}-${name}-gluetun";
-                        }
-                      ];
+                      volumes = [ cfg.volumes.gluetun.volume ];
                     };
                   };
                 };
               };
             };
-
-            persistentVolumeClaims = pinnedData.persistentVolumeClaims;
-            persistentVolumes = pinnedData.persistentVolumes;
 
             services.${name}.spec = {
               ports = [

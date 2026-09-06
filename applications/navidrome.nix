@@ -13,6 +13,12 @@
       uses-ingress = true;
       uses-nfs = true;
 
+      # Shape only -- no volumeHandle here, that's environment-specific (see
+      # env/dev/navidrome.nix and docs/pinned-volumes.md).
+      volumes = cfg: {
+        data.size = "5Gi";
+      };
+
       extraOptions = {
         image = mkOption {
           description = mdDoc "The docker image";
@@ -47,13 +53,6 @@
 
       extraResources =
         cfg:
-        let
-          pinnedData = self.lib.mkPinnedVolume {
-            pvcName = "${name}-${name}-data";
-            volumeHandle = "pvc-883bbf8c-bcb0-48e6-a6d3-b68277d13af8";
-            size = "5Gi";
-          };
-        in
         {
           deployments.${name} = {
             metadata.labels = {
@@ -148,10 +147,7 @@
                   ];
 
                   volumes = [
-                    {
-                      name = "data";
-                      persistentVolumeClaim.claimName = "${name}-${name}-data";
-                    }
+                    cfg.volumes.data.volume
                     {
                       name = "music";
                       persistentVolumeClaim.claimName = "${name}-${name}-music";
@@ -192,7 +188,7 @@
             };
           };
 
-          persistentVolumeClaims = pinnedData.persistentVolumeClaims // {
+          persistentVolumeClaims = {
             "${name}-${name}-music".spec =
               if cfg.nfs.enable then
                 {
@@ -227,9 +223,7 @@
             type = "ClusterIP";
           };
 
-          persistentVolumes =
-            pinnedData.persistentVolumes
-            // lib.optionalAttrs cfg.nfs.enable {
+          persistentVolumes = lib.optionalAttrs cfg.nfs.enable {
               "${name}-${name}-music-nfs" = {
                 apiVersion = "v1";
                 kind = "PersistentVolume";
