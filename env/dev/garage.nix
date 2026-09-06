@@ -27,5 +27,11 @@
     # Start out on longhorn (no NFS) to keep the first boot simple — flip on
     # once garage is validated, pointed at its own NAS export like rustfs's.
     nfs.enable = false;
+
+    # Captured via `kubectl get pv <name> -o jsonpath='{.spec.csi.volumeHandle}'`
+    # -- see docs/pinned-volumes.md. Specific to this cluster. dataVolumeHandle
+    # only takes effect while nfs.enable is false, as above.
+    volumeOverrides.meta.volumeHandle = "pvc-12507954-e2c5-4fd6-9a00-498f96993445";
+    dataVolumeHandle = "pvc-06689573-2c6c-4acd-961d-95a4801239b2";
   };
 }

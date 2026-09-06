@@ -43,6 +43,20 @@
         # No published Helm chart repo exists upstream (only a chart living
         # inside the garage git repo, meant to be cloned+installed locally) —
         # hand-rolled resources give the same control with no extra fetch.
+
+        # Only `meta` goes through here -- `data` conditionally swaps between a
+        # pinned Longhorn volume and an NFS-backed one under the same PVC name
+        # depending on cfg.nfs.enable (see extraResources below), which doesn't
+        # fit this shape+override model, so it keeps its own hand-rolled
+        # mkPinnedVolume call. Shape only -- no volumeHandle here, that's
+        # environment-specific (see env/dev/garage.nix and docs/pinned-volumes.md).
+        volumes = cfg: {
+          meta = {
+            pvcName = "${name}-meta";
+            size = cfg.metaPersistenceSize;
+          };
+        };
+
         extraOptions = {
           image = mkOption {
             description = mdDoc "The garage container image";
@@ -97,6 +111,19 @@
             default = "50Gi";
           };
 
+          # Set per-environment (e.g. env/dev/garage.nix), same reasoning as
+          # cfg.volumeOverrides.<key>.volumeHandle elsewhere -- see
+          # docs/pinned-volumes.md. Only meaningful when cfg.nfs.enable is
+          # false; unlike the generic volumes/volumeOverrides mechanism, there
+          # is no automatic dynamic-PVC fallback for a null value here, since
+          # this volume's shape doesn't fit that model (see the extraResources
+          # comment above).
+          dataVolumeHandle = mkOption {
+            description = mdDoc "Longhorn volumeHandle to pin the data volume to when cfg.nfs.enable is false.";
+            type = types.nullOr types.str;
+            default = null;
+          };
+
           # Chart default is n/a here (no chart); the container has no
           # documented non-root user, so this only takes effect when nfs.enable
           # forces a podSecurityContext to match the NFS export's expected uid.
@@ -135,14 +162,9 @@
         extraResources =
           cfg:
           let
-            pinnedMeta = self.lib.mkPinnedVolume {
-              pvcName = "${name}-meta";
-              volumeHandle = "pvc-12507954-e2c5-4fd6-9a00-498f96993445";
-              size = cfg.metaPersistenceSize;
-            };
             pinnedData = self.lib.mkPinnedVolume {
               pvcName = "${name}-data";
-              volumeHandle = "pvc-06689573-2c6c-4acd-961d-95a4801239b2";
+              volumeHandle = cfg.dataVolumeHandle;
               size = cfg.dataPersistenceSize;
             };
             nfsDataPV = lib.optionalAttrs cfg.nfs.enable {
@@ -337,10 +359,7 @@
                         name = "config";
                         configMap.name = "${name}-config";
                       }
-                      {
-                        name = "meta";
-                        persistentVolumeClaim.claimName = "${name}-meta";
-                      }
+                      cfg.volumes.meta.volume
                       {
                         name = "data";
                         persistentVolumeClaim.claimName = "${name}-data";
@@ -412,7 +431,7 @@
               ];
             };
 
-            persistentVolumeClaims = pinnedMeta.persistentVolumeClaims // {
+            persistentVolumeClaims = {
               "${name}-data" =
                 if cfg.nfs.enable then
                   {
@@ -428,9 +447,7 @@
             };
 
             persistentVolumes =
-              pinnedMeta.persistentVolumes
-              // nfsDataPV
-              // lib.optionalAttrs (!cfg.nfs.enable) pinnedData.persistentVolumes;
+              nfsDataPV // lib.optionalAttrs (!cfg.nfs.enable) pinnedData.persistentVolumes;
           };
       };
 }
