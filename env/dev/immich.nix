@@ -1,21 +1,15 @@
 { config, secrets, ... }:
 {
+  # ../../applications/immich.nix
   services.immich = {
-    enable = true;
-
     adminApiKey = secrets.immich.adminApiKey;
 
-    databaseTarget = "postgresql";
     database = {
       inherit (secrets.immich.database) password username;
     };
 
-    ingressProvider = "traefik-lan";
-    ingress.tls.enable = true;
-
-    nfs.enable = false;
-
-    hostAffinity = "nixmini";
+    databaseTarget = "postgresql";
+    enable = true;
 
     externalLibrary = {
       enable = true;
@@ -23,7 +17,12 @@
       path = "${config.devDefaults.nasBase}/Photos";
     };
 
+    hostAffinity = "nixmini";
+    ingress.tls.enable = true;
+    ingressProvider = "traefik-lan";
     monitoring.autokuma.enable = true;
+    nfs.enable = false;
+
     redis = {
       inherit (secrets.immich.redis) password;
       host = "redis.redis";
