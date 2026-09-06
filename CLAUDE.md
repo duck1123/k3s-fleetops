@@ -155,6 +155,7 @@ Every ingress in this repo (`uses-ingress = true` via `mkArgoApp`) is LAN/Tailsc
 - `chart` — optional Helm chart (from `nixhelm`)
 - `extraOptions` — NixOS-style module options exposed under `config.services.<name>`
 - `extraResources` — raw Kubernetes resources (deployments, services, ingresses, PVCs, etc.)
+- `pinnedVolumes` — small precious volumes (config/database, not bulk media) that must survive an `enable = false` → `true` cycle instead of coming back empty; see [docs/pinned-volumes.md](docs/pinned-volumes.md)
 - `sopsSecrets` — secrets to encrypt and inject as Kubernetes Secrets
 - `uses-ingress` — adds standard ingress options (domain, clusterIssuer, ingressClassName)
 
