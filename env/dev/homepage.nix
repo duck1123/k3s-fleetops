@@ -15,6 +15,63 @@
       theme = "dark";
     };
 
+    # Cluster nodes run glances (dotfiles' `features.glances`, port 61208) directly
+    # on the host OS -- not a k8s app, so it can't be auto-discovered like
+    # mkArgoApp services and is listed here by static LAN IP instead.
+    extraGroups = {
+      Nodes = {
+        nixmini = {
+          href = "http://192.168.0.25:61208";
+          widget = {
+            type = "glances";
+            url = "http://192.168.0.25:61208";
+            version = 4;
+            metric = "cpu";
+          };
+        };
+
+        nasnix = {
+          href = "http://192.168.0.16:61208";
+          widget = {
+            type = "glances";
+            url = "http://192.168.0.16:61208";
+            version = 4;
+            metric = "cpu";
+          };
+        };
+
+        edgenix = {
+          href = "http://192.168.0.22:61208";
+          widget = {
+            type = "glances";
+            url = "http://192.168.0.22:61208";
+            version = 4;
+            metric = "cpu";
+          };
+        };
+
+        inspernix = {
+          href = "http://192.168.0.24:61208";
+          widget = {
+            type = "glances";
+            url = "http://192.168.0.24:61208";
+            version = 4;
+            metric = "cpu";
+          };
+        };
+
+        powerspecnix = {
+          href = "http://192.168.0.29:61208";
+          widget = {
+            type = "glances";
+            url = "http://192.168.0.29:61208";
+            version = 4;
+            metric = "cpu";
+          };
+        };
+      };
+    };
+
     # Values for widgets that need an API key/password. Reference them from a
     # service's `homepage.extraSettings.widget.*` (or `widgets`/`extraGroups`
     # here) as `{{HOMEPAGE_VAR_<KEY>}}` -- homepage substitutes the placeholder

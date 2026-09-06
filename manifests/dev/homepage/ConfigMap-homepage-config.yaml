@@ -53,6 +53,42 @@ data:
             href: https://uptime-kuma.home.kronkltd.net
         - xyops:
             href: https://xyops.home.kronkltd.net
+    - Nodes:
+        - edgenix:
+            href: http://192.168.0.22:61208
+            widget:
+              metric: cpu
+              type: glances
+              url: http://192.168.0.22:61208
+              version: 4
+        - inspernix:
+            href: http://192.168.0.24:61208
+            widget:
+              metric: cpu
+              type: glances
+              url: http://192.168.0.24:61208
+              version: 4
+        - nasnix:
+            href: http://192.168.0.16:61208
+            widget:
+              metric: cpu
+              type: glances
+              url: http://192.168.0.16:61208
+              version: 4
+        - nixmini:
+            href: http://192.168.0.25:61208
+            widget:
+              metric: cpu
+              type: glances
+              url: http://192.168.0.25:61208
+              version: 4
+        - powerspecnix:
+            href: http://192.168.0.29:61208
+            widget:
+              metric: cpu
+              type: glances
+              url: http://192.168.0.29:61208
+              version: 4
   settings.yaml: |
     theme: dark
     title: Homelab
