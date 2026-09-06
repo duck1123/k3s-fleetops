@@ -27,6 +27,27 @@ in
       {
         inherit name;
 
+        # `pvcName` overrides since these predate the "${name}-${name}-<key>"
+        # convention (data's is flat, matching persistentVolumeClaimName
+        # below). Shape only -- no volumeHandle here, that's
+        # environment-specific (see env/dev/postgresql.nix and
+        # docs/pinned-volumes.md). Each key only exists at all when its
+        # gating option is on, same as before.
+        volumes =
+          cfg:
+          lib.optionalAttrs cfg.persistenceEnabled {
+            data = {
+              pvcName = "postgresql-data";
+              size = cfg.persistenceSize;
+            };
+          }
+          // lib.optionalAttrs cfg.backup.enable {
+            backups = {
+              pvcName = "${name}-backups";
+              size = cfg.backup.storageSize;
+            };
+          };
+
         sopsSecrets = cfg: {
           ${password-secret} = with cfg.auth; {
             inherit
@@ -250,18 +271,6 @@ in
 
         extraResources =
           cfg:
-          let
-            pinnedData = self.lib.mkPinnedVolume {
-              pvcName = "postgresql-data";
-              volumeHandle = "pvc-f011e680-b80d-4628-abbd-8641d837938b";
-              size = cfg.persistenceSize;
-            };
-            pinnedBackups = self.lib.mkPinnedVolume {
-              pvcName = "${name}-backups";
-              volumeHandle = "pvc-4a9e7907-8262-4938-b52b-3b5971935619";
-              size = cfg.backup.storageSize;
-            };
-          in
           {
             # Create a Job to initialize extra databases after PostgreSQL is ready
             jobs = lib.optionalAttrs (cfg.extraDatabases != [ ]) {
@@ -424,9 +433,7 @@ in
                           volumes = [
                             {
                               name = "backup-storage";
-                              persistentVolumeClaim = {
-                                claimName = "${name}-backups";
-                              };
+                              persistentVolumeClaim.claimName = cfg.volumes.backups.pvcName;
                             }
                           ];
                         };
@@ -436,15 +443,6 @@ in
                 };
               };
             };
-
-            # Data PVC (pinned, gated on cfg.persistenceEnabled) + backup PVC (pinned, gated on cfg.backup.enable)
-            persistentVolumeClaims =
-              lib.optionalAttrs cfg.persistenceEnabled pinnedData.persistentVolumeClaims
-              // lib.optionalAttrs cfg.backup.enable pinnedBackups.persistentVolumeClaims;
-
-            persistentVolumes =
-              lib.optionalAttrs cfg.persistenceEnabled pinnedData.persistentVolumes
-              // lib.optionalAttrs cfg.backup.enable pinnedBackups.persistentVolumes;
 
             # Patch StatefulSet health checks and the pod's scratch/config
             # volumes (persistence itself now comes from
