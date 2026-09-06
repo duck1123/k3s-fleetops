@@ -76,12 +76,17 @@
           # placeholder (see applications/homepage.nix's `widgetSecrets`); set
           # `services.homepage.widgetSecrets.IMMICH_API_KEY` from
           # `config.services.immich.adminApiKey` in env/dev/homepage.nix.
+          # `version = 2` selects homepage's newer Immich API paths
+          # (/api/server/*, required for Immich >= v1.118 -- this repo tracks
+          # the "release" image tag, currently v2.x); the API key must carry
+          # the `server.statistics` permission or homepage's requests 403.
           homepage.extraSettings = mkOption {
             default = lib.optionalAttrs (cfg.adminApiKey != "") {
               widget = {
                 type = "immich";
                 url = "http://${name}-server.${cfg.namespace}:2283";
                 key = "{{HOMEPAGE_VAR_IMMICH_API_KEY}}";
+                version = 2;
               };
             };
           };
