@@ -143,6 +143,20 @@
             };
           };
 
+          # Set per-environment (e.g. env/dev/immich.nix), same reasoning as
+          # cfg.volumeOverrides.<key>.volumeHandle elsewhere -- see
+          # docs/pinned-volumes.md. Only meaningful when cfg.nfs.enable is
+          # false; the library volume conditionally swaps between a pinned
+          # Longhorn volume and an NFS-backed one under the same PVC name
+          # (see extraResources below), which doesn't fit the generic
+          # volumes/volumeOverrides model, so there is no automatic
+          # dynamic-PVC fallback for a null value here.
+          libraryVolumeHandle = mkOption {
+            description = mdDoc "Longhorn volumeHandle to pin the library volume to when cfg.nfs.enable is false.";
+            type = types.nullOr types.str;
+            default = null;
+          };
+
           externalLibrary = {
             enable = mkOption {
               description = mdDoc "Mount an NFS share as an external library (read-only) at /mnt/external-library";
@@ -255,12 +269,12 @@
         extraResources =
           cfg:
           let
-            # Volume handle captured from the live cluster (`kubectl get pv -o
-            # jsonpath='{.spec.csi.volumeHandle}'`) for the 100Gi photo/video library --
-            # pins disable/re-enable cycles to the same data instead of a fresh empty PVC.
+            # cfg.libraryVolumeHandle (env-settable, see docs/pinned-volumes.md) for
+            # the 100Gi photo/video library -- pins disable/re-enable cycles to the
+            # same data instead of a fresh empty PVC.
             pinnedLibrary = self.lib.mkPinnedVolume {
               pvcName = "${name}-${name}-library";
-              volumeHandle = "pvc-d794cdee-ffa7-4885-a2be-b741de8dd416";
+              volumeHandle = cfg.libraryVolumeHandle;
               size = "100Gi";
             };
           in
