@@ -28,11 +28,12 @@
 
         # `pvcName = "pihole"` (not the usual "${name}-${name}-<key>" convention)
         # to match the chart's `existingClaim` value below, which is a literal
-        # string the chart's own template plumbing already expects.
-        pinnedVolumes = cfg: {
+        # string the chart's own template plumbing already expects. Shape only
+        # -- no volumeHandle here, that's environment-specific (see
+        # env/dev/pihole.nix and docs/pinned-volumes.md).
+        volumes = cfg: {
           data = {
             pvcName = "pihole";
-            volumeHandle = "pvc-131cfa45-b850-44ac-a9b1-81fadbc4bdd2";
             size = cfg.pvcSize;
           };
         };

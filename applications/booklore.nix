@@ -30,14 +30,14 @@
           };
         };
 
-        pinnedVolumes = cfg: {
+        # Shape only -- no volumeHandle here, that's environment-specific (see
+        # env/dev/booklore.nix and docs/pinned-volumes.md).
+        volumes = cfg: {
           data = {
-            volumeHandle = "pvc-da71c5a0-68e9-48f0-a8a2-e71d5a8adccc";
             size = "5Gi";
             volumeAttributes.backupTargetName = "default";
           };
           bookdrop = {
-            volumeHandle = "pvc-b8bc2a4f-b836-4142-a5cf-c513c51f5422";
             size = "5Gi";
             volumeAttributes.backupTargetName = "default";
           };
@@ -169,12 +169,12 @@
                       }
                     ];
                     volumes = [
-                      cfg.pinnedVolumes.bookdrop.volume
+                      cfg.volumes.bookdrop.volume
                       {
                         name = "books";
                         persistentVolumeClaim.claimName = "${name}-${name}-books";
                       }
-                      cfg.pinnedVolumes.data.volume
+                      cfg.volumes.data.volume
                     ];
                   };
                 };

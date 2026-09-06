@@ -33,11 +33,16 @@
       extraOptions ? { },
       # A function that takes the config and returns extra resources to deploy with the application
       extraResources ? (cfg: { }),
-      # A function that takes the config and returns an attrset of pinned-volume specs, keyed by a
-      # short logical volume name (e.g. "appdata", "config") -- each value is the arg-set for
-      # `self.lib.mkPinnedVolume` minus `pvcName` (that's derived as "${name}-${name}-<key>" to
-      # match this repo's existing naming convention). See docs/pinned-volumes.md.
-      pinnedVolumes ? (cfg: { }),
+      # A function that takes the config and returns an attrset of volume specs (size, and
+      # optionally pvcName/pvName/accessModes/volumeAttributes/storageClassName overrides), keyed
+      # by a short logical volume name (e.g. "appdata", "config"). This declares each volume's
+      # *shape* only -- environment-agnostic, belongs in applications/<name>.nix. Whether a given
+      # volume actually gets pinned to a specific pre-existing Longhorn volume, and to which one,
+      # is controlled separately by `cfg.volumeHandles.<key>` (a plain option, set per-environment
+      # in e.g. env/dev/<name>.nix, since a volumeHandle only means something on one specific
+      # cluster) -- unset/null there just means an ordinary dynamically-provisioned PVC. See
+      # docs/pinned-volumes.md.
+      volumes ? (cfg: { }),
       # A function that takes the config and returns secrets to encrypt (name -> stringData attrs)
       sopsSecrets ? (cfg: { }),
       # Does this chart expose an ingress
@@ -61,31 +66,50 @@
       cfg = config.services.${name};
       values = attrsets.recursiveUpdate (defaultValues cfg) cfg.values;
 
-      # See docs/pinned-volumes.md. `resolvedPinnedVolumes` is whatever the app's
-      # `pinnedVolumes cfg` returned; `pinnedVolumeFragments` runs each one through
-      # `mkPinnedVolume` (producing that entry's { persistentVolumeClaims; persistentVolumes; });
-      # `pinnedVolumeResources` folds all of those into one attrset merged into this app's
-      # resources automatically. `pinnedVolumeInfo` (exposed as `cfg.pinnedVolumes`) is what
-      # extraResources/extraAppConfig/etc reference instead of hand-typing the PVC name --
-      # `cfg.pinnedVolumes.<key>.volume` is a ready `{ name; persistentVolumeClaim.claimName; }`
-      # for a Deployment's `spec.template.spec.volumes`.
-      resolvedPinnedVolumes = pinnedVolumes cfg;
+      # See docs/pinned-volumes.md. `resolvedVolumes` is whatever the app's `volumes cfg`
+      # returned -- shape only (size, naming overrides), no volumeHandle. Each entry becomes
+      # either a plain dynamically-provisioned PVC (if `cfg.volumeHandles.<key>` is unset -- the
+      # default, and what a brand-new environment gets automatically) or a pinned PV+PVC via
+      # `mkPinnedVolume` (once that environment's config sets a real volumeHandle). `cfg.volumes`
+      # is what extraResources/extraAppConfig/etc reference instead of hand-typing the PVC name --
+      # `cfg.volumes.<key>.volume` is a ready `{ name; persistentVolumeClaim.claimName; }` for a
+      # Deployment's `spec.template.spec.volumes`, regardless of whether that key ends up pinned.
+      resolvedVolumes = volumes cfg;
       # Default naming follows this repo's existing convention; pass an explicit
       # `pvcName` in a volume's arg-set to override it (e.g. to match a literal
       # name a Helm chart's `existingClaim`-style value already expects).
-      pinnedVolumePvcName = volName: args: args.pvcName or "${name}-${name}-${volName}";
-      pinnedVolumeFragments = lib.mapAttrs (
+      volumePvcName = volName: args: args.pvcName or "${name}-${name}-${volName}";
+      volumeFragments = lib.mapAttrs (
         volName: args:
-        self.lib.mkPinnedVolume ({ pvcName = pinnedVolumePvcName volName args; } // args)
-      ) resolvedPinnedVolumes;
-      pinnedVolumeResources = lib.foldl' lib.recursiveUpdate { } (lib.attrValues pinnedVolumeFragments);
-      pinnedVolumeInfo = lib.mapAttrs (volName: args: {
-        pvcName = pinnedVolumePvcName volName args;
+        let
+          pvcName = volumePvcName volName args;
+          handle = cfg.volumeHandles.${volName} or null;
+        in
+        if handle == null then
+          {
+            persistentVolumeClaims.${pvcName}.spec = {
+              accessModes = args.accessModes or [ "ReadWriteOnce" ];
+              resources.requests.storage = args.size;
+              storageClassName = args.storageClassName or cfg.storageClassName;
+            };
+          }
+        else
+          self.lib.mkPinnedVolume (
+            (builtins.removeAttrs args [ "pvcName" ])
+            // {
+              inherit pvcName;
+              volumeHandle = handle;
+            }
+          )
+      ) resolvedVolumes;
+      volumeResources = lib.foldl' lib.recursiveUpdate { } (lib.attrValues volumeFragments);
+      volumeInfo = lib.mapAttrs (volName: args: {
+        pvcName = volumePvcName volName args;
         volume = {
           name = volName;
-          persistentVolumeClaim.claimName = pinnedVolumePvcName volName args;
+          persistentVolumeClaim.claimName = volumePvcName volName args;
         };
-      }) resolvedPinnedVolumes;
+      }) resolvedVolumes;
 
       # Combined secrets from sopsSecrets parameter and cfg.sopsSecrets option (option overrides)
       combinedSopsSecrets = (sopsSecrets cfg) // cfg.sopsSecrets;
@@ -435,16 +459,28 @@
           default = storageClassName;
         };
 
-        # Internal: computed from the outer `pinnedVolumes` parameter -- see
-        # docs/pinned-volumes.md. Reference `cfg.pinnedVolumes.<key>.volume` in a
+        # Set per-environment (e.g. env/dev/<name>.nix) -- a Longhorn volumeHandle only
+        # identifies a volume on one specific cluster, so it doesn't belong in
+        # applications/<name>.nix. Unset/null for a key in the `volumes` parameter
+        # means that volume is an ordinary dynamically-provisioned PVC (what a
+        # brand-new environment gets automatically); set it once you've captured
+        # the real handle to pin that volume instead. See docs/pinned-volumes.md.
+        volumeHandles = mkOption {
+          default = { };
+          type = types.attrsOf (types.nullOr types.str);
+          description = mdDoc "Map of volume key (from the `volumes` parameter passed to mkArgoApp) -> Longhorn volumeHandle to pin it to. Missing/null = ordinary dynamically-provisioned volume.";
+        };
+
+        # Internal: computed from the outer `volumes` parameter -- see
+        # docs/pinned-volumes.md. Reference `cfg.volumes.<key>.volume` in a
         # Deployment's `volumes` list instead of hand-typing the PVC name; the
         # matching PersistentVolumeClaim/PersistentVolume resources are already
-        # merged into this app automatically.
-        pinnedVolumes = mkOption {
+        # merged into this app automatically, pinned or not.
+        volumes = mkOption {
           internal = true;
-          default = pinnedVolumeInfo;
+          default = volumeInfo;
           type = types.attrsOf types.attrs;
-          description = mdDoc "Computed pinned-volume info (`.pvcName`, `.volume`), one entry per key in the `pinnedVolumes` parameter passed to mkArgoApp.";
+          description = mdDoc "Computed volume info (`.pvcName`, `.volume`), one entry per key in the `volumes` parameter passed to mkArgoApp.";
         };
 
         tz = mkOption {
@@ -575,7 +611,7 @@
                   # sopsSecrets are intentionally excluded: encryption happens outside Nix via
                   # scripts/write-sops-secrets.sh so plaintext values never enter the Nix store.
                   baseResources = lib.foldl' lib.recursiveUpdate { } [
-                    pinnedVolumeResources
+                    volumeResources
                     (extraResources cfg)
                     cfg.extraResources
                   ];

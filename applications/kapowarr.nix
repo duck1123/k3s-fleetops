@@ -22,9 +22,10 @@
         name = "kapowarr";
         uses-ingress = true;
 
-        pinnedVolumes = cfg: {
+        # Shape only -- no volumeHandle here, that's environment-specific (see
+        # env/dev/kapowarr.nix and docs/pinned-volumes.md).
+        volumes = cfg: {
           config = {
-            volumeHandle = "pvc-aa4bb624-7cf8-4fbc-a6c9-7e09e50f53f6";
             size = "5Gi";
             volumeAttributes.backupTargetName = "default";
           };
@@ -223,7 +224,7 @@
                     ];
 
                     volumes = [
-                      cfg.pinnedVolumes.config.volume
+                      cfg.volumes.config.volume
                       {
                         name = "downloads";
                         persistentVolumeClaim.claimName = "${name}-${name}-downloads";
