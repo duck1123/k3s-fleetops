@@ -24,6 +24,27 @@
       rec {
         name = "mariadb";
 
+        # `pvcName` overrides since these are flat names, not the usual
+        # "${name}-${name}-<key>" convention -- data's matches the chart's
+        # existingClaim value below. Shape only -- no volumeHandle here,
+        # that's environment-specific (see env/dev/mariadb.nix and
+        # docs/pinned-volumes.md). backups only exists at all when
+        # cfg.backup.enable, same as before.
+        volumes =
+          cfg:
+          {
+            data = {
+              pvcName = "mariadb-data";
+              size = "8Gi";
+            };
+          }
+          // lib.optionalAttrs cfg.backup.enable {
+            backups = {
+              pvcName = "mariadb-backups";
+              size = cfg.backup.storageSize;
+            };
+          };
+
         sopsSecrets = cfg: {
           ${password-secret} = {
             "mariadb-root-password" = cfg.auth.rootPassword;
@@ -161,27 +182,7 @@
 
         extraResources =
           cfg:
-          let
-            pinnedData = self.lib.mkPinnedVolume {
-              pvcName = "mariadb-data";
-              volumeHandle = "pvc-7ef8145c-7770-449b-a78d-81b1df2e17df";
-              size = "8Gi";
-            };
-            pinnedBackups = self.lib.mkPinnedVolume {
-              pvcName = "mariadb-backups";
-              volumeHandle = "pvc-f42c562c-5275-4ae2-999c-94eab513bcd9";
-              size = cfg.backup.storageSize;
-            };
-          in
           {
-            # Data PVC (always pinned) + backup PVC (pinned, gated on cfg.backup.enable)
-            persistentVolumeClaims =
-              pinnedData.persistentVolumeClaims
-              // lib.optionalAttrs cfg.backup.enable pinnedBackups.persistentVolumeClaims;
-
-            persistentVolumes =
-              pinnedData.persistentVolumes // lib.optionalAttrs cfg.backup.enable pinnedBackups.persistentVolumes;
-
             # CronJob for automated backups
             cronJobs = lib.optionalAttrs cfg.backup.enable {
               "mariadb-backup" = {
@@ -260,9 +261,7 @@
                           volumes = [
                             {
                               name = "backup-storage";
-                              persistentVolumeClaim = {
-                                claimName = "mariadb-backups";
-                              };
+                              persistentVolumeClaim.claimName = cfg.volumes.backups.pvcName;
                             }
                           ];
                         };
