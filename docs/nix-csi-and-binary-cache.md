@@ -29,10 +29,9 @@ Public cache name: `nixos`, at `https://attic.home.kronkltd.net/nixos`, public k
 
 ## RustFS — the previous backend, now disabled but still configured (not deleted)
 
-Garage replaced RustFS as Attic's storage backend on 2026-08-31 (`applications/rustfs.nix`/`env/dev/rustfs.nix` still exist with `enable = false;`, kept around rather than deleted). **Two loose ends from the migration, as of this writing:**
+Garage replaced RustFS as Attic's storage backend on 2026-08-31 (`applications/rustfs.nix`/`env/dev/rustfs.nix` still exist with `enable = false;`, kept around rather than deleted). `env/dev/nocodb.nix` was migrated to Garage on 2026-09-06 (re-enabled at the same time, see `applications/nocodb.nix`'s `storage.endpoint` doc for why it uses Garage's ingress domain rather than the in-cluster `garage.garage` ClusterIP).
 
-- `env/dev/longhorn.nix`'s `backupTargetCredential` still points at `rustfs-svc.rustfs:9000` using `secrets.rustfs.*` — Longhorn backups have not been migrated to Garage and are presumably non-functional while RustFS is disabled. Check this before relying on a Longhorn backup existing.
-- `env/dev/nocodb.nix` still defaults `storage-backend` to `"rustfs"` (its `endpoint = "http://rustfs.rustfs:9000"` — note this is also the wrong Service name, see below). Not currently an active problem since `services.nocodb.enable = false`, but re-enabling nocodb as-is would hit a dead backend.
+**One remaining loose end, as of this writing:** `env/dev/longhorn.nix`'s `backupTargetCredential` still points at `rustfs-svc.rustfs:9000` using `secrets.rustfs.*` — Longhorn backups have not been migrated to Garage and are presumably non-functional while RustFS is disabled. Check this before relying on a Longhorn backup existing.
 
 The RustFS-specific gotchas below are kept for reference (relevant again if RustFS is ever re-enabled for one of the above, or reused elsewhere) but don't apply to Attic's current setup:
 
