@@ -33,6 +33,11 @@
       extraOptions ? { },
       # A function that takes the config and returns extra resources to deploy with the application
       extraResources ? (cfg: { }),
+      # A function that takes the config and returns an attrset of pinned-volume specs, keyed by a
+      # short logical volume name (e.g. "appdata", "config") -- each value is the arg-set for
+      # `self.lib.mkPinnedVolume` minus `pvcName` (that's derived as "${name}-${name}-<key>" to
+      # match this repo's existing naming convention). See docs/pinned-volumes.md.
+      pinnedVolumes ? (cfg: { }),
       # A function that takes the config and returns secrets to encrypt (name -> stringData attrs)
       sopsSecrets ? (cfg: { }),
       # Does this chart expose an ingress
@@ -55,6 +60,28 @@
         ;
       cfg = config.services.${name};
       values = attrsets.recursiveUpdate (defaultValues cfg) cfg.values;
+
+      # See docs/pinned-volumes.md. `resolvedPinnedVolumes` is whatever the app's
+      # `pinnedVolumes cfg` returned; `pinnedVolumeFragments` runs each one through
+      # `mkPinnedVolume` (producing that entry's { persistentVolumeClaims; persistentVolumes; });
+      # `pinnedVolumeResources` folds all of those into one attrset merged into this app's
+      # resources automatically. `pinnedVolumeInfo` (exposed as `cfg.pinnedVolumes`) is what
+      # extraResources/extraAppConfig/etc reference instead of hand-typing the PVC name --
+      # `cfg.pinnedVolumes.<key>.volume` is a ready `{ name; persistentVolumeClaim.claimName; }`
+      # for a Deployment's `spec.template.spec.volumes`.
+      resolvedPinnedVolumes = pinnedVolumes cfg;
+      pinnedVolumePvcName = volName: "${name}-${name}-${volName}";
+      pinnedVolumeFragments = lib.mapAttrs (
+        volName: args: self.lib.mkPinnedVolume ({ pvcName = pinnedVolumePvcName volName; } // args)
+      ) resolvedPinnedVolumes;
+      pinnedVolumeResources = lib.foldl' lib.recursiveUpdate { } (lib.attrValues pinnedVolumeFragments);
+      pinnedVolumeInfo = lib.mapAttrs (volName: _: {
+        pvcName = pinnedVolumePvcName volName;
+        volume = {
+          name = volName;
+          persistentVolumeClaim.claimName = pinnedVolumePvcName volName;
+        };
+      }) resolvedPinnedVolumes;
 
       # Combined secrets from sopsSecrets parameter and cfg.sopsSecrets option (option overrides)
       combinedSopsSecrets = (sopsSecrets cfg) // cfg.sopsSecrets;
@@ -404,6 +431,18 @@
           default = storageClassName;
         };
 
+        # Internal: computed from the outer `pinnedVolumes` parameter -- see
+        # docs/pinned-volumes.md. Reference `cfg.pinnedVolumes.<key>.volume` in a
+        # Deployment's `volumes` list instead of hand-typing the PVC name; the
+        # matching PersistentVolumeClaim/PersistentVolume resources are already
+        # merged into this app automatically.
+        pinnedVolumes = mkOption {
+          internal = true;
+          default = pinnedVolumeInfo;
+          type = types.attrsOf types.attrs;
+          description = mdDoc "Computed pinned-volume info (`.pvcName`, `.volume`), one entry per key in the `pinnedVolumes` parameter passed to mkArgoApp.";
+        };
+
         tz = mkOption {
           description = mdDoc "The timezone";
           type = types.str;
@@ -531,7 +570,11 @@
                 let
                   # sopsSecrets are intentionally excluded: encryption happens outside Nix via
                   # scripts/write-sops-secrets.sh so plaintext values never enter the Nix store.
-                  baseResources = lib.recursiveUpdate (extraResources cfg) cfg.extraResources;
+                  baseResources = lib.foldl' lib.recursiveUpdate { } [
+                    pinnedVolumeResources
+                    (extraResources cfg)
+                    cfg.extraResources
+                  ];
                   resources = addHostAffinityToResources (builtins.removeAttrs baseResources [
                     "sopsSecrets"
                   ]) cfg.hostAffinity;
