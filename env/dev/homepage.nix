@@ -25,6 +25,8 @@
         # service, so it's listed here by static LAN IP instead.
         plex = {
           href = "http://192.168.0.22:32400/web";
+          ping = "192.168.0.22";
+          siteMonitor = "http://192.168.0.22:32400";
           widget = {
             type = "plex";
             url = "http://192.168.0.22:32400";
@@ -36,6 +38,8 @@
       Nodes = {
         nixmini = {
           href = "http://192.168.0.25:61208";
+          ping = "192.168.0.25";
+          siteMonitor = "http://192.168.0.25:61208";
           widget = {
             type = "glances";
             url = "http://192.168.0.25:61208";
@@ -46,6 +50,8 @@
 
         nasnix = {
           href = "http://192.168.0.16:61208";
+          ping = "192.168.0.16";
+          siteMonitor = "http://192.168.0.16:61208";
           widget = {
             type = "glances";
             url = "http://192.168.0.16:61208";
@@ -56,6 +62,8 @@
 
         edgenix = {
           href = "http://192.168.0.22:61208";
+          ping = "192.168.0.22";
+          siteMonitor = "http://192.168.0.22:61208";
           widget = {
             type = "glances";
             url = "http://192.168.0.22:61208";
@@ -66,6 +74,8 @@
 
         inspernix = {
           href = "http://192.168.0.24:61208";
+          ping = "192.168.0.24";
+          siteMonitor = "http://192.168.0.24:61208";
           widget = {
             type = "glances";
             url = "http://192.168.0.24:61208";
@@ -76,6 +86,8 @@
 
         powerspecnix = {
           href = "http://192.168.0.29:61208";
+          ping = "192.168.0.29";
+          siteMonitor = "http://192.168.0.29:61208";
           widget = {
             type = "glances";
             url = "http://192.168.0.29:61208";

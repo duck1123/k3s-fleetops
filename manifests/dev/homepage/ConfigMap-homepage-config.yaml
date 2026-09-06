@@ -6,37 +6,59 @@ data:
     - Storage:
         - attic:
             href: https://attic.home.kronkltd.net
+            ping: attic.home.kronkltd.net
+            siteMonitor: https://attic.home.kronkltd.net
         - garage:
             href: https://garage.home.kronkltd.net
+            ping: garage.home.kronkltd.net
+            siteMonitor: https://garage.home.kronkltd.net
         - longhorn:
             href: https://longhorn.home.kronkltd.net
+            ping: longhorn.home.kronkltd.net
+            siteMonitor: https://longhorn.home.kronkltd.net
     - Database:
         - nocodb:
             href: https://nocodb.home.kronkltd.net
+            ping: nocodb.home.kronkltd.net
+            siteMonitor: https://nocodb.home.kronkltd.net
     - Download:
         - qbittorrent:
             href: https://qbittorrent.home.kronkltd.net
+            ping: qbittorrent.home.kronkltd.net
+            siteMonitor: https://qbittorrent.home.kronkltd.net
         - sabnzbd:
             href: https://sabnzbd.home.kronkltd.net
+            ping: sabnzbd.home.kronkltd.net
+            siteMonitor: https://sabnzbd.home.kronkltd.net
             widget:
               key: '{{HOMEPAGE_VAR_SABNZBD_API_KEY}}'
               type: sabnzbd
               url: http://sabnzbd.sabnzbd:8080
         - slskd:
             href: https://slskd.home.kronkltd.net
+            ping: slskd.home.kronkltd.net
+            siteMonitor: https://slskd.home.kronkltd.net
     - Apps:
         - audiobookshelf:
             href: https://audiobookshelf.home.kronkltd.net
+            ping: audiobookshelf.home.kronkltd.net
+            siteMonitor: https://audiobookshelf.home.kronkltd.net
             widget:
               key: '{{HOMEPAGE_VAR_AUDIOBOOKSHELF_API_KEY}}'
               type: audiobookshelf
               url: http://audiobookshelf.audiobookshelf:80
         - cloudbeaver:
             href: https://cloudbeaver.home.kronkltd.net
+            ping: cloudbeaver.home.kronkltd.net
+            siteMonitor: https://cloudbeaver.home.kronkltd.net
         - homarr:
             href: https://homarr.home.kronkltd.net
+            ping: homarr.home.kronkltd.net
+            siteMonitor: https://homarr.home.kronkltd.net
         - immich:
             href: https://immich.home.kronkltd.net
+            ping: immich.home.kronkltd.net
+            siteMonitor: https://immich.home.kronkltd.net
             widget:
               key: '{{HOMEPAGE_VAR_IMMICH_API_KEY}}'
               type: immich
@@ -44,59 +66,85 @@ data:
               version: 2
         - komga:
             href: https://komga.home.kronkltd.net
+            ping: komga.home.kronkltd.net
+            siteMonitor: https://komga.home.kronkltd.net
             widget:
               key: '{{HOMEPAGE_VAR_KOMGA_API_KEY}}'
               type: komga
               url: http://komga.komga:25600
         - lidarr:
             href: https://lidarr.home.kronkltd.net
+            ping: lidarr.home.kronkltd.net
+            siteMonitor: https://lidarr.home.kronkltd.net
             widget:
               key: '{{HOMEPAGE_VAR_LIDARR_API_KEY}}'
               type: lidarr
               url: http://lidarr.lidarr:8686
         - memos:
             href: https://memos.home.kronkltd.net
+            ping: memos.home.kronkltd.net
+            siteMonitor: https://memos.home.kronkltd.net
         - paperless-ngx:
             href: https://paperless-ngx.home.kronkltd.net
+            ping: paperless-ngx.home.kronkltd.net
+            siteMonitor: https://paperless-ngx.home.kronkltd.net
         - prowlarr:
             href: https://prowlarr.home.kronkltd.net
+            ping: prowlarr.home.kronkltd.net
+            siteMonitor: https://prowlarr.home.kronkltd.net
             widget:
               key: '{{HOMEPAGE_VAR_PROWLARR_API_KEY}}'
               type: prowlarr
               url: http://prowlarr.prowlarr:9696
         - radarr:
             href: https://radarr.home.kronkltd.net
+            ping: radarr.home.kronkltd.net
+            siteMonitor: https://radarr.home.kronkltd.net
             widget:
               key: '{{HOMEPAGE_VAR_RADARR_API_KEY}}'
               type: radarr
               url: http://radarr.radarr:7878
         - sonarr:
             href: https://sonarr.home.kronkltd.net
+            ping: sonarr.home.kronkltd.net
+            siteMonitor: https://sonarr.home.kronkltd.net
             widget:
               key: '{{HOMEPAGE_VAR_SONARR_API_KEY}}'
               type: sonarr
               url: http://sonarr.sonarr:8989
         - stashapp:
             href: https://stashapp.home.kronkltd.net
+            ping: stashapp.home.kronkltd.net
+            siteMonitor: https://stashapp.home.kronkltd.net
             widget:
               key: '{{HOMEPAGE_VAR_STASHAPP_API_KEY}}'
               type: stash
               url: http://stashapp.stashapp:9999
         - tdarr:
             href: https://tdarr.home.kronkltd.net
+            ping: tdarr.home.kronkltd.net
+            siteMonitor: https://tdarr.home.kronkltd.net
         - trilium:
             href: https://trilium.home.kronkltd.net
+            ping: trilium.home.kronkltd.net
+            siteMonitor: https://trilium.home.kronkltd.net
             widget:
               key: '{{HOMEPAGE_VAR_TRILIUM_API_KEY}}'
               type: trilium
               url: http://trilium.trilium:8080
         - uptime-kuma:
             href: https://uptime-kuma.home.kronkltd.net
+            ping: uptime-kuma.home.kronkltd.net
+            siteMonitor: https://uptime-kuma.home.kronkltd.net
         - xyops:
             href: https://xyops.home.kronkltd.net
+            ping: xyops.home.kronkltd.net
+            siteMonitor: https://xyops.home.kronkltd.net
     - Media:
         - plex:
             href: http://192.168.0.22:32400/web
+            ping: 192.168.0.22
+            siteMonitor: http://192.168.0.22:32400
             widget:
               key: '{{HOMEPAGE_VAR_PLEX_API_KEY}}'
               type: plex
@@ -104,6 +152,8 @@ data:
     - Nodes:
         - edgenix:
             href: http://192.168.0.22:61208
+            ping: 192.168.0.22
+            siteMonitor: http://192.168.0.22:61208
             widget:
               metric: cpu
               type: glances
@@ -111,6 +161,8 @@ data:
               version: 4
         - inspernix:
             href: http://192.168.0.24:61208
+            ping: 192.168.0.24
+            siteMonitor: http://192.168.0.24:61208
             widget:
               metric: cpu
               type: glances
@@ -118,6 +170,8 @@ data:
               version: 4
         - nasnix:
             href: http://192.168.0.16:61208
+            ping: 192.168.0.16
+            siteMonitor: http://192.168.0.16:61208
             widget:
               metric: cpu
               type: glances
@@ -125,6 +179,8 @@ data:
               version: 4
         - nixmini:
             href: http://192.168.0.25:61208
+            ping: 192.168.0.25
+            siteMonitor: http://192.168.0.25:61208
             widget:
               metric: cpu
               type: glances
@@ -132,6 +188,8 @@ data:
               version: 4
         - powerspecnix:
             href: http://192.168.0.29:61208
+            ping: 192.168.0.29
+            siteMonitor: http://192.168.0.29:61208
             widget:
               metric: cpu
               type: glances

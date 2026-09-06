@@ -28,11 +28,18 @@
             acc: svc:
             let
               h = svc.homepage;
+              # ping wants a bare host, not a URL -- pull it out of href (which is
+              # always a plain "https://<domain>" with no path/port by default, but
+              # an app can override href to something else via homepage.href).
+              hrefMatch = if h.href != null then builtins.match "https?://([^:/]+).*" h.href else null;
+              pingHost = if hrefMatch != null then builtins.head hrefMatch else null;
               item = {
                 inherit (h) href;
               }
               // lib.optionalAttrs (h.icon != "") { inherit (h) icon; }
               // lib.optionalAttrs (h.description != "") { inherit (h) description; }
+              // lib.optionalAttrs (h.href != null) { siteMonitor = h.href; }
+              // lib.optionalAttrs (pingHost != null) { ping = pingHost; }
               // h.extraSettings;
             in
             lib.recursiveUpdate acc {
@@ -247,6 +254,9 @@
                         inherit name;
                         image = cfg.image;
                         imagePullPolicy = "IfNotPresent";
+                        # ping issues real ICMP echo requests, which needs raw-socket
+                        # access the container doesn't have by default.
+                        securityContext.capabilities.add = [ "NET_RAW" ];
                         env = [
                           {
                             name = "TZ";
