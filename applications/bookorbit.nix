@@ -34,7 +34,7 @@
         # env/dev/bookorbit.nix and docs/pinned-volumes.md).
         volumes = cfg: {
           data = {
-            size = "5Gi";
+            size = "20Gi";
             volumeAttributes.backupTargetName = "default";
           };
         };
