@@ -12,11 +12,14 @@
     self.lib.mkArgoApp { inherit config lib; } {
       name = "keycloak";
 
+      # https://github.com/codecentric/helm-charts/tree/master/charts/keycloakx
+      # (bitnami/keycloak was frozen behind Bitnami's Aug 2025 paid-tier
+      # restructuring; codecentric is the actively-maintained community chart)
       chart = lib.helm.downloadHelmChart {
-        repo = "oci://registry-1.docker.io/bitnamicharts";
-        chart = "keycloak";
-        version = "24.1.0";
-        chartHash = "sha256-bgHZ5oUYVM65j2wwVWBavVs+opt0bf6QVZFqoEtC04A=";
+        repo = "https://codecentric.github.io/helm-charts";
+        chart = "keycloakx";
+        version = "7.3.1";
+        chartHash = "sha256-JyGehtXvxeMebHhFi2rx2TkTToT/Id8uICBwNfJkvGI=";
       };
 
       uses-ingress = true;
@@ -24,49 +27,135 @@
       extraOptions = {
         ingress = {
           adminDomain = mkOption {
-            description = mdDoc "The ingress domain for the admin";
+            description = mdDoc "The ingress domain for the admin console";
             type = types.str;
-            default = defaultApiDomain;
+            default = "keycloak-admin.local";
           };
+        };
+
+        auth = {
+          adminPassword = mkOption {
+            description = mdDoc "The admin console password";
+            type = types.str;
+            default = "CHANGEME";
+          };
+        };
+
+        # External database Keycloak stores its realm/user data in. Fill
+        # these in via env/dev/keycloak.nix (following the pattern in
+        # env/dev/postgresql.nix / env/dev/mariadb.nix) before enabling.
+        database = {
+          vendor = mkOption {
+            description = mdDoc "Database vendor: dev-file, dev-mem, mariadb, mssql, mysql, oracle or postgres";
+            type = types.str;
+            default = "postgres";
+          };
+
+          host = mkOption {
+            description = mdDoc "Database host";
+            type = types.str;
+            default = "";
+          };
+
+          port = mkOption {
+            description = mdDoc "Database port";
+            type = types.port;
+            default = 5432;
+          };
+
+          name = mkOption {
+            description = mdDoc "Database name";
+            type = types.str;
+            default = "keycloak";
+          };
+
+          username = mkOption {
+            description = mdDoc "Database username";
+            type = types.str;
+            default = "keycloak";
+          };
+
+          password = mkOption {
+            description = mdDoc "Database password";
+            type = types.str;
+            default = "CHANGEME";
+          };
+        };
+      };
+
+      sopsSecrets = cfg: {
+        keycloak-admin-password = {
+          password = cfg.auth.adminPassword;
+        };
+        keycloak-db-password = with cfg.database; {
+          inherit password;
         };
       };
 
       defaultValues = cfg: {
-        auth = {
-          adminUser = "admin";
-          existingSecret = "keycloak-admin-password";
-          passwordSecretKey = "password";
+        database = with cfg.database; {
+          inherit vendor;
+          hostname = host;
+          inherit port;
+          database = name;
+          inherit username;
+          existingSecret = "keycloak-db-password";
+          existingSecretKey = "password";
         };
+
+        extraEnv = ''
+          - name: KEYCLOAK_ADMIN
+            value: admin
+          - name: KEYCLOAK_ADMIN_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: keycloak-admin-password
+                key: password
+        '';
 
         ingress = with cfg.ingress; {
           enabled = true;
           ingressClassName = "traefik";
-          hostname = domain;
           annotations = {
             "cert-manager.io/cluster-issuer" = clusterIssuer;
             "ingress.kubernetes.io/force-ssl-redirect" = "true";
           };
-          tls = true;
-        };
+          tls = [
+            {
+              hosts = [ domain ];
+              secretName = "keycloak-tls";
+            }
+          ];
+          rules = [
+            {
+              host = domain;
+              paths = [
+                {
+                  path = "/";
+                  pathType = "Prefix";
+                }
+              ];
+            }
+          ];
 
-        adminIngress = with cfg.ingress; {
-          enabled = true;
-          ingressClassName = "traefik";
-          hostname = adminDomain;
-          annotations = {
-            "cert-manager.io/cluster-issuer" = "letsencrypt-prod";
-            "ingress.kubernetes.io/force-ssl-redirect" = "true";
-          };
-          tls = true;
-        };
-      };
-
-      extraResources = cfg: {
-        sealedSecrets.keycloak-admin-password.spec = {
-          encryptedData.password = "AgBMtaSD0NBt9kb50YJtd/KkzCvM7m/WDuQ2FxcipwPGmAu/HB3ThieIfH1NHk0+EasS/j1C972GiA72VE450b+7TOXZbkjJXejBOmN+tIFc8oXpfrceCSQxkn3vGL6nBYzuAeHKX3d3s6y1pyYMD90lccqd1mMBfLeve/r+RAsXiWCFiHZh0DVVo13pGBYy77p2SR6ZTSXoVjkehE5wnSjUh70M3RCavI6sMjc+ZpVRoJccQ9YPQV3xT6qEPkKJRl//Gv9k7Ve66VvrVSW7hixdNQK/094m2mzjfaa1KxNWfO8LV2tMfBY0eC1HEpLlmxnMNCGWcnzcBgXUKOKEH+zavvSouoiCwj+NtdRWB3Ky5dqs2LtW3Lv8ElLwCRn1DN1/F7I930aYeI8mkxmvxmKRObkd3RNqA/ZiwqAMWH9hpJMaG8//IYQJXzPEa2HOdw+XaoeY/53LC5UzjCrQQeGoRjS85Zpv4XnjqkdBXQ2rwQ/DmKpoYTHxWpXopxbuTii/xsPWO+2oQ1OTdipungglH4OcXLMaXaZqebsz21vZN/qf1Vi+T3qwycRnDd9BCRvgL/OzugUvV4iqVsI2CdHMILwyORPi6drEssnLh7tin2kDRWAWB6S9Di361EzBX0oUzTYuR/imvD+RPPKlN4h+AY5rxh5t+hYfPLKJSgQFWctYas8nertS6Dyh01wiw6lc4RpbSogrArFAJb3/3/LV/aHKZg==";
-          template.metadata = {
-            inherit (cfg) namespace;
-            name = "keycloak-admin-password";
+          console = {
+            enabled = true;
+            ingressClassName = "traefik";
+            annotations = {
+              "cert-manager.io/cluster-issuer" = "letsencrypt-prod";
+              "ingress.kubernetes.io/force-ssl-redirect" = "true";
+            };
+            rules = [
+              {
+                host = adminDomain;
+                paths = [
+                  {
+                    path = "/admin";
+                    pathType = "Prefix";
+                  }
+                ];
+              }
+            ];
           };
         };
       };

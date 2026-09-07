@@ -203,6 +203,12 @@
                           {
                             name = "backup";
                             image = "bitnami/mariadb:latest";
+                            # The backups PVC's root dir is owned by root:root
+                            # 0755 (standard ext4 mkfs default) -- without
+                            # this, the container falls back to bitnami's
+                            # default non-root UID and mysqldump fails with
+                            # "Permission denied" writing into /backups.
+                            securityContext.runAsUser = 0;
                             command = [
                               "/bin/bash"
                               "-c"

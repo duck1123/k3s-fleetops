@@ -87,16 +87,16 @@ Charts with explicit version pins and SHA-256 hashes.
 | mariadb | applications/mariadb.nix | oci://registry-1.docker.io/bitnamicharts (classic charts.bitnami.com repo 403s now) | 27.0.8 | https://artifacthub.io/packages/helm/bitnami/mariadb — free-tier image is `bitnami/mariadb:latest` only, no immutable tag; chart appVersion label is cosmetic since we pin `image` ourselves |
 | memos | applications/memos.nix | https://charts.gabe565.com | 0.17.0 | https://artifacthub.io/packages/helm/gabe565/memos — still latest |
 | metabase | applications/metabase.nix | https://pmint93.github.io/helm-charts | 2.27.6 | https://artifacthub.io/packages/helm/pmint93/metabase |
-| minio | applications/minio.nix | https://charts.bitnami.com/bitnami | 17.0.21 | https://artifacthub.io/packages/helm/bitnami/minio — frozen at last free-tier release since Bitnami's Aug 2025 catalog restructuring; won't move without a source change |
 | n8n | applications/n8n.nix | https://community-charts.github.io/helm-charts | 1.24.38 | https://artifacthub.io/packages/helm/community-charts/n8n — chart stayed on major 1.x despite the large minor jump; app version now 2.37.10, worth a changelog skim |
 | pihole | applications/pihole.nix | https://mojo2600.github.io/pihole-kubernetes/ | 2.38.0 | https://artifacthub.io/packages/helm/mojo2600/pihole — still latest |
 | postgres (groundhog2k) | applications/postgresql.nix | https://groundhog2k.github.io/helm-charts/ | 1.6.8 | https://artifacthub.io/packages/helm/groundhog2k/postgres |
 | prometheus stack | applications/prometheus.nix | https://prometheus-community.github.io/helm-charts | 83.6.0 | https://artifacthub.io/packages/helm/prometheus-community/kube-prometheus-stack |
-| sealed-secrets | applications/sealed-secrets.nix | oci://registry-1.docker.io/bitnamicharts (migrated from bitnami-labs classic repo) | 2.5.19 | https://artifacthub.io/packages/helm/bitnami/sealed-secrets — new post-OCI-migration numbering; frozen at 2.5.19 since the Aug 2025 Bitnami restructuring, no newer tag exists |
 | sops-operator | applications/sops.nix | https://isindir.github.io/sops-secrets-operator/ | 0.28.1 | https://artifacthub.io/packages/helm/isindir/sops-secrets-operator — still latest |
 | tailscale | applications/tailscale.nix | https://pkgs.tailscale.com/helmcharts | 1.102.3 | https://pkgs.tailscale.com/helmcharts/index.yaml |
 | homer | applications/homer.nix | https://charts.gabe565.com | 0.13.0 | https://artifacthub.io/packages/helm/gabe565/homer — still latest |
 | argo-events | applications/argo-events.nix | https://argoproj.github.io/argo-helm | 2.4.27 | https://artifacthub.io/packages/helm/argo/argo-events |
+| argo-workflows | applications/argo-workflows.nix | https://argoproj.github.io/argo-helm | 2.0.4 | https://artifacthub.io/packages/helm/argo/argo-workflows — migrated off bitnami's frozen/renumbered chart; disabled (`enable = false`), untested against a real deployment |
+| keycloak | applications/keycloak.nix | https://codecentric.github.io/helm-charts | 7.3.1 | https://github.com/codecentric/helm-charts/tree/master/charts/keycloakx — migrated off frozen bitnami/keycloak; disabled (`enable = false`), untested against a real deployment |
 
 ### Deferred — needs review before upgrading
 
@@ -105,12 +105,10 @@ These have newer versions available but involve major or breaking changes. Revie
 | Service | File | Current | Available | Notes |
 |---------|------|---------|-----------|-------|
 | kube-prometheus-stack | applications/prometheus.nix | 83.6.0 | 86.1.0 | CRD changes likely; review upgrade docs |
-| keycloak | applications/keycloak.nix | 24.1.0 | 25.2.0 | Major bitnami chart version |
 | kyverno | applications/kyverno.nix | 3.4.4 | 3.8.1 | Significant policy engine changes |
-| spark | applications/spark.nix | 9.3.5 | 10.0.3 | Major version, breaking config changes |
+| spark | applications/spark.nix | 9.3.5 | 10.0.3 | Major version, breaking config changes; also still on bitnami/spark (frozen) — no good plain-chart replacement exists post-Bitnami, real alternative is Apache's own spark-kubernetes-operator (Operator+CRDs, different architecture). Disabled and not in active use, left as-is for now |
 | lldap | applications/lldap.nix | 0.4.2 | 0.6.4 | Check LDAP schema migrations |
 | opentelemetry-collector | applications/opentelemetry-collector.nix | 0.107.0 | 0.158.0 | Large version jump; verify config compatibility |
-| argo-workflows | applications/argo-workflows.nix | 11.1.10 | unclear | Bitnami renumbered (OCI: ~1.1.x); verify repo migration |
 | rustfs | applications/rustfs.nix | 0.0.90 | 0.6.0 | Large jump; still beta software |
 | immich (chart) | applications/immich.nix | 0.12.0 | 0.13.1 | **Build-blocked, not just review**: chart ≥0.13 pulls in bjw-s-labs common-library schema validation that fetches `raw.githubusercontent.com` during `helm template`, which fails under Nix's sandboxed/offline build. Needs a workaround (e.g. schema-validation skip flag) before it can be bumped at all |
 

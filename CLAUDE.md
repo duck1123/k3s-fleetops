@@ -66,8 +66,6 @@ nur forward argocd                    # Port-forward ArgoCD UI to localhost:8080
 nur forward traefik                   # Expose Traefik dashboard on localhost:9000
 nur argocd install                    # Install or upgrade ArgoCD into the cluster (safe to re-run)
 nur argocd update-manifest            # Download latest stable ArgoCD install manifest
-nur sealed-secrets install-key        # Upload sealed-secrets TLS keypair (tls.crt + tls.key required)
-nur sealed-secrets apply-label        # Mark uploaded key as active
 nur apply-git-hooks                   # Register git hooks for this repo
 nur apps list                         # List app names known to `nur apps restart` (from applications/default.nix)
 nur apps restart <name>               # Roll an app's Deployment/StatefulSet in namespace <name>

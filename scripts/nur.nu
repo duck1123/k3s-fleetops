@@ -599,20 +599,3 @@ echo 'Restore completed successfully!'"
   print $"Restore job: ($job_name)"
   print $"Monitor: kubectl logs -n ($namespace) -f job/($job_name)"
 }
-
-# ─── Sealed secrets ──────────────────────────────────────────────────────────
-
-# Upload sealed-secrets TLS keypair (tls.crt + tls.key must exist in cwd)
-export def "nur sealed-secrets install-key" [] {
-  ^kubectl -n sealed-secrets create secret tls imported-secret --cert=tls.crt --key=tls.key
-}
-
-# Mark uploaded sealed-secrets key as active
-export def "nur sealed-secrets apply-label" [] {
-  ^kubectl -n sealed-secrets label secret imported-secret sealedsecrets.bitnami.com/sealed-secrets-key=active
-}
-
-# Delete the sealed-secrets controller pod (forces key reload)
-export def "nur sealed-secrets delete-controller" [] {
-  ^kubectl -n sealed-secrets delete pod -l name=sealed-secrets-controller
-}

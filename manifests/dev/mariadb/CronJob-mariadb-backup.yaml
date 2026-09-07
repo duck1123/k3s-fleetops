@@ -53,6 +53,8 @@ spec:
                       name: mariadb-password
               image: bitnami/mariadb:latest
               name: backup
+              securityContext:
+                runAsUser: 0
               volumeMounts:
                 - mountPath: /backups
                   name: backup-storage

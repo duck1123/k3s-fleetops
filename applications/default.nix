@@ -54,7 +54,6 @@
     ./metabase.nix
     ./metallb.nix
     ./mindsdb.nix
-    ./minio.nix
     ./mssql.nix
     ./n8n.nix
     ./navidrome.nix
@@ -75,7 +74,6 @@
     ./satisfactory.nix
     ./sonarr.nix
     ./soularr.nix
-    ./sealed-secrets.nix
     ./slskd.nix
     ./sops.nix
     ./stashapp.nix
