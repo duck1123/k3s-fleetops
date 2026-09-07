@@ -62,6 +62,7 @@ These images have explicit version tags and require manual checks.
 | postgres init | applications/immich.nix | docker.io/postgres | 17.11 | https://hub.docker.com/_/postgres/tags |
 | pgvector | applications/postgresql.nix | pgvector/pgvector | pg17 (floating) | https://hub.docker.com/r/pgvector/pgvector/tags |
 | busybox | various (init containers) | busybox | 1.38 | https://hub.docker.com/_/busybox/tags |
+| mariadb | applications/mariadb.nix (`image.tag`, backup CronJob) | docker.io/mariadb | 11.8.9 | https://hub.docker.com/_/mariadb/tags |
 | trilium | applications/trilium.nix | triliumnext/trilium | v0.105.0 | https://github.com/TriliumNext/Trilium/releases |
 | hass-AiDot | applications/home-assistant.nix | toxuin/hass-AiDot (git tag, not an image) | v1.2.0 | https://github.com/toxuin/hass-AiDot/releases |
 | opensearch | applications/ditto-relay.nix | opensearchproject/opensearch | 2.19.6 | https://hub.docker.com/r/opensearchproject/opensearch/tags |
@@ -84,7 +85,7 @@ Charts with explicit version pins and SHA-256 hashes.
 | cloudbeaver | applications/cloudbeaver.nix | https://avistotelecom.github.io/charts/ | 1.1.7 | https://artifacthub.io/packages/helm/avisto/cloudbeaver — no chart release since May 2025, this is still latest |
 | immich | applications/immich.nix | oci://ghcr.io/immich-app/immich-charts | 0.12.0 | https://artifacthub.io/packages/helm/immich/immich |
 | kite | applications/kite.nix | https://zxh326.github.io/kite | 0.15.0 | https://github.com/kite-org/kite (image repo moved zxh326→kite-org; Helm repo URL still resolves as-is) |
-| mariadb | applications/mariadb.nix | oci://registry-1.docker.io/bitnamicharts (classic charts.bitnami.com repo 403s now) | 27.0.8 | https://artifacthub.io/packages/helm/bitnami/mariadb — free-tier image is `bitnami/mariadb:latest` only, no immutable tag; chart appVersion label is cosmetic since we pin `image` ourselves |
+| mariadb | applications/mariadb.nix | https://groundhog2k.github.io/helm-charts/ | 4.44 | https://github.com/groundhog2k/helm-charts — migrated off frozen bitnami/mariadb; stock `docker.io/mariadb:11.8.9` image pinned via `image.tag`. `data` volume deliberately left unpinned post-migration (fresh volume from the dump/restore cutover) -- re-pin once confirmed stable, see docs/pinned-volumes.md |
 | memos | applications/memos.nix | https://charts.gabe565.com | 0.17.0 | https://artifacthub.io/packages/helm/gabe565/memos — still latest |
 | metabase | applications/metabase.nix | https://pmint93.github.io/helm-charts | 2.27.6 | https://artifacthub.io/packages/helm/pmint93/metabase |
 | n8n | applications/n8n.nix | https://community-charts.github.io/helm-charts | 1.24.38 | https://artifacthub.io/packages/helm/community-charts/n8n — chart stayed on major 1.x despite the large minor jump; app version now 2.37.10, worth a changelog skim |
