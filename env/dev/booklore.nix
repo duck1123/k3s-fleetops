@@ -1,7 +1,7 @@
 { ... }:
 {
   services.booklore = {
-    enable = false;
+    enable = true;
     # hostAffinity = "edgenix";
 
     databaseTarget = "mariadb";
