@@ -59,8 +59,8 @@
         chart = lib.helm.downloadHelmChart {
           repo = "oci://registry-1.docker.io/bitnamicharts";
           chart = "mariadb";
-          version = "27.0.4";
-          chartHash = "sha256-CwUmp5f57WqdPLR2/K5MkSMf+YFve20m23+MY348EYs=";
+          version = "27.0.8";
+          chartHash = "sha256-A9t84piyQH+9a5UajpaxrulWXSsV/GN0yMm2TcZEVI8=";
         };
 
         extraOptions = {

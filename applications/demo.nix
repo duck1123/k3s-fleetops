@@ -113,7 +113,7 @@
                   initContainers = [
                     {
                       name = "nix-debug";
-                      image = "busybox:1.36";
+                      image = "busybox:1.38";
                       command = [
                         "sh"
                         "-c"

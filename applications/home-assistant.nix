@@ -88,7 +88,7 @@
                 initContainers = [
                   {
                     name = "ensure-reverse-proxy-config";
-                    image = "busybox:1.36";
+                    image = "busybox:1.38";
                     imagePullPolicy = "IfNotPresent";
                     command = [
                       "sh"
@@ -139,7 +139,7 @@
                 ++ lib.optionals cfg.installAidot.enable [
                   {
                     name = "install-aidot-integration";
-                    image = "busybox:1.36";
+                    image = "busybox:1.38";
                     imagePullPolicy = "IfNotPresent";
                     env = [
                       {

@@ -82,7 +82,7 @@
               with a newer build than the image ships.
             '';
             type = types.str;
-            default = "ghcr.io/rommapp/romm:5.1.0";
+            default = "ghcr.io/rommapp/romm:5.2.0";
           };
 
           admin = {

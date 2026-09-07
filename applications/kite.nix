@@ -15,8 +15,8 @@
       chart = helm.downloadHelmChart {
         repo = "https://zxh326.github.io/kite";
         chart = "kite";
-        version = "0.14.1";
-        chartHash = "sha256-esxcmhoBhhxjByM3KftrYFlD8h2a0fwT933ZRz8DuyE=";
+        version = "0.15.0";
+        chartHash = "sha256-ZIaOXRKTWUjnQD1GVgDAT4kxx0oX+DT9LHYIbm4+3i0=";
       };
 
       uses-ingress = true;

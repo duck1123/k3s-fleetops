@@ -253,7 +253,7 @@
                   containers = [
                     {
                       name = esName;
-                      image = "opensearchproject/opensearch:2.19.0";
+                      image = "opensearchproject/opensearch:2.19.6";
                       imagePullPolicy = "IfNotPresent";
                       env = [
                         {

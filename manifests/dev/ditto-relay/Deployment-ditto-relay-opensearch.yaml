@@ -23,7 +23,7 @@ spec:
               value: "true"
             - name: OPENSEARCH_JAVA_OPTS
               value: -Xms1g -Xmx1g
-          image: opensearchproject/opensearch:2.19.0
+          image: opensearchproject/opensearch:2.19.6
           imagePullPolicy: IfNotPresent
           name: ditto-relay-opensearch
           ports:

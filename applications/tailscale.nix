@@ -35,8 +35,8 @@
         chart = helm.downloadHelmChart {
           repo = "https://pkgs.tailscale.com/helmcharts";
           chart = "tailscale-operator";
-          version = "1.98.9";
-          chartHash = "sha256-Xav0I55wfaV1RbfOQP5HA2L7cU48ShJPe/Zl5JNDW8o=";
+          version = "1.102.3";
+          chartHash = "sha256-yPwHKq8qXGdZlbNi9Y7fFd4PKRt0tHUTuVuh+HsyBiY=";
         };
 
         extraOptions = {

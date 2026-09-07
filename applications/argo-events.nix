@@ -14,8 +14,8 @@
       chart = lib.helm.downloadHelmChart {
         repo = "https://argoproj.github.io/argo-helm";
         chart = "argo-events";
-        version = "2.4.21";
-        chartHash = "sha256-I2seJPvPXti08DSnWFbjH9wj4ysx8zYLSN4D8CU4aHQ=";
+        version = "2.4.27";
+        chartHash = "sha256-Ukdoy13K2xDJ/iC2OlB4QJ1feqnpXp+Oxe0acKhGVAo=";
       };
 
       defaultValues = cfg: { metrics.enabled = true; };

@@ -402,7 +402,7 @@
                     containers = [
                       {
                         name = "enable-vector-extension";
-                        image = "docker.io/postgres:17.10";
+                        image = "docker.io/postgres:17.11";
                         imagePullPolicy = "IfNotPresent";
                         command = [ "psql" ];
                         args = [

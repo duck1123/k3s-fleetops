@@ -25,7 +25,7 @@ spec:
         - env:
             - name: TZ
               value: Etc/UTC
-          image: triliumnext/trilium:v0.104.1
+          image: triliumnext/trilium:v0.105.0
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3

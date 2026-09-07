@@ -2,7 +2,7 @@
 
 This document records all explicitly pinned container images and Helm chart versions, plus the process for checking and updating them. Update this file whenever versions change.
 
-**Last full check: 2026-08-10**
+**Last full check: 2026-09-07**
 
 ---
 
@@ -49,22 +49,22 @@ These images have explicit version tags and require manual checks.
 
 | Service | File | Image | Current Tag | Check URL |
 |---------|------|-------|-------------|-----------|
-| nocodb | applications/nocodb.nix | nocodb/nocodb | 2026.08.0 | https://hub.docker.com/r/nocodb/nocodb/tags |
+| nocodb | applications/nocodb.nix | nocodb/nocodb | 2026.08.2 | https://hub.docker.com/r/nocodb/nocodb/tags |
 | paperless-ngx | applications/paperless-ngx.nix | ghcr.io/paperless-ngx/paperless-ngx | 3.1.3 | https://github.com/paperless-ngx/paperless-ngx/releases |
-| radarr | env/dev/radarr.nix | linuxserver/radarr | 6.3.0.10514-ls313 | https://hub.docker.com/r/linuxserver/radarr/tags |
-| sonarr | env/dev/sonarr.nix | linuxserver/sonarr | 4.0.19.2979-ls321 | https://hub.docker.com/r/linuxserver/sonarr/tags |
+| radarr | env/dev/radarr.nix | linuxserver/radarr | 6.3.0.10514-ls315 | https://hub.docker.com/r/linuxserver/radarr/tags |
+| sonarr | env/dev/sonarr.nix | linuxserver/sonarr | 4.0.19.2979-ls323 | https://hub.docker.com/r/linuxserver/sonarr/tags |
 | tdarr | env/dev/tdarr.nix | ghcr.io/haveagitgat/tdarr | 2.86.01 | https://github.com/HaveAGitGat/Tdarr (GHCR tags are authoritative; GitHub Releases page is stale) |
-| kavita | applications/kavita.nix | linuxserver/kavita | v0.9.0.2-ls110 | https://hub.docker.com/r/linuxserver/kavita/tags |
-| mealie | applications/mealie.nix, env/dev/mealie.nix | ghcr.io/mealie-recipes/mealie | v3.22.0 | https://github.com/mealie-recipes/mealie/releases |
-| romm | applications/romm.nix | ghcr.io/rommapp/romm | 5.1.0 | https://github.com/rommapp/romm/releases |
-| bookorbit | applications/bookorbit.nix | ghcr.io/bookorbit/bookorbit | 1.3.0 | https://github.com/bookorbit/bookorbit/pkgs/container/bookorbit |
+| kavita | applications/kavita.nix | linuxserver/kavita | v0.9.1.4-ls123 | https://hub.docker.com/r/linuxserver/kavita/tags — this release line addresses CVE-2026-47202, prioritized |
+| mealie | applications/mealie.nix, env/dev/mealie.nix | ghcr.io/mealie-recipes/mealie | v3.25.1 | https://github.com/mealie-recipes/mealie/releases |
+| romm | applications/romm.nix | ghcr.io/rommapp/romm | 5.2.0 | https://github.com/rommapp/romm/releases |
+| bookorbit | applications/bookorbit.nix | ghcr.io/bookorbit/bookorbit | 1.3.0 (not bumped — see below) | https://github.com/bookorbit/bookorbit/pkgs/container/bookorbit — v2.9.0 available; jumps a major version with several releases since pinning, review changelog before bumping |
 | hivemq | applications/hivemq.nix | hivemq/hivemq-ce | 2026.5 | https://hub.docker.com/r/hivemq/hivemq-ce/tags |
-| postgres init | applications/immich.nix | docker.io/postgres | 17.10 | https://hub.docker.com/_/postgres/tags |
+| postgres init | applications/immich.nix | docker.io/postgres | 17.11 | https://hub.docker.com/_/postgres/tags |
 | pgvector | applications/postgresql.nix | pgvector/pgvector | pg17 (floating) | https://hub.docker.com/r/pgvector/pgvector/tags |
-| busybox | various (init containers) | busybox | 1.36 | https://hub.docker.com/_/busybox/tags |
-| trilium | applications/trilium.nix | triliumnext/trilium | v0.104.1 | https://github.com/TriliumNext/Trilium/releases |
+| busybox | various (init containers) | busybox | 1.38 | https://hub.docker.com/_/busybox/tags |
+| trilium | applications/trilium.nix | triliumnext/trilium | v0.105.0 | https://github.com/TriliumNext/Trilium/releases |
 | hass-AiDot | applications/home-assistant.nix | toxuin/hass-AiDot (git tag, not an image) | v1.2.0 | https://github.com/toxuin/hass-AiDot/releases |
-| opensearch | applications/ditto-relay.nix | opensearchproject/opensearch | 2.19.0 | https://hub.docker.com/r/opensearchproject/opensearch/tags |
+| opensearch | applications/ditto-relay.nix | opensearchproject/opensearch | 2.19.6 | https://hub.docker.com/r/opensearchproject/opensearch/tags |
 
 **Floating images** (no pinning needed — these always pull latest/stable):
 Many applications use `:latest`, `:stable`, or a floating major tag (e.g. `redis:8-alpine`, `louislam/uptime-kuma:1`).
@@ -80,23 +80,23 @@ Charts with explicit version pins and SHA-256 hashes.
 
 | Service | File | Repo | Version | ArtifactHub / Source |
 |---------|------|------|---------|----------------------|
-| authentik | applications/authentik.nix | https://charts.goauthentik.io/ | 2026.5.2 | https://artifacthub.io/packages/helm/goauthentik/authentik |
-| cloudbeaver | applications/cloudbeaver.nix | https://avistotelecom.github.io/charts/ | 1.1.7 | https://artifacthub.io/packages/helm/avisto/cloudbeaver |
+| authentik | applications/authentik.nix | https://charts.goauthentik.io/ | 2026.8.1 | https://artifacthub.io/packages/helm/goauthentik/authentik |
+| cloudbeaver | applications/cloudbeaver.nix | https://avistotelecom.github.io/charts/ | 1.1.7 | https://artifacthub.io/packages/helm/avisto/cloudbeaver — no chart release since May 2025, this is still latest |
 | immich | applications/immich.nix | oci://ghcr.io/immich-app/immich-charts | 0.12.0 | https://artifacthub.io/packages/helm/immich/immich |
-| kite | applications/kite.nix | https://zxh326.github.io/kite | 0.14.1 | https://github.com/kite-org/kite (image repo moved zxh326→kite-org; Helm repo URL still resolves as-is) |
-| mariadb | applications/mariadb.nix | oci://registry-1.docker.io/bitnamicharts (classic charts.bitnami.com repo 403s now) | 27.0.4 | https://artifacthub.io/packages/helm/bitnami/mariadb — free-tier image is `bitnami/mariadb:latest` only, no immutable tag; chart appVersion label (13.0.1, an RC) is cosmetic since we pin `image` ourselves |
-| memos | applications/memos.nix | https://charts.gabe565.com | 0.17.0 | https://artifacthub.io/packages/helm/gabe565/memos |
-| metabase | applications/metabase.nix | https://pmint93.github.io/helm-charts | 2.26.0 | https://artifacthub.io/packages/helm/pmint93/metabase |
-| minio | applications/minio.nix | https://charts.bitnami.com/bitnami | 17.0.21 | https://artifacthub.io/packages/helm/bitnami/minio |
-| n8n | applications/n8n.nix | https://community-charts.github.io/helm-charts | 1.16.44 | https://artifacthub.io/packages/helm/community-charts/n8n |
-| pihole | applications/pihole.nix | https://mojo2600.github.io/pihole-kubernetes/ | 2.38.0 | https://artifacthub.io/packages/helm/mojo2600/pihole |
-| postgres (groundhog2k) | applications/postgresql.nix | https://groundhog2k.github.io/helm-charts/ | 1.6.7 | https://artifacthub.io/packages/helm/groundhog2k/postgres |
+| kite | applications/kite.nix | https://zxh326.github.io/kite | 0.15.0 | https://github.com/kite-org/kite (image repo moved zxh326→kite-org; Helm repo URL still resolves as-is) |
+| mariadb | applications/mariadb.nix | oci://registry-1.docker.io/bitnamicharts (classic charts.bitnami.com repo 403s now) | 27.0.8 | https://artifacthub.io/packages/helm/bitnami/mariadb — free-tier image is `bitnami/mariadb:latest` only, no immutable tag; chart appVersion label is cosmetic since we pin `image` ourselves |
+| memos | applications/memos.nix | https://charts.gabe565.com | 0.17.0 | https://artifacthub.io/packages/helm/gabe565/memos — still latest |
+| metabase | applications/metabase.nix | https://pmint93.github.io/helm-charts | 2.27.6 | https://artifacthub.io/packages/helm/pmint93/metabase |
+| minio | applications/minio.nix | https://charts.bitnami.com/bitnami | 17.0.21 | https://artifacthub.io/packages/helm/bitnami/minio — frozen at last free-tier release since Bitnami's Aug 2025 catalog restructuring; won't move without a source change |
+| n8n | applications/n8n.nix | https://community-charts.github.io/helm-charts | 1.24.38 | https://artifacthub.io/packages/helm/community-charts/n8n — chart stayed on major 1.x despite the large minor jump; app version now 2.37.10, worth a changelog skim |
+| pihole | applications/pihole.nix | https://mojo2600.github.io/pihole-kubernetes/ | 2.38.0 | https://artifacthub.io/packages/helm/mojo2600/pihole — still latest |
+| postgres (groundhog2k) | applications/postgresql.nix | https://groundhog2k.github.io/helm-charts/ | 1.6.8 | https://artifacthub.io/packages/helm/groundhog2k/postgres |
 | prometheus stack | applications/prometheus.nix | https://prometheus-community.github.io/helm-charts | 83.6.0 | https://artifacthub.io/packages/helm/prometheus-community/kube-prometheus-stack |
 | sealed-secrets | applications/sealed-secrets.nix | oci://registry-1.docker.io/bitnamicharts (migrated from bitnami-labs classic repo) | 2.5.19 | https://artifacthub.io/packages/helm/bitnami/sealed-secrets — new post-OCI-migration numbering; frozen at 2.5.19 since the Aug 2025 Bitnami restructuring, no newer tag exists |
-| sops-operator | applications/sops.nix | https://isindir.github.io/sops-secrets-operator/ | 0.28.1 | https://artifacthub.io/packages/helm/isindir/sops-secrets-operator |
-| tailscale | applications/tailscale.nix | https://pkgs.tailscale.com/helmcharts | 1.98.9 | https://pkgs.tailscale.com/helmcharts/index.yaml |
-| homer | applications/homer.nix | https://charts.gabe565.com | 0.13.0 | https://artifacthub.io/packages/helm/gabe565/homer |
-| argo-events | applications/argo-events.nix | https://argoproj.github.io/argo-helm | 2.4.21 | https://artifacthub.io/packages/helm/argo/argo-events |
+| sops-operator | applications/sops.nix | https://isindir.github.io/sops-secrets-operator/ | 0.28.1 | https://artifacthub.io/packages/helm/isindir/sops-secrets-operator — still latest |
+| tailscale | applications/tailscale.nix | https://pkgs.tailscale.com/helmcharts | 1.102.3 | https://pkgs.tailscale.com/helmcharts/index.yaml |
+| homer | applications/homer.nix | https://charts.gabe565.com | 0.13.0 | https://artifacthub.io/packages/helm/gabe565/homer — still latest |
+| argo-events | applications/argo-events.nix | https://argoproj.github.io/argo-helm | 2.4.27 | https://artifacthub.io/packages/helm/argo/argo-events |
 
 ### Deferred — needs review before upgrading
 
