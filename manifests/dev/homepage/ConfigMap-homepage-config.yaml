@@ -35,9 +35,6 @@ data:
             href: https://slskd.home.kronkltd.net
             siteMonitor: https://slskd.home.kronkltd.net
     - Apps:
-        - booklore:
-            href: https://booklore.home.kronkltd.net
-            siteMonitor: https://booklore.home.kronkltd.net
         - romm:
             href: https://romm.home.kronkltd.net
             siteMonitor: https://romm.home.kronkltd.net
