@@ -2,113 +2,83 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   labels:
-    app.kubernetes.io/component: primary
     app.kubernetes.io/instance: mariadb
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: mariadb
-    app.kubernetes.io/part-of: mariadb
-    app.kubernetes.io/version: 13.0.1
-    helm.sh/chart: mariadb-27.0.8
+    app.kubernetes.io/version: 11.8.4
+    helm.sh/chart: mariadb-4.44
   name: mariadb
   namespace: mariadb
 spec:
+  podManagementPolicy: OrderedReady
   replicas: 1
-  revisionHistoryLimit: 10
   selector:
     matchLabels:
-      app.kubernetes.io/component: primary
       app.kubernetes.io/instance: mariadb
       app.kubernetes.io/name: mariadb
-      app.kubernetes.io/part-of: mariadb
-  serviceName: mariadb-headless
+  serviceName: mariadb
   template:
     metadata:
       annotations:
-        checksum/configuration: bb81e5586a95ca5f6f13711061449e7af7e2f97cbeed9608c37d0b825a11da96
+        checksum/customconfig: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+        checksum/customscripts: 69db2cb357d38c5e4f49c96128f8a4ca281f195abf6f982e3cb72089c8578e9e
+        checksum/scripts: 5c5d50c344ec1fdc574677a120b2fed8545c6fb46f4c20d2d094abdfe5f65992
+        checksum/secureconfig: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
       labels:
-        app.kubernetes.io/component: primary
         app.kubernetes.io/instance: mariadb
-        app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: mariadb
-        app.kubernetes.io/part-of: mariadb
-        app.kubernetes.io/version: 13.0.1
-        helm.sh/chart: mariadb-27.0.8
     spec:
-      affinity:
-        podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-            - podAffinityTerm:
-                labelSelector:
-                  matchLabels:
-                    app.kubernetes.io/component: primary
-                    app.kubernetes.io/instance: mariadb
-                    app.kubernetes.io/name: mariadb
-                topologyKey: kubernetes.io/hostname
-              weight: 1
-      automountServiceAccountToken: false
       containers:
         - env:
-            - name: BITNAMI_DEBUG
-              value: "false"
-            - name: MARIADB_ROOT_PASSWORD_FILE
-              value: /opt/bitnami/mariadb/secrets/mariadb-root-password
-            - name: MARIADB_USER
-              value: mariadb
-            - name: MARIADB_PASSWORD_FILE
-              value: /opt/bitnami/mariadb/secrets/mariadb-password
+            - name: MARIADB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: root-password
+                  name: mariadb-password
             - name: MARIADB_DATABASE
-              value: mydb
-            - name: MARIADB_ENABLE_SSL
-              value: "no"
-            - name: OPENSSL_FIPS
-              value: "yes"
-          image: registry-1.docker.io/bitnami/mariadb:latest
+              valueFrom:
+                secretKeyRef:
+                  key: database
+                  name: mariadb-password
+            - name: MARIADB_USER
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: mariadb-password
+            - name: MARIADB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: user-password
+                  name: mariadb-password
+          image: docker.io/mariadb:11.8.9
           imagePullPolicy: IfNotPresent
           livenessProbe:
             exec:
               command:
-                - /bin/bash
-                - -ec
-                - |
-                  password_aux="${MARIADB_ROOT_PASSWORD:-}"
-                  if [[ -f "${MARIADB_ROOT_PASSWORD_FILE:-}" ]]; then
-                      password_aux=$(cat "$MARIADB_ROOT_PASSWORD_FILE")
-                  fi
-                  mariadb-admin status -uroot -p"${password_aux}"
+                - bash
+                - -c
+                - healthcheck.sh --connect --innodb_initialized
             failureThreshold: 3
             initialDelaySeconds: 120
             periodSeconds: 10
             successThreshold: 1
-            timeoutSeconds: 1
+            timeoutSeconds: 5
           name: mariadb
           ports:
             - containerPort: 3306
-              name: mysql
+              name: sql
+              protocol: TCP
           readinessProbe:
             exec:
               command:
-                - /bin/bash
-                - -ec
-                - |
-                  password_aux="${MARIADB_ROOT_PASSWORD:-}"
-                  if [[ -f "${MARIADB_ROOT_PASSWORD_FILE:-}" ]]; then
-                      password_aux=$(cat "$MARIADB_ROOT_PASSWORD_FILE")
-                  fi
-                  mariadb-admin ping -uroot -p"${password_aux}"
+                - bash
+                - -c
+                - healthcheck.sh --connect --innodb_initialized
             failureThreshold: 3
             initialDelaySeconds: 30
             periodSeconds: 10
             successThreshold: 1
-            timeoutSeconds: 1
-          resources:
-            limits:
-              cpu: 750m
-              ephemeral-storage: 2Gi
-              memory: 768Mi
-            requests:
-              cpu: 500m
-              ephemeral-storage: 50Mi
-              memory: 512Mi
+            timeoutSeconds: 5
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -116,62 +86,37 @@ spec:
                 - ALL
             privileged: false
             readOnlyRootFilesystem: true
-            runAsGroup: 1001
+            runAsGroup: 999
             runAsNonRoot: true
-            runAsUser: 1001
-            seLinuxOptions: {}
-            seccompProfile:
-              type: RuntimeDefault
+            runAsUser: 999
+          startupProbe:
+            exec:
+              command:
+                - bash
+                - -c
+                - healthcheck.sh --connect --innodb_initialized
+            failureThreshold: 30
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
           volumeMounts:
-            - mountPath: /bitnami/mariadb
-              name: data
-            - mountPath: /docker-entrypoint-initdb.d
-              name: custom-init-scripts
-            - mountPath: /opt/bitnami/mariadb/conf/my.cnf
-              name: config
-              subPath: my.cnf
-            - mountPath: /opt/bitnami/mariadb/secrets/
-              name: mariadb-credentials
+            - mountPath: /var/lib/mysql
+              name: db-volume
             - mountPath: /tmp
-              name: empty-dir
-              subPath: tmp-dir
-            - mountPath: /opt/bitnami/mariadb/conf
-              name: empty-dir
-              subPath: app-conf-dir
-            - mountPath: /opt/bitnami/mariadb/tmp
-              name: empty-dir
-              subPath: app-tmp-dir
-            - mountPath: /opt/bitnami/mariadb/logs
-              name: empty-dir
-              subPath: app-logs-dir
+              name: tmp-volume
+            - mountPath: /var/run/mysqld
+              name: tmp-volume
+            - mountPath: /etc/mysql/conf.d
+              name: configs
+            - mountPath: /docker-entrypoint-initdb.d
+              name: scripts
       initContainers:
-        - args:
-            - -ec
-            - |
-              #!/bin/bash
-
-              . /opt/bitnami/scripts/libfs.sh
-              # We copy the logs folder because it has symlinks to stdout and stderr
-              if ! is_dir_empty /opt/bitnami/mariadb/logs; then
-                cp -r /opt/bitnami/mariadb/logs /emptydir/app-logs-dir
-              fi
-          command:
-            - /bin/bash
-          env:
-            - name: OPENSSL_FIPS
-              value: "yes"
-          image: registry-1.docker.io/bitnami/mariadb:latest
+        - command:
+            - /initscripts/init.sh
+          image: docker.io/mariadb:11.8.9
           imagePullPolicy: IfNotPresent
-          name: preserve-logs-symlinks
-          resources:
-            limits:
-              cpu: 750m
-              ephemeral-storage: 2Gi
-              memory: 768Mi
-            requests:
-              cpu: 500m
-              ephemeral-storage: 50Mi
-              memory: 512Mi
+          name: mariadb-init
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -179,39 +124,41 @@ spec:
                 - ALL
             privileged: false
             readOnlyRootFilesystem: true
-            runAsGroup: 1001
+            runAsGroup: 999
             runAsNonRoot: true
-            runAsUser: 1001
-            seLinuxOptions: {}
-            seccompProfile:
-              type: RuntimeDefault
+            runAsUser: 999
           volumeMounts:
-            - mountPath: /emptydir
-              name: empty-dir
+            - mountPath: /customscripts
+              name: customscripts-volume
+            - mountPath: /initscripts
+              name: initscripts
+            - mountPath: /scripts
+              name: scripts
+            - mountPath: /configs
+              name: configs
+      nodeSelector:
+        kubernetes.io/hostname: edgenix
       securityContext:
-        fsGroup: 1001
-        fsGroupChangePolicy: Always
-        supplementalGroups: []
-        sysctls: []
-      serviceAccountName: mariadb
+        fsGroup: 999
+        supplementalGroups:
+          - 999
+      serviceAccountName: default
       volumes:
         - emptyDir: {}
-          name: empty-dir
+          name: tmp-volume
+        - emptyDir: {}
+          name: configs
+        - emptyDir: {}
+          name: scripts
         - configMap:
-            name: mariadb
-          name: config
+            defaultMode: 365
+            name: mariadb-scripts
+          name: initscripts
         - configMap:
-            name: mariadb-init-scripts
-          name: custom-init-scripts
-        - name: mariadb-credentials
-          secret:
-            items:
-              - key: mariadb-root-password
-                path: mariadb-root-password
-              - key: mariadb-password
-                path: mariadb-password
-            secretName: mariadb-password
-        - name: data
+            defaultMode: 365
+            name: mariadb-customscripts
+          name: customscripts-volume
+        - name: db-volume
           persistentVolumeClaim:
             claimName: mariadb-data
   updateStrategy:

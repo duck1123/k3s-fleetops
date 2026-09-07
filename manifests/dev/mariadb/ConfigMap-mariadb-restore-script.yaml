@@ -31,7 +31,7 @@ data:
     fi
 
     echo "Restoring database..."
-    gunzip -c "$BACKUP_FILE" | mysql \
+    gunzip -c "$BACKUP_FILE" | mariadb \
       -h mariadb.mariadb \
       -u root \
       -p"$MARIADB_ROOT_PASSWORD"

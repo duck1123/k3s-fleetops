@@ -17,7 +17,7 @@ spec:
                 - /bin/bash
                 - -c
                 - |
-                  # pipefail matters here: without it, a mysqldump
+                  # pipefail matters here: without it, a mariadb-dump
                   # that dies mid-stream still lets `| gzip` exit 0
                   # (it just sees its input close early), so `set -e`
                   # alone never catches a truncated backup.
@@ -29,7 +29,7 @@ spec:
                   echo "Starting backup at $(date)"
 
                   # Create backup
-                  mysqldump \
+                  mariadb-dump \
                     -h mariadb.mariadb \
                     -u root \
                     -p"$MARIADB_ROOT_PASSWORD" \
@@ -53,9 +53,9 @@ spec:
                 - name: MARIADB_ROOT_PASSWORD
                   valueFrom:
                     secretKeyRef:
-                      key: mariadb-root-password
+                      key: root-password
                       name: mariadb-password
-              image: bitnami/mariadb:latest
+              image: docker.io/mariadb:11.8.9
               name: backup
               securityContext:
                 runAsUser: 0

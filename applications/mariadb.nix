@@ -26,10 +26,10 @@
 
         # `pvcName` overrides since these are flat names, not the usual
         # "${name}-${name}-<key>" convention -- data's matches the chart's
-        # existingClaim value below. Shape only -- no volumeHandle here,
-        # that's environment-specific (see env/dev/mariadb.nix and
-        # docs/pinned-volumes.md). backups only exists at all when
-        # cfg.backup.enable, same as before.
+        # storage.persistentVolumeClaimName value below. Shape only -- no
+        # volumeHandle here, that's environment-specific (see
+        # env/dev/mariadb.nix and docs/pinned-volumes.md). backups only
+        # exists at all when cfg.backup.enable, same as before.
         volumes =
           cfg:
           {
@@ -47,20 +47,22 @@
 
         sopsSecrets = cfg: {
           ${password-secret} = {
-            "mariadb-root-password" = cfg.auth.rootPassword;
-            "mariadb-password" = cfg.auth.password;
-            "mariadb-replication-password" = cfg.auth.replicationPassword;
+            "root-password" = cfg.auth.rootPassword;
+            "user-password" = cfg.auth.password;
             username = cfg.auth.username;
             database = cfg.auth.database;
           };
         };
 
-        # https://artifacthub.io/packages/helm/bitnami/mariadb
+        # https://github.com/groundhog2k/helm-charts (chart "mariadb") -- bitnami/mariadb
+        # was frozen behind Bitnami's Aug 2025 paid-tier restructuring (both the chart and
+        # its free-tier `bitnami/mariadb:latest` image stopped getting updates). This is a
+        # plain stock-image chart from the same maintainer as this repo's postgresql.nix.
         chart = lib.helm.downloadHelmChart {
-          repo = "oci://registry-1.docker.io/bitnamicharts";
+          repo = "https://groundhog2k.github.io/helm-charts/";
           chart = "mariadb";
-          version = "27.0.8";
-          chartHash = "sha256-A9t84piyQH+9a5UajpaxrulWXSsV/GN0yMm2TcZEVI8=";
+          version = "4.44";
+          chartHash = "sha256-b7yqBM02dY2my3pfyCWjekv0I82nMlSOQ3ftnXU5VvY=";
         };
 
         extraOptions = {
@@ -87,12 +89,6 @@
               description = mdDoc "The database name";
               type = types.str;
               default = "mydb";
-            };
-
-            replicationPassword = mkOption {
-              description = mdDoc "The replication password";
-              type = types.str;
-              default = "CHANGEME";
             };
           };
 
@@ -147,14 +143,28 @@
         };
 
         defaultValues = cfg: {
-          auth = {
+          # Pinned to the version validated during the bitnami->groundhog2k
+          # migration (test-restore + live cutover) -- see IMAGE-VERSIONS.md.
+          image.tag = "11.8.9";
+
+          settings = {
             existingSecret = password-secret;
-            username = cfg.auth.username;
-            database = cfg.auth.database;
+            rootPassword.secretKey = "root-password";
           };
 
-          # Add initdb scripts for extra databases
-          initdbScripts = lib.listToAttrs (
+          # The chart's single built-in "main" database/user (mirrors what
+          # auth.database/username used to configure via bitnami's `auth.*`)
+          userDatabase = {
+            existingSecret = password-secret;
+            name.secretKey = "database";
+            user.secretKey = "username";
+            password.secretKey = "user-password";
+          };
+
+          # Extra databases beyond the main one -- same CREATE DATABASE/USER
+          # SQL as before, just under this chart's customScripts key instead
+          # of bitnami's initdbScripts.
+          customScripts = lib.listToAttrs (
             map (db: {
               name = "init-${db.name}.sql";
               value = ''
@@ -167,17 +177,8 @@
           );
 
           nodeSelector."kubernetes.io/hostname" = cfg.hostAffinity;
-          primary.persistence = {
-            storageClass = cfg.storageClassName;
-            # Pinned via extraResources below (mkPinnedVolume) instead of
-            # the chart's own volumeClaimTemplates -- see
-            # modules/lib/mkPinnedVolume.nix. This also sidesteps a chart
-            # quirk where volumeClaimTemplates only apply when
-            # primary.persistence.size is set, which this app never did
-            # (persistence still worked because the chart's StatefulSet
-            # falls back to its own default size in that case).
-            existingClaim = "mariadb-data";
-          };
+
+          storage.persistentVolumeClaimName = cfg.volumes.data.pvcName;
         };
 
         extraResources = cfg: {
@@ -202,18 +203,18 @@
                         containers = [
                           {
                             name = "backup";
-                            image = "bitnami/mariadb:latest";
+                            image = "docker.io/mariadb:11.8.9";
                             # The backups PVC's root dir is owned by root:root
                             # 0755 (standard ext4 mkfs default) -- without
-                            # this, the container falls back to bitnami's
-                            # default non-root UID and mysqldump fails with
-                            # "Permission denied" writing into /backups.
+                            # this, the container falls back to the image's
+                            # default non-root UID and mariadb-dump fails
+                            # with "Permission denied" writing into /backups.
                             securityContext.runAsUser = 0;
                             command = [
                               "/bin/bash"
                               "-c"
                               ''
-                                # pipefail matters here: without it, a mysqldump
+                                # pipefail matters here: without it, a mariadb-dump
                                 # that dies mid-stream still lets `| gzip` exit 0
                                 # (it just sees its input close early), so `set -e`
                                 # alone never catches a truncated backup.
@@ -225,7 +226,7 @@
                                 echo "Starting backup at $(date)"
 
                                 # Create backup
-                                mysqldump \
+                                mariadb-dump \
                                   -h mariadb.mariadb \
                                   -u root \
                                   -p"$MARIADB_ROOT_PASSWORD" \
@@ -253,7 +254,7 @@
                                 valueFrom = {
                                   secretKeyRef = {
                                     name = password-secret;
-                                    key = "mariadb-root-password";
+                                    key = "root-password";
                                   };
                                 };
                               }
@@ -315,7 +316,7 @@
                   fi
 
                   echo "Restoring database..."
-                  gunzip -c "$BACKUP_FILE" | mysql \
+                  gunzip -c "$BACKUP_FILE" | mariadb \
                     -h mariadb.mariadb \
                     -u root \
                     -p"$MARIADB_ROOT_PASSWORD"
