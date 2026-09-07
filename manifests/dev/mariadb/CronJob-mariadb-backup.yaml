@@ -17,7 +17,11 @@ spec:
                 - /bin/bash
                 - -c
                 - |
-                  set -e
+                  # pipefail matters here: without it, a mysqldump
+                  # that dies mid-stream still lets `| gzip` exit 0
+                  # (it just sees its input close early), so `set -e`
+                  # alone never catches a truncated backup.
+                  set -eo pipefail
                   BACKUP_DIR="/backups"
                   TIMESTAMP=$(date +%Y%m%d_%H%M%S)
                   BACKUP_FILE="$BACKUP_DIR/mariadb-backup-$TIMESTAMP.sql.gz"
