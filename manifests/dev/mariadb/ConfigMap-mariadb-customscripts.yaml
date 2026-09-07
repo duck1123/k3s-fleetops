@@ -1,15 +1,23 @@
 apiVersion: v1
 data:
-  init-booklore.sql: |
-    CREATE DATABASE IF NOT EXISTS `booklore`;
-    CREATE USER IF NOT EXISTS 'booklore'@'%' IDENTIFIED BY 'omE.6H):+]qedMo>ZG;m';
-    GRANT ALL PRIVILEGES ON `booklore`.* TO 'booklore'@'%';
-    FLUSH PRIVILEGES;
-  init-romm.sql: |
-    CREATE DATABASE IF NOT EXISTS `romm`;
-    CREATE USER IF NOT EXISTS 'mariadb'@'%' IDENTIFIED BY 'omE.6H):+]qedMo>ZG;m';
-    GRANT ALL PRIVILEGES ON `romm`.* TO 'mariadb'@'%';
-    FLUSH PRIVILEGES;
+  init-booklore.sh: |
+    #!/bin/bash
+    set -e
+    mariadb -u root -p"$MARIADB_ROOT_PASSWORD" <<-EOSQL
+      CREATE DATABASE IF NOT EXISTS \`booklore\`;
+      CREATE USER IF NOT EXISTS 'booklore'@'%' IDENTIFIED BY '$EXTRADB_BOOKLORE_PASSWORD';
+      GRANT ALL PRIVILEGES ON \`booklore\`.* TO 'booklore'@'%';
+      FLUSH PRIVILEGES;
+    EOSQL
+  init-romm.sh: |
+    #!/bin/bash
+    set -e
+    mariadb -u root -p"$MARIADB_ROOT_PASSWORD" <<-EOSQL
+      CREATE DATABASE IF NOT EXISTS \`romm\`;
+      CREATE USER IF NOT EXISTS 'mariadb'@'%' IDENTIFIED BY '$EXTRADB_ROMM_PASSWORD';
+      GRANT ALL PRIVILEGES ON \`romm\`.* TO 'mariadb'@'%';
+      FLUSH PRIVILEGES;
+    EOSQL
 kind: ConfigMap
 metadata:
   labels:

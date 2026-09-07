@@ -11,6 +11,10 @@
     with lib;
     let
       password-secret = "mariadb-password";
+      extra-db-secret = "mariadb-extradb-passwords";
+      # Deterministic per-database env var name the init .sh scripts read
+      # their password from -- e.g. "booklore" -> "EXTRADB_BOOKLORE_PASSWORD".
+      extraDbEnvVar = dbName: "EXTRADB_${lib.toUpper dbName}_PASSWORD";
     in
     self.lib.mkArgoApp
       {
@@ -52,6 +56,18 @@
             username = cfg.auth.username;
             database = cfg.auth.database;
           };
+        }
+        // lib.optionalAttrs (cfg.extraDatabases != [ ]) {
+          # One key per extra database, e.g. "booklore-password" -- kept out
+          # of the customScripts ConfigMap (which is plaintext, committed to
+          # git) and injected into the mariadb container as env vars instead
+          # (see defaultValues.env below and extraDbEnvVar).
+          ${extra-db-secret} = lib.listToAttrs (
+            map (db: {
+              name = "${db.name}-password";
+              value = db.password;
+            }) cfg.extraDatabases
+          );
         };
 
         # https://github.com/groundhog2k/helm-charts (chart "mariadb") -- bitnami/mariadb
@@ -161,17 +177,38 @@
             password.secretKey = "user-password";
           };
 
-          # Extra databases beyond the main one -- same CREATE DATABASE/USER
-          # SQL as before, just under this chart's customScripts key instead
-          # of bitnami's initdbScripts.
+          # One password env var per extra database, sourced from the
+          # extra-db-secret SopsSecret above -- never the plaintext value
+          # itself (that only exists in cfg.extraDatabases at Nix-eval time
+          # and in the sops-encrypted ciphertext committed to git).
+          env = map (db: {
+            name = extraDbEnvVar db.name;
+            valueFrom.secretKeyRef = {
+              name = extra-db-secret;
+              key = "${db.name}-password";
+            };
+          }) cfg.extraDatabases;
+
+          # Extra databases beyond the main one. A plain .sql file can't do
+          # variable substitution, so this is a .sh script instead -- the
+          # stock mariadb entrypoint sources it the same way, and it can read
+          # its password from the env var above rather than having it baked
+          # into this (plaintext, git-committed) ConfigMap. Backticks are
+          # escaped since this heredoc is unquoted (needed for the password
+          # variable to expand) -- otherwise bash would treat them as
+          # command substitution.
           customScripts = lib.listToAttrs (
             map (db: {
-              name = "init-${db.name}.sql";
+              name = "init-${db.name}.sh";
               value = ''
-                CREATE DATABASE IF NOT EXISTS `${db.name}`;
-                CREATE USER IF NOT EXISTS '${db.username}'@'%' IDENTIFIED BY '${db.password}';
-                GRANT ALL PRIVILEGES ON `${db.name}`.* TO '${db.username}'@'%';
-                FLUSH PRIVILEGES;
+                #!/bin/bash
+                set -e
+                mariadb -u root -p"$MARIADB_ROOT_PASSWORD" <<-EOSQL
+                  CREATE DATABASE IF NOT EXISTS \`${db.name}\`;
+                  CREATE USER IF NOT EXISTS '${db.username}'@'%' IDENTIFIED BY '${"$" + extraDbEnvVar db.name}';
+                  GRANT ALL PRIVILEGES ON \`${db.name}\`.* TO '${db.username}'@'%';
+                  FLUSH PRIVILEGES;
+                EOSQL
               '';
             }) cfg.extraDatabases
           );

@@ -21,7 +21,7 @@ spec:
     metadata:
       annotations:
         checksum/customconfig: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
-        checksum/customscripts: 69db2cb357d38c5e4f49c96128f8a4ca281f195abf6f982e3cb72089c8578e9e
+        checksum/customscripts: f00dd9a577d192a927be6bd2d8ae09bfa9267540be0abed152903d494b82f88e
         checksum/scripts: 5c5d50c344ec1fdc574677a120b2fed8545c6fb46f4c20d2d094abdfe5f65992
         checksum/secureconfig: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
       labels:
@@ -50,6 +50,16 @@ spec:
                 secretKeyRef:
                   key: user-password
                   name: mariadb-password
+            - name: EXTRADB_BOOKLORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: booklore-password
+                  name: mariadb-extradb-passwords
+            - name: EXTRADB_ROMM_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: romm-password
+                  name: mariadb-extradb-passwords
           image: docker.io/mariadb:11.8.9
           imagePullPolicy: IfNotPresent
           livenessProbe:
