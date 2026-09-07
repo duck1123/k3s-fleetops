@@ -35,6 +35,14 @@
         };
       };
 
+      Automation = {
+        # ArgoCD doesn't set `uses-ingress` (see applications/argocd.nix), so it
+        # can't auto-discover a homepage tile -- listed here by its real URL.
+        argocd = {
+          href = "https://argocd.dev.kronkltd.net/";
+        };
+      };
+
       Nodes = {
         nixmini = {
           href = "http://192.168.0.25:61208";

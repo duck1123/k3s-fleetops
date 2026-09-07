@@ -119,6 +119,8 @@ data:
               type: trilium
               url: http://trilium.trilium:8080
     - Automation:
+        - argocd:
+            href: https://argocd.dev.kronkltd.net/
         - tdarr:
             href: https://tdarr.home.kronkltd.net
             siteMonitor: https://tdarr.home.kronkltd.net
