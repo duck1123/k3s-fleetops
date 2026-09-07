@@ -1,6 +1,8 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  annotations:
+    argocd.argoproj.io/sync-options: Replace=true,Force=true
   name: mariadb-data
   namespace: mariadb
 spec:
@@ -9,4 +11,5 @@ spec:
   resources:
     requests:
       storage: 8Gi
-  storageClassName: longhorn
+  storageClassName: ""
+  volumeName: mariadb-data-pv
