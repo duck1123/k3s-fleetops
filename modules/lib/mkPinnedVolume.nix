@@ -22,14 +22,25 @@
   # pv <name> -o jsonpath='{.spec.csi.volumeHandle}'`) before first use --
   # this function has no way to look it up itself.
   #
-  # Both objects carry `Replace=true,Force=true` (not just `Replace=true`):
-  # switching an already-bound PVC from a dynamic PV to this one changes
-  # `volumeName`/`storageClassName`, which Kubernetes treats as immutable
-  # once bound -- a plain `kubectl replace` (what `Replace=true` alone gets
-  # you) is rejected with "spec is immutable after creation", and ArgoCD
-  # just retries the same failing replace forever rather than falling back
-  # to a delete+recreate. `Force=true` is what actually makes ArgoCD do that
-  # delete+recreate on such a conflict. This only ever lands on the PVC/PV a
+  # Both objects carry `Replace=true` only -- NOT `Force=true`. Force=true
+  # was tried (see git history) specifically to let ArgoCD self-heal the one
+  # genuinely-immutable transition (switching an already-bound PVC from a
+  # dynamic PV to this one changes `volumeName`/`storageClassName`, which
+  # Kubernetes rejects on a plain replace with "spec is immutable after
+  # creation") without a manual delete. In practice it caused far more
+  # disruption than it solved: during the mariadb bitnami->groundhog2k
+  # migration (2026-09-07), Force=true triggered a delete+recreate of the
+  # pinned PVC/PV on effectively *any* full sync of the app -- not just when
+  # the pin itself changed -- repeatedly tearing down a volume actively
+  # mounted by a running pod and leaving it stuck (Terminating, or Released
+  # with a stale claimRef) until manually fixed. Plain `Replace=true` doesn't
+  # do this: without Force, a genuine immutable-field mismatch just retries
+  # forever harmlessly (no delete, no downtime) instead of resolving itself,
+  # which means the one-time pin/unpin transition still needs the same
+  # manual step this was meant to avoid -- scale the app to 0, delete the
+  # stale PVC by hand, let it recreate against the same volumeHandle -- but
+  # that manual step is one-time and predictable, unlike Force=true's
+  # unpredictable recurring churn. This only ever lands on the PVC/PV a
   # pinned volume generates -- unpinned/dynamic volumes get no sync-options
   # annotation at all, and it can't leak onto any other resource in the app.
   #
@@ -56,7 +67,7 @@
     }:
     {
       persistentVolumeClaims.${pvcName} = {
-        metadata.annotations."argocd.argoproj.io/sync-options" = "Replace=true,Force=true";
+        metadata.annotations."argocd.argoproj.io/sync-options" = "Replace=true";
         spec = {
           inherit accessModes storageClassName;
           resources.requests.storage = size;
@@ -69,7 +80,7 @@
         kind = "PersistentVolume";
         metadata = {
           name = pvName;
-          annotations."argocd.argoproj.io/sync-options" = "Replace=true,Force=true";
+          annotations."argocd.argoproj.io/sync-options" = "Replace=true";
         };
         spec = {
           capacity.storage = size;
