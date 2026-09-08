@@ -128,28 +128,39 @@
             };
           };
 
-          ingresses.${name}.spec = with cfg.ingress; {
-            inherit ingressClassName;
+          ingresses.${name} = {
+            metadata.annotations = optionalAttrs (cfg.ingress.clusterIssuer != "") {
+              "cert-manager.io/cluster-issuer" = cfg.ingress.clusterIssuer;
+            };
 
-            rules = [
-              {
-                host = domain;
+            spec = with cfg.ingress; {
+              inherit ingressClassName;
 
-                http.paths = [
-                  {
-                    backend.service = {
-                      inherit name;
-                      port.name = "http";
-                    };
+              rules = [
+                {
+                  host = domain;
 
-                    path = "/";
-                    pathType = "ImplementationSpecific";
-                  }
-                ];
-              }
-            ];
+                  http.paths = [
+                    {
+                      backend.service = {
+                        inherit name;
+                        port.name = "http";
+                      };
 
-            tls = [ { hosts = [ domain ]; } ];
+                      path = "/";
+                      pathType = "ImplementationSpecific";
+                    }
+                  ];
+                }
+              ];
+
+              tls = [
+                {
+                  hosts = [ domain ];
+                  secretName = "${domain}-tls";
+                }
+              ];
+            };
           };
 
           services.${name}.spec = {
