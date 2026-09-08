@@ -6,13 +6,10 @@
     };
 
     elasticsearch.elasticPassword = secrets.tube-archivist.auth.password;
-    # Never runs cleanly -- its bundled Celery worker writes task results as
-    # pickle, but its own startup cleanup step (ta_startup -> fail_pending)
-    # assumes UTF-8/JSON and crashes decoding its own fresh output, causing a
-    # permanent CrashLoopBackOff unrelated to ES (which connects fine). Looks
-    # like an upstream bug in bbilly1/tubearchivist -- disabled again as it
-    # was before, no data worth preserving.
-    enable = false;
+    # Known upstream bug: https://github.com/tubearchivist/tubearchivist/issues/1209
+    # -- re-enabled temporarily to test whether clearing poisoned
+    # celery-task-meta-* Redis keys is enough to get past it.
+    enable = true;
     hostAffinity = "edgenix";
 
     ingressProvider = "traefik-lan";
