@@ -1,7 +1,7 @@
 { ... }:
 {
   services.memos = {
-    enable = true;
+    enable = false;
     # hostAffinity = "edgenix";
 
     databaseTarget = "postgresql";

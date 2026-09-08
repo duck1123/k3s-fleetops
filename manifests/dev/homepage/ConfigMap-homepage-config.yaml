@@ -68,13 +68,6 @@ data:
               type: sonarr
               url: http://sonarr.sonarr:8989
     - Media:
-        - audiobookshelf:
-            href: https://audiobookshelf.home.kronkltd.net
-            siteMonitor: https://audiobookshelf.home.kronkltd.net
-            widget:
-              key: '{{HOMEPAGE_VAR_AUDIOBOOKSHELF_API_KEY}}'
-              type: audiobookshelf
-              url: http://audiobookshelf.audiobookshelf:80
         - bookorbit:
             href: https://bookorbit.home.kronkltd.net
             siteMonitor: https://bookorbit.home.kronkltd.net
@@ -109,9 +102,6 @@ data:
               type: stash
               url: http://stashapp.stashapp:9999
     - Notes:
-        - memos:
-            href: https://memos.home.kronkltd.net
-            siteMonitor: https://memos.home.kronkltd.net
         - paperless-ngx:
             href: https://paperless-ngx.home.kronkltd.net
             siteMonitor: https://paperless-ngx.home.kronkltd.net
