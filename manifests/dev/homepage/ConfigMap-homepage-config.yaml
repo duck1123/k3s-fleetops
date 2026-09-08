@@ -38,6 +38,9 @@ data:
         - romm:
             href: https://romm.home.kronkltd.net
             siteMonitor: https://romm.home.kronkltd.net
+        - tube-archivist:
+            href: https://tube-archivist.home.kronkltd.net
+            siteMonitor: https://tube-archivist.home.kronkltd.net
     - Arr:
         - lidarr:
             href: https://lidarr.home.kronkltd.net
