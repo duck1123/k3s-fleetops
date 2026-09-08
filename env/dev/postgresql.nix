@@ -87,6 +87,10 @@
           name = "securo";
           username = "securo";
           password = secrets.securo.database.password;
+          # Securo's agent knowledge base uses pgvector; must be created here
+          # (as the postgres superuser) since even the database owner can't
+          # CREATE EXTENSION for it -- see the postgresql-init-databases job.
+          extensions = [ "vector" ];
         }
       ];
 

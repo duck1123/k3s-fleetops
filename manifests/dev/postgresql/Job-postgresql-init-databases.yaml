@@ -639,6 +639,34 @@ spec:
               EOSQL
               echo "Database securo created successfully"
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              echo "Enabling extensions on securo: vector..."
+              psql -v ON_ERROR_STOP=1 -d 'securo' <<-EOSQL
+                CREATE EXTENSION IF NOT EXISTS "vector";
+              EOSQL
+
           env:
             - name: PGHOST
               value: postgresql.postgresql

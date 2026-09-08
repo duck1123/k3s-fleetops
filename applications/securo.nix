@@ -575,55 +575,6 @@
                 ];
               };
             };
-
-            # Shared postgres already runs pgvector/pgvector -- Securo's
-            # agent knowledge base (and any future embedding features) need
-            # the `vector` extension enabled on its database. Mirrors the
-            # same hook used by applications/immich.nix.
-            jobs = optionalAttrs (cfg.database.password != "") {
-              "${name}-enable-vector-extension" = {
-                metadata.annotations = {
-                  "argocd.argoproj.io/hook" = "Sync";
-                  "argocd.argoproj.io/hook-delete-policy" = "BeforeHookCreation,HookSucceeded";
-                  "argocd.argoproj.io/sync-wave" = "1";
-                };
-                spec = {
-                  backoffLimit = 3;
-                  template.spec = {
-                    restartPolicy = "OnFailure";
-                    containers = [
-                      {
-                        name = "enable-vector-extension";
-                        image = "docker.io/postgres:17.11";
-                        imagePullPolicy = "IfNotPresent";
-                        command = [ "psql" ];
-                        args = [
-                          "-h"
-                          cfg.database.host
-                          "-p"
-                          "${toString cfg.database.port}"
-                          "-U"
-                          cfg.database.username
-                          "-d"
-                          cfg.database.name
-                          "-c"
-                          "CREATE EXTENSION IF NOT EXISTS vector;"
-                        ];
-                        env = [
-                          {
-                            name = "PGPASSWORD";
-                            valueFrom.secretKeyRef = {
-                              name = db-secret;
-                              key = "password";
-                            };
-                          }
-                        ];
-                      }
-                    ];
-                  };
-                };
-              };
-            };
           };
       };
 }

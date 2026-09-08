@@ -217,6 +217,11 @@ in
                     type = types.str;
                     description = mdDoc "Database password";
                   };
+                  extensions = mkOption {
+                    type = types.listOf types.str;
+                    description = mdDoc "Extensions to enable in this database (e.g. [ \"vector\" ]). Created as the postgres superuser -- most extensions (pgvector included) refuse non-superusers even when they own the database, so this can't be done by the app's own role.";
+                    default = [ ];
+                  };
                 };
               }
             );
@@ -345,6 +350,17 @@ in
                               EOSQL
                               echo "Database ${db.name} created successfully"
                             '') cfg.extraDatabases}
+                            ${lib.concatMapStringsSep "\n" (
+                              db:
+                              lib.optionalString (db.extensions != [ ]) ''
+                                echo "Enabling extensions on ${db.name}: ${lib.concatStringsSep ", " db.extensions}..."
+                                psql -v ON_ERROR_STOP=1 -d '${db.name}' <<-EOSQL
+                                  ${lib.concatMapStringsSep "\n                                  " (
+                                    ext: "CREATE EXTENSION IF NOT EXISTS \"${ext}\";"
+                                  ) db.extensions}
+                                EOSQL
+                              ''
+                            ) cfg.extraDatabases}
                           ''
                         ];
                       }

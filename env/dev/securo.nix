@@ -19,6 +19,20 @@
       host = "redis.redis";
       port = 6379;
       password = secrets.redis.password;
+
+      # db 0 (the default for every app on the shared redis instance) is a
+      # free-for-all: immich (BullMQ), nocodb, and any Celery-based app all
+      # write there, and Celery's default result-backend keys
+      # ("celery-task-meta-<uuid>") and pidbox control/reply queue have no
+      # per-app prefix at all -- they collide directly between unrelated
+      # Celery apps. securo-worker crash-looped on startup picking up a
+      # stale application/x-signed-pickle pidbox message left behind by
+      # tube-archivist's Celery setup (see
+      # incident-tube-archivist-celery-pickle-crashloop in memory) even
+      # though tube-archivist is disabled -- the poisoned message was still
+      # sitting in db 0. Giving securo its own db avoids that collision
+      # without touching any other app's (currently-working) redis config.
+      dbIndex = 2;
     };
 
     ingressProvider = "traefik-lan";
