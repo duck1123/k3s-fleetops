@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: elasticvue
+  namespace: elasticvue
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: elasticvue.home.kronkltd.net
+      http:
+        paths:
+          - backend:
+              service:
+                name: elasticvue
+                port:
+                  name: http
+            path: /
+            pathType: ImplementationSpecific
+  tls:
+    - hosts:
+        - elasticvue.home.kronkltd.net

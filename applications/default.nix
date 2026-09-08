@@ -19,6 +19,7 @@
     ./ditto-relay.nix
     ./duck1123
     ./dozzle.nix
+    ./elasticvue.nix
     ./ersatztv.nix
     ./fileflows.nix
     ./flaresolverr.nix
@@ -59,6 +60,7 @@
     ./navidrome.nix
     ./nocodb.nix
     ./openldap.nix
+    ./opensearch-dashboards.nix
     ./opentelemetry-collector.nix
     ./paperless-ngx.nix
     ./pihole.nix

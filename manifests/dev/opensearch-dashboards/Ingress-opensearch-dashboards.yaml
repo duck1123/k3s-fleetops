@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: opensearch-dashboards
+  namespace: opensearch-dashboards
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: opensearch-dashboards.home.kronkltd.net
+      http:
+        paths:
+          - backend:
+              service:
+                name: opensearch-dashboards
+                port:
+                  name: http
+            path: /
+            pathType: ImplementationSpecific
+  tls:
+    - hosts:
+        - opensearch-dashboards.home.kronkltd.net
