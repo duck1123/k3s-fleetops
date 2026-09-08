@@ -64,6 +64,7 @@
     ./opentelemetry-collector.nix
     ./paperless-ngx.nix
     ./pihole.nix
+    ./pinchflat.nix
     ./postgresql.nix
     ./promtail.nix
     ./prometheus.nix

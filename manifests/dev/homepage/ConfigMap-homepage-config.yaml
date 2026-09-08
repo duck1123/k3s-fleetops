@@ -92,6 +92,9 @@ data:
               key: '{{HOMEPAGE_VAR_KOMGA_API_KEY}}'
               type: komga
               url: http://komga.komga:25600
+        - pinchflat:
+            href: https://pinchflat.home.kronkltd.net
+            siteMonitor: https://pinchflat.home.kronkltd.net
         - plex:
             href: http://192.168.0.22:32400/web
             ping: 192.168.0.22

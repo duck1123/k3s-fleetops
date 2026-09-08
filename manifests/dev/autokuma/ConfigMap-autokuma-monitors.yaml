@@ -15,6 +15,7 @@ data:
   nocodb.json: '{"name":"nocodb","type":"http","url":"https://nocodb.home.kronkltd.net"}'
   opensearch-dashboards.json: '{"name":"opensearch-dashboards","type":"http","url":"https://opensearch-dashboards.home.kronkltd.net"}'
   paperless-ngx.json: '{"name":"paperless-ngx","type":"http","url":"https://paperless-ngx.home.kronkltd.net"}'
+  pinchflat.json: '{"name":"pinchflat","type":"http","url":"https://pinchflat.home.kronkltd.net"}'
   prowlarr.json: '{"name":"prowlarr","type":"http","url":"https://prowlarr.home.kronkltd.net"}'
   qbittorrent.json: '{"name":"qbittorrent","type":"http","url":"https://qbittorrent.home.kronkltd.net"}'
   radarr.json: '{"name":"radarr","type":"http","url":"https://radarr.home.kronkltd.net"}'

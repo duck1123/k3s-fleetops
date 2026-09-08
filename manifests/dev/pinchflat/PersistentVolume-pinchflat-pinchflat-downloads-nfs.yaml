@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pinchflat-pinchflat-downloads-nfs
+spec:
+  accessModes:
+    - ReadWriteMany
+  capacity:
+    storage: 2Ti
+  mountOptions:
+    - nolock
+    - noexec
+    - soft
+    - timeo=30
+  nfs:
+    path: /volume1/Pinchflat
+    server: 192.168.0.124
+  persistentVolumeReclaimPolicy: Retain

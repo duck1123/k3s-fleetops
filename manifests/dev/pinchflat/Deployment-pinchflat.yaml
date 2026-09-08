@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pinchflat
+  namespace: pinchflat
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pinchflat
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: pinchflat
+    spec:
+      containers:
+        - env:
+            - name: SECRET_KEY_BASE
+              valueFrom:
+                secretKeyRef:
+                  key: SECRET_KEY_BASE
+                  name: pinchflat-secret-key-base
+          image: ghcr.io/kieraneglin/pinchflat:latest
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthcheck
+              port: 8945
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+          name: pinchflat
+          ports:
+            - containerPort: 8945
+              name: http
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 6
+            httpGet:
+              path: /healthcheck
+              port: 8945
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+            requests:
+              cpu: 100m
+              memory: 256Mi
+          volumeMounts:
+            - mountPath: /config
+              name: config
+            - mountPath: /downloads
+              name: downloads
+      nodeSelector:
+        kubernetes.io/hostname: edgenix
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: pinchflat-pinchflat-config
+        - name: downloads
+          persistentVolumeClaim:
+            claimName: pinchflat-pinchflat-downloads
