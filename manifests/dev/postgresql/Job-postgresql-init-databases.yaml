@@ -622,9 +622,9 @@ spec:
                 DO \$\$
                 BEGIN
                   IF NOT EXISTS (SELECT FROM pg_user WHERE usename = 'securo') THEN
-                    EXECUTE format('CREATE USER %I WITH PASSWORD %L', 'securo', 'omE.6H):+]qedMo>ZG;m');
+                    EXECUTE format('CREATE USER %I WITH PASSWORD %L', 'securo', '8MLsDNzjE8LyMCkrl1EG6wFDrDRQoRqy');
                   ELSE
-                    EXECUTE format('ALTER USER %I WITH PASSWORD %L', 'securo', 'omE.6H):+]qedMo>ZG;m');
+                    EXECUTE format('ALTER USER %I WITH PASSWORD %L', 'securo', '8MLsDNzjE8LyMCkrl1EG6wFDrDRQoRqy');
                   END IF;
                 END
                 \$\$;
