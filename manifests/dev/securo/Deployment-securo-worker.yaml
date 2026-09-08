@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/instance: securo-worker
+    app.kubernetes.io/name: securo-worker
+  name: securo-worker
+  namespace: securo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: securo-worker
+      app.kubernetes.io/name: securo-worker
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: securo-worker
+        app.kubernetes.io/name: securo-worker
+    spec:
+      automountServiceAccountToken: true
+      containers:
+        - command:
+            - celery
+            - -A
+            - app.worker
+            - worker
+            - --loglevel=info
+            - --concurrency=2
+          env:
+            - name: DEBUG
+              value: "false"
+            - name: FRONTEND_URL
+              value: https://securo.home.kronkltd.net
+            - name: WEBAUTHN_RP_ID
+              value: securo.home.kronkltd.net
+            - name: SIMPLEFIN_ENABLED
+              value: "true"
+            - name: SIMPLEFIN_API_URL
+              value: https://beta-bridge.simplefin.org
+            - name: OPENEXCHANGERATES_APP_ID
+              value: ""
+            - name: TESOURO_DIRETO_ENABLED
+              value: "false"
+            - name: STORAGE_LOCAL_PATH
+              value: /app/data/attachments
+            - name: AGENTS_KNOWLEDGE_STORAGE_PATH
+              value: /app/data/agent_knowledge
+            - name: AGENTS_ENABLED
+              value: "false"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  key: url
+                  name: securo-database
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: key
+                  name: securo-secret-key
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  key: url
+                  name: securo-redis
+          image: ghcr.io/securo-finance/securo-backend:0.15.1
+          imagePullPolicy: IfNotPresent
+          name: securo-worker
+          ports: []
+          volumeMounts:
+            - mountPath: /app/data/attachments
+              name: attachments
+            - mountPath: /app/data/agent_knowledge
+              name: agent-knowledge
+            - mountPath: /app/data/embedding_models
+              name: embedding-models
+      serviceAccountName: default
+      volumes:
+        - name: attachments
+          persistentVolumeClaim:
+            claimName: securo-securo-attachments
+        - name: agent-knowledge
+          persistentVolumeClaim:
+            claimName: securo-securo-agent-knowledge
+        - name: embedding-models
+          persistentVolumeClaim:
+            claimName: securo-securo-embedding-models

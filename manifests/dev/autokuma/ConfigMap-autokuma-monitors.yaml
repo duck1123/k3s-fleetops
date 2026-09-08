@@ -21,6 +21,7 @@ data:
   radarr.json: '{"name":"radarr","type":"http","url":"https://radarr.home.kronkltd.net"}'
   romm.json: '{"name":"romm","type":"http","url":"https://romm.home.kronkltd.net"}'
   sabnzbd.json: '{"name":"sabnzbd","type":"http","url":"https://sabnzbd.home.kronkltd.net"}'
+  securo.json: '{"name":"securo","type":"http","url":"https://securo.home.kronkltd.net"}'
   slskd.json: '{"name":"slskd","type":"http","url":"https://slskd.home.kronkltd.net"}'
   sonarr.json: '{"name":"sonarr","type":"http","url":"https://sonarr.home.kronkltd.net"}'
   stashapp.json: '{"name":"stashapp","type":"http","url":"https://stashapp.home.kronkltd.net"}'

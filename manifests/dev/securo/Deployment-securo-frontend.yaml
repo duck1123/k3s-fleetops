@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/instance: securo-frontend
+    app.kubernetes.io/name: securo-frontend
+  name: securo-frontend
+  namespace: securo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: securo-frontend
+      app.kubernetes.io/name: securo-frontend
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: securo-frontend
+        app.kubernetes.io/name: securo-frontend
+    spec:
+      automountServiceAccountToken: true
+      containers:
+        - env:
+            - name: BACKEND_URL
+              value: http://securo-backend.securo:8000
+            - name: FRONTEND_URL
+              value: https://securo.home.kronkltd.net
+          image: ghcr.io/securo-finance/securo-frontend:0.15.1
+          imagePullPolicy: IfNotPresent
+          name: securo-frontend
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+      serviceAccountName: default

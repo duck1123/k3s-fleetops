@@ -79,6 +79,11 @@
           username = "bookorbit";
           password = secrets.postgresql.userPassword;
         }
+        {
+          name = "securo";
+          username = "securo";
+          password = secrets.postgresql.userPassword;
+        }
       ];
 
     # Captured via `kubectl get pv <name> -o jsonpath='{.spec.csi.volumeHandle}'`

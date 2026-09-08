@@ -74,6 +74,7 @@
     ./redis.nix
     ./romm.nix
     ./sabnzbd.nix
+    ./securo.nix
     ./satisfactory.nix
     ./sonarr.nix
     ./soularr.nix

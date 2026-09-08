@@ -59,6 +59,7 @@ in
     "Arr"
     "Media"
     "Notes"
+    "Finance"
     "Automation"
     "Nostr"
     "Nodes"

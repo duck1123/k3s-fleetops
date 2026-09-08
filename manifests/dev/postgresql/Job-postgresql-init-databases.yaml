@@ -613,6 +613,32 @@ spec:
               EOSQL
               echo "Database bookorbit created successfully"
 
+              echo "Creating database securo and user securo..."
+              psql -v ON_ERROR_STOP=1 <<-EOSQL
+                -- Create database if it doesn't exist
+                SELECT format('CREATE DATABASE %I', 'securo') WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'securo')\gexec
+
+                -- Create user if it doesn't exist, then always update password
+                DO \$\$
+                BEGIN
+                  IF NOT EXISTS (SELECT FROM pg_user WHERE usename = 'securo') THEN
+                    EXECUTE format('CREATE USER %I WITH PASSWORD %L', 'securo', 'omE.6H):+]qedMo>ZG;m');
+                  ELSE
+                    EXECUTE format('ALTER USER %I WITH PASSWORD %L', 'securo', 'omE.6H):+]qedMo>ZG;m');
+                  END IF;
+                END
+                \$\$;
+
+                -- Grant privileges (quote database name)
+                DO \$\$
+                BEGIN
+                  EXECUTE format('GRANT ALL PRIVILEGES ON DATABASE %I TO %I', 'securo', 'securo');
+                  EXECUTE format('ALTER DATABASE %I OWNER TO %I', 'securo', 'securo');
+                END
+                \$\$;
+              EOSQL
+              echo "Database securo created successfully"
+
           env:
             - name: PGHOST
               value: postgresql.postgresql
