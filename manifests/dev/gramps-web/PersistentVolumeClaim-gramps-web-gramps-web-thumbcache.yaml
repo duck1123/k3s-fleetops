@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: gramps-web-gramps-web-thumbCache
+  name: gramps-web-gramps-web-thumbcache
   namespace: gramps-web
 spec:
   accessModes:

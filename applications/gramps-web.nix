@@ -50,7 +50,7 @@
         volumes = cfg: {
           users.size = "100Mi";
           index.size = "1Gi";
-          thumbCache.size = "2Gi";
+          thumbcache.size = "2Gi";
           cache.size = "2Gi";
           secret.size = "50Mi";
           db.size = "2Gi";
@@ -129,7 +129,7 @@
               }
               {
                 mountPath = "/app/thumbnail_cache";
-                name = "thumbCache";
+                name = "thumbcache";
               }
               {
                 mountPath = "/app/cache";
@@ -155,7 +155,7 @@
             sharedVolumes = [
               cfg.volumes.users.volume
               cfg.volumes.index.volume
-              cfg.volumes.thumbCache.volume
+              cfg.volumes.thumbcache.volume
               cfg.volumes.cache.volume
               cfg.volumes.secret.volume
               cfg.volumes.db.volume

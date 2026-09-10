@@ -51,7 +51,7 @@ spec:
             - mountPath: /app/indexdir
               name: index
             - mountPath: /app/thumbnail_cache
-              name: thumbCache
+              name: thumbcache
             - mountPath: /app/cache
               name: cache
             - mountPath: /app/secret
@@ -96,7 +96,7 @@ spec:
             - mountPath: /app/indexdir
               name: index
             - mountPath: /app/thumbnail_cache
-              name: thumbCache
+              name: thumbcache
             - mountPath: /app/cache
               name: cache
             - mountPath: /app/secret
@@ -114,9 +114,9 @@ spec:
         - name: index
           persistentVolumeClaim:
             claimName: gramps-web-gramps-web-index
-        - name: thumbCache
+        - name: thumbcache
           persistentVolumeClaim:
-            claimName: gramps-web-gramps-web-thumbCache
+            claimName: gramps-web-gramps-web-thumbcache
         - name: cache
           persistentVolumeClaim:
             claimName: gramps-web-gramps-web-cache
