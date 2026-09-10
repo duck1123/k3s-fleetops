@@ -13,6 +13,7 @@
       name = "superset";
       env-secret = "superset-env";
       admin-secret = "superset-admin";
+      connections-secret = "superset-postgres-connections";
     in
     self.lib.mkArgoApp
       {
@@ -68,6 +69,15 @@
               username = cfg.admin.username;
               email = cfg.admin.email;
               password = cfg.admin.password;
+            };
+          }
+          // optionalAttrs (cfg.reportingConnections != [ ]) {
+            ${connections-secret} = {
+              CONNECTIONS_JSON = builtins.toJSON (
+                map (c: {
+                  inherit (c) name host port username password;
+                }) cfg.reportingConnections
+              );
             };
           };
 
@@ -147,6 +157,46 @@
             description = mdDoc "Run the Celery beat scheduler -- only needed for scheduled alerts/reports";
             type = types.bool;
             default = false;
+          };
+
+          reportingConnections = mkOption {
+            description = mdDoc ''
+              Postgres databases to register as SQL Lab connections, one entry per
+              database (Postgres has no cross-database queries, so a single connection
+              can't cover multiple databases on the same instance). Registered
+              declaratively by the superset-register-connections job -- see
+              env/dev/superset.nix, which populates this from
+              config.services.postgresql.extraDatabases so it stays in sync with that
+              list automatically. Each entry should use that database's own
+              least-privilege role rather than the Postgres admin role.
+            '';
+            type = types.listOf (
+              types.submodule {
+                options = {
+                  name = mkOption {
+                    type = types.str;
+                    description = mdDoc "Database name -- also used as the Superset connection display name.";
+                  };
+                  host = mkOption {
+                    type = types.str;
+                    description = mdDoc "Postgres host.";
+                  };
+                  port = mkOption {
+                    type = types.port;
+                    description = mdDoc "Postgres port.";
+                  };
+                  username = mkOption {
+                    type = types.str;
+                    description = mdDoc "Role to connect as.";
+                  };
+                  password = mkOption {
+                    type = types.str;
+                    description = mdDoc "Password for that role.";
+                  };
+                };
+              }
+            );
+            default = [ ];
           };
         };
 
@@ -280,6 +330,92 @@
                             --lastname Admin \
                             --email "$ADMIN_EMAIL" \
                             --password "$ADMIN_PASSWORD" || true
+                        ''
+                      ];
+                      volumeMounts = [
+                        {
+                          name = "superset-config";
+                          mountPath = "/app/pythonpath";
+                          readOnly = true;
+                        }
+                      ];
+                    }
+                  ];
+                  volumes = [
+                    {
+                      name = "superset-config";
+                      secret.secretName = "${name}-config";
+                    }
+                  ];
+                };
+              };
+            };
+          }
+          // optionalAttrs (cfg.reportingConnections != [ ]) {
+            "${name}-register-connections" = {
+              metadata.annotations = {
+                "argocd.argoproj.io/hook" = "Sync";
+                "argocd.argoproj.io/hook-delete-policy" = "BeforeHookCreation,HookSucceeded";
+                # Same wave as superset-create-admin -- both only need the chart's own
+                # init-db job (wave "0") to have finished, and don't depend on each other.
+                "argocd.argoproj.io/sync-wave" = "1";
+              };
+              spec = {
+                backoffLimit = 3;
+                template.spec = {
+                  restartPolicy = "OnFailure";
+                  securityContext.runAsUser = 0;
+                  containers = [
+                    {
+                      name = "register-connections";
+                      image = "apachesuperset.docker.scarf.sh/apache/superset:${cfg.imageTag}";
+                      imagePullPolicy = "IfNotPresent";
+                      envFrom = [
+                        { secretRef.name = env-secret; }
+                        { secretRef.name = connections-secret; }
+                      ];
+                      command = [
+                        "/bin/sh"
+                        "-c"
+                        ''
+                          set -e
+                          . /app/pythonpath/superset_bootstrap.sh
+                          python3 - <<'PYEOF'
+                          import json
+                          import os
+
+                          from sqlalchemy.engine import URL
+
+                          from superset.app import create_app
+
+                          app = create_app()
+                          with app.app_context():
+                              from superset import db
+                              from superset.models.core import Database
+
+                              conns = json.loads(os.environ["CONNECTIONS_JSON"])
+                              for c in conns:
+                                  uri = str(
+                                      URL.create(
+                                          "postgresql+psycopg2",
+                                          username=c["username"],
+                                          password=c["password"],
+                                          host=c["host"],
+                                          port=c["port"],
+                                          database=c["name"],
+                                      )
+                                  )
+                                  existing = (
+                                      db.session.query(Database)
+                                      .filter_by(database_name=c["name"])
+                                      .one_or_none()
+                                  )
+                                  if existing is None:
+                                      existing = Database(database_name=c["name"])
+                                      db.session.add(existing)
+                                  existing.set_sqlalchemy_uri(uri)
+                              db.session.commit()
+                          PYEOF
                         ''
                       ];
                       volumeMounts = [

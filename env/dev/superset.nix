@@ -1,4 +1,4 @@
-{ secrets, ... }:
+{ secrets, config, ... }:
 {
   services.superset = {
     # Flip on once `superset.database.password` / `superset.secretKey` / `superset.admin.*`
@@ -26,5 +26,14 @@
     ingressProvider = "traefik-lan";
     ingress.tls.enable = true;
     homepage.group = "Apps";
+
+    # One SQL Lab connection per database on the shared postgres instance (Postgres has
+    # no cross-database queries, so one connection can't cover all of them -- see
+    # applications/superset.nix). Sourced from postgresql.nix's extraDatabases so new
+    # app databases automatically get a connection registered on the next `nur switch`.
+    reportingConnections = map (db: {
+      inherit (db) name username password;
+      inherit (config.databaseProviders.postgresql) host port;
+    }) config.services.postgresql.extraDatabases;
   };
 }

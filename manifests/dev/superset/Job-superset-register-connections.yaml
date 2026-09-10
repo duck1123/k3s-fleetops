@@ -1,0 +1,75 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded
+    argocd.argoproj.io/sync-wave: "1"
+  name: superset-register-connections
+  namespace: superset
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      containers:
+        - command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              . /app/pythonpath/superset_bootstrap.sh
+              python3 - <<'PYEOF'
+              import json
+              import os
+
+              from sqlalchemy.engine import URL
+
+              from superset.app import create_app
+
+              app = create_app()
+              with app.app_context():
+                  from superset import db
+                  from superset.models.core import Database
+
+                  conns = json.loads(os.environ["CONNECTIONS_JSON"])
+                  for c in conns:
+                      uri = str(
+                          URL.create(
+                              "postgresql+psycopg2",
+                              username=c["username"],
+                              password=c["password"],
+                              host=c["host"],
+                              port=c["port"],
+                              database=c["name"],
+                          )
+                      )
+                      existing = (
+                          db.session.query(Database)
+                          .filter_by(database_name=c["name"])
+                          .one_or_none()
+                      )
+                      if existing is None:
+                          existing = Database(database_name=c["name"])
+                          db.session.add(existing)
+                      existing.set_sqlalchemy_uri(uri)
+                  db.session.commit()
+              PYEOF
+          envFrom:
+            - secretRef:
+                name: superset-env
+            - secretRef:
+                name: superset-postgres-connections
+          image: apachesuperset.docker.scarf.sh/apache/superset:6.1.0
+          imagePullPolicy: IfNotPresent
+          name: register-connections
+          volumeMounts:
+            - mountPath: /app/pythonpath
+              name: superset-config
+              readOnly: true
+      restartPolicy: OnFailure
+      securityContext:
+        runAsUser: 0
+      volumes:
+        - name: superset-config
+          secret:
+            secretName: superset-config
