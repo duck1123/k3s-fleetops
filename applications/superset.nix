@@ -170,12 +170,15 @@
           # The stock apachesuperset.docker.scarf.sh/apache/superset image ships no Postgres
           # DBAPI driver at all (verified: neither psycopg2 nor psycopg importable) -- every
           # container that sources this script (web, worker, beat, init job) needs it before
-          # SQLAlchemy can even create an engine. Re-runs on every container start (no
-          # persistent volume backs ~/bootstrap), costing a few seconds per restart.
+          # SQLAlchemy can even create an engine. Must use the app's own /app/.venv/bin/pip --
+          # gunicorn/celery run from that venv's site-packages, and a bare `pip install`
+          # resolves to a *different* (system) Python whose packages the venv never sees, so
+          # "Successfully installed" still leaves the app with ModuleNotFoundError. Re-runs on
+          # every container start (no persistent volume backs ~/bootstrap).
           bootstrapScript = ''
             #!/bin/bash
             if [ ! -f ~/bootstrap ]; then
-              pip install --no-cache-dir psycopg2-binary
+              /app/.venv/bin/pip install --no-cache-dir psycopg2-binary
               echo "Running Superset with uid {{ .Values.runAsUser }}" > ~/bootstrap
             fi
           '';
