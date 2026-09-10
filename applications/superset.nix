@@ -168,17 +168,19 @@
           };
 
           # The stock apachesuperset.docker.scarf.sh/apache/superset image ships no Postgres
-          # DBAPI driver at all (verified: neither psycopg2 nor psycopg importable) -- every
-          # container that sources this script (web, worker, beat, init job) needs it before
-          # SQLAlchemy can even create an engine. Must use the app's own /app/.venv/bin/pip --
-          # gunicorn/celery run from that venv's site-packages, and a bare `pip install`
-          # resolves to a *different* (system) Python whose packages the venv never sees, so
-          # "Successfully installed" still leaves the app with ModuleNotFoundError. Re-runs on
-          # every container start (no persistent volume backs ~/bootstrap).
+          # DBAPI driver at all (verified: neither psycopg2 nor psycopg importable), and the
+          # /app/.venv the app actually runs from has no `pip` at all -- a bare `pip install`
+          # resolves to a *different* (system) Python whose packages the venv never sees
+          # ("Successfully installed" but still ModuleNotFoundError at import time), and
+          # /app/.venv/bin/pip doesn't exist. Confirmed working recipe (verified against this
+          # exact image/tag via a one-off debug pod): `ensurepip` into the venv first, then
+          # `python3 -m pip install` using that venv's own interpreter. Re-runs on every
+          # container start (no persistent volume backs ~/bootstrap).
           bootstrapScript = ''
             #!/bin/bash
             if [ ! -f ~/bootstrap ]; then
-              /app/.venv/bin/pip install --no-cache-dir psycopg2-binary
+              /app/.venv/bin/python3 -m ensurepip
+              /app/.venv/bin/python3 -m pip install --no-cache-dir psycopg2-binary
               echo "Running Superset with uid {{ .Values.runAsUser }}" > ~/bootstrap
             fi
           '';
