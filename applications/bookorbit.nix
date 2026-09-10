@@ -49,7 +49,7 @@
           image = mkOption {
             description = mdDoc "The docker image";
             type = types.str;
-            default = "ghcr.io/bookorbit/bookorbit:1.3.0";
+            default = "ghcr.io/bookorbit/bookorbit:2.9.0";
           };
 
           service.port = mkOption {
@@ -109,7 +109,7 @@
             metadata.labels = {
               "app.kubernetes.io/instance" = name;
               "app.kubernetes.io/name" = name;
-              "app.kubernetes.io/version" = "1.3.0";
+              "app.kubernetes.io/version" = "2.9.0";
             };
 
             spec = {

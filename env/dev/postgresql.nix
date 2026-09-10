@@ -78,6 +78,13 @@
           name = "bookorbit";
           username = "bookorbit";
           password = secrets.postgresql.userPassword;
+          # BookOrbit 2.x requires these for its migrations/search; the app's
+          # own DB role can't CREATE EXTENSION for itself -- see securo above.
+          extensions = [
+            "vector"
+            "uuid-ossp"
+            "pg_trgm"
+          ];
         }
         {
           # Dedicated alphanumeric-only password -- see env/dev/securo.nix

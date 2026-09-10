@@ -661,6 +661,12 @@ spec:
 
 
 
+              echo "Enabling extensions on bookorbit: vector, uuid-ossp, pg_trgm..."
+              psql -v ON_ERROR_STOP=1 -d 'bookorbit' <<-EOSQL
+                CREATE EXTENSION IF NOT EXISTS "vector";
+                                                CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+                                                CREATE EXTENSION IF NOT EXISTS "pg_trgm";
+              EOSQL
 
               echo "Enabling extensions on securo: vector..."
               psql -v ON_ERROR_STOP=1 -d 'securo' <<-EOSQL

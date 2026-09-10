@@ -298,6 +298,26 @@ export def "nur argocd refresh" [name?: string] {
   }
 }
 
+# Trigger an actual ArgoCD sync, not just a refresh -- a refresh only recomputes
+# the diff against git, it doesn't apply anything or run PostSync hooks. A hook
+# Job (e.g. postgresql-init-databases, deleted after HookSucceeded) only re-runs
+# on a real sync. Uses `argocd`'s --core mode, which talks to the k8s API
+# directly via the local kubeconfig context -- no port-forward/login needed.
+# With no name, syncs every Application; pass one to target just that app,
+# e.g. `nur argocd sync bookorbit`.
+export def "nur argocd sync" [name?: string] {
+  if ($name | is-empty) {
+    let apps = (
+      ^kubectl get applications -n argocd -o jsonpath='{.items[*].metadata.name}'
+      | str trim
+      | split row " "
+    )
+    ^argocd app sync ...$apps --core
+  } else {
+    ^argocd app sync $name --core
+  }
+}
+
 # ─── Port-forwarding ─────────────────────────────────────────────────────────
 
 # Port-forward ArgoCD UI to localhost:8080
