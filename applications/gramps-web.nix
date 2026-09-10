@@ -104,6 +104,18 @@
             type = types.int;
             default = 5000;
           };
+
+          gunicornWorkers = mkOption {
+            description = mdDoc ''
+              Gunicorn worker process count (image defaults to 8 via `GUNICORN_NUM_WORKERS`).
+              Gramps' sqlite backend has no cross-process write coordination -- multiple
+              gunicorn workers hitting the same grampsdb sqlite file at once fail writes
+              with `sqlite3.OperationalError: database is locked`. Keep at 1 unless/until
+              the tree is moved to a real database backend.
+            '';
+            type = types.int;
+            default = 1;
+          };
         };
 
         extraResources =
@@ -113,6 +125,10 @@
               {
                 name = "GRAMPSWEB_TREE";
                 value = cfg.treeName;
+              }
+              {
+                name = "GUNICORN_NUM_WORKERS";
+                value = toString cfg.gunicornWorkers;
               }
               (redisEnvVar cfg "GRAMPSWEB_CELERY_CONFIG__broker_url" "brokerUrl" 0)
               (redisEnvVar cfg "GRAMPSWEB_CELERY_CONFIG__result_backend" "brokerUrl" 0)

@@ -23,6 +23,8 @@ spec:
         - env:
             - name: GRAMPSWEB_TREE
               value: Gramps Web
+            - name: GUNICORN_NUM_WORKERS
+              value: "1"
             - name: GRAMPSWEB_CELERY_CONFIG__broker_url
               valueFrom:
                 secretKeyRef:
@@ -72,6 +74,8 @@ spec:
           env:
             - name: GRAMPSWEB_TREE
               value: Gramps Web
+            - name: GUNICORN_NUM_WORKERS
+              value: "1"
             - name: GRAMPSWEB_CELERY_CONFIG__broker_url
               valueFrom:
                 secretKeyRef:
