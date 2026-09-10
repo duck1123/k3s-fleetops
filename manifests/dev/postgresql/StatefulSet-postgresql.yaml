@@ -88,6 +88,8 @@ spec:
             successThreshold: 1
             timeoutSeconds: 10
           volumeMounts:
+            - mountPath: /dev/shm
+              name: dshm
             - mountPath: /var/run
               name: run
             - mountPath: /tmp
@@ -141,6 +143,10 @@ spec:
             defaultMode: 365
             name: postgresql-scripts
           name: initscripts
+        - emptyDir:
+            medium: Memory
+            sizeLimit: 1Gi
+          name: dshm
         - name: postgres-data
           persistentVolumeClaim:
             claimName: postgresql-data

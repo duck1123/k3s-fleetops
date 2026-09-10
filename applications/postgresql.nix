@@ -473,6 +473,17 @@ in
                     containers = [
                       {
                         name = "postgres";
+                        # Container runtimes default /dev/shm to ~64Mi, too
+                        # small for Postgres parallel-query workers' DSM
+                        # segments -- bookorbit's migrations hit this
+                        # ("could not resize shared memory segment ...
+                        # No space left on device") until this was added.
+                        volumeMounts = [
+                          {
+                            mountPath = "/dev/shm";
+                            name = "dshm";
+                          }
+                        ];
                         # Health checks with less aggressive settings (using mkForce to override Helm values)
                         livenessProbe = lib.mkForce {
                           exec = {
@@ -540,6 +551,13 @@ in
                         configMap = {
                           name = "${name}-scripts";
                           defaultMode = 365;
+                        };
+                      }
+                      {
+                        name = "dshm";
+                        emptyDir = {
+                          medium = "Memory";
+                          sizeLimit = "1Gi";
                         };
                       }
                     ];
