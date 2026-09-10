@@ -64,7 +64,7 @@ spec:
               name: media
             - mountPath: /tmp
               name: tmp
-        - command:
+        - args:
             - celery
             - -A
             - gramps_webapi.celery

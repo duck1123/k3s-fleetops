@@ -224,7 +224,11 @@
                         name = "${name}-celery";
                         image = cfg.image;
                         imagePullPolicy = "IfNotPresent";
-                        command = [
+                        # `args`, not `command` -- k8s `command` overrides the image's
+                        # ENTRYPOINT (docker-entrypoint.sh), which is what generates/exports
+                        # GRAMPSWEB_SECRET_KEY. `args` overrides CMD only, same as compose's
+                        # `command:` does, so the entrypoint still runs before this.
+                        args = [
                           "celery"
                           "-A"
                           "gramps_webapi.celery"
