@@ -17,15 +17,6 @@ data:
         - cloudbeaver:
             href: https://cloudbeaver.home.kronkltd.net
             siteMonitor: https://cloudbeaver.home.kronkltd.net
-        - elasticvue:
-            href: https://elasticvue.home.kronkltd.net
-            siteMonitor: https://elasticvue.home.kronkltd.net
-        - nocodb:
-            href: https://nocodb.home.kronkltd.net
-            siteMonitor: https://nocodb.home.kronkltd.net
-        - opensearch-dashboards:
-            href: https://opensearch-dashboards.home.kronkltd.net
-            siteMonitor: https://opensearch-dashboards.home.kronkltd.net
     - Download:
         - qbittorrent:
             href: https://qbittorrent.home.kronkltd.net
@@ -40,10 +31,6 @@ data:
         - slskd:
             href: https://slskd.home.kronkltd.net
             siteMonitor: https://slskd.home.kronkltd.net
-    - Apps:
-        - romm:
-            href: https://romm.home.kronkltd.net
-            siteMonitor: https://romm.home.kronkltd.net
     - Arr:
         - lidarr:
             href: https://lidarr.home.kronkltd.net

@@ -3,7 +3,7 @@
   services.nocodb = {
     allowLocalExternalDatabases = true;
     auth.jwtSecret = (secrets.nocodb or { }).jwtSecret or "";
-    enable = true;
+    enable = false;
 
     homepage.group = "Database";
 

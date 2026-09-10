@@ -1,7 +1,7 @@
 { ... }:
 {
   services.elasticvue = {
-    enable = true;
+    enable = false;
 
     ingressProvider = "traefik-lan";
 
