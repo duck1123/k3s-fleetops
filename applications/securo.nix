@@ -452,7 +452,18 @@
                           env = [
                             {
                               name = "BACKEND_URL";
-                              value = "http://${name}-backend.${cfg.namespace}:8000";
+                              # Must be fully-qualified: the frontend's nginx
+                              # templates this straight into a `resolver`-based
+                              # proxy_pass (see its nginx.conf comment about
+                              # per-request DNS re-resolution), and nginx's
+                              # resolver directive queries the literal name with
+                              # no /etc/resolv.conf search-domain expansion.
+                              # CoreDNS is only authoritative for the full
+                              # "<svc>.<ns>.svc.cluster.local" zone, so the short
+                              # "<svc>.<ns>" form that regular ndots-aware tools
+                              # (curl, getent) resolve fine comes back NXDOMAIN
+                              # from nginx's raw query.
+                              value = "http://${name}-backend.${cfg.namespace}.svc.cluster.local:8000";
                             }
                             {
                               name = "FRONTEND_URL";

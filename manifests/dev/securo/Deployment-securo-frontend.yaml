@@ -22,7 +22,7 @@ spec:
       containers:
         - env:
             - name: BACKEND_URL
-              value: http://securo-backend.securo:8000
+              value: http://securo-backend.securo.svc.cluster.local:8000
             - name: FRONTEND_URL
               value: https://securo.home.kronkltd.net
           image: ghcr.io/securo-finance/securo-frontend:0.15.1
