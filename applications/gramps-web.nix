@@ -61,8 +61,8 @@
           cfg:
           optionalAttrs (cfg.redis.password != "") {
             ${redis-secret} = {
-              brokerUrl = redisDsn cfg 0;
-              ratelimitUrl = redisDsn cfg 1;
+              brokerUrl = redisDsn cfg cfg.redis.celeryDbIndex;
+              ratelimitUrl = redisDsn cfg cfg.redis.ratelimitDbIndex;
             };
           };
 
@@ -97,6 +97,24 @@
               type = types.str;
               default = "";
             };
+
+            # Dedicated db indices (not 0/2/3/4, already used by paperless-ngx/immich,
+            # securo, and superset respectively -- see incident-tube-archivist-celery-pickle-crashloop
+            # in memory for why colliding Celery apps on the same db is dangerous: a
+            # differently-configured app's messages land in this one's queue and get
+            # rejected as untrusted content, or vice versa) so gramps-web's Celery
+            # broker/results and rate-limit storage never collide with another app's keys.
+            celeryDbIndex = mkOption {
+              description = mdDoc "Redis database index for gramps-web's Celery broker/result backend";
+              type = types.int;
+              default = 5;
+            };
+
+            ratelimitDbIndex = mkOption {
+              description = mdDoc "Redis database index for gramps-web's API rate-limit storage";
+              type = types.int;
+              default = 6;
+            };
           };
 
           service.port = mkOption {
@@ -130,9 +148,9 @@
                 name = "GUNICORN_NUM_WORKERS";
                 value = toString cfg.gunicornWorkers;
               }
-              (redisEnvVar cfg "GRAMPSWEB_CELERY_CONFIG__broker_url" "brokerUrl" 0)
-              (redisEnvVar cfg "GRAMPSWEB_CELERY_CONFIG__result_backend" "brokerUrl" 0)
-              (redisEnvVar cfg "GRAMPSWEB_RATELIMIT_STORAGE_URI" "ratelimitUrl" 1)
+              (redisEnvVar cfg "GRAMPSWEB_CELERY_CONFIG__broker_url" "brokerUrl" cfg.redis.celeryDbIndex)
+              (redisEnvVar cfg "GRAMPSWEB_CELERY_CONFIG__result_backend" "brokerUrl" cfg.redis.celeryDbIndex)
+              (redisEnvVar cfg "GRAMPSWEB_RATELIMIT_STORAGE_URI" "ratelimitUrl" cfg.redis.ratelimitDbIndex)
             ];
             sharedVolumeMounts = [
               {
