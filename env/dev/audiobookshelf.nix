@@ -1,7 +1,7 @@
 { secrets, ... }:
 {
   services.audiobookshelf = {
-    enable = false;
+    enable = true;
     apiKey = secrets.audiobookshelf.key;
     # hostAffinity = "edgenix";
 
