@@ -13,10 +13,6 @@ data:
         - longhorn:
             href: https://longhorn.home.kronkltd.net
             siteMonitor: https://longhorn.home.kronkltd.net
-    - Database:
-        - cloudbeaver:
-            href: https://cloudbeaver.home.kronkltd.net
-            siteMonitor: https://cloudbeaver.home.kronkltd.net
     - Download:
         - qbittorrent:
             href: https://qbittorrent.home.kronkltd.net
@@ -65,13 +61,6 @@ data:
               type: sonarr
               url: http://sonarr.sonarr:8989
     - Media:
-        - audiobookshelf:
-            href: https://audiobookshelf.home.kronkltd.net
-            siteMonitor: https://audiobookshelf.home.kronkltd.net
-            widget:
-              key: '{{HOMEPAGE_VAR_AUDIOBOOKSHELF_API_KEY}}'
-              type: audiobookshelf
-              url: http://audiobookshelf.audiobookshelf:80
         - bookorbit:
             href: https://bookorbit.home.kronkltd.net
             siteMonitor: https://bookorbit.home.kronkltd.net
@@ -112,13 +101,6 @@ data:
         - paperless-ngx:
             href: https://paperless-ngx.home.kronkltd.net
             siteMonitor: https://paperless-ngx.home.kronkltd.net
-        - trilium:
-            href: https://trilium.home.kronkltd.net
-            siteMonitor: https://trilium.home.kronkltd.net
-            widget:
-              key: '{{HOMEPAGE_VAR_TRILIUM_API_KEY}}'
-              type: trilium
-              url: http://trilium.trilium:8080
     - Finance:
         - securo:
             href: https://securo.home.kronkltd.net

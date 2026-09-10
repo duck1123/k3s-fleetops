@@ -1,9 +1,7 @@
 apiVersion: v1
 data:
   attic.json: '{"name":"attic","type":"http","url":"https://attic.home.kronkltd.net"}'
-  audiobookshelf.json: '{"name":"audiobookshelf","type":"http","url":"https://audiobookshelf.home.kronkltd.net"}'
   bookorbit.json: '{"name":"bookorbit","type":"http","url":"https://bookorbit.home.kronkltd.net"}'
-  cloudbeaver.json: '{"name":"cloudbeaver","type":"http","url":"https://cloudbeaver.home.kronkltd.net"}'
   ditto-relay.json: '{"name":"ditto-relay","type":"http","url":"https://relay.duck1123.com"}'
   duck1123.json: '{"name":"duck1123","type":"http","url":"https://duck1123.com"}'
   garage.json: '{"name":"garage","type":"http","url":"http://garage.garage.svc.cluster.local:3903/health"}'
@@ -24,7 +22,6 @@ data:
   stashapp.json: '{"name":"stashapp","type":"http","url":"https://stashapp.home.kronkltd.net"}'
   superset.json: '{"name":"superset","type":"http","url":"https://superset.home.kronkltd.net"}'
   tdarr.json: '{"name":"tdarr","type":"http","url":"https://tdarr.home.kronkltd.net"}'
-  trilium.json: '{"name":"trilium","type":"http","url":"https://trilium.home.kronkltd.net"}'
   uptime-kuma.json: '{"name":"uptime-kuma","type":"http","url":"https://uptime-kuma.home.kronkltd.net"}'
   xyops.json: '{"name":"xyops","type":"http","url":"https://xyops.home.kronkltd.net"}'
 kind: ConfigMap
