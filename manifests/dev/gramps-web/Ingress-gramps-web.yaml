@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  name: gramps-web
+  namespace: gramps-web
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: gramps-web.home.kronkltd.net
+      http:
+        paths:
+          - backend:
+              service:
+                name: gramps-web
+                port:
+                  name: http
+            path: /
+            pathType: ImplementationSpecific
+  tls:
+    - hosts:
+        - gramps-web.home.kronkltd.net
+      secretName: gramps-web-tls

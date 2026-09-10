@@ -5,6 +5,7 @@ data:
   ditto-relay.json: '{"name":"ditto-relay","type":"http","url":"https://relay.duck1123.com"}'
   duck1123.json: '{"name":"duck1123","type":"http","url":"https://duck1123.com"}'
   garage.json: '{"name":"garage","type":"http","url":"http://garage.garage.svc.cluster.local:3903/health"}'
+  gramps-web.json: '{"name":"gramps-web","type":"http","url":"https://gramps-web.home.kronkltd.net"}'
   homepage.json: '{"name":"homepage","type":"http","url":"https://homepage.home.kronkltd.net"}'
   immich.json: '{"name":"immich","type":"http","url":"https://immich.home.kronkltd.net"}'
   komga.json: '{"name":"komga","type":"http","url":"https://komga.home.kronkltd.net"}'

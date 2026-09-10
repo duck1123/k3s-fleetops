@@ -28,6 +28,9 @@ data:
             href: https://slskd.home.kronkltd.net
             siteMonitor: https://slskd.home.kronkltd.net
     - Apps:
+        - gramps-web:
+            href: https://gramps-web.home.kronkltd.net
+            siteMonitor: https://gramps-web.home.kronkltd.net
         - superset:
             href: https://superset.home.kronkltd.net
             siteMonitor: https://superset.home.kronkltd.net

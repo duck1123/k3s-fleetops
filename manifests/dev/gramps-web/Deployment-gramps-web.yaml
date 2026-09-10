@@ -1,0 +1,133 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/instance: gramps-web
+    app.kubernetes.io/name: gramps-web
+  name: gramps-web
+  namespace: gramps-web
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: gramps-web
+      app.kubernetes.io/name: gramps-web
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: gramps-web
+        app.kubernetes.io/name: gramps-web
+    spec:
+      containers:
+        - env:
+            - name: GRAMPSWEB_TREE
+              value: Gramps Web
+            - name: GRAMPSWEB_CELERY_CONFIG__broker_url
+              valueFrom:
+                secretKeyRef:
+                  key: brokerUrl
+                  name: gramps-web-redis
+            - name: GRAMPSWEB_CELERY_CONFIG__result_backend
+              valueFrom:
+                secretKeyRef:
+                  key: brokerUrl
+                  name: gramps-web-redis
+            - name: GRAMPSWEB_RATELIMIT_STORAGE_URI
+              valueFrom:
+                secretKeyRef:
+                  key: ratelimitUrl
+                  name: gramps-web-redis
+          image: ghcr.io/gramps-project/grampsweb:26.7.0
+          imagePullPolicy: IfNotPresent
+          name: gramps-web
+          ports:
+            - containerPort: 5000
+              name: http
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /app/users
+              name: users
+            - mountPath: /app/indexdir
+              name: index
+            - mountPath: /app/thumbnail_cache
+              name: thumbCache
+            - mountPath: /app/cache
+              name: cache
+            - mountPath: /app/secret
+              name: secret
+            - mountPath: /root/.gramps/grampsdb
+              name: db
+            - mountPath: /app/media
+              name: media
+            - mountPath: /tmp
+              name: tmp
+        - command:
+            - celery
+            - -A
+            - gramps_webapi.celery
+            - worker
+            - --loglevel=INFO
+            - --concurrency=2
+          env:
+            - name: GRAMPSWEB_TREE
+              value: Gramps Web
+            - name: GRAMPSWEB_CELERY_CONFIG__broker_url
+              valueFrom:
+                secretKeyRef:
+                  key: brokerUrl
+                  name: gramps-web-redis
+            - name: GRAMPSWEB_CELERY_CONFIG__result_backend
+              valueFrom:
+                secretKeyRef:
+                  key: brokerUrl
+                  name: gramps-web-redis
+            - name: GRAMPSWEB_RATELIMIT_STORAGE_URI
+              valueFrom:
+                secretKeyRef:
+                  key: ratelimitUrl
+                  name: gramps-web-redis
+          image: ghcr.io/gramps-project/grampsweb:26.7.0
+          imagePullPolicy: IfNotPresent
+          name: gramps-web-celery
+          volumeMounts:
+            - mountPath: /app/users
+              name: users
+            - mountPath: /app/indexdir
+              name: index
+            - mountPath: /app/thumbnail_cache
+              name: thumbCache
+            - mountPath: /app/cache
+              name: cache
+            - mountPath: /app/secret
+              name: secret
+            - mountPath: /root/.gramps/grampsdb
+              name: db
+            - mountPath: /app/media
+              name: media
+            - mountPath: /tmp
+              name: tmp
+      volumes:
+        - name: users
+          persistentVolumeClaim:
+            claimName: gramps-web-gramps-web-users
+        - name: index
+          persistentVolumeClaim:
+            claimName: gramps-web-gramps-web-index
+        - name: thumbCache
+          persistentVolumeClaim:
+            claimName: gramps-web-gramps-web-thumbCache
+        - name: cache
+          persistentVolumeClaim:
+            claimName: gramps-web-gramps-web-cache
+        - name: secret
+          persistentVolumeClaim:
+            claimName: gramps-web-gramps-web-secret
+        - name: db
+          persistentVolumeClaim:
+            claimName: gramps-web-gramps-web-db
+        - name: media
+          persistentVolumeClaim:
+            claimName: gramps-web-gramps-web-media
+        - emptyDir: {}
+          name: tmp

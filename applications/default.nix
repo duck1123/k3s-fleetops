@@ -26,6 +26,7 @@
     ./forgejo.nix
     ./garage.nix
     ./gluetun.nix
+    ./gramps-web.nix
     ./grafana
     ./harbor.nix
     ./hivemq.nix
