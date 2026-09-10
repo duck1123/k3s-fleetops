@@ -16,6 +16,7 @@ spec:
             - /bin/sh
             - -c
             - |
+              . /app/pythonpath/superset_bootstrap.sh
               superset fab create-admin \
                 --username "$ADMIN_USERNAME" \
                 --firstname Superset \

@@ -167,6 +167,19 @@
             celeryDb = cfg.redis.celeryDbIndex;
           };
 
+          # The stock apachesuperset.docker.scarf.sh/apache/superset image ships no Postgres
+          # DBAPI driver at all (verified: neither psycopg2 nor psycopg importable) -- every
+          # container that sources this script (web, worker, beat, init job) needs it before
+          # SQLAlchemy can even create an engine. Re-runs on every container start (no
+          # persistent volume backs ~/bootstrap), costing a few seconds per restart.
+          bootstrapScript = ''
+            #!/bin/bash
+            if [ ! -f ~/bootstrap ]; then
+              pip install --no-cache-dir psycopg2-binary
+              echo "Running Superset with uid {{ .Values.runAsUser }}" > ~/bootstrap
+            fi
+          '';
+
           # Safe to bake in literally -- just Python reading an env var, not a secret value.
           # The real SECRET_KEY lives in the "superset-env" Secret above.
           configOverrides.secret_key = ''
@@ -255,6 +268,7 @@
                         "/bin/sh"
                         "-c"
                         ''
+                          . /app/pythonpath/superset_bootstrap.sh
                           superset fab create-admin \
                             --username "$ADMIN_USERNAME" \
                             --firstname Superset \
