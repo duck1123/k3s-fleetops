@@ -639,6 +639,32 @@ spec:
               EOSQL
               echo "Database securo created successfully"
 
+              echo "Creating database superset and user superset..."
+              psql -v ON_ERROR_STOP=1 <<-EOSQL
+                -- Create database if it doesn't exist
+                SELECT format('CREATE DATABASE %I', 'superset') WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'superset')\gexec
+
+                -- Create user if it doesn't exist, then always update password
+                DO \$\$
+                BEGIN
+                  IF NOT EXISTS (SELECT FROM pg_user WHERE usename = 'superset') THEN
+                    EXECUTE format('CREATE USER %I WITH PASSWORD %L', 'superset', 'b6baf840707ea3dcd83de3f975c371613afc1ef1ac875576');
+                  ELSE
+                    EXECUTE format('ALTER USER %I WITH PASSWORD %L', 'superset', 'b6baf840707ea3dcd83de3f975c371613afc1ef1ac875576');
+                  END IF;
+                END
+                \$\$;
+
+                -- Grant privileges (quote database name)
+                DO \$\$
+                BEGIN
+                  EXECUTE format('GRANT ALL PRIVILEGES ON DATABASE %I TO %I', 'superset', 'superset');
+                  EXECUTE format('ALTER DATABASE %I OWNER TO %I', 'superset', 'superset');
+                END
+                \$\$;
+              EOSQL
+              echo "Database superset created successfully"
+
 
 
 
@@ -672,6 +698,7 @@ spec:
               psql -v ON_ERROR_STOP=1 -d 'securo' <<-EOSQL
                 CREATE EXTENSION IF NOT EXISTS "vector";
               EOSQL
+
 
           env:
             - name: PGHOST

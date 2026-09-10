@@ -83,6 +83,7 @@
     ./stashapp.nix
     ./spark.nix
     ./sqlpad.nix
+    ./superset.nix
     ./tailscale.nix
     ./tdarr.nix
     ./trilium.nix

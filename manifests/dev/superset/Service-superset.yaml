@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/component: web
+    app.kubernetes.io/instance: superset
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: superset
+    app.kubernetes.io/part-of: superset
+    app.kubernetes.io/version: 6.1.0
+    helm.sh/chart: superset-0.22.7
+  name: superset
+  namespace: superset
+spec:
+  ports:
+    - name: http
+      port: 8088
+      protocol: TCP
+      targetPort: http
+  selector:
+    app.kubernetes.io/component: web
+    app.kubernetes.io/instance: superset
+    app.kubernetes.io/name: superset
+  type: ClusterIP

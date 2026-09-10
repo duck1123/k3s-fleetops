@@ -1,0 +1,57 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded
+    argocd.argoproj.io/sync-wave: "1"
+  name: superset-create-admin
+  namespace: superset
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      containers:
+        - command:
+            - /bin/sh
+            - -c
+            - |
+              superset fab create-admin \
+                --username "$ADMIN_USERNAME" \
+                --firstname Superset \
+                --lastname Admin \
+                --email "$ADMIN_EMAIL" \
+                --password "$ADMIN_PASSWORD" || true
+          env:
+            - name: ADMIN_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: superset-admin
+            - name: ADMIN_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  key: email
+                  name: superset-admin
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: superset-admin
+          envFrom:
+            - secretRef:
+                name: superset-env
+          image: apachesuperset.docker.scarf.sh/apache/superset:6.1.0
+          imagePullPolicy: IfNotPresent
+          name: create-admin
+          volumeMounts:
+            - mountPath: /app/pythonpath
+              name: superset-config
+              readOnly: true
+      restartPolicy: OnFailure
+      securityContext:
+        runAsUser: 0
+      volumes:
+        - name: superset-config
+          secret:
+            secretName: superset-config

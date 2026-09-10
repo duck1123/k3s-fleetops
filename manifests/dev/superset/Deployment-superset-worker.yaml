@@ -1,0 +1,108 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/component: worker
+    app.kubernetes.io/instance: superset
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: superset
+    app.kubernetes.io/part-of: superset
+    app.kubernetes.io/version: 6.1.0
+    helm.sh/chart: superset-0.22.7
+  name: superset-worker
+  namespace: superset
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: worker
+      app.kubernetes.io/instance: superset
+      app.kubernetes.io/name: superset
+  template:
+    metadata:
+      annotations:
+        checksum/config: 61d6ceecb29207bec37f127726e5a79defc5786b29dd7c338eff6f455706dbe6
+        checksum/configOverrides: dbb840bbdeda1cbf6656bbd2cb1e570466000c947679fdd3cdcd6026154a15ee
+        checksum/configOverridesFiles: 44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
+        checksum/database: 1cb4598390ab69d8a2d88ba66340947862f40bc9e2d0ad732742c2e05d6d77de
+        checksum/extraConfigs: 44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
+        checksum/extraSecretEnv: 44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
+        checksum/extraSecrets: 44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
+        checksum/featureFlags: 44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
+        checksum/redis: 6c4e31e9be354e1c4091dc15597214460524b0b70682894a29b76b30d8bcaa7d
+        checksum/superset_bootstrap.sh: dc9a47141051ced34960c313860a55e03eb48c1fa36a0ed25c03ad60cd3b5c48
+        checksum/superset_config.py: 80ce797b05eb1b1390cde5ab201f2d6a29a399fde6e794d766964cda38dd1bf4
+      labels:
+        app.kubernetes.io/component: worker
+        app.kubernetes.io/instance: superset
+        app.kubernetes.io/name: superset
+    spec:
+      containers:
+        - command:
+            - /bin/sh
+            - -c
+            - . /app/pythonpath/superset_bootstrap.sh; exec celery --app=superset.tasks.celery_app:app worker
+          env:
+            - name: SUPERSET_PORT
+              value: "8088"
+          envFrom:
+            - secretRef:
+                name: superset-env
+          image: apachesuperset.docker.scarf.sh/apache/superset:6.1.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - celery -A superset.tasks.celery_app:app inspect ping -d celery@$HOSTNAME
+            failureThreshold: 3
+            initialDelaySeconds: 120
+            periodSeconds: 60
+            successThreshold: 1
+            timeoutSeconds: 60
+          name: superset
+          resources: {}
+          volumeMounts:
+            - mountPath: /app/pythonpath
+              name: superset-config
+              readOnly: true
+      initContainers:
+        - command:
+            - /bin/bash
+            - -c
+            - |
+              # See supersetNode.initContainers for the rationale.
+              SECONDS=0
+              wait_for() {
+                local host=$1 port=$2 name=$3
+                until (exec 3<>/dev/tcp/"$host"/"$port") 2>/dev/null; do
+                  if [ "$SECONDS" -ge 120 ]; then
+                    echo "timeout waiting for $name at $host:$port after 120s" >&2
+                    exit 1
+                  fi
+                  echo "waiting for $name at $host:$port (elapsed ${SECONDS}s)"
+                  sleep 2
+                done
+                echo "$name at $host:$port is up"
+              }
+              wait_for "$DB_HOST" "$DB_PORT" postgres
+              wait_for "$REDIS_HOST" "$REDIS_PORT" redis
+          envFrom:
+            - secretRef:
+                name: superset-env
+          image: apachesuperset.docker.scarf.sh/apache/superset:6.1.0
+          imagePullPolicy: IfNotPresent
+          name: wait-for-postgres-redis
+          resources:
+            limits:
+              memory: 256Mi
+            requests:
+              cpu: 250m
+              memory: 128Mi
+      securityContext:
+        runAsUser: 0
+      volumes:
+        - name: superset-config
+          secret:
+            secretName: superset-config

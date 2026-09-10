@@ -93,6 +93,7 @@ Charts with explicit version pins and SHA-256 hashes.
 | postgres (groundhog2k) | applications/postgresql.nix | https://groundhog2k.github.io/helm-charts/ | 1.6.8 | https://artifacthub.io/packages/helm/groundhog2k/postgres |
 | prometheus stack | applications/prometheus.nix | https://prometheus-community.github.io/helm-charts | 83.6.0 | https://artifacthub.io/packages/helm/prometheus-community/kube-prometheus-stack |
 | sops-operator | applications/sops.nix | https://isindir.github.io/sops-secrets-operator/ | 0.28.1 | https://artifacthub.io/packages/helm/isindir/sops-secrets-operator — still latest |
+| superset | applications/superset.nix | https://apache.github.io/superset | 0.22.7 | https://apache.github.io/superset/index.yaml — official Apache chart repo; appVersion 6.1.0, pinned separately via `image.tag` (`imageTag` option) so applications/superset.nix's own superset-create-admin job stays in sync |
 | tailscale | applications/tailscale.nix | https://pkgs.tailscale.com/helmcharts | 1.102.3 | https://pkgs.tailscale.com/helmcharts/index.yaml |
 | homer | applications/homer.nix | https://charts.gabe565.com | 0.13.0 | https://artifacthub.io/packages/helm/gabe565/homer — still latest |
 | argo-events | applications/argo-events.nix | https://argoproj.github.io/argo-helm | 2.4.27 | https://artifacthub.io/packages/helm/argo/argo-events |

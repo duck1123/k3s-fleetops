@@ -1,0 +1,77 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation
+  labels:
+    app.kubernetes.io/component: init
+    app.kubernetes.io/instance: superset
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: superset
+    app.kubernetes.io/part-of: superset
+    app.kubernetes.io/version: 6.1.0
+    helm.sh/chart: superset-0.22.7
+  name: superset-init-db
+  namespace: superset
+spec:
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: init
+        app.kubernetes.io/instance: superset
+        app.kubernetes.io/name: superset
+        job: superset-init-db
+      name: superset-init-db
+    spec:
+      containers:
+        - command:
+            - /bin/sh
+            - -c
+            - . /app/pythonpath/superset_bootstrap.sh; . /app/pythonpath/superset_init.sh
+          envFrom:
+            - secretRef:
+                name: superset-env
+          image: apachesuperset.docker.scarf.sh/apache/superset:6.1.0
+          imagePullPolicy: IfNotPresent
+          name: superset-init-db
+          resources: {}
+          volumeMounts:
+            - mountPath: /app/pythonpath
+              name: superset-config
+              readOnly: true
+      initContainers:
+        - command:
+            - /bin/bash
+            - -c
+            - |
+              # See supersetNode.initContainers for the rationale.
+              SECONDS=0
+              until (exec 3<>/dev/tcp/"$DB_HOST"/"$DB_PORT") 2>/dev/null; do
+                if [ "$SECONDS" -ge 120 ]; then
+                  echo "timeout waiting for postgres at $DB_HOST:$DB_PORT after 120s" >&2
+                  exit 1
+                fi
+                echo "waiting for postgres at $DB_HOST:$DB_PORT (elapsed ${SECONDS}s)"
+                sleep 2
+              done
+              echo "postgres at $DB_HOST:$DB_PORT is up"
+          envFrom:
+            - secretRef:
+                name: superset-env
+          image: apachesuperset.docker.scarf.sh/apache/superset:6.1.0
+          imagePullPolicy: IfNotPresent
+          name: wait-for-postgres
+          resources:
+            limits:
+              memory: 256Mi
+            requests:
+              cpu: 250m
+              memory: 128Mi
+      restartPolicy: Never
+      securityContext:
+        runAsUser: 0
+      volumes:
+        - name: superset-config
+          secret:
+            secretName: superset-config

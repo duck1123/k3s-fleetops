@@ -31,6 +31,10 @@ data:
         - slskd:
             href: https://slskd.home.kronkltd.net
             siteMonitor: https://slskd.home.kronkltd.net
+    - Apps:
+        - superset:
+            href: https://superset.home.kronkltd.net
+            siteMonitor: https://superset.home.kronkltd.net
     - Arr:
         - lidarr:
             href: https://lidarr.home.kronkltd.net

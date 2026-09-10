@@ -99,6 +99,15 @@
           # CREATE EXTENSION for it -- see the postgresql-init-databases job.
           extensions = [ "vector" ];
         }
+        {
+          # Dedicated alphanumeric-only password -- Superset's own `superset db upgrade`
+          # goes through Alembic/ConfigParser the same way securo's does (see
+          # env/dev/securo.nix), so it can't share the punctuation-heavy shared
+          # userPassword either.
+          name = "superset";
+          username = "superset";
+          password = (secrets.superset or { }).database.password or secrets.postgresql.userPassword;
+        }
       ];
 
     # Captured via `kubectl get pv <name> -o jsonpath='{.spec.csi.volumeHandle}'`
