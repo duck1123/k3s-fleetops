@@ -1,7 +1,7 @@
 { ... }:
 {
   services.crafty-controller = {
-    enable = true;
+    enable = false;
 
     serviceType = "LoadBalancer";
     storageClassName = "longhorn";
