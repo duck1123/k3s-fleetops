@@ -1,0 +1,119 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: amd64
+  namespace: nix-csi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: builder
+      app.kubernetes.io/part-of: nix-csi
+      kubernetes.io/arch: amd64
+      nix.csi/deployment: amd64
+  template:
+    metadata:
+      annotations:
+        configHash: 92bdf6d553d21f1e33456fe976625fc7
+        kubectl.kubernetes.io/default-container: nix-builder
+        nix-csi/discard: "true"
+      labels:
+        app.kubernetes.io/name: builder
+        app.kubernetes.io/part-of: nix-csi
+        kubernetes.io/arch: amd64
+        nix.csi/deployment: amd64
+    spec:
+      containers:
+        - command:
+            - dinit
+            - --log-file
+            - /var/log/dinit.log
+            - --quiet
+            - builder
+          env:
+            - name: BUILDERS_ENABLED
+              value: "true"
+            - name: CACHE_ENABLED
+              value: "true"
+            - name: HOME
+              value: /nix/var/nix-csi/root
+            - name: KUBE_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          image: ghcr.io/lillecarl/nix-csi/scratch:1.0.1
+          name: nix-builder
+          resources:
+            limits:
+              ephemeral-storage: 5Gi
+            requests:
+              cpu: "1"
+              ephemeral-storage: 5Gi
+              memory: 2Gi
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - mountPath: /etc/nix
+              name: nix-config
+            - mountPath: /nix
+              name: nix-store
+              subPath: nix
+            - mountPath: /etc/ssh
+              name: ssh-config
+            - mountPath: /etc/ssh-dynauth
+              name: ssh-dynauth
+            - mountPath: /etc/ssh-key
+              name: ssh-key
+      initContainers:
+        - command:
+            - initCopy
+          image: ghcr.io/lillecarl/nix-csi/scratch:1.0.1
+          imagePullPolicy: Always
+          name: initcopy
+          securityContext:
+            capabilities:
+              add:
+                - SYS_CHROOT
+          volumeMounts:
+            - mountPath: /nix
+              name: init-store
+              subPath: nix
+            - mountPath: /etc/nix
+              name: nix-config
+            - mountPath: /nix-volume
+              name: nix-store
+            - mountPath: /etc/ssh
+              name: ssh-config
+            - mountPath: /etc/ssh-dynauth
+              name: ssh-dynauth
+            - mountPath: /etc/ssh-key
+              name: ssh-key
+      nodeSelector:
+        kubernetes.io/arch: amd64
+      priorityClassName: system-cluster-critical
+      serviceAccountName: nix-csi
+      volumes:
+        - csi:
+            driver: nix.csi.store
+            readOnly: true
+            volumeAttributes:
+              aarch64-linux: /nix/store/kx5i62ls90cdacnsh2jqxxgb42rfs9d7-builder-init-env
+              x86_64-linux: /nix/store/48dg7h9ax95f45xv9q1ia55qzkwvdppp-builder-init-env
+          name: init-store
+        - configMap:
+            name: nix-builder
+          name: nix-config
+        - emptyDir: {}
+          name: nix-store
+        - configMap:
+            defaultMode: 292
+            name: ssh-config
+          name: ssh-config
+        - configMap:
+            defaultMode: 292
+            name: ssh-dynauth
+          name: ssh-dynauth
+        - name: ssh-key
+          secret:
+            defaultMode: 256
+            secretName: ssh-key

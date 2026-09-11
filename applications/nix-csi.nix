@@ -73,6 +73,10 @@
                     cache.nixConfig.settings = cacheSettings;
                     node.nixConfig.settings = atticSettings;
                     builders.nixConfig.settings = atticSettings;
+                    # Gives cache/node/proxy a local-build fallback (via SSH-ng,
+                    # discovered dynamically by builders.py) for bootstrap *-init-env
+                    # paths that are missing from Attic, instead of hard-failing.
+                    builders.deployments.amd64.enable = true;
                   };
                 }
               ];
