@@ -62,6 +62,7 @@
         # env/dev/mediamanager.nix and docs/pinned-volumes.md).
         volumes = cfg: {
           images.size = "5Gi";
+          config.size = "500Mi";
         };
 
         extraOptions = {
@@ -224,6 +225,17 @@
                             mountPath = "/app/config";
                             name = "config";
                           }
+                          # Overlay just config.toml from the ConfigMap on top of the
+                          # writable PVC above -- the app writes its own log file
+                          # (media_manager.log) and possibly other state into
+                          # /app/config, so the whole directory can't be a read-only
+                          # ConfigMap mount (that's what broke both the root-init
+                          # chown step and this file-logging handler).
+                          {
+                            mountPath = "/app/config/config.toml";
+                            name = "config-file";
+                            subPath = "config.toml";
+                          }
                           {
                             mountPath = "/data/images";
                             name = "images";
@@ -245,8 +257,9 @@
                     ];
 
                     volumes = [
+                      cfg.volumes.config.volume
                       {
-                        name = "config";
+                        name = "config-file";
                         configMap.name = name;
                       }
                       cfg.volumes.images.volume

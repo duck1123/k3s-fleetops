@@ -66,6 +66,9 @@ spec:
           volumeMounts:
             - mountPath: /app/config
               name: config
+            - mountPath: /app/config/config.toml
+              name: config-file
+              subPath: config.toml
             - mountPath: /data/images
               name: images
             - mountPath: /data/tv
@@ -80,9 +83,12 @@ spec:
         runAsUser: 1000
       serviceAccountName: default
       volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: mediamanager-mediamanager-config
         - configMap:
             name: mediamanager
-          name: config
+          name: config-file
         - name: images
           persistentVolumeClaim:
             claimName: mediamanager-mediamanager-images
