@@ -15,6 +15,7 @@
     ./cert-manager.nix
     ./cloudbeaver.nix
     ./cloudflared.nix
+    ./crafty-controller.nix
     ./demo.nix
     ./ditto-relay.nix
     ./duck1123

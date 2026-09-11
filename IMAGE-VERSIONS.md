@@ -67,6 +67,7 @@ These images have explicit version tags and require manual checks.
 | hass-AiDot | applications/home-assistant.nix | toxuin/hass-AiDot (git tag, not an image) | v1.2.0 | https://github.com/toxuin/hass-AiDot/releases |
 | opensearch | applications/ditto-relay.nix | opensearchproject/opensearch | 2.19.6 | https://hub.docker.com/r/opensearchproject/opensearch/tags |
 | gramps-web | applications/gramps-web.nix | ghcr.io/gramps-project/grampsweb | 26.7.0 | https://github.com/gramps-project/gramps-web-api/releases (image tags checked via GHCR registry API, not GitHub releases) |
+| crafty-controller | applications/crafty-controller.nix | registry.gitlab.com/crafty-controller/crafty-4 | 4.5.4 | https://gitlab.com/crafty-controller/crafty-4/-/tags |
 
 **Floating images** (no pinning needed — these always pull latest/stable):
 Many applications use `:latest`, `:stable`, or a floating major tag (e.g. `redis:8-alpine`, `louislam/uptime-kuma:1`).
