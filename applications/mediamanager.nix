@@ -18,30 +18,28 @@
       # are intentionally left out -- they're injected via MEDIAMANAGER_* env
       # vars from sops secrets instead (pydantic-settings' env source wins
       # over the TOML source), so they never sit in a plaintext ConfigMap.
-      configToml =
-        cfg:
-        ''
-          [misc]
-          frontend_url = "https://${cfg.ingress.domain}"
-          cors_urls = ["https://${cfg.ingress.domain}"]
-          image_directory = "/data/images"
-          tv_directory = "/data/tv"
-          movie_directory = "/data/movies"
-          torrent_directory = "/data/torrents"
-          development = false
+      configToml = cfg: ''
+        [misc]
+        frontend_url = "https://${cfg.ingress.domain}"
+        cors_urls = ["https://${cfg.ingress.domain}"]
+        image_directory = "/data/images"
+        tv_directory = "/data/tv"
+        movie_directory = "/data/movies"
+        torrent_directory = "/data/torrents"
+        development = false
 
-          [[misc.tv_libraries]]
-          name = "TV"
-          path = "/data/tv"
+        [[misc.tv_libraries]]
+        name = "TV"
+        path = "/data/tv"
 
-          [[misc.movie_libraries]]
-          name = "Movies"
-          path = "/data/movies"
+        [[misc.movie_libraries]]
+        name = "Movies"
+        path = "/data/movies"
 
-          [auth]
-          registration_enabled = ${boolToString cfg.registrationEnabled}
-          admin_emails = [${concatStringsSep ", " (map (e: ''"${e}"'') cfg.adminEmails)}]
-        '';
+        [auth]
+        registration_enabled = ${boolToString cfg.registrationEnabled}
+        admin_emails = [${concatStringsSep ", " (map (e: ''"${e}"'') cfg.adminEmails)}]
+      '';
     in
     self.lib.mkArgoApp
       {
