@@ -1,7 +1,7 @@
 { config, secrets, ... }:
 {
   services.komga = {
-    enable = true;
+    enable = false;
     apiKey = secrets.komga.key;
 
     ingressProvider = "traefik-lan";

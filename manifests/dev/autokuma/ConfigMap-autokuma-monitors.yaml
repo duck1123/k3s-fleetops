@@ -8,7 +8,6 @@ data:
   gramps-web.json: '{"name":"gramps-web","type":"http","url":"https://gramps-web.home.kronkltd.net"}'
   homepage.json: '{"name":"homepage","type":"http","url":"https://homepage.home.kronkltd.net"}'
   immich.json: '{"name":"immich","type":"http","url":"https://immich.home.kronkltd.net"}'
-  komga.json: '{"name":"komga","type":"http","url":"https://komga.home.kronkltd.net"}'
   lidarr.json: '{"name":"lidarr","type":"http","url":"https://lidarr.home.kronkltd.net"}'
   longhorn.json: '{"name":"longhorn","type":"http","url":"https://longhorn.home.kronkltd.net"}'
   paperless-ngx.json: '{"name":"paperless-ngx","type":"http","url":"https://paperless-ngx.home.kronkltd.net"}'
