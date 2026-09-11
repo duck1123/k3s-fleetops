@@ -75,6 +75,18 @@
             default = 8000;
           };
 
+          puid = mkOption {
+            description = mdDoc "The user ID to run the container as. The image's entrypoint runs as root and chowns everything under /app/config to this uid on startup -- pointless (and noisy, since /app/config is a read-only ConfigMap mount here) but harmless when it matches, since pod securityContext.runAsUser already puts the process itself at this uid.";
+            type = types.int;
+            default = 1000;
+          };
+
+          pgid = mkOption {
+            description = mdDoc "The group ID to run the container as.";
+            type = types.int;
+            default = 1000;
+          };
+
           tokenSecret = mkOption {
             description = mdDoc "Value for auth.token_secret (session/JWT signing key -- generate with `openssl rand -hex 32`). Empty = the app falls back to a fresh random secret on every restart, invalidating all sessions.";
             type = types.str;
@@ -126,6 +138,11 @@
 
                   spec = {
                     serviceAccountName = "default";
+                    securityContext = {
+                      runAsUser = cfg.puid;
+                      runAsGroup = cfg.pgid;
+                      fsGroup = cfg.pgid;
+                    };
 
                     containers = [
                       {
