@@ -10,7 +10,6 @@ data:
   immich.json: '{"name":"immich","type":"http","url":"https://immich.home.kronkltd.net"}'
   lidarr.json: '{"name":"lidarr","type":"http","url":"https://lidarr.home.kronkltd.net"}'
   longhorn.json: '{"name":"longhorn","type":"http","url":"https://longhorn.home.kronkltd.net"}'
-  mediamanager.json: '{"name":"mediamanager","type":"http","url":"https://mediamanager.home.kronkltd.net"}'
   paperless-ngx.json: '{"name":"paperless-ngx","type":"http","url":"https://paperless-ngx.home.kronkltd.net"}'
   pinchflat.json: '{"name":"pinchflat","type":"http","url":"https://pinchflat.home.kronkltd.net"}'
   prowlarr.json: '{"name":"prowlarr","type":"http","url":"https://prowlarr.home.kronkltd.net"}'

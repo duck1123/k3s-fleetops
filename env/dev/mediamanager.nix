@@ -1,7 +1,7 @@
 { secrets, ... }:
 {
   services.mediamanager = {
-    enable = true;
+    enable = false;
 
     databaseTarget = "postgresql";
     database.enable = true;

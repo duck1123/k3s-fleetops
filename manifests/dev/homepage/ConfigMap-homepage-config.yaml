@@ -45,9 +45,6 @@ data:
               key: '{{HOMEPAGE_VAR_LIDARR_API_KEY}}'
               type: lidarr
               url: http://lidarr.lidarr:8686
-        - mediamanager:
-            href: https://mediamanager.home.kronkltd.net
-            siteMonitor: https://mediamanager.home.kronkltd.net
         - prowlarr:
             href: https://prowlarr.home.kronkltd.net
             siteMonitor: https://prowlarr.home.kronkltd.net
