@@ -1,7 +1,7 @@
 { config, ... }:
 {
   services.uptime-kuma = {
-    enable = false;
+    enable = true;
     storageClassName = "longhorn";
 
     ingressProvider = "traefik-lan";

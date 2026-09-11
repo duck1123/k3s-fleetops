@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: xyops
+  namespace: xyops
+spec:
+  ports:
+    - name: http
+      port: 5522
+      protocol: TCP
+      targetPort: http
+  selector:
+    app.kubernetes.io/instance: xyops
+    app.kubernetes.io/name: xyops
+  type: ClusterIP

@@ -34,6 +34,9 @@ data:
         - superset:
             href: https://superset.home.kronkltd.net
             siteMonitor: https://superset.home.kronkltd.net
+        - windmill:
+            href: https://windmill.home.kronkltd.net
+            siteMonitor: https://windmill.home.kronkltd.net
     - Arr:
         - lidarr:
             href: https://lidarr.home.kronkltd.net
@@ -104,6 +107,12 @@ data:
     - Automation:
         - argocd:
             href: https://argocd.dev.kronkltd.net/
+        - uptime-kuma:
+            href: https://uptime-kuma.home.kronkltd.net
+            siteMonitor: https://uptime-kuma.home.kronkltd.net
+        - xyops:
+            href: https://xyops.home.kronkltd.net
+            siteMonitor: https://xyops.home.kronkltd.net
     - Nostr:
         - Ditto Relay:
             href: https://relay.duck1123.com
