@@ -1,0 +1,25 @@
+{ secrets, ... }:
+{
+  services.mediamanager = {
+    enable = true;
+
+    databaseTarget = "postgresql";
+    database.enable = true;
+    # Dedicated alphanumeric-only password -- see env/dev/securo.nix for why
+    # an Alembic-migrated app can't safely share the punctuation-heavy shared
+    # databaseProviders.postgresql password.
+    database.password = secrets.mediamanager.database.password;
+
+    tokenSecret = secrets.mediamanager.auth.tokenSecret;
+
+    adminEmails = [ "duck@kronkltd.net" ];
+    registrationEnabled = false;
+
+    ingressProvider = "traefik-lan";
+    ingress.tls.enable = true;
+    homepage.group = "Arr";
+
+    nfsTarget = "nas";
+    nfs.enable = true;
+  };
+}

@@ -613,6 +613,32 @@ spec:
               EOSQL
               echo "Database bookorbit created successfully"
 
+              echo "Creating database mediamanager and user mediamanager..."
+              psql -v ON_ERROR_STOP=1 <<-EOSQL
+                -- Create database if it doesn't exist
+                SELECT format('CREATE DATABASE %I', 'mediamanager') WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'mediamanager')\gexec
+
+                -- Create user if it doesn't exist, then always update password
+                DO \$\$
+                BEGIN
+                  IF NOT EXISTS (SELECT FROM pg_user WHERE usename = 'mediamanager') THEN
+                    EXECUTE format('CREATE USER %I WITH PASSWORD %L', 'mediamanager', 'RPzGXDlPFUCpRnwgOcbWdayi4ezl7YIC');
+                  ELSE
+                    EXECUTE format('ALTER USER %I WITH PASSWORD %L', 'mediamanager', 'RPzGXDlPFUCpRnwgOcbWdayi4ezl7YIC');
+                  END IF;
+                END
+                \$\$;
+
+                -- Grant privileges (quote database name)
+                DO \$\$
+                BEGIN
+                  EXECUTE format('GRANT ALL PRIVILEGES ON DATABASE %I TO %I', 'mediamanager', 'mediamanager');
+                  EXECUTE format('ALTER DATABASE %I OWNER TO %I', 'mediamanager', 'mediamanager');
+                END
+                \$\$;
+              EOSQL
+              echo "Database mediamanager created successfully"
+
               echo "Creating database securo and user securo..."
               psql -v ON_ERROR_STOP=1 <<-EOSQL
                 -- Create database if it doesn't exist
@@ -693,6 +719,7 @@ spec:
                                                 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
                                                 CREATE EXTENSION IF NOT EXISTS "pg_trgm";
               EOSQL
+
 
               echo "Enabling extensions on securo: vector..."
               psql -v ON_ERROR_STOP=1 -d 'securo' <<-EOSQL

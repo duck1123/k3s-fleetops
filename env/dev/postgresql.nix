@@ -88,6 +88,14 @@
         }
         {
           # Dedicated alphanumeric-only password -- see env/dev/securo.nix
+          # for why an Alembic-migrated app can't share the punctuation-heavy
+          # shared postgresql userPassword.
+          name = "mediamanager";
+          username = "mediamanager";
+          password = secrets.mediamanager.database.password;
+        }
+        {
+          # Dedicated alphanumeric-only password -- see env/dev/securo.nix
           # for why securo can't share the punctuation-heavy postgresql
           # userPassword (Alembic's ConfigParser-based URL handling breaks
           # on percent-encoded special characters).

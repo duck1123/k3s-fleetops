@@ -52,6 +52,7 @@
     ./mariadb.nix
     ./marquez.nix
     ./mealie.nix
+    ./mediamanager.nix
     ./memos.nix
     ./rustfs.nix
     ./metabase.nix

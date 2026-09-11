@@ -1,0 +1,27 @@
+apiVersion: v1
+data:
+  config.toml: |
+    [misc]
+    frontend_url = "https://mediamanager.home.kronkltd.net"
+    cors_urls = ["https://mediamanager.home.kronkltd.net"]
+    image_directory = "/data/images"
+    tv_directory = "/data/tv"
+    movie_directory = "/data/movies"
+    torrent_directory = "/data/torrents"
+    development = false
+
+    [[misc.tv_libraries]]
+    name = "TV"
+    path = "/data/tv"
+
+    [[misc.movie_libraries]]
+    name = "Movies"
+    path = "/data/movies"
+
+    [auth]
+    registration_enabled = false
+    admin_emails = ["duck@kronkltd.net"]
+kind: ConfigMap
+metadata:
+  name: mediamanager
+  namespace: mediamanager
