@@ -13,7 +13,6 @@
     tokenSecret = secrets.mediamanager.auth.tokenSecret;
 
     adminEmails = [ "duck@kronkltd.net" ];
-    registrationEnabled = false;
 
     ingressProvider = "traefik-lan";
     ingress.tls.enable = true;

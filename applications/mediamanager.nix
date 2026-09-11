@@ -37,7 +37,9 @@
         path = "/data/movies"
 
         [auth]
-        registration_enabled = ${boolToString cfg.registrationEnabled}
+        # No registration_enabled here -- that field doesn't exist yet in the
+        # pinned 1.12.3 AuthConfig (pydantic-settings' extra="forbid" default
+        # rejects unknown keys outright); it's a later-release addition.
         admin_emails = [${concatStringsSep ", " (map (e: ''"${e}"'') cfg.adminEmails)}]
       '';
     in
@@ -91,12 +93,6 @@
             description = mdDoc "Value for auth.token_secret (session/JWT signing key -- generate with `openssl rand -hex 32`). Empty = the app falls back to a fresh random secret on every restart, invalidating all sessions.";
             type = types.str;
             default = "";
-          };
-
-          registrationEnabled = mkOption {
-            description = mdDoc "Whether the sign-up page is enabled. When false, only the accounts in adminEmails can log in (created automatically on first boot if no users exist yet).";
-            type = types.bool;
-            default = false;
           };
 
           adminEmails = mkOption {

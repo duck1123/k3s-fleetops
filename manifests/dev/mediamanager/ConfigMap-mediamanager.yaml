@@ -19,7 +19,9 @@ data:
     path = "/data/movies"
 
     [auth]
-    registration_enabled = false
+    # No registration_enabled here -- that field doesn't exist yet in the
+    # pinned 1.12.3 AuthConfig (pydantic-settings' extra="forbid" default
+    # rejects unknown keys outright); it's a later-release addition.
     admin_emails = ["duck@kronkltd.net"]
 kind: ConfigMap
 metadata:
