@@ -20,8 +20,10 @@
     jwtSecret = (secrets.bookorbit or { }).jwtSecret or "";
     setupBootstrapToken = (secrets.bookorbit or { }).setupBootstrapToken or "";
 
-    # No volumeOverrides yet -- this is a brand-new app with no PVC to pin.
-    # Once it's up, capture the "data" PVC's volumeHandle and pin it here --
-    # see docs/pinned-volumes.md.
+    # Captured via `kubectl get pv <name> -o jsonpath='{.spec.csi.volumeHandle}'`
+    # -- see docs/pinned-volumes.md. Specific to this cluster.
+    volumeOverrides = {
+      data.volumeHandle = "pvc-51d3f19b-d08c-4486-8da0-586d5cf841fe";
+    };
   };
 }

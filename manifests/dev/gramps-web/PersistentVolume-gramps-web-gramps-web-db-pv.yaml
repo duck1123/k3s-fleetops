@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-options: Replace=true
+  name: gramps-web-gramps-web-db-pv
+spec:
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 2Gi
+  csi:
+    driver: driver.longhorn.io
+    fsType: ext4
+    volumeAttributes:
+      dataEngine: v1
+      dataLocality: disabled
+      disableRevisionCounter: "true"
+      fromBackup: ""
+      fsType: ext4
+      numberOfReplicas: "1"
+      staleReplicaTimeout: "30"
+      unmapMarkSnapChainRemoved: ignored
+    volumeHandle: pvc-c70d1079-d1bb-4af0-9993-dab06212b2ae
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
