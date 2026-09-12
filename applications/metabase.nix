@@ -43,10 +43,11 @@
         done
 
         props=$(curl -sf "$base_url/api/session/properties")
-        setup_token=$(echo "$props" | jq -r '."setup-token" // empty')
+        has_user_setup=$(echo "$props" | jq -r '."has-user-setup"')
 
-        if [ -n "$setup_token" ]; then
+        if [ "$has_user_setup" != "true" ]; then
           echo "No admin exists yet -- completing first-run setup"
+          setup_token=$(echo "$props" | jq -r '."setup-token"')
           setup_body=$(jq -n \
             --arg token "$setup_token" \
             --arg first_name "$FIRST_NAME" \
