@@ -18,13 +18,19 @@
       # ── Runtime ──────────────────────────────────────────────────────────────
       # The site itself (pubkey, relays, NIP-05 well-known file) lives as a real
       # npm/Vite project at applications/duck1123-site/, built via the
-      # `duck1123-site` flake package (modules/pkgs/duck1123-site.nix). nix-csi
-      # fetches this repo's own flake by GitHub reference to get that package —
-      # meaning site changes need to be pushed before nix-csi will pick them up,
-      # same as applications/nostrarchives.nix's nixExpr. It's symlinkJoin'd with
-      # pkgs.python3 so /nix/var/result has both a `bin/python3` to run
-      # server.py *and* the built static files (index.html, assets/,
-      # .well-known/) at its root for that same server to serve.
+      # `duck1123-site` flake package (modules/pkgs/duck1123-site.nix). Its
+      # output store path is resolved right here at `nur switch` time (forcing
+      # a local build of the site as part of the activation package) and baked
+      # in literally via builtins.storePath -- so nix-csi never re-evaluates
+      # the flake, and the embedded path only changes when the site's content
+      # actually does. There's no fallback: builtins.storePath carries no build
+      # recipe, so this exact path must be pushed to Attic (`attic push nixos
+      # ${self.packages.x86_64-linux.duck1123-site}`) as part of every switch
+      # that changes it, or nix-csi has nothing to substitute it from. It's
+      # symlinkJoin'd with pkgs.python3 so /nix/var/result has both a
+      # `bin/python3` to run server.py *and* the built static files
+      # (index.html, assets/, .well-known/) at its root for that same server
+      # to serve.
       nixExpr = ''
         let
           pkgs = import (builtins.fetchTree {
@@ -33,7 +39,7 @@
             repo = "nixpkgs";
             ref = "nixos-unstable";
           }) {};
-          site = (builtins.getFlake "github:duck1123/k3s-fleetops").packages.x86_64-linux.duck1123-site;
+          site = builtins.storePath "${self.packages.x86_64-linux.duck1123-site}";
         in
         pkgs.symlinkJoin {
           name = "duck1123-runtime";
