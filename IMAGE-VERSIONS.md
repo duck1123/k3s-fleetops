@@ -128,7 +128,6 @@ These have newer versions available but involve major or breaking changes. Revie
 | mssql | applications/mssql.nix | (check ArtifactHub) | 1.2.3 |
 | openldap | applications/openldap.nix | https://charts.rock8s.com | 4.1.1 |
 | satisfactory | applications/satisfactory.nix | https://schich.tel/helm-charts | 0.3.2 |
-| sqlpad | applications/sqlpad.nix | (check ArtifactHub) | 0.1.0 |
 
 ---
 

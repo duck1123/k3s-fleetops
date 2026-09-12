@@ -85,7 +85,6 @@
     ./sops.nix
     ./stashapp.nix
     ./spark.nix
-    ./sqlpad.nix
     ./superset.nix
     ./tailscale.nix
     ./tdarr.nix
