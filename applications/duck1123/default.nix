@@ -18,37 +18,24 @@
       # ── Runtime ──────────────────────────────────────────────────────────────
       # The site itself (pubkey, relays, NIP-05 well-known file) lives as a real
       # npm/Vite project at applications/duck1123-site/, built via the
-      # `duck1123-site` flake package (modules/pkgs/duck1123-site.nix). Its
+      # `duck1123-runtime` flake package (modules/pkgs/duck1123-site.nix,
+      # symlinkJoin of the site + pkgs.python3 so /nix/var/result has both the
+      # built static files and a `bin/python3` for server.py to run). Its
       # output store path is resolved right here at `nur switch` time (forcing
-      # a local build of the site as part of the activation package) and baked
-      # in literally via builtins.storePath -- so nix-csi never re-evaluates
-      # the flake, and the embedded path only changes when the site's content
-      # actually does. There's no fallback: builtins.storePath carries no build
-      # recipe, so this exact path must be pushed to Attic (`attic push nixos
-      # ${self.packages.x86_64-linux.duck1123-site}`) as part of every switch
-      # that changes it, or nix-csi has nothing to substitute it from. It's
-      # symlinkJoin'd with pkgs.python3 so /nix/var/result has both a
-      # `bin/python3` to run server.py *and* the built static files
-      # (index.html, assets/, .well-known/) at its root for that same server
-      # to serve.
-      nixExpr = ''
-        let
-          pkgs = import (builtins.fetchTree {
-            type = "github";
-            owner = "nixos";
-            repo = "nixpkgs";
-            ref = "nixos-unstable";
-          }) {};
-          site = builtins.storePath "${self.packages.x86_64-linux.duck1123-site}";
-        in
-        pkgs.symlinkJoin {
-          name = "duck1123-runtime";
-          paths = [
-            pkgs.python3
-            site
-          ];
-        }
-      '';
+      # a local build as part of the activation package) and passed to nix-csi
+      # via the CSI driver's per-system storePath convention (volumeAttributes
+      # keyed by Nix system string, e.g. "x86_64-linux" -- same mechanism
+      # applications/nix-csi.nix's builder pod uses for its init-store volume)
+      # rather than a nixExpr string. This isn't just style: nix-csi evaluates
+      # nixExpr without --impure, and builtins.storePath is rejected in pure
+      # eval, so embedding the literal path inside nixExpr's source text
+      # hard-fails NodePublishVolume ("Failed to build Nix expression") --
+      # the storePath attribute instead gets handed to `nix build` as a plain
+      # CLI installable, which substitutes fine. There's still no fallback:
+      # this exact path must be pushed to Attic (`attic push nixos
+      # ${self.packages.x86_64-linux.duck1123-runtime}`) as part of every
+      # switch that changes it, or nix-csi has nothing to substitute it from.
+      duck1123Runtime = self.packages.x86_64-linux.duck1123-runtime;
 
       serverScript = builtins.readFile ./server.py;
     in
@@ -116,7 +103,7 @@
                       name = "nix";
                       csi = {
                         driver = "nix.csi.store";
-                        volumeAttributes.nixExpr = nixExpr;
+                        volumeAttributes."x86_64-linux" = "${duck1123Runtime}";
                       };
                     }
                     {

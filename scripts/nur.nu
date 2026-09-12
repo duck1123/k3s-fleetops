@@ -100,7 +100,7 @@ export def "nur push-site-cache" [
 export def "nur switch" [--show-trace, --fallback] {
   let drv_path = nur build --show-trace=$show_trace --fallback=$fallback
   switch-activation-package $drv_path
-  nur push-site-cache duck1123-site
+  nur push-site-cache duck1123-runtime
 }
 
 # CI shorthand — same as switch

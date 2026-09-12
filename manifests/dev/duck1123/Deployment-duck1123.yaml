@@ -35,23 +35,7 @@ spec:
         - csi:
             driver: nix.csi.store
             volumeAttributes:
-              nixExpr: |
-                let
-                  pkgs = import (builtins.fetchTree {
-                    type = "github";
-                    owner = "nixos";
-                    repo = "nixpkgs";
-                    ref = "nixos-unstable";
-                  }) {};
-                  site = builtins.storePath "/nix/store/a67d18pv0ffpmsl4bvl7v8yrisb6h8y0-duck1123-site-0.1.0";
-                in
-                pkgs.symlinkJoin {
-                  name = "duck1123-runtime";
-                  paths = [
-                    pkgs.python3
-                    site
-                  ];
-                }
+              x86_64-linux: /nix/store/hr5prqzsvn3kqdh7ib1515j026l4054c-duck1123-runtime
           name: nix
         - configMap:
             name: duck1123-server
