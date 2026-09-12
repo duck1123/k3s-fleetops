@@ -13,6 +13,10 @@ data:
         - longhorn:
             href: https://longhorn.home.kronkltd.net
             siteMonitor: https://longhorn.home.kronkltd.net
+    - Database:
+        - cloudbeaver:
+            href: https://cloudbeaver.home.kronkltd.net
+            siteMonitor: https://cloudbeaver.home.kronkltd.net
     - Download:
         - qbittorrent:
             href: https://qbittorrent.home.kronkltd.net

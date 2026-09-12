@@ -1,7 +1,7 @@
 { config, ... }:
 {
   services.cloudbeaver = {
-    enable = false;
+    enable = true;
     hostAffinity = "edgenix";
 
     ingressProvider = "traefik-lan";
