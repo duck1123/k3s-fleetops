@@ -1,0 +1,109 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded
+    argocd.argoproj.io/sync-wave: "1"
+  name: metabase-register-connections
+  namespace: metabase
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      containers:
+        - command:
+            - bash
+            - -c
+            - |
+              set -euo pipefail
+
+              base_url="http://metabase.metabase"
+
+              echo "Waiting for Metabase to become healthy..."
+              until curl -sf "$base_url/api/health" >/dev/null; do
+                sleep 3
+              done
+
+              props=$(curl -sf "$base_url/api/session/properties")
+              setup_token=$(echo "$props" | jq -r '."setup-token" // empty')
+
+              if [ -n "$setup_token" ]; then
+                echo "No admin exists yet -- completing first-run setup"
+                setup_body=$(jq -n \
+                  --arg token "$setup_token" \
+                  --arg first_name "$FIRST_NAME" \
+                  --arg last_name "$LAST_NAME" \
+                  --arg email "$EMAIL" \
+                  --arg password "$PASSWORD" \
+                  '{token:$token,user:{first_name:$first_name,last_name:$last_name,email:$email,password:$password},prefs:{site_name:"Metabase",allow_tracking:false}}')
+                session=$(curl -sf -X POST "$base_url/api/setup" \
+                  -H "Content-Type: application/json" -d "$setup_body" | jq -r '.id')
+              else
+                echo "Logging in as existing admin"
+                login_body=$(jq -n --arg email "$EMAIL" --arg password "$PASSWORD" \
+                  '{username:$email,password:$password}')
+                session=$(curl -sf -X POST "$base_url/api/session" \
+                  -H "Content-Type: application/json" -d "$login_body" | jq -r '.id')
+              fi
+
+              if [ -z "$session" ] || [ "$session" = "null" ]; then
+                echo "Failed to obtain a Metabase session" >&2
+                exit 1
+              fi
+
+              existing=$(curl -sf -H "X-Metabase-Session: $session" "$base_url/api/database")
+
+              count=$(echo "$CONNECTIONS_JSON" | jq 'length')
+              for i in $(seq 0 $((count - 1))); do
+                conn=$(echo "$CONNECTIONS_JSON" | jq -c ".[$i]")
+                conn_name=$(echo "$conn" | jq -r '.name')
+
+                existing_id=$(echo "$existing" | jq -r --arg n "$conn_name" \
+                  '(.data // .) | .[]? | select(.name == $n) | .id' | head -n1)
+
+                body=$(echo "$conn" | jq \
+                  '{engine: "postgres", name: .name, details: {host: .host, port: .port, dbname: .name, user: .username, password: .password, ssl: false, "tunnel-enabled": false}}')
+
+                if [ -n "$existing_id" ]; then
+                  echo "Updating Metabase database \"$conn_name\" (id=$existing_id)"
+                  curl -sf -X PUT "$base_url/api/database/$existing_id" \
+                    -H "X-Metabase-Session: $session" -H "Content-Type: application/json" \
+                    -d "$body" >/dev/null
+                else
+                  echo "Creating Metabase database \"$conn_name\""
+                  curl -sf -X POST "$base_url/api/database" \
+                    -H "X-Metabase-Session: $session" -H "Content-Type: application/json" \
+                    -d "$body" >/dev/null
+                fi
+              done
+          envFrom:
+            - secretRef:
+                name: metabase-admin
+            - secretRef:
+                name: metabase-postgres-connections
+          image: ghcr.io/lillecarl/nix-csi/scratch:1.0.1
+          name: register-connections
+          volumeMounts:
+            - mountPath: /nix
+              name: nix
+              subPath: nix
+      restartPolicy: OnFailure
+      volumes:
+        - csi:
+            driver: nix.csi.store
+            volumeAttributes:
+              nixExpr: |
+                let
+                  pkgs = import (builtins.fetchTree {
+                    type = "github";
+                    owner = "nixos";
+                    repo = "nixpkgs";
+                    ref = "nixos-unstable";
+                  }) {};
+                in
+                pkgs.symlinkJoin {
+                  name = "metabase-register-connections-tools";
+                  paths = [ pkgs.bash pkgs.curl pkgs.jq pkgs.coreutils ];
+                }
+          name: nix
