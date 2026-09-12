@@ -134,7 +134,7 @@ export def "nur lint nix" [] {
   if $response.exit_code != 0 {
     print $"nixpkgs-fmt failed with exit code ($response.exit_code)"
     print $response.stderr
-    exit $response.exit_code  
+    exit $response.exit_code # nu-lint-ignore: exit_only_in_main  
   }
 }
 
@@ -147,7 +147,7 @@ export def "nur lint nushell" [] {
   if $response.exit_code != 0 {
     print $"Linting failed with exit code ($response.exit_code)"
     print $response.stderr
-    exit $response.exit_code
+    exit $response.exit_code # nu-lint-ignore: exit_only_in_main
   }
 
   # nu-lint always exits 0, even with warnings, so check its summary line ourselves
@@ -157,7 +157,7 @@ export def "nur lint nushell" [] {
   if $warning_count > 0 {
     print -e $response.stdout
     print -e $"nu-lint found ($warning_count) warning\(s\)"
-    exit 1
+    exit 1 # nu-lint-ignore: exit_only_in_main
   }
 }
 
