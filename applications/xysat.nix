@@ -59,6 +59,20 @@
             type = types.str;
             default = "/var/lib/xysat";
           };
+
+          nixExpr = mkOption {
+            description = mdDoc ''
+              Nix expression for nix-csi to build and mount at /nix (subPath
+              "nix") inside the xysat container, exposing
+              /nix/var/result/bin -- this gives jobs the satellite runs
+              access to whatever the expression's package set includes.
+              PATH is set to include /nix/var/result/bin whenever this is
+              non-empty. Empty string (default) disables the nix-csi volume
+              entirely -- the pixlcore/xysat image is unaffected.
+            '';
+            type = types.str;
+            default = "";
+          };
         };
 
         extraResources =
@@ -112,12 +126,59 @@
                               key = "SETUP_URL";
                             };
                           }
+                        ]
+                        ++ optionals (cfg.nixExpr != "") [
+                          {
+                            name = "PATH";
+                            value = "/nix/var/result/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin";
+                          }
+                          {
+                            # extra-* appends to (rather than replaces) nix's built-in
+                            # defaults, so cache.nixos.org stays in the substituter list
+                            # alongside the self-hosted Attic cache (see
+                            # docs/nix-csi-and-binary-cache.md).
+                            #
+                            # `store = local?root=...` points nix's actual store (db +
+                            # /nix/store writes) at the writable scratch emptyDir below,
+                            # completely separate from the read-only nix-csi mount at
+                            # /nix (which only supplies the base toolset binaries on
+                            # PATH). This is what lets `nix build`/`nix run`/`nix shell`
+                            # fetch or build anything, not just what's baked into
+                            # nixExpr -- ephemeral by design, wiped on pod restart.
+                            #
+                            # sandbox = false + build-users-group = "" are required to
+                            # build as root with no nixbld user/group present in the
+                            # pixlcore/xysat image, and no CAP_SYS_ADMIN for the usual
+                            # sandbox namespaces -- builds run unsandboxed as a result
+                            # (acceptable here since these are ephemeral automation
+                            # workers, not a shared multi-tenant store).
+                            name = "NIX_CONFIG";
+                            value = ''
+                              experimental-features = nix-command flakes
+                              extra-substituters = https://attic.home.kronkltd.net/nixos
+                              extra-trusted-public-keys = nixos:6s8iAyKEnH2z4spigUdDmt1VwiAwrvPA9vQNUd9if1k=
+                              store = local?root=/var/lib/nix-scratch
+                              sandbox = false
+                              build-users-group =
+                            '';
+                          }
                         ];
 
                         volumeMounts = [
                           {
                             mountPath = "/etc/xysat";
                             name = "conf";
+                          }
+                        ]
+                        ++ optionals (cfg.nixExpr != "") [
+                          {
+                            mountPath = "/nix";
+                            name = "nix";
+                            subPath = "nix";
+                          }
+                          {
+                            mountPath = "/var/lib/nix-scratch";
+                            name = "nix-scratch";
                           }
                         ];
                       }
@@ -130,6 +191,21 @@
                           path = cfg.hostConfigDir;
                           type = "DirectoryOrCreate";
                         };
+                      }
+                    ]
+                    ++ optionals (cfg.nixExpr != "") [
+                      {
+                        name = "nix";
+                        csi = {
+                          driver = "nix.csi.store";
+                          volumeAttributes.nixExpr = cfg.nixExpr;
+                        };
+                      }
+                      {
+                        # Writable, node-local, wiped on pod restart -- see the
+                        # NIX_CONFIG `store` setting above.
+                        name = "nix-scratch";
+                        emptyDir = { };
                       }
                     ];
                   };

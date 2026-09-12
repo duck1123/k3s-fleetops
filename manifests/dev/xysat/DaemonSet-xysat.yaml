@@ -26,12 +26,27 @@ spec:
                 secretKeyRef:
                   key: SETUP_URL
                   name: xysat-setup
+            - name: PATH
+              value: /nix/var/result/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+            - name: NIX_CONFIG
+              value: |
+                experimental-features = nix-command flakes
+                extra-substituters = https://attic.home.kronkltd.net/nixos
+                extra-trusted-public-keys = nixos:6s8iAyKEnH2z4spigUdDmt1VwiAwrvPA9vQNUd9if1k=
+                store = local?root=/var/lib/nix-scratch
+                sandbox = false
+                build-users-group =
           image: ghcr.io/pixlcore/xysat:latest
           imagePullPolicy: IfNotPresent
           name: xysat
           volumeMounts:
             - mountPath: /etc/xysat
               name: conf
+            - mountPath: /nix
+              name: nix
+              subPath: nix
+            - mountPath: /var/lib/nix-scratch
+              name: nix-scratch
       dnsPolicy: ClusterFirstWithHostNet
       hostNetwork: true
       hostPID: true
@@ -42,3 +57,30 @@ spec:
             path: /var/lib/xysat
             type: DirectoryOrCreate
           name: conf
+        - csi:
+            driver: nix.csi.store
+            volumeAttributes:
+              nixExpr: |
+                let
+                  pkgs = import (builtins.fetchTree {
+                    type = "github";
+                    owner = "nixos";
+                    repo = "nixpkgs";
+                    ref = "nixos-unstable";
+                  }) {};
+                in
+                pkgs.buildEnv {
+                  name = "xysat-tools";
+                  paths = with pkgs; [
+                    bash
+                    coreutils
+                    git
+                    curl
+                    jq
+                    nushell
+                    nix
+                  ];
+                }
+          name: nix
+        - emptyDir: {}
+          name: nix-scratch
