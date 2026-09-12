@@ -21,8 +21,15 @@ spec:
               base_url="http://windmill.windmill:8000"
 
               echo "Waiting for Windmill to become healthy..."
-              until curl -sf "$base_url/api/health" >/dev/null; do
+              health_timeout=180
+              health_elapsed=0
+              until curl -sf "$base_url/healthz" >/dev/null; do
+                if [ "$health_elapsed" -ge "$health_timeout" ]; then
+                  echo "Windmill did not become healthy within ${health_timeout}s" >&2
+                  exit 1
+                fi
                 sleep 3
+                health_elapsed=$((health_elapsed + 3))
               done
 
               export HOME=/tmp

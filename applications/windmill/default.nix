@@ -46,8 +46,15 @@
         base_url="http://${name}.${name}:${toString cfg.service.port}"
 
         echo "Waiting for Windmill to become healthy..."
-        until curl -sf "$base_url/api/health" >/dev/null; do
+        health_timeout=180
+        health_elapsed=0
+        until curl -sf "$base_url/healthz" >/dev/null; do
+          if [ "$health_elapsed" -ge "$health_timeout" ]; then
+            echo "Windmill did not become healthy within ''${health_timeout}s" >&2
+            exit 1
+          fi
           sleep 3
+          health_elapsed=$((health_elapsed + 3))
         done
 
         export HOME=/tmp
@@ -597,7 +604,7 @@
               "argocd.argoproj.io/hook" = "Sync";
               "argocd.argoproj.io/hook-delete-policy" = "BeforeHookCreation,HookSucceeded";
               # Runs after the chart's own Deployment (wave "0", implicit) is
-              # created -- the job polls /api/health so it tolerates the pod
+              # created -- the job polls /healthz so it tolerates the pod
               # not being Ready yet, it just needs the Service to exist.
               "argocd.argoproj.io/sync-wave" = "1";
             };
