@@ -31,6 +31,9 @@ data:
         - gramps-web:
             href: https://gramps-web.home.kronkltd.net
             siteMonitor: https://gramps-web.home.kronkltd.net
+        - metabase:
+            href: https://metabase.home.kronkltd.net
+            siteMonitor: https://metabase.home.kronkltd.net
         - superset:
             href: https://superset.home.kronkltd.net
             siteMonitor: https://superset.home.kronkltd.net

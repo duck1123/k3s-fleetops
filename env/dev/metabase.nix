@@ -1,7 +1,7 @@
 { config, ... }:
 {
   services.metabase = {
-    enable = false;
+    enable = true;
 
     ingressProvider = "traefik-lan";
   };

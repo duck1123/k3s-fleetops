@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: metabase
+    chart: metabase-2.27.6
+    heritage: Helm
+    release: metabase
+  name: metabase
+  namespace: metabase
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: metabase
+  template:
+    metadata:
+      annotations:
+        checksum/config: 887191747c260eebef3666c653c0b8c504138eda25596c26605f69524285c325
+      labels:
+        app: metabase
+        release: metabase
+    spec:
+      automountServiceAccountToken: true
+      containers:
+        - env:
+            - name: MB_JETTY_HOST
+              value: 0.0.0.0
+            - name: MB_JETTY_PORT
+              value: "3000"
+            - name: MB_PROMETHEUS_SERVER_PORT
+              value: "9191"
+            - name: MB_DB_TYPE
+              value: h2
+            - name: MB_PASSWORD_COMPLEXITY
+              value: normal
+            - name: MB_PASSWORD_LENGTH
+              value: "6"
+            - name: JAVA_TIMEZONE
+              value: UTC
+            - name: MB_EMOJI_IN_LOGS
+              value: "true"
+            - name: MB_COLORIZE_LOGS
+              value: "true"
+          image: metabase/metabase:v0.61.1.x
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 6
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 5
+            timeoutSeconds: 30
+          name: metabase
+          ports:
+            - containerPort: 3000
+            - containerPort: 9191
+              name: metrics
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+          resources: {}
+          startupProbe:
+            failureThreshold: 60
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+      serviceAccountName: default
