@@ -106,6 +106,13 @@ data:
         - paperless-ngx:
             href: https://paperless-ngx.home.kronkltd.net
             siteMonitor: https://paperless-ngx.home.kronkltd.net
+        - trilium:
+            href: https://trilium.home.kronkltd.net
+            siteMonitor: https://trilium.home.kronkltd.net
+            widget:
+              key: '{{HOMEPAGE_VAR_TRILIUM_API_KEY}}'
+              type: trilium
+              url: http://trilium.trilium:8080
     - Finance:
         - securo:
             href: https://securo.home.kronkltd.net
