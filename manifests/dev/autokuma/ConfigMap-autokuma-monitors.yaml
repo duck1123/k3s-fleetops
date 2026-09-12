@@ -16,6 +16,7 @@ data:
   prowlarr.json: '{"name":"prowlarr","type":"http","url":"https://prowlarr.home.kronkltd.net"}'
   qbittorrent.json: '{"name":"qbittorrent","type":"http","url":"https://qbittorrent.home.kronkltd.net"}'
   radarr.json: '{"name":"radarr","type":"http","url":"https://radarr.home.kronkltd.net"}'
+  romm.json: '{"name":"romm","type":"http","url":"https://romm.home.kronkltd.net"}'
   sabnzbd.json: '{"name":"sabnzbd","type":"http","url":"https://sabnzbd.home.kronkltd.net"}'
   securo.json: '{"name":"securo","type":"http","url":"https://securo.home.kronkltd.net"}'
   slskd.json: '{"name":"slskd","type":"http","url":"https://slskd.home.kronkltd.net"}'

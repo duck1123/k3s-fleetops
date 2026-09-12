@@ -34,6 +34,9 @@ data:
         - metabase:
             href: https://metabase.home.kronkltd.net
             siteMonitor: https://metabase.home.kronkltd.net
+        - romm:
+            href: https://romm.home.kronkltd.net
+            siteMonitor: https://romm.home.kronkltd.net
         - superset:
             href: https://superset.home.kronkltd.net
             siteMonitor: https://superset.home.kronkltd.net
