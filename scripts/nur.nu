@@ -107,7 +107,46 @@ export def "nur switch" [--show-trace, --fallback] {
 
 # CI shorthand — same as switch
 export def "nur ci" [] {
+  nur lint
   nur switch
+}
+
+export def "nur lint" [] {
+  nur lint nushell
+  nur lint nix
+}
+
+export def "nur lint nix" [] {
+  let response = ^nixpkgs-fmt --check . | complete
+  response.exit_code
+  if $response.exit_code != 0 {
+    print $"nixpkgs-fmt failed with exit code ($response.exit_code)"
+    print $response.stderr
+    exit $response.exit_code  
+  }
+}
+
+# Lint the project
+export def "nur lint nushell" [] {
+  let response = nu-lint | complete
+
+  # print $response
+
+  if $response.exit_code != 0 {
+    print $"Linting failed with exit code ($response.exit_code)"
+    print $response.stderr
+    exit $response.exit_code
+  }
+
+  # nu-lint always exits 0, even with warnings, so check its summary line ourselves
+  let warning_matches = $response.stdout | parse --regex 'Found (?<warnings>\d+) warning'
+  let warning_count = if ($warning_matches | is-empty) { 0 } else { $warning_matches | get warnings.0? | default "0" | into int }
+
+  if $warning_count > 0 {
+    print -e $response.stdout
+    print -e $"nu-lint found ($warning_count) warning\(s\)"
+    exit 1
+  }
 }
 
 # Format all .nix files using nixfmt
