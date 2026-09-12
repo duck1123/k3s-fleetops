@@ -30,6 +30,12 @@
           };
         };
 
+        # Shape only -- no volumeHandle here, that's environment-specific (see
+        # docs/pinned-volumes.md).
+        volumes = cfg: {
+          data.size = "10Gi";
+        };
+
         extraOptions = {
           image = mkOption {
             description = mdDoc "The docker image";
@@ -152,10 +158,7 @@
                           }
                         ];
                         volumes = [
-                          {
-                            name = "data";
-                            persistentVolumeClaim.claimName = "${name}-${name}-data";
-                          }
+                          cfg.volumes.data.volume
                         ];
                       };
                     };
@@ -191,10 +194,7 @@
                     template.spec = {
                       restartPolicy = "Never";
                       volumes = [
-                        {
-                          name = "data";
-                          persistentVolumeClaim.claimName = "${name}-${name}-data";
-                        }
+                        cfg.volumes.data.volume
                       ];
                       containers = [
                         {
@@ -216,14 +216,6 @@
                       ];
                     };
                   };
-                };
-              };
-
-              persistentVolumeClaims = {
-                "${name}-${name}-data".spec = {
-                  inherit (cfg) storageClassName;
-                  accessModes = [ "ReadWriteOnce" ];
-                  resources.requests.storage = "10Gi";
                 };
               };
             };
