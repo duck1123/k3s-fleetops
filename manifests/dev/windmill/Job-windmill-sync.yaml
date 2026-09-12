@@ -98,6 +98,8 @@ spec:
             - mountPath: /nix
               name: nix
               subPath: nix
+            - mountPath: /tmp
+              name: tmp
       restartPolicy: OnFailure
       volumes:
         - csi:
@@ -105,3 +107,5 @@ spec:
             volumeAttributes:
               x86_64-linux: /nix/store/l29hwdjs4s1vb9zizkj5s8n799iv2042-windmill-sync-bundle
           name: nix
+        - emptyDir: {}
+          name: tmp

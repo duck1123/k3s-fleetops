@@ -639,6 +639,10 @@
                         mountPath = "/nix";
                         subPath = "nix";
                       }
+                      {
+                        name = "tmp";
+                        mountPath = "/tmp";
+                      }
                     ];
                   }
                 ];
@@ -649,6 +653,13 @@
                       driver = "nix.csi.store";
                       volumeAttributes."x86_64-linux" = "${windmillSyncBundle}";
                     };
+                  }
+                  # The scratch image has no /tmp of its own -- the script sets
+                  # HOME=/tmp and writes a log file and wmill's --config-dir
+                  # there, all of which need a writable directory to land in.
+                  {
+                    name = "tmp";
+                    emptyDir = { };
                   }
                 ];
               };
