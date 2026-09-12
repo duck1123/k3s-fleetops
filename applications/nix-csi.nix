@@ -93,12 +93,34 @@
                   };
                 };
               };
+            # builders.py (nix-csi's own code) discovers builder pods via the k8s API
+            # and addresses them as `ssh-ng://nix@<pod-name>.nix-csi-builders.<ns>.svc...`
+            # -- a DNS name that's only ever populated by the StatefulSet controller
+            # (which sets each pod's `hostname`/`subdomain` to match its governing
+            # headless Service). The `builders.deployments.amd64` option renders a
+            # plain Deployment instead, whose pods get random name suffixes and no
+            # such DNS record, so that address never resolves and every build that
+            # needs an actual (non-substitutable) derivation fails outright. Promoting
+            # it to a StatefulSet (same pattern already used for the `nix-cache` role,
+            # see StatefulSet-nix-cache.yaml) gives it a stable `amd64-0` pod name that
+            # matches what builders.py expects, with no other spec changes needed.
+            toBuilderStatefulSet =
+              r:
+              r
+              // {
+                kind = "StatefulSet";
+                spec = r.spec // {
+                  serviceName = "nix-csi-builders";
+                };
+              };
             patchedResources = map (
               r:
               if r.kind == "Service" && r.metadata.name == "nix-cache-lb" then
                 pinIp "192.168.0.241" r
               else if r.kind == "Service" && r.metadata.name == "nix-proxy" then
                 pinIp "192.168.0.240" r
+              else if r.kind == "Deployment" && r.metadata.name == "amd64" then
+                toBuilderStatefulSet r
               else
                 r
             ) resources;
