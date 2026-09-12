@@ -83,12 +83,13 @@ def switch-activation-package [drv_path: string] {
   nur post-process-manifests
 }
 
-# Push a site app's built store path to the Attic `nixos` cache. Required
-# after any change to a site app whose applications/<name>/default.nix embeds
-# `builtins.storePath "${self.packages.<system>.<name>-site}"` directly
-# (currently just duck1123) -- that pattern has no build recipe for nix-csi to
-# fall back on, so the exact path must exist in Attic before the manifest
-# referencing it is pushed, or nix-csi has nothing to substitute it from.
+# Push a built store path to the Attic `nixos` cache. Required after any
+# change to an application whose applications/<name>/default.nix embeds
+# `"${self.packages.<system>.<name>}"` directly into a nix-csi volume's
+# per-system storePath (currently duck1123Runtime and windmill-sync-bundle) --
+# that pattern has no build recipe for nix-csi to fall back on, so the exact
+# path must exist in Attic before the manifest referencing it is pushed, or
+# nix-csi has nothing to substitute it from.
 export def "nur push-site-cache" [
   name: string   # Flake package name, e.g. "duck1123-site"
 ] {
@@ -101,6 +102,7 @@ export def "nur switch" [--show-trace, --fallback] {
   let drv_path = nur build --show-trace=$show_trace --fallback=$fallback
   switch-activation-package $drv_path
   nur push-site-cache duck1123-runtime
+  nur push-site-cache windmill-sync-bundle
 }
 
 # CI shorthand — same as switch

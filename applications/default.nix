@@ -90,7 +90,7 @@
     ./tailscale.nix
     ./tdarr.nix
     ./trilium.nix
-    ./windmill.nix
+    ./windmill
     ./tube-archivist.nix
     ./tunarr.nix
     ./tempo.nix

@@ -15,5 +15,7 @@
 
     storageClassName = "longhorn";
     replicas = 1;
+
+    inherit (secrets.windmill) superadminSecret superadminEmail superadminPassword;
   };
 }

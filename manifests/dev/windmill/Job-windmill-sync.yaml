@@ -1,0 +1,100 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded
+    argocd.argoproj.io/sync-wave: "1"
+  name: windmill-sync
+  namespace: windmill
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      containers:
+        - command:
+            - bash
+            - -c
+            - |
+              set -euo pipefail
+
+              base_url="http://windmill.windmill:8000"
+
+              echo "Waiting for Windmill to become healthy..."
+              until curl -sf "$base_url/api/health" >/dev/null; do
+                sleep 3
+              done
+
+              export HOME=/tmp
+
+              # Separate from SUPERADMIN_SECRET (which only authenticates *this job's*
+              # API/CLI calls) -- this is a real, loginable instance user, so you can
+              # sign into the Windmill UI yourself. `wmill user add` isn't documented
+              # as idempotent, so a failure here is treated as "probably already
+              # exists" and logged rather than failing the job.
+              if [ -n "${SUPERADMIN_EMAIL:-}" ] && [ -n "${SUPERADMIN_PASSWORD:-}" ]; then
+                echo "Ensuring Windmill superadmin user \"$SUPERADMIN_EMAIL\" exists..."
+                if ! wmill user add "$SUPERADMIN_EMAIL" "$SUPERADMIN_PASSWORD" --superadmin \
+                    --token "$SUPERADMIN_SECRET" --base-url "$base_url" --workspace "$WORKSPACE" \
+                    --config-dir /tmp/wmill-config 2>/tmp/user-add.log; then
+                  echo "wmill user add did not succeed (likely already exists), continuing:" >&2
+                  cat /tmp/user-add.log >&2
+                fi
+              fi
+
+              count=$(echo "${SECRET_VARIABLES_JSON:-[]}" | jq 'length')
+              for i in $(seq 0 $((count - 1))); do
+                var=$(echo "$SECRET_VARIABLES_JSON" | jq -c ".[$i]")
+                var_path=$(echo "$var" | jq -r '.path')
+                var_value=$(echo "$var" | jq -r '.value')
+
+                body=$(jq -n --arg path "$var_path" --arg value "$var_value" \
+                  '{path: $path, value: $value, is_secret: true, description: ""}')
+
+                status=$(curl -s -o /tmp/resp -w '%{http_code}' -X POST \
+                  "$base_url/api/w/$WORKSPACE/variables/create" \
+                  -H "Authorization: Bearer $SUPERADMIN_SECRET" \
+                  -H "Content-Type: application/json" -d "$body")
+
+                if [ "$status" = "409" ]; then
+                  echo "Updating existing Windmill variable \"$var_path\""
+                  curl -sf -X POST "$base_url/api/w/$WORKSPACE/variables/update/$var_path" \
+                    -H "Authorization: Bearer $SUPERADMIN_SECRET" \
+                    -H "Content-Type: application/json" \
+                    -d "$(jq -n --arg value "$var_value" '{value: $value}')" >/dev/null
+                elif [ "${status:0:1}" != "2" ]; then
+                  echo "Failed to create Windmill variable \"$var_path\" (HTTP $status)" >&2
+                  cat /tmp/resp >&2
+                  exit 1
+                else
+                  echo "Created Windmill variable \"$var_path\""
+                fi
+              done
+
+              echo "Pushing declarative config from applications/windmill/wmill ..."
+              cd /nix/var/result/share/windmill-wmill
+              wmill sync push \
+                --workspace "$WORKSPACE" \
+                --token "$SUPERADMIN_SECRET" \
+                --base-url "$base_url" \
+                --config-dir /tmp/wmill-config \
+                --yes
+          env:
+            - name: WORKSPACE
+              value: default
+          envFrom:
+            - secretRef:
+                name: windmill-superadmin-secret
+          image: ghcr.io/lillecarl/nix-csi/scratch:1.0.1
+          name: windmill-sync
+          volumeMounts:
+            - mountPath: /nix
+              name: nix
+              subPath: nix
+      restartPolicy: OnFailure
+      volumes:
+        - csi:
+            driver: nix.csi.store
+            volumeAttributes:
+              x86_64-linux: /nix/store/l29hwdjs4s1vb9zizkj5s8n799iv2042-windmill-sync-bundle
+          name: nix
